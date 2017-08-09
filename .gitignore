@@ -1,0 +1,7 @@
+# Python
+**/.idea
+__pycache__
+
+# docs
+/docs/_build
+

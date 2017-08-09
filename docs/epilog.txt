@@ -1,0 +1,48 @@
+
+..
+   The content of this file will be appended to every documentation file. Put common substitutions and links here.
+
+.. |GF| replace:: the Gpufit library
+.. |GF_version| replace:: 1.0.0
+
+.. _CUDA: http://developer.nvidia.com/cuda-zone
+.. _CUDA_SELECT_NVCC_ARCH_FLAGS: http://cmake.org/cmake/help/v3.7/module/FindCUDA.html
+
+.. _CMake: http://www.cmake.org
+.. _Boost: http://www.boost.org
+.. _MATLAB: http://www.mathworks.com/products/matlab.html
+.. _Python: http://www.python.org
+
+.. _`Gpufit on Github`: https://github.com/gpufit/Gpufit
+.. _`Gpufit release location`: https://github.com/gpufit/Gpufit/releases
+.. _Gpufit-master.zip: https://github.com/gpufit/Gpufit/archive/master.zip
+
+.. _gpufit.h: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gpufit.h
+.. _interface.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/interface.cpp
+
+.. _gauss_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_1d.cuh
+.. _gauss_2d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_2d.cuh
+.. _gauss_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_2d_elliptic.cuh
+.. _gauss_2d_rotated.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_2d_rotated.cuh
+.. _cauchy_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/cauchy2delliptic.cuh
+.. _linear_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/linear_1d.cuh
+.. _lse.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/lse.cuh
+.. _mle.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/mle.cuh
+.. _cuda_kernels.cu: https://github.com/gpufit/Gpufit/blob/master/Gpufit/cuda_kernels.cu
+
+.. _Tests: https://github.com/gpufit/Gpufit/tree/master/Gpufit/tests
+.. _Examples: https://github.com/gpufit/Gpufit/tree/master/Gpufit/examples
+.. _Simple_Example.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/examples/Simple_Example.cpp
+.. _Gauss_Fit_2D_Example.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/examples/Gauss_Fit_2D_Example.cpp
+.. _Linear_Regression_Example.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/examples/Linear_Regression_Example.cpp
+
+.. _GpufitMex.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/GpufitMex.cpp
+.. _gpufit.m: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/gpufit.m
+
+.. _`Matlab simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/examples/simple.m
+.. _`Matlab Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/examples/gauss2d.m
+.. _`Matlab Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/examples/gauss2d_plot.m
+
+.. _`Python simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/simple.py
+.. _`Python Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d.py
+.. _`Python Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d_plot.py

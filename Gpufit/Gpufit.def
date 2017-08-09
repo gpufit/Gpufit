@@ -1,0 +1,7 @@
+LIBRARY	      "Gpufit"
+EXPORTS       
+    gpufit @1
+    gpufit_get_last_error @2
+    gpufit_get_cuda_version @3
+    gpufit_cuda_available @4
+    gpufit_portable_interface @5

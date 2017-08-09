@@ -1,0 +1,20 @@
+
+# Applications
+
+function( add_example modules name )
+  set( target ${name} )
+  add_executable( ${target} ${name}.cpp
+    ${PROJECT_SOURCE_DIR}/Tests/utils.h
+    ${PROJECT_SOURCE_DIR}/Tests/utils.cpp
+  )  
+  target_include_directories( ${target} PRIVATE ${PROJECT_SOURCE_DIR} )
+  target_link_libraries( ${target} ${modules} )
+  set_property( TARGET ${target}
+    PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+  set_property( TARGET ${target} PROPERTY FOLDER GpufitCpufitExamples )
+#  install( TARGETS ${target} RUNTIME DESTINATION bin )
+endfunction()
+
+add_example( "Cpufit;Gpufit" Gpufit_Cpufit_Performance_Comparison )
+
+add_example( "Cpufit;Gpufit" Gpufit_Cpufit_Nvidia_Profiler_Test )

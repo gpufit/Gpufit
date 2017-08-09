@@ -1,0 +1,15 @@
+.wy-nav-content {
+    max-width: 1100px !important;
+}
+
+@media screen and (max-width: 767px) {
+    .wy-table-responsive table td {
+        white-space: nowrap;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .wy-table-responsive table td {
+        white-space: normal;
+    }
+}
