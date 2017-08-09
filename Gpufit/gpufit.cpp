@@ -1,7 +1,9 @@
 #include "gpufit.h"
 #include "interface.h"
+#include "../Cpufit/profile.h"
 
 #include <string>
+#include <iostream>
 
 std::string last_error ;
 
@@ -26,6 +28,8 @@ int gpufit
 )
 try
 {
+	std::chrono::high_resolution_clock::time_point t1, t2, t3;
+	t1 = std::chrono::high_resolution_clock::now();
     __int32 n_points_32 = 0;
     if (n_points <= (unsigned int)(std::numeric_limits<__int32>::max()))
     {
@@ -53,7 +57,16 @@ try
         output_chi_squares,
         output_n_iterations);
 
+	t2 = std::chrono::high_resolution_clock::now();
+
     fi.fit(model_id);
+
+	t3 = std::chrono::high_resolution_clock::now();
+
+	profiler.initialize_LM += t2 - t1;
+	profiler.all += t3 - t1;
+
+	display_profiler_results();
 
     return STATUS_OK ;
 }

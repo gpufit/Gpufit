@@ -1,5 +1,6 @@
 #include "lm_fit.h"
 #include <algorithm>
+#include "../Cpufit/profile.h"
 
 LMFit::LMFit
 (
@@ -56,17 +57,36 @@ void LMFit::get_results(GPUData const & gpu_data, int const n_fits)
 
 void LMFit::run(float const tolerance)
 {
+	std::chrono::high_resolution_clock::time_point t1, t2, t3, t4, t5, t6;
+
+	t1 = std::chrono::high_resolution_clock::now();
+
     set_parameters_to_fit_indices();
 
+	t2 = std::chrono::high_resolution_clock::now();
+
     GPUData gpu_data(info_);
+
+    t3 = std::chrono::high_resolution_clock::now();
+
     gpu_data.init_user_info(user_info_);
+
+    t4 = std::chrono::high_resolution_clock::now();
+
+    profiler.initialize_LM += t2 - t1;
+    profiler.allocate_GPU_memory += t3 - t2;
+    profiler.copy_data_to_GPU += t4 - t3;
 
     // loop over data chunks
     while (n_fits_left_ > 0)
     {
         chunk_size_ = int((std::min)(n_fits_left_, info_.max_chunk_size_));
 
+        t1 = std::chrono::high_resolution_clock::now();
+
         info_.set_fits_per_block(chunk_size_);
+
+        t2 = std::chrono::high_resolution_clock::now();
 
         gpu_data.reset(chunk_size_);
         gpu_data.init(
@@ -76,17 +96,29 @@ void LMFit::run(float const tolerance)
             initial_parameters_,
             parameters_to_fit_indices_);
 
+        t3 = std::chrono::high_resolution_clock::now();
+
         LMFitCUDA lmfit_cuda(
             tolerance,
             info_,
             gpu_data,
             chunk_size_);
 
+        t4 = std::chrono::high_resolution_clock::now();
+
         lmfit_cuda.run();
+
+        t5 = std::chrono::high_resolution_clock::now();
 
         get_results(gpu_data, chunk_size_);
 
+        t6 = std::chrono::high_resolution_clock::now();
+
         n_fits_left_ -= chunk_size_;
         ichunk_++;
+
+        profiler.initialize_LM += t2 - t1 + t4 - t3;
+        profiler.copy_data_to_GPU += t3 - t2;
+        profiler.read_results_from_GPU += t6 - t5;
     }
 }

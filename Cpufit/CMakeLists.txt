@@ -14,6 +14,7 @@ set( CpuSources
 	lm_fit.cpp
 	lm_fit_cpp.cpp
 	interface.cpp
+	profile.cpp
 	Cpufit.def
 )
 

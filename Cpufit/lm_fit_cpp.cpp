@@ -1,5 +1,6 @@
 #include "cpufit.h"
 #include "lm_fit.h"
+#include "profile.h"
 
 #include <vector>
 #include <numeric>
@@ -521,15 +522,33 @@ void LMFitCPP::calc_curve_values()
     
 void LMFitCPP::calc_coefficients()
 {
+	std::chrono::high_resolution_clock::time_point t1, t2, t3;
+
     std::vector<float> & curve = curve_;
     std::vector<float> & derivatives = derivatives_;
 
+    t1 = std::chrono::high_resolution_clock::now();
+
     calc_chi_square(curve);
+
+    t2 = std::chrono::high_resolution_clock::now();
+
+    profiler.compute_chisquare += t2 - t1;
 
     if ((*chi_square_) < prev_chi_square_ || prev_chi_square_ == 0)
     {
+		t1 = std::chrono::high_resolution_clock::now();
+
         calculate_hessian(derivatives, curve);
+
+		t2 = std::chrono::high_resolution_clock::now();
+
         calc_gradient(derivatives, curve);
+
+		t3 = std::chrono::high_resolution_clock::now();
+
+        profiler.compute_hessian += t2 - t1;
+        profiler.compute_gradient += t3 - t2;
     }
 }
 
@@ -678,30 +697,59 @@ void LMFitCPP::modify_step_width()
 
 void LMFitCPP::run()
 {
+	std::chrono::high_resolution_clock::time_point t1, t2, t3, t4, t5;
+
+    t1 = std::chrono::high_resolution_clock::now();
+
     for (int i = 0; i < info_.n_parameters_; i++)
         parameters_[i] = initial_parameters_[i];
 
     (*state_) = 0;
+
+	t2 = std::chrono::high_resolution_clock::now();
+
 	calc_curve_values();
+
+	t3 = std::chrono::high_resolution_clock::now();
+
     calc_coefficients();
+
     prev_chi_square_ = (*chi_square_);
+
+    profiler.initialize_LM += t2 - t1;
+    profiler.compute_model += t3 - t2;
         
     for (int iteration = 0; (*state_) == 0; iteration++)
     {
+        t1 = std::chrono::high_resolution_clock::now();
+
         modify_step_width();
         
         gauss_jordan();
 
         update_parameters();
 
+        t2 = std::chrono::high_resolution_clock::now();
+
 		calc_curve_values();
+
+		t3 = std::chrono::high_resolution_clock::now();
+
         calc_coefficients();
+
+        t4 = std::chrono::high_resolution_clock::now();
 
         converged_ = check_for_convergence();
 
         evaluate_iteration(iteration);
 
         prepare_next_iteration();
+
+		t5 = std::chrono::high_resolution_clock::now();
+
+        profiler.gauss_jordan += t2 - t1;
+        profiler.compute_model += t3 - t2;
+        profiler.evaluate_iteration += t5 - t4;
 
         if (converged_ || (*state_) != 0)
         {

@@ -1,5 +1,6 @@
 #include "cpufit.h"
 #include "interface.h"
+#include "../Cpufit/profile.h"
 
 FitInterface::FitInterface(
     float const * data,
@@ -95,6 +96,9 @@ void FitInterface::set_number_of_parameters(int const model_id)
 
 void FitInterface::fit(int const model_id)
 {
+    std::chrono::high_resolution_clock::time_point t1, t2;
+    t1 = std::chrono::high_resolution_clock::now();
+
     set_number_of_parameters(model_id);
 
     check_sizes();
@@ -113,6 +117,9 @@ void FitInterface::fit(int const model_id)
         output_states_,
         output_chi_squares_,
         output_n_iterations_);
+
+    t2 = std::chrono::high_resolution_clock::now();
+    profiler.initialize_LM += t2 - t1;
 
     lmfit.run(tolerance_);
 }

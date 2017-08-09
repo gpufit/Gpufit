@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 #include <numeric>
+#include "../Cpufit/profile.h"
 
 LMFit::LMFit(
     float const * const data,
@@ -36,8 +37,12 @@ LMFit::~LMFit()
 
 void LMFit::run(float const tolerance)
 {
+    std::chrono::high_resolution_clock::time_point t1, t2;
+
     for (std::size_t fit_index = 0; fit_index < info_.n_fits_; fit_index++)
     {
+        t1 = std::chrono::high_resolution_clock::now();
+
         LMFitCPP gf_cpp(
             tolerance,
             fit_index,
@@ -51,6 +56,9 @@ void LMFit::run(float const tolerance)
             output_states_ + fit_index,
             output_chi_squares_ + fit_index,
             output_n_iterations_ + fit_index);
+
+        t2 = std::chrono::high_resolution_clock::now();
+        profiler.initialize_LM += t2 - t1;
 
         gf_cpp.run();
     }

@@ -85,6 +85,8 @@ void LMFitCUDA::solve_equation_system()
         gpu_data_.finished_,
         info_.n_fits_per_block_);
     CUDA_CHECK_STATUS(cudaGetLastError());
+
+	cudaDeviceSynchronize();
 }
 
 void LMFitCUDA::calc_curve_values()
@@ -111,6 +113,8 @@ void LMFitCUDA::calc_curve_values()
 		gpu_data_.user_info_,
 		info_.user_info_size_);
 	CUDA_CHECK_STATUS(cudaGetLastError());
+
+	cudaDeviceSynchronize();
 }
 
 void LMFitCUDA::calc_chi_squares()
@@ -143,6 +147,8 @@ void LMFitCUDA::calc_chi_squares()
         gpu_data_.user_info_,
         info_.user_info_size_);
     CUDA_CHECK_STATUS(cudaGetLastError());
+
+    cudaDeviceSynchronize();
 }
 
 void LMFitCUDA::calc_gradients()
@@ -177,6 +183,8 @@ void LMFitCUDA::calc_gradients()
         gpu_data_.user_info_,
         info_.user_info_size_);
     CUDA_CHECK_STATUS(cudaGetLastError());
+
+    cudaDeviceSynchronize();
 }
 
 void LMFitCUDA::calc_hessians()
@@ -205,6 +213,8 @@ void LMFitCUDA::calc_hessians()
         gpu_data_.user_info_,
         info_.user_info_size_);
     CUDA_CHECK_STATUS(cudaGetLastError());
+
+	cudaDeviceSynchronize();
 }
 
 void LMFitCUDA::evaluate_iteration(int const iteration)
@@ -250,4 +260,6 @@ void LMFitCUDA::evaluate_iteration(int const iteration)
         n_fits_,
         info_.n_parameters_);
     CUDA_CHECK_STATUS(cudaGetLastError());
+
+	cudaDeviceSynchronize();
 }

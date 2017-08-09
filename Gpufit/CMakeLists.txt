@@ -95,6 +95,7 @@ set( GpuHeaders
 	info.h
 	lm_fit.h
 	interface.h
+	../Cpufit/profile.h
 )
 
 set( GpuSources
@@ -103,6 +104,7 @@ set( GpuSources
 	lm_fit.cpp
 	lm_fit_cuda.cpp
 	interface.cpp
+	../Cpufit/profile.cpp
 	gpufit.def
 )
 
