@@ -37,6 +37,16 @@ Instructions for using the bindary distribution may be found in the documentatio
   Python examples.
 - The Gpufit manual in PDF format
 
+## Authors
+
+Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Keller-Findeisen at the Max Planck Institute for Biophysical Chemistry, in Göttingen, Germany.
+
+## How to cite Gpufit
+
+If you use Gpufit in your research, please cite our publication describing the software.  
+
+  * (our citation here)
+
 ## License
 
 MIT License
