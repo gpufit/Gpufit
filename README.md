@@ -4,7 +4,7 @@ Levenberg Marquardt curve fitting in CUDA.
 
 Homepage: [github.com/gpufit/Gpufit](https://github.com/gpufit/Gpufit)
 
-The manuscript describing Gpufit is now online at Biorxiv: https://doi.org/10.1101/174110.
+The manuscript describing Gpufit is now online at [Biorxiv](http://www.biorxiv.org/content/early/2017/08/10/174110).
 
 ## Quick start instructions
 
