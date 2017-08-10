@@ -4,6 +4,8 @@ Levenberg Marquardt curve fitting in CUDA.
 
 Homepage: [github.com/gpufit/Gpufit](https://github.com/gpufit/Gpufit)
 
+The manuscript describing Gpufit is now online at Biorxiv: https://doi.org/10.1101/174110.
+
 ## Quick start instructions
 
 To verify that Gpufit is working correctly on the host computer, go to the folder gpufit_performance_test of the binary package and run Gpufit_Cpufit_Performance_Comparison.exe.  Further details of the test executable can be found in the documentation package.
@@ -45,9 +47,9 @@ Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Kelle
 
 If you use Gpufit in your research, please cite our publication describing the software.  
 
-  *  Gpufit: An open-source toolkit for GPU-accelerated curve fitting
-      Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, Mark Bates
-      bioRxiv 174110; doi: https://doi.org/10.1101/174110 
+  *  Gpufit: An open-source toolkit for GPU-accelerated curve fitting  
+     Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, Mark Bates  
+     bioRxiv 174110; doi: https://doi.org/10.1101/174110  
 
 ## License
 
