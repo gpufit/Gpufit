@@ -224,7 +224,7 @@ Description of output parameters
 
 :output_chi_squares: Pointer to array of :math:`\chi^2` values
 
-    For each fit, this array contains the final :math:`\chi^2` value.
+    For each fit, this array contains the final :math:`\chi^2` value, as returned by the estimator function (see :ref:`estimator-functions`). 
 
     :type: float *
     :length: n_fits
