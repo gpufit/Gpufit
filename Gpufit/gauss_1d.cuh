@@ -62,25 +62,21 @@ __device__ void calculate_gauss1d(
     int const n_parameters,
     float * values,
     float * derivatives,
+    int const point_index,
+    int const fit_index,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
 {
-    int const n_fits_per_block = blockDim.x / n_points;
-    int const fit_in_block = threadIdx.x / n_points;
-    int const point_index = threadIdx.x - (fit_in_block*n_points);
-    int const fit_index = blockIdx.x*n_fits_per_block + fit_in_block;
-
-    float * current_value = &values[fit_index * n_points];
-    float const * p = &parameters[fit_index * n_parameters];
+    float const * p = parameters;
     
     float const argx = (point_index - p[1]) * (point_index - p[1]) / (2 * p[2] * p[2]);
     float const ex = exp(-argx);
-    current_value[point_index] = p[0] * ex + p[3];
+    values[point_index] = p[0] * ex + p[3];
 
     // derivatives
 
-    float * current_derivative = &derivatives[fit_index * n_points * n_parameters + point_index];
+    float * current_derivative = derivatives + point_index;
 
     current_derivative[0]  = ex;
     current_derivative[1 * n_points]  = p[0] * ex * (point_index - p[1]) / (p[2] * p[2]);

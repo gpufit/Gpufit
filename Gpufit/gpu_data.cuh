@@ -78,10 +78,11 @@ public:
 
     void read(bool * dst, int const * src);
     void set(int* arr, int const value);
+    void set(float* arr, float const value, int const count);
     void copy(float * dst, float const * src, std::size_t const count);
 
 private:
-	void set(float* arr, float const value, int const count);
+	
 	void set(int* arr, int const value, int const count);
     void write(float* dst, float const * src, int const count);
     void write(int* dst, std::vector<int> const & src);
@@ -106,7 +107,7 @@ public:
     Device_Array< float > gradients_;
     Device_Array< float > hessians_;
     Device_Array< float > deltas_;
-
+    Device_Array< float > subtotals_;
 
     Device_Array< float > values_;
     Device_Array< float > derivatives_;
@@ -114,7 +115,7 @@ public:
     Device_Array< float > lambdas_;
     Device_Array< int > states_;
     Device_Array< int > finished_;
-    Device_Array< int > iteration_falied_;
+    Device_Array< int > iteration_failed_;
     Device_Array< int > all_finished_;
     Device_Array< int > n_iterations_;
 };

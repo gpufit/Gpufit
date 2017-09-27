@@ -3,11 +3,21 @@
 
 #include <device_launch_parameters.h>
 
+extern __global__ void cuda_sum_chi_square_subtotals(
+    float * result,
+    float const *summands,
+    int const size,
+    int const n_sums,
+    int const * finished);
+extern __global__ void cuda_check_fit_improvement(
+    int * iteration_failed,
+    float const * chi_squares,
+    float const * prev_chi_squares,
+    int const n_fits,
+    int const * finished);
 extern __global__ void cuda_calculate_chi_squares(
     float * chi_squares,
     int * states,
-    int * iteration_falied,
-    float const * prev_chi_squares,
     float const * data,
     float const * values,
     float const * weights,
@@ -15,8 +25,17 @@ extern __global__ void cuda_calculate_chi_squares(
     int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
+    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size);
+extern __global__ void cuda_sum_gradient_subtotals(
+    float * gradients,
+    float const * subtotals,
+    int const n_summands,
+    int const n_fits,
+    int const n_parameters,
+    int const * skip,
+    int const * finished);
 extern __global__ void cuda_calculate_gradients(
     float * gradients,
     float const * data,
@@ -31,6 +50,7 @@ extern __global__ void cuda_calculate_gradients(
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
+    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size);
 extern __global__ void cuda_calculate_hessians(
@@ -64,6 +84,7 @@ extern __global__ void cuda_calc_curve_values(
     float * values,
     float * derivatives,
     int const n_fits_per_block,
+    int const n_blocks_per_fit,
     int const model_id,
     int const chunk_index,
     char * user_info,

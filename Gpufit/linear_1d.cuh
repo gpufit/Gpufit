@@ -62,15 +62,12 @@ __device__ void calculate_linear1d(
     int const n_parameters,
     float * values,
     float * derivatives,
+    int const point_index,
+    int const fit_index,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
 {
-    int const n_fits_per_block = blockDim.x / n_points;
-    int const fit_in_block = threadIdx.x / n_points;
-    int const point_index = threadIdx.x - (fit_in_block*n_points);
-    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
-
     float * user_info_float = (float*) user_info;
     float x = 0.0f;
     if (!user_info_float)
@@ -88,16 +85,13 @@ __device__ void calculate_linear1d(
         x = user_info_float[chunk_begin + fit_begin + point_index];
     }
 
-    float* current_value = &values[fit_index*n_points];
-    float const * current_parameters = &parameters[fit_index * n_parameters];
-
-    current_value[point_index] = current_parameters[0] + current_parameters[1] * x;
+    values[point_index] = parameters[0] + parameters[1] * x;
 
     // derivatives
 
-    float * current_derivative = &derivatives[fit_index * n_parameters * n_points + point_index];
-    current_derivative[0] = 1.f;
-    current_derivative[1 * n_points] = x;
+    float * current_derivatives = derivatives + point_index;
+    current_derivatives[0 * n_points] = 1.f;
+    current_derivatives[1 * n_points] = x;
 }
 
 #endif

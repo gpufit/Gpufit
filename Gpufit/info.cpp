@@ -11,6 +11,7 @@ Info::Info() :
     n_fits_(0),
     user_info_size_(0),
     n_fits_per_block_(0),
+    n_blocks_per_fit_(0),
     model_id_(0),
     estimator_id_(0),
     max_threads_(0),
@@ -38,15 +39,35 @@ void Info::set_number_of_parameters_to_fit(int const * const parameters_to_fit)
 
 void Info::set_fits_per_block(std::size_t const current_chunk_size)
 {
-    n_fits_per_block_ = 8;
-    bool is_divisible = false;
-    bool enough_threads = false;
-    do 
+    n_fits_per_block_ = 1;
+
+    if (n_points_ < max_threads_ / 4)
     {
-        n_fits_per_block_ /= 2;
-        is_divisible = current_chunk_size % n_fits_per_block_ == 0;
-        enough_threads = n_fits_per_block_ * n_points_ < max_threads_ / 4;
-    } while ((!is_divisible || !enough_threads) && n_fits_per_block_ > 1);
+        n_fits_per_block_ = 8;
+        bool is_divisible = false;
+        bool enough_threads = false;
+        do
+        {
+            n_fits_per_block_ /= 2;
+            is_divisible = current_chunk_size % n_fits_per_block_ == 0;
+            enough_threads = n_fits_per_block_ * n_points_ < max_threads_ / 4;
+        } while ((!is_divisible || !enough_threads) && n_fits_per_block_ > 1);
+    }
+}
+
+void Info::set_blocks_per_fit()
+{
+    n_blocks_per_fit_ = 1;
+    
+    if (n_points_ > max_threads_)
+    {
+        bool enough_threads = false;
+        do
+        {
+            n_blocks_per_fit_ *= 2;
+            enough_threads = n_points_ / n_blocks_per_fit_ < max_threads_;
+        } while (!enough_threads);
+    }
 }
 
 void Info::set_max_chunk_size()
@@ -57,6 +78,7 @@ void Info::set_max_chunk_size()
         + 2 * n_parameters_
         + 2 * n_parameters_to_fit_
         + 1 * n_parameters_to_fit_*n_parameters_to_fit_
+        + 1 * n_parameters_to_fit_*n_blocks_per_fit_
         + 1 * n_points_*n_parameters_
         + 4)
         + sizeof(int)
@@ -72,7 +94,7 @@ void Info::set_max_chunk_size()
         throw std::runtime_error("not enough free GPU memory available");
     }
 
-    tmp_chunk_size = (std::min)(tmp_chunk_size, max_blocks_);
+    tmp_chunk_size = (std::min)(tmp_chunk_size, max_blocks_ / n_blocks_per_fit_);
 
     std::size_t highest_factor = 1;
 
@@ -120,5 +142,6 @@ void Info::configure()
     }
 
     get_gpu_properties();
+    set_blocks_per_fit();
     set_max_chunk_size();
 }

@@ -18,6 +18,7 @@ public:
 private:
     void get_gpu_properties();
     void set_max_chunk_size();
+    void set_blocks_per_fit();
 
 public:
     int n_parameters_;
@@ -33,6 +34,7 @@ public:
     int max_n_iterations_;
 	std::size_t max_chunk_size_;
     int n_fits_per_block_;
+    int n_blocks_per_fit_;
     int model_id_;
     int estimator_id_;
     bool use_weights_;

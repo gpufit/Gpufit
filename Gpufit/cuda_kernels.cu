@@ -82,14 +82,21 @@ __global__ void cuda_calc_curve_values(
     float * values,
     float * derivatives,
     int const n_fits_per_block,
+    int const n_blocks_per_fit,
     int const model_id,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
 {
     int const fit_in_block = threadIdx.x / n_points;
-    int const point_index = threadIdx.x - fit_in_block * n_points;
-    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
+    int const fit_index = blockIdx.x * n_fits_per_block / n_blocks_per_fit + fit_in_block;
+    int const fit_piece = blockIdx.x % n_blocks_per_fit;
+    int const point_index = threadIdx.x - fit_in_block * n_points + fit_piece * blockDim.x;
+    int const first_point = fit_index * n_points;
+
+    float * current_values = values + first_point;
+    float * current_derivatives = derivatives + first_point * n_parameters;
+    float const * current_parameters = parameters + fit_index * n_parameters;
 
     if (finished[fit_index])
         return;
@@ -97,17 +104,17 @@ __global__ void cuda_calc_curve_values(
         return;
 
     if (model_id == GAUSS_1D)
-        calculate_gauss1d(parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+        calculate_gauss1d(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == GAUSS_2D)
-        calculate_gauss2d(parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+        calculate_gauss2d(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == GAUSS_2D_ELLIPTIC)
-        calculate_gauss2delliptic(parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+        calculate_gauss2delliptic(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == GAUSS_2D_ROTATED)
-        calculate_gauss2drotated(parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+        calculate_gauss2drotated(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == CAUCHY_2D_ELLIPTIC)
-        calculate_cauchy2delliptic(parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+        calculate_cauchy2delliptic(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == LINEAR_1D)
-        calculate_linear1d(parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+        calculate_linear1d(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
 }
 
 /* Description of the sum_up_floats function
@@ -161,6 +168,51 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
     }
 }
 
+__global__ void cuda_sum_chi_square_subtotals(
+    float * results,
+    float const * summands,
+    int const size,
+    int const n_sums,
+    int const * finished)
+{
+    int const index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (index >= n_sums || finished[index])
+        return;
+
+    float & result = results[index];
+    float const * current_summands = summands + index * size;
+    
+    double sum = 0.0;
+    for (int i = 0; i < size; i++)
+        sum += current_summands[i];
+    result = sum;
+}
+
+__global__ void cuda_check_fit_improvement(
+    int * iteration_failed,
+    float const * chi_squares,
+    float const * prev_chi_squares,
+    int const n_fits,
+    int const * finished)
+{
+    int const index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (index >= n_fits || finished[index])
+        return;
+
+    bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.f;
+    bool const chi_square_increased = (chi_squares[index] >= prev_chi_squares[index]);
+    if (prev_chi_squares_initialized && chi_square_increased)
+    {
+        iteration_failed[index] = 1;
+    }
+    else
+    {
+        iteration_failed[index] = 0;
+    }
+}
+
 /* Description of the cuda_calculate_chi_squares function
 * ========================================================
 *
@@ -176,7 +228,7 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
 *         it is only used for MLE. It is set to 3 if a fitting curve value is
 *         negative. This vector includes the states for multiple fits.
 *
-* iteration_falied: An output vector which indicates whether the chi-square values
+* iteration_failed: An output vector which indicates whether the chi-square values
 *                   calculated by the current iteration decreased compared to the
 *                   previous iteration.
 *
@@ -218,7 +270,7 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
 *   cuda_calculate_chi_squares<<< blocks, threads >>>(
 *       chi_squares,
 *       states,
-*       iteration_falied,
+*       iteration_failed,
 *       prev_chi_squares,
 *       data,
 *       values,
@@ -235,8 +287,6 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
 __global__ void cuda_calculate_chi_squares(
     float * chi_squares,
     int * states,
-    int * iteration_falied,
-    float const * prev_chi_squares,
     float const * data,
     float const * values,
     float const * weights,
@@ -244,13 +294,15 @@ __global__ void cuda_calculate_chi_squares(
     int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
+    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size)
 {
     int const shared_size = blockDim.x / n_fits_per_block;
     int const fit_in_block = threadIdx.x / shared_size;
-    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
-    int const point_index = threadIdx.x - fit_in_block * shared_size;
+    int const fit_index = blockIdx.x * n_fits_per_block / n_blocks_per_fit + fit_in_block;
+    int const fit_piece = blockIdx.x % n_blocks_per_fit;
+    int const point_index = threadIdx.x - fit_in_block * shared_size + fit_piece * shared_size;
     int const first_point = fit_index * n_points;
 
     if (finished[fit_index])
@@ -265,7 +317,8 @@ __global__ void cuda_calculate_chi_squares(
 
     extern __shared__ float extern_array[];
     
-    volatile float * shared_chi_square = &extern_array[fit_in_block*shared_size];
+    volatile float * shared_chi_square
+        = extern_array + (fit_in_block - fit_piece) * shared_size;
     
     if (point_index >= n_points)
     {
@@ -299,20 +352,33 @@ __global__ void cuda_calculate_chi_squares(
                 user_info_size);
         }
     }
+    shared_chi_square += fit_piece * shared_size;
     sum_up_floats(shared_chi_square, shared_size);
-    chi_squares[fit_index] = shared_chi_square[0];
+    chi_squares[fit_index * n_blocks_per_fit + fit_piece] = shared_chi_square[0];
+}
 
+__global__ void cuda_sum_gradient_subtotals(
+    float * gradients,
+    float const * subtotals,
+    int const n_summands,
+    int const n_fits,
+    int const n_parameters,
+    int const * skip,
+    int const * finished)
+{
+    int const index = blockIdx.x * blockDim.x + threadIdx.x;
+    int const fit_index = index / n_parameters;
 
-    bool const prev_chi_squares_initialized = prev_chi_squares[fit_index] != 0;
-    bool const chi_square_increased = (chi_squares[fit_index] >= prev_chi_squares[fit_index]);
-    if (prev_chi_squares_initialized && chi_square_increased)
-    {
-        iteration_falied[fit_index] = 1;
-    }
-    else
-    {
-        iteration_falied[fit_index] = 0;
-    }
+    if (fit_index >= n_fits || finished[fit_index] || skip[fit_index])
+        return;
+
+    float & gradient = gradients[index];
+    float const * current_summands = subtotals + index * n_summands;
+
+    double sum = 0.0;
+    for (int i = 0; i < n_summands; i++)
+        sum += current_summands[i];
+    gradient = sum;
 }
 
 /* Description of the cuda_calculate_gradients function
@@ -403,13 +469,15 @@ __global__ void cuda_calculate_gradients(
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
+    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size)
 {
     int const shared_size = blockDim.x / n_fits_per_block;
     int const fit_in_block = threadIdx.x / shared_size;
-    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
-    int const point_index = threadIdx.x - fit_in_block * shared_size;
+    int const fit_index = blockIdx.x * n_fits_per_block / n_blocks_per_fit + fit_in_block;
+    int const fit_piece = blockIdx.x % n_blocks_per_fit;
+    int const point_index = threadIdx.x - fit_in_block * shared_size + fit_piece * shared_size;
     int const first_point = fit_index * n_points;
 
     if (finished[fit_index] || skip[fit_index])
@@ -424,7 +492,7 @@ __global__ void cuda_calculate_gradients(
 
     extern __shared__ float extern_array[];
 
-    volatile float * shared_gradient = &extern_array[fit_in_block * shared_size];
+    volatile float * shared_gradient = extern_array + (fit_in_block - fit_piece) * shared_size;
 
     if (point_index >= n_points)
     {
@@ -464,8 +532,8 @@ __global__ void cuda_calculate_gradients(
                     user_info_size);
             }
         }
-        sum_up_floats(shared_gradient, shared_size);
-        gradients[fit_index * n_parameters_to_fit + parameter_index] = shared_gradient[0];
+        sum_up_floats(shared_gradient + fit_piece * shared_size, shared_size);
+        gradients[(fit_index * n_parameters_to_fit + parameter_index)* n_blocks_per_fit + fit_piece] = shared_gradient[fit_piece * shared_size];
     }
 }
 
@@ -629,7 +697,7 @@ __global__ void cuda_calculate_hessians(
 *
 * n_parameters: The number of fitting curve parameters.
 *
-* iteration_falied: An input vector which indicates whether the previous iteration
+* iteration_failed: An input vector which indicates whether the previous iteration
 *                   failed.
 *
 * finished: An input vector which allows the calculation to be skipped for single fits.
