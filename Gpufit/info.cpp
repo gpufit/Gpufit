@@ -59,13 +59,13 @@ void Info::set_blocks_per_fit()
 {
     n_blocks_per_fit_ = 1;
     
-    if (n_points_ > max_threads_)
+    if (power_of_two_n_points_ > max_threads_)
     {
         bool enough_threads = false;
         do
         {
             n_blocks_per_fit_ *= 2;
-            enough_threads = n_points_ / n_blocks_per_fit_ < max_threads_;
+            enough_threads = power_of_two_n_points_ / n_blocks_per_fit_ < max_threads_;
         } while (!enough_threads);
     }
 }
