@@ -4,10 +4,9 @@
 #include <device_launch_parameters.h>
 
 extern __global__ void cuda_sum_chi_square_subtotals(
-    float * result,
-    float const *summands,
-    int const size,
-    int const n_sums,
+    float * chi_squares,
+    int const n_blocks_per_fit,
+    int const n_fits,
     int const * finished);
 extern __global__ void cuda_check_fit_improvement(
     int * iteration_failed,
@@ -22,6 +21,7 @@ extern __global__ void cuda_calculate_chi_squares(
     float const * values,
     float const * weights,
     int const n_points,
+    int const n_fits,
     int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
@@ -30,8 +30,7 @@ extern __global__ void cuda_calculate_chi_squares(
     std::size_t const user_info_size);
 extern __global__ void cuda_sum_gradient_subtotals(
     float * gradients,
-    float const * subtotals,
-    int const n_summands,
+    int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,
     int const * skip,
@@ -43,6 +42,7 @@ extern __global__ void cuda_calculate_gradients(
     float const * derivatives,
     float const * weights,
     int const n_points,
+    int const n_fits,
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,

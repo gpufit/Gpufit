@@ -13,12 +13,11 @@ GPUData::GPUData(Info const & info) :
     parameters_to_fit_indices_( info_.n_parameters_to_fit_ ),
     user_info_( info_.user_info_size_ ),
 
-    chi_squares_( info_.max_chunk_size_ ),
+    chi_squares_( info_.max_chunk_size_ * info_.n_blocks_per_fit_),
     prev_chi_squares_( info_.max_chunk_size_ ),
     gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ ),
     hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
     deltas_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
-    subtotals_(info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_),
 
     values_( info_.max_chunk_size_ * info_.n_points_ ),
     derivatives_( info_.max_chunk_size_ * info_.n_points_ * info_.n_parameters_ ),
@@ -44,12 +43,11 @@ void GPUData::reset(int const chunk_size)
     set(prev_parameters_, 0.f, chunk_size_ * info_.n_parameters_);
     set(parameters_to_fit_indices_, 0, info_.n_parameters_to_fit_);
 
-    set(chi_squares_, 0.f, chunk_size_);
+    set(chi_squares_, 0.f, chunk_size_* info_.n_blocks_per_fit_);
     set(prev_chi_squares_, 0.f, chunk_size_);
     set(gradients_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
     set(hessians_, 0.f, chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
     set(deltas_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
-    set(subtotals_, 0.f, chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_);
 
     set(values_, 0.f, chunk_size_*info_.n_points_);
     set(derivatives_, 0.f, chunk_size_ * info_.n_points_ * info_.n_parameters_);

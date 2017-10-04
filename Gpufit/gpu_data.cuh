@@ -107,7 +107,6 @@ public:
     Device_Array< float > gradients_;
     Device_Array< float > hessians_;
     Device_Array< float > deltas_;
-    Device_Array< float > subtotals_;
 
     Device_Array< float > values_;
     Device_Array< float > derivatives_;

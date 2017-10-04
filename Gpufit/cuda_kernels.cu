@@ -169,24 +169,23 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
 }
 
 __global__ void cuda_sum_chi_square_subtotals(
-    float * results,
-    float const * summands,
-    int const size,
-    int const n_sums,
+    float * chi_squares,
+    int const n_blocks_per_fit,
+    int const n_fits,
     int const * finished)
 {
     int const index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (index >= n_sums || finished[index])
+    if (index >= n_fits || finished[index])
         return;
 
-    float & result = results[index];
-    float const * current_summands = summands + index * size;
+    float * chi_square = chi_squares + index;
     
     double sum = 0.0;
-    for (int i = 0; i < size; i++)
-        sum += current_summands[i];
-    result = sum;
+    for (int i = 0; i < n_blocks_per_fit; i++)
+        sum += chi_square[i * n_fits];
+    
+    chi_square[0] = sum;
 }
 
 __global__ void cuda_check_fit_improvement(
@@ -291,6 +290,7 @@ __global__ void cuda_calculate_chi_squares(
     float const * values,
     float const * weights,
     int const n_points,
+    int const n_fits,
     int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
@@ -300,8 +300,8 @@ __global__ void cuda_calculate_chi_squares(
 {
     int const shared_size = blockDim.x / n_fits_per_block;
     int const fit_in_block = threadIdx.x / shared_size;
-    int const fit_index = blockIdx.x * n_fits_per_block / n_blocks_per_fit + fit_in_block;
-    int const fit_piece = blockIdx.x % n_blocks_per_fit;
+    int const fit_piece = blockIdx.x / n_fits;
+    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block - fit_piece * n_fits;
     int const point_index = threadIdx.x - fit_in_block * shared_size + fit_piece * shared_size;
     int const first_point = fit_index * n_points;
 
@@ -354,13 +354,12 @@ __global__ void cuda_calculate_chi_squares(
     }
     shared_chi_square += fit_piece * shared_size;
     sum_up_floats(shared_chi_square, shared_size);
-    chi_squares[fit_index * n_blocks_per_fit + fit_piece] = shared_chi_square[0];
+    chi_squares[fit_index + fit_piece * n_fits] = shared_chi_square[0];
 }
 
 __global__ void cuda_sum_gradient_subtotals(
     float * gradients,
-    float const * subtotals,
-    int const n_summands,
+    int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,
     int const * skip,
@@ -372,13 +371,13 @@ __global__ void cuda_sum_gradient_subtotals(
     if (fit_index >= n_fits || finished[fit_index] || skip[fit_index])
         return;
 
-    float & gradient = gradients[index];
-    float const * current_summands = subtotals + index * n_summands;
+    float * gradient = gradients + index;
 
     double sum = 0.0;
-    for (int i = 0; i < n_summands; i++)
-        sum += current_summands[i];
-    gradient = sum;
+    for (int i = 0; i < n_blocks_per_fit; i++)
+        sum += gradient[i * n_fits * n_parameters];
+
+    gradient[0] = sum;
 }
 
 /* Description of the cuda_calculate_gradients function
@@ -462,6 +461,7 @@ __global__ void cuda_calculate_gradients(
     float const * derivatives,
     float const * weights,
     int const n_points,
+    int const n_fits,
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
@@ -475,8 +475,8 @@ __global__ void cuda_calculate_gradients(
 {
     int const shared_size = blockDim.x / n_fits_per_block;
     int const fit_in_block = threadIdx.x / shared_size;
-    int const fit_index = blockIdx.x * n_fits_per_block / n_blocks_per_fit + fit_in_block;
-    int const fit_piece = blockIdx.x % n_blocks_per_fit;
+    int const fit_piece = blockIdx.x / n_fits;
+    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block - fit_piece * n_fits;
     int const point_index = threadIdx.x - fit_in_block * shared_size + fit_piece * shared_size;
     int const first_point = fit_index * n_points;
 
@@ -533,7 +533,8 @@ __global__ void cuda_calculate_gradients(
             }
         }
         sum_up_floats(shared_gradient + fit_piece * shared_size, shared_size);
-        gradients[(fit_index * n_parameters_to_fit + parameter_index)* n_blocks_per_fit + fit_piece] = shared_gradient[fit_piece * shared_size];
+        gradients[(fit_index * n_parameters_to_fit + parameter_index) + fit_piece * n_fits * n_parameters_to_fit]
+            = shared_gradient[fit_piece * shared_size];
     }
 }
 
