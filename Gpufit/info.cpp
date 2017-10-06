@@ -74,15 +74,16 @@ void Info::set_max_chunk_size()
 {
     int one_fit_memory
         = sizeof(float)
-        *(2 * n_points_
-        + 2 * n_parameters_
-        + 2 * n_parameters_to_fit_
-        + 1 * n_parameters_to_fit_*n_parameters_to_fit_
-        + 1 * n_parameters_to_fit_*n_blocks_per_fit_
-        + 1 * n_points_*n_parameters_
-        + 4)
+        *(2 * n_points_                                     // data, values
+        + 2 * n_parameters_                                 // parameters, prev_parameters
+        + 1 * n_blocks_per_fit_                             // chi_square
+        + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
+        + 1 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian
+        + 1 * n_parameters_to_fit_                          // delta
+        + 1 * n_points_*n_parameters_                       // derivatives
+        + 2)                                                // prev_chi_square, lambda
         + sizeof(int)
-        * 3;
+        * 4;                                                // state, finished, iteration_failed, n_iterations
 
     if (use_weights_)
         one_fit_memory += sizeof(float) * n_points_;
@@ -96,23 +97,9 @@ void Info::set_max_chunk_size()
 
     tmp_chunk_size = (std::min)(tmp_chunk_size, max_blocks_ / n_blocks_per_fit_);
 
-    std::size_t highest_factor = 1;
+    std::size_t const highest_factor = n_points_ * n_parameters_;
 
-    if (n_parameters_to_fit_)
-    {
-        highest_factor
-            = n_points_
-            * n_parameters_to_fit_
-            * n_parameters_to_fit_
-            * sizeof(float);
-    }
-    else
-    {
-        highest_factor = n_points_ * n_parameters_;
-    }
-
-    std::size_t const highest_size_t_value
-        = std::numeric_limits< std::size_t >::max();
+    std::size_t const highest_size_t_value = std::numeric_limits< std::size_t >::max();
 
     if (tmp_chunk_size > highest_size_t_value / highest_factor)
     {

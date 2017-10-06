@@ -15,7 +15,7 @@ GPUData::GPUData(Info const & info) :
 
     chi_squares_( info_.max_chunk_size_ * info_.n_blocks_per_fit_),
     prev_chi_squares_( info_.max_chunk_size_ ),
-    gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ ),
+    gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_),
     hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
     deltas_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
 
@@ -45,7 +45,7 @@ void GPUData::reset(int const chunk_size)
 
     set(chi_squares_, 0.f, chunk_size_* info_.n_blocks_per_fit_);
     set(prev_chi_squares_, 0.f, chunk_size_);
-    set(gradients_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
+    set(gradients_, 0.f, chunk_size_ * info_.n_parameters_to_fit_* info_.n_blocks_per_fit_);
     set(hessians_, 0.f, chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
     set(deltas_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
 
