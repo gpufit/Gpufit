@@ -33,7 +33,11 @@ def gaussians_2d(x, y, p):
 
 if __name__ == '__main__':
 
-    print('\n')
+    # cuda available checks
+    print('CUDA available: {}'.format(gf.cuda_available()))
+    if not gf.cuda_available():
+        raise RuntimeError(gf.get_last_error())
+    print('CUDA versions runtime: {}, driver: {}'.format(*gf.get_cuda_version()))
 
     # number of fit points
     size_x = 5

@@ -73,4 +73,7 @@ class Test(unittest.TestCase):
             assert (abs(true_parameters[i] - parameters[0, i]) < 1e-6)
 
 if __name__ == '__main__':
+
+    if not gf.cuda_available():
+        raise RuntimeError(gf.get_last_error())
     unittest.main()

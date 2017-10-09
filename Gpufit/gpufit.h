@@ -50,6 +50,7 @@ int gpufit
 
 char const * gpufit_get_last_error() ;
 
+// returns 1 if cuda is available and 0 otherwise
 int gpufit_cuda_available();
 
 int gpufit_get_cuda_version(int * runtime_version, int * driver_version);

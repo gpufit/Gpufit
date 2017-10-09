@@ -30,8 +30,11 @@ def generate_gauss_2d(p, xi, yi):
 
 if __name__ == '__main__':
 
+    # cuda available checks
+    print('CUDA available: {}'.format(gf.cuda_available()))
     if not gf.cuda_available():
         raise RuntimeError(gf.get_last_error())
+    print('CUDA versions runtime: {}, driver: {}'.format(*gf.get_cuda_version()))
 
     # number of fits and fit points
     number_fits = 10000
