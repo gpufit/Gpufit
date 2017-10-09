@@ -10,14 +10,14 @@ For each function and estimator there exists a separate file. Therefore, to add 
 CUDA header file containing the new model or estimator function must be created and included in the library.
 
 Please note, that in order to add a model function or estimator, it is necessary to rebuild the Gpufit library 
-from source.  In future releases of Gpufit, it may be possible to include new fit functions or estimators at runtime.
+from source. In future releases of Gpufit, it may be possible to include new fit functions or estimators at runtime.
 
 
 Add a new fit model function
 ----------------------------
 
 To add a new fit model, the model function itself as well as analytic expressions for its partial derivatives 
-must to be known.  A function calculating the values of the model as well as a function calculating the 
+must to be known. A function calculating the values of the model as well as a function calculating the
 values of the partial derivatives of the model, with respect to the model parameters and possible grid 
 coordinates, must be implemented.
 
@@ -26,8 +26,8 @@ of model parameters must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
-1.	Define an additional model ID in file gpufit.h_
-2.  Implement a CUDA device function within a newly created .cuh file according to the following template.
+1. Define an additional model ID in file gpufit.h_
+2. Implement a CUDA device function within a newly created .cuh file according to the following template.
 
 .. code-block:: cuda
 
@@ -106,7 +106,7 @@ Compare model_id with the defined model of the new model and call the calculate 
 Add a new fit estimator
 ------------------------
 
-To extend |GF| by additional estimators, three CUDA device functions must be defined and integrated.  The sections requiring modification are 
+To extend |GF| by additional estimators, three CUDA device functions must be defined and integrated. The sections requiring modification are
 the functions which calculate the estimator function values, and its gradient and hessian values. Also, a new estimator ID must be defined.
 Detailed step by step instructions for adding an additional estimator is given below.
 
@@ -293,7 +293,7 @@ and the hessian values of the estimator given. For a concrete example, see lse.c
 Future releases
 ---------------
 
-A disadvantage of the Gpufit library, when compared with established CPU-based curve fitting packages, 
-is that in order to add or modify a fit model function or a fit estimator, the library must be recompiled.  
+A current disadvantage of the Gpufit library, when compared with established CPU-based curve fitting packages,
+is that in order to add or modify a fit model function or a fit estimator, the library must be recompiled.
 We anticipate that this limitation can be overcome in future releases of the library, by employing 
 run-time compilation of the CUDA code.

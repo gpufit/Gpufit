@@ -13,7 +13,7 @@ bindings see :ref:`external-bindings`.
 
 This section describes how to compile Gpufit, including generating its 
 external bindings, from source code. Building from source is necessary when
-a fit model function is added or changed, or if a new fit estimator is required.  
+a fit model function is added or changed, or if a new fit estimator is required.
 Building the library may also be useful for compiling the code using a 
 specific version of the CUDA toolkit, or for a particular CUDA compute 
 capability. 
@@ -26,7 +26,7 @@ Use of this distribution requires only a CUDA-capable graphics card, and an
 updated Nvidia graphics driver. The binary package contains:
 
 - The Gpufit SDK, which consists of the 32-bit and 64-bit DLL files, and 
-  the Gpufit header file which contains the function definitions.  The Gpufit
+  the Gpufit header file which contains the function definitions. The Gpufit
   SDK is intended to be used when calling Gpufit from an external application
   written in e.g. C code.
 - The performance test application, which serves to test that Gpufit is 
@@ -42,7 +42,7 @@ package/README.md.
 Building from source code
 +++++++++++++++++++++++++
 
-This section describes how to build Gpufit from source code.  Note that as of
+This section describes how to build Gpufit from source code. Note that as of
 the initial release of Gpufit, the source code has been tested only with the 
 Microsoft Visual Studio compiler.
 
@@ -91,20 +91,20 @@ Compiler configuration via CMake
 CMake is an open-source tool designed to build, test, and package software. 
 It is used to control the software compilation process using compiler 
 independent configuration files, and generate native makefiles and workspaces 
-that can be used in the compiler environment.  In this section we provide a
+that can be used in the compiler environment. In this section we provide a
 simple example of how to use CMake in order to generate the input files for the
 compiler (e.g. the Visual Studio solution file), which can then be used to 
 compile Gpufit.
 
 First, identify the directory which contains the Gpufit source code 
 (for example, on a Windows computer the Gpufit source code may be stored in 
-*C:\\Sources\\Gpufit*).  Next, create a build directory outside the 
+*C:\\Sources\\Gpufit*). Next, create a build directory outside the
 source code source directory (e.g. *C:\\Sources\\Gpufit-build-64*). Finally, 
-run cmake to configure and generate the compiler input files.  The following
+run cmake to configure and generate the compiler input files. The following
 commands, executed from the command prompt, assume that the cmake executable
 (e.g. *C:\\Program Files\\CMake\\bin\\cmake.exe*) is automatically found 
 via the PATH environment variable (if not, the full path to cmake.exe must be
-specified).  This example also assumes that the source and build directories 
+specified). This example also assumes that the source and build directories
 have been set up as specified above.
 
 .. code-block:: bash
@@ -113,13 +113,13 @@ have been set up as specified above.
     cmake -G "Visual Studio 12 2013 Win64" C:\Sources\Gpufit
 
 Note that in this example the *-G* flag has been used to specify the 
-64-bit version of the Visual Studio 12 compiler.  This flag should be changed
+64-bit version of the Visual Studio 12 compiler. This flag should be changed
 depending on the compiler used, and the desired architecture 
-(e.g. 32- or 64-bit).  Further details of the CMake command line arguments 
+(e.g. 32- or 64-bit). Further details of the CMake command line arguments
 can be found `here <https://cmake.org/cmake/help/latest/manual/cmake.1.html>`__.
 
 There is also a graphical user interface available for CMake, which simplifies
-the configuration and generation steps.  For further details, see  
+the configuration and generation steps. For further details, see
 `Running CMake <https://cmake.org/runningcmake/>`_.
 
 Common issues encountered during CMake configuration
@@ -166,21 +166,21 @@ Compiling Gpufit on Windows
 ---------------------------
 
 After configuring and generating the solution files using CMake, go to the 
-desired build directory and open Gpufit.sln using Visual Studio.  Select the 
-"Debug" or "Release" build options, as appropriate.  Select the build target 
-"ALL_BUILD", and build this target.  If the build process completes
+desired build directory and open Gpufit.sln using Visual Studio. Select the
+"Debug" or "Release" build options, as appropriate. Select the build target
+"ALL_BUILD", and build this target. If the build process completes
 without errors, the Gpufit binary files will be created in the corresponding 
 "Debug" or "Release" folders in the build directory.
 
 The unit tests can be executed by building the target "RUN_TESTS" or by 
 starting the created executables in the output directory from
-the command line.  
+the command line.
 
 Linux
 -----
 
 Gpufit has not yet been officially tested on a computer running a Linux variant 
-with a CUDA capable graphics card.  However, satisfying the Prerequisites_ and 
+with a CUDA capable graphics card. However, satisfying the Prerequisites_ and
 using CMake, we estimate that the library should build in principle and one
 should also be able to run the examples on Linux.
 
@@ -188,7 +188,7 @@ MacOS
 -----
 
 Gpufit has not yet been officially tested on a computer running MacOS with a 
-CUDA capable graphics card.  However, satisfying the Prerequisites_ and using 
+CUDA capable graphics card. However, satisfying the Prerequisites_ and using
 CMake, we estimate that the library should build in principle and one
 should also be able to run the examples on MacOS.
 
@@ -203,11 +203,11 @@ If Gpufit was built from source, running the build target
 GPUFIT_CPUFIT_Performance_Comparison will run the test, which executes the 
 fitting process multiple times, varying the number of fits per function call.
 The execution time is measured in each case and the relative speed improvement 
-between the GPU and the CPU is calculated.  A successful run of the performance
-test also indicates also that Gpufit is functioning correctly.  
+between the GPU and the CPU is calculated. A successful run of the performance
+test also indicates also that Gpufit is functioning correctly.
 
 The performance comparison is also included in the Gpufit binary distribution
-as a console application.  An example of the program's output is
+as a console application. An example of the program's output is
 shown in :numref:`installation-gpufit-cpufit-performance-comparison`.
 
 .. _installation-gpufit-cpufit-performance-comparison:
@@ -216,5 +216,5 @@ shown in :numref:`installation-gpufit-cpufit-performance-comparison`.
    :width: 10 cm
    :align: center
 
-   Output of the GPUFIT vs CPUFIT performance comparison
+   Output of the Gpufit vs Cpufit performance comparison
 

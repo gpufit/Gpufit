@@ -114,7 +114,7 @@ This example features:
 - Noisy data and random initial guesses for the fit parameters
 - A Poisson noise adapted maximum likelihood estimator
 
-It is contained in Gauss_Fit_2D_Example.cpp_ and can be built and executed within the project environment.  The optional 
+It is contained in Gauss_Fit_2D_Example.cpp_ and can be built and executed within the project environment. The optional
 inputs to gpufit(), *weights* and *user info*, are not used.
 
 In this example, a 2D Gaussian curve is fit to 10\ :sup:`4` noisy data sets having a size of 20 x 20 points each.
@@ -143,7 +143,7 @@ of about 20%. The initial guesses for the center coordinates are chosen with a d
 		{
 			if (j == 1 || j == 2)
 			{
-				initial_parameters[i * number_parameters + j] = true_parameters[j] + true_parameters[3]  * (-0.2f + 0.4f * uniform_dist(rng));
+				initial_parameters[i * number_parameters + j] = true_parameters[j] + true_parameters[3] * (-0.2f + 0.4f * uniform_dist(rng));
 			}
 			else
 			{
@@ -204,7 +204,7 @@ Stored in variable temp, it is then used in every fit to generate Poisson distri
 		}
 	}
 
-Thus, in this example the difference between data for each fit only in the random noise.  This, and the 
+Thus, in this example the difference between data for each fit only in the random noise. This, and the
 randomized initial guesses for each fit, result in each fit returning slightly different best-fit parameters.
 
 We set the model and estimator IDs for the fit accordingly.

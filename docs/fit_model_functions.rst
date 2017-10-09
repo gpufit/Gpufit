@@ -4,7 +4,7 @@ Fit Model functions
 -------------------
 
 This section describes the fit model functions which are included with the Gpufit library. The headings are the names
-of the ModelID parameter used in the gpufit()_ call.  They are defined in gpufit.h_.
+of the ModelID parameter used in the gpufit()_ call. They are defined in gpufit.h_.
 
 Note that additional model functions may be added as described in the documentation, see :ref:`gpufit-customization`.
 
@@ -13,8 +13,8 @@ Note that additional model functions may be added as described in the documentat
 Linear regression
 +++++++++++++++++
 
-A 1D linear function defined by two parameters (offset and slope).  The user information data may be used to specify the
-X coordinate of each data point.  The model ID of this function is ``LINEAR_1D``, and it is implemented in linear_1d.cuh_.
+A 1D linear function defined by two parameters (offset and slope). The user information data may be used to specify the
+X coordinate of each data point. The model ID of this function is ``LINEAR_1D``, and it is implemented in linear_1d.cuh_.
 
 .. math::
 
@@ -39,7 +39,7 @@ X coordinate of each data point.  The model ID of this function is ``LINEAR_1D``
 1D Gaussian function
 ++++++++++++++++++++
 
-A 1D Gaussian function defined by four parameters.  Its model ID is ``GAUSS_1D`` and it is implemented in gauss_1d.cuh_.
+A 1D Gaussian function defined by four parameters. Its model ID is ``GAUSS_1D`` and it is implemented in gauss_1d.cuh_.
 Here, p is the vector of parameters (p0..p3) and the model function g exists for each x coordinate of the input data.
 
 .. math::
@@ -98,7 +98,7 @@ Here, p is the vector of parameters (p0..p4) and the model function g exists for
 +++++++++++++++++++++++++++++++++
 
 A 2D elliptical Gaussian function defined by six parameters. Its model ID is ``GAUSS_2D_ELLIPTIC`` and it is implemented
-in gauss_2d_elliptic.cuh_.  Here, p is the vector of parameters (p0..p5) and the model function g exists for each x,y coordinate of the input data.
+in gauss_2d_elliptic.cuh_. Here, p is the vector of parameters (p0..p5) and the model function g exists for each x,y coordinate of the input data.
 
 .. math::
 

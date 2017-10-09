@@ -4,10 +4,10 @@
 External bindings
 =================
 
-This sections describes the Gpufit bindings to other programming languages.  The bindings (e.g. to Python or Matlab) aim to
+This sections describes the Gpufit bindings to other programming languages. The bindings (e.g. to Python or Matlab) aim to
 emulate the :ref:`c-interface` as closely as possible.
 
-Most high level languages feature multidimensional numerical arrays.  In the bindings implemented for Matlab and Python, 
+Most high level languages feature multidimensional numerical arrays. In the bindings implemented for Matlab and Python,
 we adopt the convention that the input data should be organized as a 2D array, with one dimension corresponding to the
 number of data points per fit, and the other corresponding to the number of fits. Internally, in memory, these arrays should
 always be ordered such that the data values for each fit are kept together. In Matlab, for example, this means storing the
@@ -21,7 +21,7 @@ specified explicitly. Instead, these numbers are inferred from the dimensions of
 Optional parameters with default values
 ---------------------------------------
 
-The external bindings make some input parameters optional.  The optional parameters are shown here.
+The external bindings make some input parameters optional. The optional parameters are shown here.
 
 :tolerance:
     default value 1e-4
@@ -38,9 +38,9 @@ Python
 ------
 
 The Gpufit binding for Python is a project named pyGpufit. This project contains a Python package named pygpufit, which
-contains a module gpufit, and this module implements a method called fit.  Calling this method is equivalent to
-calling the C interface function *gpufit()* of |GF|. The package expects the input data to be
-stored as NumPy array.  NumPy follows row-major order by default.
+contains a module gpufit, and this module implements a method called fit. Calling this method is equivalent to
+calling the C interface function *gpufit* of |GF|. The package expects the input data to be
+stored as NumPy array. NumPy follows row-major order by default.
 
 Installation
 ++++++++++++
@@ -56,14 +56,17 @@ Install the wheel file with.
 Python Interface
 ++++++++++++++++
 
-Optional parameters are passed in as None. The numbers of points, fits and parameters is deduced from the dimensions of
-the input data and initial parameters arrays.
+fit
+...
 
-The signature of the gpufit method is
+The signature of the fit method (equivalent to calling the C interface function *gpufit*) is
 
 .. code-block:: python
 
     def fit(data, weights, model_id:ModelID, initial_parameters, tolerance:float=None, max_number_iterations:int=None, parameters_to_fit=None, estimator_id:EstimatorID=None, user_info=None):
+
+Optional parameters are passed in as None. The numbers of points, fits and parameters is deduced from the dimensions of
+the input data and initial parameters arrays.
 
 *Input parameters*
 
@@ -119,6 +122,44 @@ The signature of the gpufit method is
 
 Errors are raised if checks on parameters fail or if the execution of fit failed.
 
+get_last_error
+..............
+
+The signature of the get_last_error method (equivalent to calling the C interface function *gpufit_get_last_error*) is
+
+.. code-block:: python
+
+    def get_last_error():
+
+Returns a string representing the error message of the last occurred error.
+
+cuda_available
+..............
+
+The signature of the cuda_available method (equivalent to calling the C interface function *gpufit_cuda_available*) is
+
+.. code-block:: python
+
+    def cuda_available():
+
+Returns True if CUDA is available and False otherwise.
+
+get_cuda_version
+................
+
+The signature of the get_cuda_version method (equivalent to calling the C interface function *gpufit_get_cuda_version*) is
+
+.. code-block:: python
+
+    def get_cuda_version():
+
+*Output parameters*
+
+:runtime version: Tuple of (Major version, Minor version)
+:driver version: Tuple of (Major version, Minor version)
+
+An error is raised if the execution failed (i.e. because CUDA is not available).
+
 Python Examples
 +++++++++++++++
 
@@ -133,6 +174,15 @@ The essential imports are:
 
     import numpy as np
     import pygpufit.gpufit as gf
+
+
+First we test for availability of CUDA as well as CUDA driver and runtime versions.
+
+.. code-block:: python
+
+    # cuda available checks
+    print('CUDA available: {}'.format(gf.cuda_available()))
+    print('CUDA versions runtime: {}, driver: {}'.format(*gf.get_cuda_version()))
 
 The true parameters describing an example 2D Gaussian peak functions are:
 
@@ -237,7 +287,7 @@ fitted parameters are limited to those fits that converged.
 Matlab
 ------
 
-The Matlab binding for Gpufit is a Matlab script (gpufit.m_).  This script checks the input data, sets default parameters, and 
+The Matlab binding for Gpufit is a Matlab script (gpufit.m_). This script checks the input data, sets default parameters, and
 calls the C interface of |GF|, via a compiled .mex file.
 
 Please note, that before using the Matlab binding, the path to gpufit.m_ must be added to the Matlab path.
