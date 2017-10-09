@@ -13,6 +13,7 @@ set( module_directory "${build_directory}/pygpufit" )
 set( module_files
   "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/__init__.py"
   "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/gpufit.py"
+  "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/version.py"
 )
 set( binary $<TARGET_FILE:Gpufit> )
 

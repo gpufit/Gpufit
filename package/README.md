@@ -27,7 +27,7 @@ CMake
 
 - CUDA_ARCHITECTURE must be set to All (it is by default)
 
-- CUDA toolkit 8.0 is used for all builds (must be installed before)
+- CUDA toolkit 8.0/9.0 is used for all builds (must be installed before)
 
 - Build directory for MSVC14 Win64 is BUILD_BASE_PATH/VC14x64-8.0
 
@@ -46,3 +46,14 @@ Build
 Documentation
 
 - An up-to-date version of the documentation must exist at SOURCE_BASE_PATH\docs\_build\latex\Gpufit.pdf (must be created before).
+
+## Setting the version number
+
+Unfortunately the version has to be updated in various places.
+
+- CmakeLists.txt (project( Gpufit VERSION 1.0.0 ))
+- docs/conf.py (release = u'1.0.0')
+- docs/epilog.txt (.. |GF_version| replace:: 1.0.0)
+- Gpufit/matlab/gpufit_version.m 
+- Gpufit/python/pygpufit/version.py
+- calling the packaging script (create_package.bat %1 1.0.0 %3)

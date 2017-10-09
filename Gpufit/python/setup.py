@@ -7,6 +7,7 @@
 from setuptools import setup, find_packages
 import os
 from io import open # to have encoding as parameter of open on Python >=2.6
+import pygpufit.version as vs
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,13 +26,13 @@ def get_long_description():
 
 if __name__ == "__main__":
     setup(name='pyGpufit',
-        version='1.0.0',
+        version=vs.__version__,
         description='Levenberg Marquardt curve fitting in CUDA',
         long_description=get_long_description(),
         url='https://github.com/gpufit/Gpufit',
         author='M. Bates, A. Przybylski, B. Thiel, and J. Keller-Findeisen',
         author_email='a@b.c',
-        license='',
+        license='MIT license',
         classifiers=[],
         keywords='Levenberg Marquardt, curve fitting, CUDA',
         packages=find_packages(where=HERE),
