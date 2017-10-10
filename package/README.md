@@ -57,3 +57,4 @@ Unfortunately the version has to be updated in various places.
 - Gpufit/matlab/gpufit_version.m 
 - Gpufit/python/pygpufit/version.py
 - calling the packaging script (create_package.bat %1 1.0.0 %3)
+- package/sdk_readme.txt, also CUDA version inside
