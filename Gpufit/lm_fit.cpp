@@ -54,19 +54,22 @@ void LMFit::get_results(GPUData const & gpu_data, int const n_fits)
     output_n_iterations_ = gpu_data.n_iterations_.copy( n_fits, output_n_iterations_ ) ;
 }
 
-void LMFit::run(float const tolerance)
+void LMFit::run(float const tolerance, int * output_info)
 {
     set_parameters_to_fit_indices();
 
     GPUData gpu_data(info_);
     gpu_data.init_user_info(user_info_);
 
+    bool const fpb_is_set = info_.n_fits_per_block_ > 0;
+
     // loop over data chunks
     while (n_fits_left_ > 0)
     {
         chunk_size_ = int((std::min)(n_fits_left_, info_.max_chunk_size_));
 
-        info_.set_fits_per_block(chunk_size_);
+        if (!fpb_is_set)
+            info_.set_fits_per_block(chunk_size_);
 
         gpu_data.reset(chunk_size_);
         gpu_data.init(
@@ -88,5 +91,20 @@ void LMFit::run(float const tolerance)
 
         n_fits_left_ -= chunk_size_;
         ichunk_++;
+    }
+    if (output_info)
+    {
+        output_info[0] = ichunk_;
+
+        output_info[1] = chunk_size_;
+
+        output_info[2] = info_.max_chunk_size_;
+
+        output_info[3] = info_.n_fits_per_block_;
+
+        if (!fpb_is_set) info_.set_fits_per_block(info_.max_chunk_size_);
+        output_info[4] = info_.n_fits_per_block_;
+
+        output_info[5] = info_.n_blocks_per_fit_;
     }
 }

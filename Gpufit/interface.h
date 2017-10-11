@@ -24,7 +24,8 @@ public:
         float * output_parameters,
         int * output_states,
         float * output_chi_squares,
-        int * output_n_iterations
+        int * output_n_iterations,
+        int * output_info
     ) ;
     
     virtual ~FitInterface();
@@ -58,6 +59,7 @@ private:
     int * output_states_;
     float * output_chi_squares_;
     int * output_n_iterations_;
+    int * output_info_;
 };
 
 #endif

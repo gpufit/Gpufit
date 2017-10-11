@@ -110,7 +110,8 @@ void linear_regression_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data()
+            output_number_iterations.data(),
+            0
         );
 
 	// check status

@@ -26,7 +26,7 @@ public:
 
     virtual ~LMFit();
 
-    void run(float const tolerance);
+    void run(float const tolerance, int * output_info);
 
 private:
     void set_parameters_to_fit_indices();

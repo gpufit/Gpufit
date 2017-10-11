@@ -1,4 +1,4 @@
-function [parameters, states, chi_squares, n_iterations, time]...
+function [parameters, states, chi_squares, n_iterations, time, info]...
     = gpufit(data, weights, model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
 % Wrapper around the Gpufit mex file.
 %
@@ -107,7 +107,7 @@ end
 
 %% run Gpufit taking the time
 tic;
-[parameters, states, chi_squares, n_iterations] ...
+[parameters, states, chi_squares, n_iterations, info] ...
     = GpufitMex(data, weights, n_fits, n_points, tolerance, max_n_iterations, estimator_id, initial_parameters, parameters_to_fit, model_id, n_parameters, user_info, user_info_size);
 
 time = toc;

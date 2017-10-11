@@ -319,7 +319,8 @@ int main(int argc, char * argv[])
 			gpufit_parameters.data(),
 			gpufit_states.data(),
 			gpufit_chi_squares.data(),
-			gpufit_n_iterations.data()
+			gpufit_n_iterations.data(),
+            0
 		);
 	std::chrono::milliseconds::rep const dt_gpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 

@@ -22,7 +22,8 @@ int gpufit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    int * output_info
 )
 try
 {
@@ -51,7 +52,8 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations);
+        output_n_iterations,
+        output_info);
 
     fi.fit(model_id);
 
@@ -125,6 +127,7 @@ int gpufit_portable_interface(int argc, void *argv[])
         (float *) argv[12],
         (int *) argv[13],
         (float *) argv[14],
-        (int *) argv[15]);
+        (int *) argv[15],
+        (int *)argv[16]);
 
 }

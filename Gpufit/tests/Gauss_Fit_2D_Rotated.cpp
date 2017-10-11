@@ -70,7 +70,8 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
                 output_parameters.data(),
                 &output_states,
                 &output_chi_square,
-                &output_n_iterations
+                &output_n_iterations,
+                0
             ) ;
 
     BOOST_CHECK( status == 0 ) ;

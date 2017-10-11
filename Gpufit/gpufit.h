@@ -45,7 +45,8 @@ int gpufit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    int * output_info
 ) ;
 
 char const * gpufit_get_last_error() ;

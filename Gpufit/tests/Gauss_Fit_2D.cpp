@@ -65,7 +65,8 @@ void gauss_fit_2d()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations
+            &output_n_iterations,
+            0
         );
 
     BOOST_CHECK(status == 0);
@@ -91,7 +92,8 @@ void gauss_fit_2d()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations
+            &output_n_iterations,
+            0
         );
 
     BOOST_CHECK(status_with_weights == 0);
@@ -135,7 +137,8 @@ void gauss_fit_2d_large_dataset()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations
+            &output_n_iterations,
+            0
         );
 
     BOOST_CHECK(status == 0);
@@ -161,7 +164,8 @@ void gauss_fit_2d_large_dataset()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations
+            &output_n_iterations,
+            0
         );
 
     BOOST_CHECK(status_with_weights == 0);
