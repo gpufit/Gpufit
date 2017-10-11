@@ -71,8 +71,8 @@ void LMFit::run(float const tolerance, int * output_info)
         if (!fpb_is_set)
             info_.set_fits_per_block(chunk_size_);
 
-        gpu_data.reset(chunk_size_);
         gpu_data.init(
+            chunk_size_,
             ichunk_,
             data_,
             weights_,
