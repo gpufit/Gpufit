@@ -32,35 +32,36 @@ GPUData::GPUData(Info const & info) :
 
 }
 
-void GPUData::reset(int const chunk_size)
-{
-    chunk_size_ = chunk_size;
-
-    set(prev_chi_squares_, 0.f, chunk_size_);
-    set(states_, 0, chunk_size_);
-    set(finished_, 0, chunk_size_);
-}
-
 void GPUData::init
 (
+    int const chunk_size,
     int const chunk_index,
     float const * const data,
     float const * const weights,
     float const * const initial_parameters,
     std::vector<int> const & parameters_to_fit_indices)
 {
+    chunk_size_ = chunk_size;
     chunk_index_ = chunk_index;
+
+    set(prev_chi_squares_, 0.f, chunk_size_);
+    set(states_, 0, chunk_size_);
+    set(finished_, 0, chunk_size_);
+
     write(
         data_,
         &data[chunk_index_*info_.max_chunk_size_*info_.n_points_],
         chunk_size_*info_.n_points_);
+    
     if (info_.use_weights_)
         write(weights_, &weights[chunk_index_*info_.max_chunk_size_*info_.n_points_],
                 chunk_size_*info_.n_points_);
+    
     write(
         parameters_,
         &initial_parameters[chunk_index_*info_.max_chunk_size_*info_.n_parameters_],
         chunk_size_ * info_.n_parameters_);
+    
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
     set(lambdas_, 0.001f, chunk_size_);

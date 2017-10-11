@@ -65,9 +65,9 @@ class GPUData
 public:
     GPUData(Info const & info);
 
-    void reset(int const chunk_size);
     void init
     (
+        int const chuk_size,
         int const chunk_index,
         float const * data,
         float const * weights,
