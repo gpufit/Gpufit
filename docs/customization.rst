@@ -10,14 +10,14 @@ For each function and estimator there exists a separate file. Therefore, to add 
 CUDA header file containing the new model or estimator function must be created and included in the library.
 
 Please note, that in order to add a model function or estimator, it is necessary to rebuild the Gpufit library 
-from source.  In future releases of Gpufit, it may be possible to include new fit functions or estimators at runtime.
+from source. In future releases of Gpufit, it may be possible to include new fit functions or estimators at runtime.
 
 
 Add a new fit model function
 ----------------------------
 
 To add a new fit model, the model function itself as well as analytic expressions for its partial derivatives 
-must to be known.  A function calculating the values of the model as well as a function calculating the 
+must to be known. A function calculating the values of the model as well as a function calculating the
 values of the partial derivatives of the model, with respect to the model parameters and possible grid 
 coordinates, must be implemented.
 
@@ -26,28 +26,24 @@ of model parameters must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
-1.	Define an additional model ID in file gpufit.h_
-2.  Implement a CUDA device function within a newly created .cuh file according to the following template.
+1. Define an additional model ID in file gpufit.h_
+2. Implement a CUDA device function within a newly created .cuh file according to the following template.
 
 .. code-block:: cuda
 
-    __device__ void ... (                                       // function name
+    __device__ void ... (               // ... = function name
         float const * parameters,
         int const n_fits,
         int const n_points,
         int const n_parameters,
         float * values,
         float * derivatives,
+        int const point_index,
+        int const fit_index,
         int const chunk_index,
         char * user_info,
         std::size_t const user_info_size)
     {
-        ///////////////////////////// indices /////////////////////////////
-        int const n_fits_per_block = blockDim.x / n_points;
-        int const fit_in_block = threadIdx.x / n_points;
-        int const point_index = threadIdx.x - (fit_in_block*n_points);
-        int const fit_index = blockIdx.x*n_fits_per_block + fit_in_block;
-
         ///////////////////////////// values //////////////////////////////
         float* current_value = &values[fit_index*n_points];
         float const * current_parameters = &parameters[fit_index*n_parameters];
@@ -74,13 +70,13 @@ function values and partial derivative values of the model function for a partic
 
     if (model_id == GAUSS_1D)
         calculate_gauss1d
-            (parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+            (parameters, n_fits, n_points, n_parameters, values, derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
             .
             .
             .
     else if (model_id == ...)       // model ID
         ...                         // function name
-            (parameters, n_fits, n_points, n_parameters, values, derivatives, chunk_index, user_info, user_info_size);
+            (parameters, n_fits, n_points, n_parameters, values, derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
 
 Compare model_id with the defined model of the new model and call the calculate model values function of your model.
 
@@ -106,7 +102,7 @@ Compare model_id with the defined model of the new model and call the calculate 
 Add a new fit estimator
 ------------------------
 
-To extend |GF| by additional estimators, three CUDA device functions must be defined and integrated.  The sections requiring modification are 
+To extend |GF| by additional estimators, three CUDA device functions must be defined and integrated. The sections requiring modification are
 the functions which calculate the estimator function values, and its gradient and hessian values. Also, a new estimator ID must be defined.
 Detailed step by step instructions for adding an additional estimator is given below.
 
@@ -117,7 +113,7 @@ Detailed step by step instructions for adding an additional estimator is given b
 .. code-block:: cuda
 
     ///////////////////////////// Chi-square /////////////////////////////
-    __device__ void ... (           // function name Chi-square
+    __device__ void ... (           // ... = function name Chi-square
         volatile float * chi_square,
         int const point_index,
         float const * data,
@@ -131,7 +127,7 @@ Detailed step by step instructions for adding an additional estimator is given b
     }
 
     ////////////////////////////// gradient //////////////////////////////
-    __device__ void ... (           // function name gradient
+    __device__ void ... (           // ... = function name gradient of Chi-square
         volatile float * gradient,
         int const point_index,
         int const parameter_index,
@@ -142,7 +138,8 @@ Detailed step by step instructions for adding an additional estimator is given b
         char * user_info,
         std::size_t const user_info_size)
     {
-        gradient[point_index] = ... ;            // formula calculating summands of the gradient of Chi-square
+        gradient[point_index] = ... ;           // formula calculating summands of the gradient of Chi-square
+                                                // model derivates are stored in derivative[parameter_index]
     }
 
     ////////////////////////////// hessian ///////////////////////////////
@@ -171,6 +168,8 @@ and the hessian values of the estimator given. For a concrete example, see lse.c
     #include "....cuh"              // filename
 
 4. Add an if branch in 3 CUDA global functions in the file cuda_kernels.cu_
+
+For calculation of Chi-squares.
 
     .. code-block:: cuda
 
@@ -209,6 +208,7 @@ and the hessian values of the estimator given. For a concrete example, see lse.c
         .
         .
 
+For calculation of the gradients of Chi-square.
 
     .. code-block:: cuda
 
@@ -248,6 +248,8 @@ and the hessian values of the estimator given. For a concrete example, see lse.c
         .
         .
         .
+
+For the calculation of the Hessian.
 
     .. code-block:: cuda
 
@@ -293,7 +295,7 @@ and the hessian values of the estimator given. For a concrete example, see lse.c
 Future releases
 ---------------
 
-A disadvantage of the Gpufit library, when compared with established CPU-based curve fitting packages, 
-is that in order to add or modify a fit model function or a fit estimator, the library must be recompiled.  
+A current disadvantage of the Gpufit library, when compared with established CPU-based curve fitting packages,
+is that in order to add or modify a fit model function or a fit estimator, the library must be recompiled.
 We anticipate that this limitation can be overcome in future releases of the library, by employing 
 run-time compilation of the CUDA code.

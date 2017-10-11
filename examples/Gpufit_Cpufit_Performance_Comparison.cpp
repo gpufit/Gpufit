@@ -217,16 +217,23 @@ int main(int argc, char * argv[])
 
 
     // check for CUDA availability
+	bool const cuda_available = gpufit_cuda_available() != 0;
+	if (!gpufit_cuda_available())
+	{
+		std::cout << "CUDA not available" << std::endl;
+	}
+
+	// check for CUDA runtime and driver
     int cuda_runtime_version = 0;
     int cuda_driver_version = 0;
-    bool const version_available = gpufit_get_cuda_version(&cuda_runtime_version, &cuda_driver_version) != 0;
+    bool const version_available = gpufit_get_cuda_version(&cuda_runtime_version, &cuda_driver_version) == STATUS_OK;
     int const cuda_runtime_major = cuda_runtime_version / 1000;
     int const cuda_runtime_minor = cuda_runtime_version % 1000 / 10;
     int const cuda_driver_major = cuda_driver_version / 1000;
     int const cuda_driver_minor = cuda_driver_version % 1000 / 10;
 
     bool do_gpufits = false;
-    if (version_available)
+    if (cuda_available & version_available)
     {
         std::cout << "CUDA runtime version: ";
         std::cout << cuda_runtime_major << "." << cuda_runtime_minor << std::endl;

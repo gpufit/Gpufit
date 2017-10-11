@@ -9,26 +9,26 @@ and open source.
 
 Optimization algorithms are ubiquitous tools employed in many field of science 
 and technology. One such algorithm for numerical, non-linear optimization is the 
-Levenberg-Marquardt algorithm (LMA).  The LMA combines elements of the method of 
+Levenberg-Marquardt algorithm (LMA). The LMA combines elements of the method of 
 steepest descent and Newton's method, and has become a standard algorithm for 
 least-squares fitting.
 
 Although the LMA is, in itself, an efficient optimization algorithm, 
 applications requiring many iterations of this procedure may encounter 
-limitations due to the sheer number of calculations involved.  The time required 
+limitations due to the sheer number of calculations involved. The time required 
 for the convergence of a fit, or a set of fits, can determine an application's 
 feasibility, e.g. in the context of real-time data processing and feedback 
-systems.  Alternatively, in the case of very large datasets, the time required 
+systems. Alternatively, in the case of very large datasets, the time required 
 to solve a particular optimization problem may prove impractical.
 
 In recent years, advanced graphics processing units (GPUs) and the development 
 of general purpose GPU programming have enabled fast and parallelized computing 
-by shifting calculations from the CPU to the GPU.  The large number of 
+by shifting calculations from the CPU to the GPU. The large number of 
 independent computing units available on a modern GPU enables the rapid 
 execution of many instructions in parallel, with an overall computation power 
-far exceeding that of a CPU.  Languages such as CUDA C and OpenCL allow GPU-
+far exceeding that of a CPU. Languages such as CUDA C and OpenCL allow GPU-
 based programs to be developed in a manner similar to conventional software, but 
-with an inherently parallelized structure.  These developments have led to the 
+with an inherently parallelized structure. These developments have led to the 
 creation of new GPU-accelerated tools, such as the Gpufit.
 
 This manual describes how to install and build the Gpufit library and its 
@@ -53,35 +53,35 @@ Hardware requirements
 ---------------------
 
 Because the fit algorithm is implemented in CUDA C, a CUDA_-compatible graphics
-card is required to run Gpufit.  The minimum supported compute capability is 
-2.0.  More advanced GPU hardware will result in higher fitting performance.
+card is required to run Gpufit. The minimum supported compute capability is 
+2.0. More advanced GPU hardware will result in higher fitting performance.
 
 Software requirements
 ---------------------
 
 In addition to a compatible GPU, the graphics card driver installed on the 
 host computer must be compatible with the version of the CUDA toolkit which 
-was used to compile Gpufit.  This may present an issue for older graphics 
+was used to compile Gpufit. This may present an issue for older graphics 
 cards or for computers running outdated graphics drivers.
 
-At the time of its initial release, Gpufit was compiled with CUDA toolkit 
-version 8.0.  Therefore, the Nvidia graphics driver installed on the host PC 
+At the time of its initial release in 2017, Gpufit was compiled with CUDA toolkit
+version 8.0. Therefore, the Nvidia graphics driver installed on the host PC 
 must be at least version 367.48 (released July 2016) in order to be compatible
 with the binary files generated in this build.
 
-When compatibility issues arise, there are two possible solutions.  The best 
+When compatibility issues arise, there are two possible solutions. The best 
 option is to update the graphics driver to a version which is compatible with
-the CUDA toolkit used to build Gpufit.  The second option is to re-compile 
+the CUDA toolkit used to build Gpufit. The second option is to re-compile 
 Gpufit from source code, using an earlier version of the CUDA toolkit which is 
-compatible with the graphics driver in question.  However, this solution is 
+compatible with the graphics driver in question. However, this solution is 
 likely to result in slower performance of the Gpufit code, since older versions 
 of the CUDA toolkit are not as efficient.
 
-Note that all CUDA-supported graphics cards should be compatible with 
-CUDA toolkit version 6.5.  This is the last version of CUDA which supported 
-GPUs with compute capability 1.x.  In other words, an updated Nvidia graphics
+Note that all CUDA-supported graphics cards should be compatible with
+CUDA toolkit version 6.5. This is the last version of CUDA which supported 
+GPUs with compute capability 1.x. In other words, an updated Nvidia graphics
 driver should be available for all CUDA-enabled GPUs which is compatible with
-toolkit version 6.5.  
+toolkit version 6.5. 
 
 If you are unsure if your graphics card is CUDA-compatible, a lists of CUDA
 supported GPUs can be found `here <http://developer.nvidia.com/cuda-gpus>`_.

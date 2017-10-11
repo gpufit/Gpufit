@@ -64,32 +64,29 @@ __device__ void calculate_gauss2delliptic(
     int const n_parameters,
     float * values,
     float * derivatives,
+    int const point_index,
+    int const fit_index,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
 {
     int const n_points_x = sqrt((float)n_points);
-    int const n_fits_per_block = blockDim.x / n_points;
-    int const fit_in_block = threadIdx.x / n_points;
-    int const point_index = threadIdx.x - (fit_in_block*n_points);
-    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - point_index_y * n_points_x;
 
-    float* current_value = &values[fit_index * n_points];
-    float const * p = &parameters[fit_index * n_parameters];
+    float const * p = parameters;
 
     float const argx = (point_index_x - p[1]) * (point_index_x - p[1]) / (2 * p[3] * p[3]);
     float const argy = (point_index_y - p[2]) * (point_index_y - p[2]) / (2 * p[4] * p[4]);
     float const ex = exp(-(argx + argy));
-    current_value[point_index] = p[0] * ex + p[5];
+    values[point_index] = p[0] * ex + p[5];
 
     // derivatives
 
-    float * current_derivative = &derivatives[fit_index * n_points * n_parameters + point_index];
+    float * current_derivative = derivatives + point_index;
 
-    current_derivative[0] = ex;
+    current_derivative[0 * n_points] = ex;
     current_derivative[1 * n_points] = p[0] * ex * (point_index_x - p[1]) / (p[3] * p[3]);
     current_derivative[2 * n_points] = p[0] * ex * (point_index_y - p[2]) / (p[4] * p[4]);
     current_derivative[3 * n_points] = p[0] * ex * (point_index_x - p[1]) * (point_index_x - p[1]) / (p[3] * p[3] * p[3]);

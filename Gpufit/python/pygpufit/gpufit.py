@@ -8,7 +8,7 @@
 
 import os
 import time
-from ctypes import cdll, POINTER, c_int, c_float, c_char, c_char_p, c_size_t
+from ctypes import cdll, POINTER, byref, c_int, c_float, c_char, c_char_p, c_size_t
 import numpy as np
 
 # define library loader (actual loading is lazy)
@@ -31,6 +31,11 @@ cuda_available_func = lib.gpufit_cuda_available
 cuda_available_func.restype = c_int
 cuda_available_func.argtypes = None
 
+# gpufit_get_cuda_version function in the dll
+get_cuda_version_func = lib.gpufit_get_cuda_version
+get_cuda_version_func.restype = c_int
+get_cuda_version_func.argtypes = [POINTER(c_int), POINTER(c_int)]
+
 
 class ModelID():
 
@@ -46,6 +51,12 @@ class EstimatorID():
 
     LSE = 0
     MLE = 1
+
+
+class Status():
+
+    Ok = 0
+    Error = 1
 
 
 def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_iterations=None, \
@@ -176,7 +187,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
 
 
     # check status
-    if status != 0:
+    if status != Status.Ok:
         # get error from last error and raise runtime error
         error_message = error_func()
         raise RuntimeError('status = {}, message = {}'.format(status, error_message))
@@ -187,15 +198,36 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
 
 def get_last_error():
     """
-
-    :return:
+    :return: Error message of last error.
     """
     return error_func()
 
 
 def cuda_available():
     """
-
     :return: True if CUDA is available, False otherwise
     """
     return cuda_available_func() != 0
+
+
+def get_cuda_version():
+    """
+    :return: Tuple with runtime and driver version as integers.
+    """
+    runtime_version = c_int(-1)
+    driver_version = c_int(-1)
+    status = get_cuda_version_func(byref(runtime_version), byref(driver_version))
+
+    # check status
+    if status != Status.Ok:
+        # get error from last error and raise runtime error
+        error_message = error_func()
+        raise RuntimeError('status = {}, message = {}'.format(status, error_message))
+
+    # decode versions
+    runtime_version = runtime_version.value
+    runtime_version = (runtime_version // 1000, runtime_version % 1000 // 10)
+    driver_version = driver_version.value
+    driver_version = (driver_version // 1000, driver_version % 1000 // 10)
+
+    return runtime_version, driver_version

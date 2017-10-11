@@ -47,13 +47,13 @@ void gauss_fit_2d_example()
 
 
 	// number of fits, fit points and parameters
-	size_t const number_fits = 10000;
-	size_t const size_x = 20;
+	size_t const number_fits = 1;
+	size_t const size_x = 50;
 	size_t const number_points = size_x * size_x;
 	size_t const number_parameters = 5;
 
 	// true parameters (amplitude, center x position, center y position, width, offset)
-	std::vector< float > true_parameters{ 10.f, 9.5f, 9.5f, 3.f, 10.f}; 
+	std::vector< float > true_parameters{ 10.f, 15.5f, 15.5f, 3.f, 10.f}; 
 
 	// initialize random number generator
 	std::mt19937 rng;

@@ -19,7 +19,7 @@ A flowchart of the implementation of the Levenberg-Marquardt algorithm is given 
 Performance comparison to other GPU benchmarks
 ----------------------------------------------
 
-Using the bundled application to estimate the fitting speed per second of 10 million fits for various CUDA capable
+Using the bundled application (initial release created with CUDA runtime 8.0) to estimate the fitting speed per second of 10 million fits for various CUDA capable
 graphics cards of various architectures (on different computers with different versions of graphics drivers) we can
 compare to the results of Passmark G3D. By and large, the results seem to correlate, i.e. a high Passmark G3D score
 also relates to a high Gpufit fitting speed.

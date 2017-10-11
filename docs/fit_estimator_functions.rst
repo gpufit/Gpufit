@@ -9,7 +9,7 @@ Least squares estimator
 +++++++++++++++++++++++
 
 The least squares estimator computes the weighted sum of the squared deviation between the data values and the model at
-the positions of the data points.  The ID for this estimator is ``LSE``. It's implemented in lse.cuh_.
+the positions of the data points. The ID for this estimator is ``LSE``. It's implemented in lse.cuh_.
 
 Least squares estimation is a common method, and the standard Levenberg-Marquardt algorithm described by Marquardt makes 
 use of minimal least squares. The estimator is described as follows.
@@ -51,4 +51,4 @@ The estimator is described as follows.
 
 :`\vec{p}`: Actual model function parameters
 	
-Note that this estimator does not provide any means to weight the data values.  Rather, noise in the data is assumed to be purely Poissonian.
+Note that this estimator does not provide any means to weight the data values. Rather, noise in the data is assumed to be purely Poissonian.

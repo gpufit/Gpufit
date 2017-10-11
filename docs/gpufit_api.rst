@@ -4,7 +4,7 @@
 Gpufit API description
 ======================
 
-The Gpufit source code compiles to a dynamic-link library (DLL), providing a C interface.  
+The Gpufit source code compiles to a dynamic-link library (DLL), providing a C interface.
 In the sections below, the C interface and its arguments are described in detail.
 
 .. _c-interface:
@@ -17,7 +17,7 @@ The C interface is defined in the Gpufit header file: gpufit.h_.
 gpufit()
 ++++++++
 
-This is the main fit function.  A single call to the *gpufit()* function executes a block of *N* fits.  
+This is the main fit function. A single call to the *gpufit()* function executes a block of *N* fits.
 The inputs to *gpufit()* are scalars and pointers to arrays, and the outputs are also array pointers.
 
 The inputs to the *gpufit()* function are:
@@ -84,9 +84,9 @@ Description of input parameters
 
 :data: Pointer to data values
 
-    A pointer to the data values.  The data must be passed in as a 1D array of floating point values, with the data
-    for each fit concatenated one after another.  In the case of multi-dimensional data, the data must be flattened
-    to a 1D array.  The number of elements in the array is equal to the product n_fits * n_points.
+    A pointer to the data values. The data must be passed in as a 1D array of floating point values, with the data
+    for each fit concatenated one after another. In the case of multi-dimensional data, the data must be flattened
+    to a 1D array. The number of elements in the array is equal to the product n_fits * n_points.
 
     :type: float *
     :length: n_points * n_fits
@@ -96,11 +96,11 @@ Description of input parameters
     The weights array includes unique weighting values for each fit. It is used only by the least squares estimator (LSE).
     The size of the weights array and its organization is identical to that for the data array.
     For statistical weighting, this parameter should be set equal to the inverse of the variance of the data
-    (i.e. weights = 1.0 / variance ).  The weights array is an optional input.
+    (i.e. weights = 1.0 / variance ). The weights array is an optional input.
 
     :type: float *
     :length: n_points * n_fits
-    :special: Use a NULL pointer to indicate that no weights are provided.  In this case all data values will be weighted equally.
+    :special: Use a NULL pointer to indicate that no weights are provided. In this case all data values will be weighted equally.
 
 :model_id: Model ID
 
@@ -119,7 +119,7 @@ Description of input parameters
 
 :initial_parameters: Pointer to initial parameter values
 
-    A 1D array containing the initial model parameter values for each fit.  If the number of parameters of the fit model
+    A 1D array containing the initial model parameter values for each fit. If the number of parameters of the fit model
     is defined by *n_parameters*, then the size of this array is *n_fits * n_parameters*.
 	
     The parameter values for each fit are concatenated one after another. If there are *M* parameters per fit,
@@ -131,8 +131,8 @@ Description of input parameters
 
 :tolerance: Fit tolerance threshold
 
-    The fit tolerance determines when the fit has converged.  After each fit iteration, the change in the absolute value
-    of :math:`\chi^2` is calculated.  The fit has converged when one of two conditions are met.  First, if the change
+    The fit tolerance determines when the fit has converged. After each fit iteration, the change in the absolute value
+    of :math:`\chi^2` is calculated. The fit has converged when one of two conditions are met. First, if the change
     in the absolute value of :math:`\chi^2` is less than the tolerance value, the fit has converged.
     Alternatively, if the change in :math:`\chi^2` is less than the product of tolerance and the absolute value of
     :math:`\chi^2` [tolerance * abs(:math:`\chi^2`)], then the fit has converged.
@@ -146,7 +146,7 @@ Description of input parameters
 
 :max_n_iterations: Maximum number of iterations
 
-    The maximum number of fit iterations permitted.  If the fit has not converged after this number of iterations,
+    The maximum number of fit iterations permitted. If the fit has not converged after this number of iterations,
     the fit returns with a status value indicating that the maximum number of iterations was reached.
 
     :type: int
@@ -155,8 +155,8 @@ Description of input parameters
 
     This is an array of ones or zeros, with a length equal to the number of parameters of the fit model function.
     Each entry in the array is a flag which determines whether or not the corresponding model parameter will be held
-    constant during the fit.  To allow a parameter to vary during the fit, set the entry in *parameters_to_fit* equal
-    to one.  To hold the value constant, set the entry to zero.
+    constant during the fit. To allow a parameter to vary during the fit, set the entry in *parameters_to_fit* equal
+    to one. To hold the value constant, set the entry to zero.
 	
     An array of ones, e.g. [1,1,1,1,1,...] will allow all parameters to vary during the fit.
 
@@ -182,10 +182,10 @@ Description of input parameters
 
 :user_info: Pointer to user information data
 
-    This parameter is intended to provide flexibility to the Gpufit interface.  The user information data is a generic
+    This parameter is intended to provide flexibility to the Gpufit interface. The user information data is a generic
     block of memory which is passed in to the *gpufit()* function, and which is accessible in shared GPU memory by the
-    fit model functions.  Possible uses for the user information data is to pass in value for independent variables
-    (e.g. X values) or to supply additional data to the fit model function.  For a coded example which makes use of
+    fit model functions. Possible uses for the user information data is to pass in value for independent variables
+    (e.g. X values) or to supply additional data to the fit model function. For a coded example which makes use of
     the user information data, see :ref:`linear-regression-example`. The user information data is an optional parameter
     - if no user information is required this parameter may be set to NULL.
 
@@ -200,7 +200,7 @@ Description of output parameters
 
 :output_parameters: Pointer to array of best-fit model parameters
 
-    For each fit, this array contains the best-fit model parameters.  The array is organized identically to the input
+    For each fit, this array contains the best-fit model parameters. The array is organized identically to the input
     parameters array.
 
     :type: float *
@@ -208,7 +208,7 @@ Description of output parameters
 
 :output_states: Pointer to array of fit result state IDs
 
-    For each fit the result of the fit is indicated by a state ID.  The state ID codes are defined below.
+    For each fit the result of the fit is indicated by a state ID. The state ID codes are defined below.
     A state ID of 0 indicates that the fit converged successfully.
 
     As defined in gpufit.h_:
@@ -224,7 +224,7 @@ Description of output parameters
 
 :output_chi_squares: Pointer to array of :math:`\chi^2` values
 
-    For each fit, this array contains the final :math:`\chi^2` value.
+    For each fit, this array contains the final :math:`\chi^2` value, as returned by the estimator function (see :ref:`estimator-functions`). 
 
     :type: float *
     :length: n_fits
@@ -257,7 +257,7 @@ Description of parameters
 
 :argc: The length of the argv pointer array
 
-:argv: Array of pointers to *gpufit* parameters, as defined above.  For reference, the type of each element of the *argv* array is listed below.
+:argv: Array of pointers to *gpufit* parameters, as defined above. For reference, the type of each element of the *argv* array is listed below.
 
 	:argv[0]: Number of fits
 	
@@ -339,7 +339,7 @@ A function that returns a string representation of the last error.
 
     'CUDA driver version is insufficient for CUDA runtime version'
         The graphics driver version installed on the computer is not supported by the CUDA Toolkit version which was used
-        to build Gpufit.dll.  Update the graphics driver or re-build Gpufit using a compatible CUDA Toolkit version.
+        to build Gpufit.dll. Update the graphics driver or re-build Gpufit using a compatible CUDA Toolkit version.
 
 gpufit_cuda_available()
 +++++++++++++++++++++++
@@ -351,7 +351,8 @@ A function that calls a simple CUDA function to check if CUDA is available.
     int gpufit_cuda_available();
 
 :return value: Returns 0 if CUDA is not available (no suitable device found, or driver version insufficient).
-               Use the function *gpufit_get_last_error()* to check the error message. Returns 1 if CUDA is available and CUDA runtime version and driver version are compatible.
+               Use the function *gpufit_get_last_error()* to check the error message.
+               Returns 1 if CUDA is available.
                
 gpufit_get_cuda_version()
 +++++++++++++++++++++++++
@@ -363,15 +364,18 @@ installed CUDA driver version in *driver_version*.
 
     int gpufit_get_cuda_version(int * runtime_version, int * driver_version);
 
-:runtime_version: Pointer to the CUDA runtime version number (is 0 if the CUDA runtime version is incompatible with the installed CUDA driver version)
-        
+:runtime_version: Pointer to the CUDA runtime version number. Format is Minor version times 10 plus Major version times 1000.
+                  (is 0 if the CUDA runtime version is incompatible with the installed CUDA driver version)
 
-:driver_version: Pointer to the CUDA driver version number (is 0 if no CUDA enabled graphics card was detected)
+:driver_version: Pointer to the CUDA driver version number. Format is Minor version times 10 plust Major version times 1000.
+                 (is 0 if no CUDA enabled graphics card was detected)
 
-:return value: Returns 0 if an error occured during collecting of the version information. Use the function
-               *gpufit_get_last_error()* to check the error message. Returns 1 if collecting of the version
-               information was successful.
+:return value: Status code
 
+    The return value of the function call indicates whether an error occurred.
+
+    :0: No error
+    :-1: Error. Use the function *gpufit_get_last_error()* to check the error message.
 
 
 

@@ -109,13 +109,13 @@ int gpufit_get_cuda_version(int * runtime_version, int * driver_version)
     {
         cudaRuntimeGetVersion(runtime_version);
         cudaDriverGetVersion(driver_version);
-        return 1;
+        return STATUS_OK;
     }
     catch (std::exception & exception)
     {
         last_error = exception.what();
 
-        return 0;
+        return STATUS_ERROR;
     }
 }
 

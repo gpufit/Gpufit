@@ -13,9 +13,9 @@ GPUData::GPUData(Info const & info) :
     parameters_to_fit_indices_( info_.n_parameters_to_fit_ ),
     user_info_( info_.user_info_size_ ),
 
-    chi_squares_( info_.max_chunk_size_ ),
+    chi_squares_( info_.max_chunk_size_ * info_.n_blocks_per_fit_),
     prev_chi_squares_( info_.max_chunk_size_ ),
-    gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ ),
+    gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_),
     hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
     deltas_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
 
@@ -25,7 +25,7 @@ GPUData::GPUData(Info const & info) :
     lambdas_( info_.max_chunk_size_ ),
     states_( info_.max_chunk_size_ ),
     finished_( info_.max_chunk_size_ ),
-    iteration_falied_(info_.max_chunk_size_),
+    iteration_failed_(info_.max_chunk_size_),
     all_finished_( 1 ),
     n_iterations_( info_.max_chunk_size_ )
 {
@@ -36,28 +36,9 @@ void GPUData::reset(int const chunk_size)
 {
     chunk_size_ = chunk_size;
 
-    set(data_, 0.f, chunk_size_ * info_.n_points_);
-    if (info_.use_weights_)
-        set(weights_, 0.f, chunk_size_ * info_.n_points_);
-    set(parameters_, 0.f, chunk_size_ * info_.n_parameters_);
-    set(prev_parameters_, 0.f, chunk_size_ * info_.n_parameters_);
-    set(parameters_to_fit_indices_, 0, info_.n_parameters_to_fit_);
-
-    set(chi_squares_, 0.f, chunk_size_);
     set(prev_chi_squares_, 0.f, chunk_size_);
-    set(gradients_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
-    set(hessians_, 0.f, chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
-    set(deltas_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
-
-    set(values_, 0.f, chunk_size_*info_.n_points_);
-    set(derivatives_, 0.f, chunk_size_ * info_.n_points_ * info_.n_parameters_);
-
-    set(lambdas_, 0.f, chunk_size_);
     set(states_, 0, chunk_size_);
     set(finished_, 0, chunk_size_);
-    set(iteration_falied_, 0, chunk_size_);
-    set(all_finished_, 0, 1);
-    set(n_iterations_, 0, chunk_size_);
 }
 
 void GPUData::init

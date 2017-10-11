@@ -12,6 +12,10 @@ import pygpufit.gpufit as gf
 
 if __name__ == '__main__':
 
+    # cuda available checks
+    print('CUDA available: {}'.format(gf.cuda_available()))
+    print('CUDA versions runtime: {}, driver: {}'.format(*gf.get_cuda_version()))
+
     # number of fits, number of points per fit
     number_fits = 10
     number_points = 10

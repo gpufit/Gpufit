@@ -64,43 +64,40 @@ __device__ void calculate_cauchy2delliptic(
     int const n_parameters,
     float * values,
     float * derivatives,
+    int const point_index,
+    int const fit_index,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
 {
     int const n_points_x = sqrt((float)n_points);
-    int const n_fits_per_block = blockDim.x / n_points;
-    int const fit_in_block = threadIdx.x / n_points;
-    int const point_index = threadIdx.x - (fit_in_block*n_points);
-    int const fit_index = blockIdx.x*n_fits_per_block + fit_in_block;
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - (point_index_y*n_points_x);
 
-    float* current_value = &values[fit_index*n_points];
-    float const * p = &parameters[fit_index*n_parameters];
+    float const * p = parameters;
     
     float const argx  = ((p[1] - point_index_x) / p[3]) *((p[1] - point_index_x) / p[3]) + 1;
     float const argy = ((p[2] - point_index_y) / p[4]) *((p[2] - point_index_y) / p[4]) + 1;
-    current_value[point_index] = p[0] * 1 / argx * 1 / argy + p[5];
+    values[point_index] = p[0] * 1 / argx * 1 / argy + p[5];
 
     //////////////////////////////////////////////////////////////////////////////
 
-    float * current_derivative = &derivatives[fit_index * n_points*n_parameters];
+    float * current_derivative = derivatives + point_index;
 
-    current_derivative[0 * n_points + point_index]
+    current_derivative[0 * n_points]
         = 1 / (argx*argy);
-    current_derivative[1 * n_points + point_index]
+    current_derivative[1 * n_points]
         = -2 * p[0] * (p[1] - point_index_x) * 1 / (p[3] * p[3] * argx*argx*argy);
-    current_derivative[2 * n_points + point_index]
+    current_derivative[2 * n_points]
         = -2 * p[0] * (p[2] - point_index_y) * 1 / (p[4] * p[4] * argy*argy*argx);
-    current_derivative[3 * n_points + point_index]
+    current_derivative[3 * n_points]
         = 2 * p[0] * (p[1] - point_index_x) * (p[1] - point_index_x)
         / (p[3] * p[3] * p[3] * argx * argx * argy);
-    current_derivative[4 * n_points + point_index]
+    current_derivative[4 * n_points]
         = 2 * p[0] * (p[2] - point_index_y) * (p[2] - point_index_y) 
         / (p[4] * p[4] * p[4] * argy * argy * argx);
-    current_derivative[5 * n_points + point_index]
+    current_derivative[5 * n_points]
         = 1;
 }
 

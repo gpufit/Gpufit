@@ -16,7 +16,7 @@ void LMFitCUDA::solve_equation_system()
         gpu_data_.hessians_,
         gpu_data_.lambdas_,
         info_.n_parameters_to_fit_,
-        gpu_data_.iteration_falied_,
+        gpu_data_.iteration_failed_,
         gpu_data_.finished_,
         info_.n_fits_per_block_);
     CUDA_CHECK_STATUS(cudaGetLastError());
@@ -94,10 +94,10 @@ void LMFitCUDA::calc_curve_values()
 	dim3  threads(1, 1, 1);
 	dim3  blocks(1, 1, 1);
 
-	threads.x = info_.n_points_ * info_.n_fits_per_block_;
-	threads.y = 1;
-	blocks.x = n_fits_ / info_.n_fits_per_block_;
-	blocks.y = 1;
+	threads.x = info_.n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
+    if (info_.n_blocks_per_fit_ > 1)
+        threads.x += info_.n_points_ % threads.x;
+	blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
 	cuda_calc_curve_values << < blocks, threads >> >(
 		gpu_data_.parameters_,
@@ -108,6 +108,7 @@ void LMFitCUDA::calc_curve_values()
 		gpu_data_.values_,
 		gpu_data_.derivatives_,
 		info_.n_fits_per_block_,
+        info_.n_blocks_per_fit_,
 		info_.model_id_,
 		gpu_data_.chunk_index_,
 		gpu_data_.user_info_,
@@ -122,30 +123,46 @@ void LMFitCUDA::calc_chi_squares()
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
 
-    int const shared_size
-        = sizeof(float)
-        * info_.power_of_two_n_points_
-        * info_.n_fits_per_block_;
+    threads.x = info_.power_of_two_n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
+    blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-    threads.x = info_.power_of_two_n_points_*info_.n_fits_per_block_;
-    threads.y = 1;
-    blocks.x = n_fits_ / info_.n_fits_per_block_;
-    blocks.y = 1;
+    int const shared_size = sizeof(float) * threads.x;
 
     cuda_calculate_chi_squares <<< blocks, threads, shared_size >>>(
         gpu_data_.chi_squares_,
         gpu_data_.states_,
-        gpu_data_.iteration_falied_,
-        gpu_data_.prev_chi_squares_,
         gpu_data_.data_,
         gpu_data_.values_,
         gpu_data_.weights_,
         info_.n_points_,
+        n_fits_,
         info_.estimator_id_,
         gpu_data_.finished_,
         info_.n_fits_per_block_,
+        info_.n_blocks_per_fit_,
         gpu_data_.user_info_,
         info_.user_info_size_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
+
+    threads.x = std::min(n_fits_, 256);
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+
+    if (info_.n_blocks_per_fit_ > 1)
+    {
+        cuda_sum_chi_square_subtotals <<< blocks, threads >>> (
+            gpu_data_.chi_squares_,
+            info_.n_blocks_per_fit_,
+            n_fits_,
+            gpu_data_.finished_);
+        CUDA_CHECK_STATUS(cudaGetLastError());
+    }
+
+    cuda_check_fit_improvement <<< blocks, threads >>>(
+        gpu_data_.iteration_failed_,
+        gpu_data_.chi_squares_,
+        gpu_data_.prev_chi_squares_,
+        n_fits_,
+        gpu_data_.finished_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 
     cudaDeviceSynchronize();
@@ -156,15 +173,10 @@ void LMFitCUDA::calc_gradients()
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
 
-    int const shared_size
-        = sizeof(float)
-        * info_.power_of_two_n_points_
-        * info_.n_fits_per_block_;
+    threads.x = info_.power_of_two_n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
+    blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-    threads.x = info_.power_of_two_n_points_*info_.n_fits_per_block_;
-    threads.y = 1;
-    blocks.x = n_fits_ / info_.n_fits_per_block_;
-    blocks.y = 1;
+    int const shared_size = sizeof(float) * threads.x;
 
     cuda_calculate_gradients <<< blocks, threads, shared_size >>>(
         gpu_data_.gradients_,
@@ -173,16 +185,34 @@ void LMFitCUDA::calc_gradients()
         gpu_data_.derivatives_,
         gpu_data_.weights_,
         info_.n_points_,
+        n_fits_,
         info_.n_parameters_,
         info_.n_parameters_to_fit_,
         gpu_data_.parameters_to_fit_indices_,
         info_.estimator_id_,
         gpu_data_.finished_,
-        gpu_data_.iteration_falied_,
+        gpu_data_.iteration_failed_,
         info_.n_fits_per_block_,
+        info_.n_blocks_per_fit_,
         gpu_data_.user_info_,
         info_.user_info_size_);
     CUDA_CHECK_STATUS(cudaGetLastError());
+
+    if (info_.n_blocks_per_fit_ > 1)
+    {
+        int const gradients_size = n_fits_ * info_.n_parameters_to_fit_;
+        threads.x = std::min(gradients_size, 256);
+        blocks.x = int(std::ceil(float(gradients_size) / float(threads.x)));
+
+        cuda_sum_gradient_subtotals <<< blocks, threads >>> (
+            gpu_data_.gradients_,
+            info_.n_blocks_per_fit_,
+            n_fits_,
+            info_.n_parameters_to_fit_,
+            gpu_data_.iteration_failed_,
+            gpu_data_.finished_);
+        CUDA_CHECK_STATUS(cudaGetLastError());
+    }
 
     cudaDeviceSynchronize();
 }
@@ -208,7 +238,7 @@ void LMFitCUDA::calc_hessians()
         info_.n_parameters_to_fit_,
         gpu_data_.parameters_to_fit_indices_,
         info_.estimator_id_,
-        gpu_data_.iteration_falied_,
+        gpu_data_.iteration_failed_,
         gpu_data_.finished_,
         gpu_data_.user_info_,
         info_.user_info_size_);

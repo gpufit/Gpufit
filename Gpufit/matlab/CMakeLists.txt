@@ -44,6 +44,7 @@ set( build_directory "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/matlab" )
 set( package_files
   "${CMAKE_CURRENT_SOURCE_DIR}/EstimatorID.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/gpufit.m"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gpufit_version.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/ModelID.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
 )
