@@ -87,9 +87,8 @@ void LMFit::run(float const tolerance)
         info_.set_fits_per_block(chunk_size_);
 
         t2 = std::chrono::high_resolution_clock::now();
-
-        gpu_data.reset(chunk_size_);
         gpu_data.init(
+            chunk_size_,
             ichunk_,
             data_,
             weights_,
