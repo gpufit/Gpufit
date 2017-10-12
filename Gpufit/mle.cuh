@@ -69,7 +69,7 @@ __device__ void calculate_chi_square_mle(
 /* Description of the calculate_hessian_mle function
 * ==================================================
 *
-* This function calculates the hessian matrix values of the MLE equation. The
+* This function calculates the hessian matrix values of the MLE estimator. The
 * calculation is performed based on previously calculated derivative values.
 * 
 * Parameters:
@@ -87,7 +87,7 @@ __device__ void calculate_chi_square_mle(
 * value: An input vector of fitting curve values.
 *
 * derivative: An input vector of partial derivative values of the fitting
-*             curve for each data point.
+*             curve with respect to the fitting parameters for each data point.
 *
 * weight: An input vector of values for weighting hessian matrix values. It is not
 *         used in this function. It can be used in functions calculating other estimators
@@ -112,7 +112,7 @@ __device__ void calculate_hessian_mle(
     int const parameter_index_j,
     float const * data,
     float const * value,
-    float const * derivatives,
+    float const * derivative,
     float const * weight,
     char * user_info,
     std::size_t const user_info_size)
@@ -120,13 +120,13 @@ __device__ void calculate_hessian_mle(
     *hessian
         += data[point_index]
         / (value[point_index] * value[point_index])
-        * derivatives[parameter_index_i] * derivatives[parameter_index_j];
+        * derivative[parameter_index_i] * derivative[parameter_index_j];
 }
 
 /* Description of the calculate_gradient_mle function
 * ===================================================
 *
-* This function calculates the gradient values of the MLE equation based
+* This function calculates the gradient values of the MLE estimator based
 * on previously calculated derivative values.
 *
 * Parameters:
@@ -142,7 +142,7 @@ __device__ void calculate_hessian_mle(
 * value: An input vector of fitting curve values.
 *
 * derivative: An input vector of partial derivative values of the fitting
-*             curve for each data point.
+*             curve with respect to the fitting parameters for each data point.
 *
 * weight: An input vector of values for weighting gradient vector values. It is not
 *         used in this function. It can be used in functions calculating other estimators

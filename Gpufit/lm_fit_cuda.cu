@@ -9,9 +9,8 @@ void LMFitCUDA::solve_equation_system()
     dim3  blocks(1, 1, 1);
 
     threads.x = info_.n_parameters_to_fit_*info_.n_fits_per_block_;
-    threads.y = 1;
     blocks.x = n_fits_ / info_.n_fits_per_block_;
-    blocks.y = 1;
+
     cuda_modify_step_widths<<< blocks, threads >>>(
         gpu_data_.hessians_,
         gpu_data_.lambdas_,
@@ -35,7 +34,6 @@ void LMFitCUDA::solve_equation_system()
     threads.x = n_equations + 1;
     threads.y = n_equations;
     blocks.x = n_solutions;
-    blocks.y = 1;
 
     //set the size of the shared memory area for each block
     int const shared_size
@@ -61,7 +59,6 @@ void LMFitCUDA::solve_equation_system()
     threads.x = std::min(n_fits_, 256);
     threads.y = 1;
     blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
-    blocks.y = 1;
 
     //update the lm_state_gpu_ variable
     cuda_update_state_after_gaussjordan<<< blocks, threads >>>(
@@ -73,9 +70,8 @@ void LMFitCUDA::solve_equation_system()
     CUDA_CHECK_STATUS(cudaFree(singular_tests));
 
     threads.x = info_.n_parameters_*info_.n_fits_per_block_;
-    threads.y = 1;
     blocks.x = n_fits_ / info_.n_fits_per_block_;
-    blocks.y = 1;
+
     cuda_update_parameters<<< blocks, threads >>>(
         gpu_data_.parameters_,
         gpu_data_.prev_parameters_,
@@ -135,7 +131,6 @@ void LMFitCUDA::calc_chi_squares()
         info_.estimator_id_,
         gpu_data_.finished_,
         info_.n_fits_per_block_,
-        info_.n_blocks_per_fit_,
         gpu_data_.user_info_,
         info_.user_info_size_);
     CUDA_CHECK_STATUS(cudaGetLastError());
@@ -187,7 +182,6 @@ void LMFitCUDA::calc_gradients()
         gpu_data_.finished_,
         gpu_data_.iteration_failed_,
         info_.n_fits_per_block_,
-        info_.n_blocks_per_fit_,
         gpu_data_.user_info_,
         info_.user_info_size_);
     CUDA_CHECK_STATUS(cudaGetLastError());
@@ -217,7 +211,6 @@ void LMFitCUDA::calc_hessians()
     threads.x = info_.n_parameters_to_fit_;
     threads.y = info_.n_parameters_to_fit_;
     blocks.x = n_fits_;
-    blocks.y = 1;
 
     cuda_calculate_hessians <<< blocks, threads >>>(
         gpu_data_.hessians_,
@@ -243,9 +236,7 @@ void LMFitCUDA::evaluate_iteration(int const iteration)
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    threads.y = 1;
     blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
-    blocks.y = 1;
 
     cuda_check_for_convergence<<< blocks, threads >>>(
         gpu_data_.finished_,

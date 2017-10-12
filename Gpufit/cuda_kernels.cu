@@ -36,15 +36,17 @@
 * derivatives: An output vector of concatenated sets of model function partial
 *              derivatives.
 *
-* n_fits_per_block: The number of fits calculated by each threadblock.
+* n_fits_per_block: The number of fits calculated by each thread block.
+*
+* n_blocks_per_fit: The number of thread blocks used to calculate one fit.
 *
 * model_id: The fitting model ID.
 *
-* chunk_index: The chunk index.
+* chunk_index: The data chunk index.
 *
 * user_info: An input vector containing user information.
 *
-* user_info_size: The number of elements in user_info.
+* user_info_size: The size of user_info in bytes.
 *
 * Calling the cuda_calc_curve_values function
 * ===========================================
@@ -55,17 +57,19 @@
 *   dim3  threads(1, 1, 1);
 *   dim3  blocks(1, 1, 1);
 *
-*   threads.x = n_points * n_fits_per_block;
-*   blocks.x = n_fits / n_fits_per_block;
+*   threads.x = n_points * n_fits_per_block / n_blocks_per_fit;
+*   blocks.x = n_fits / n_fits_per_block * n_blocks_per_fit;
 *
 *   cuda_calc_curve_values<<< blocks, threads >>>(
 *       parameters,
+*       n_fits,
 *       n_points,
 *       n_parameters,
 *       finished,
 *       values,
 *       derivatives,
 *       n_fits_per_block,
+*       n_blocks_per_fit,
 *       model_id,
 *       chunk_index,
 *       user_info,
@@ -104,17 +108,17 @@ __global__ void cuda_calc_curve_values(
         return;
 
     if (model_id == GAUSS_1D)
-        calculate_gauss1d(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+        calculate_gauss1d(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == GAUSS_2D)
-        calculate_gauss2d(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+        calculate_gauss2d(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == GAUSS_2D_ELLIPTIC)
-        calculate_gauss2delliptic(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+        calculate_gauss2delliptic(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == GAUSS_2D_ROTATED)
-        calculate_gauss2drotated(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+        calculate_gauss2drotated(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == CAUCHY_2D_ELLIPTIC)
-        calculate_cauchy2delliptic(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+        calculate_cauchy2delliptic(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
     else if (model_id == LINEAR_1D)
-        calculate_linear1d(current_parameters, n_fits, n_points, n_parameters, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+        calculate_linear1d(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
 }
 
 /* Description of the sum_up_floats function
@@ -146,7 +150,7 @@ __global__ void cuda_calc_curve_values(
 *   threads.x = size * vectors_per_block;
 *   blocks.x = n_vectors / vectors_per_block;
 *
-*   global_function<<< blocks,threads >>>(parameter1, ...);
+*   global_function<<< blocks, threads >>>(parameter1, ...);
 *
 */
 
@@ -168,6 +172,47 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
     }
 }
 
+/* Description of the cuda_sum_chi_square_subtotals function
+* ==========================================================
+*
+* This function sums up chi_square subtotals in place.
+*
+* Parameters:
+*
+* chi_squares: A vector of chi-square values for multiple fits.
+*              in: subtotals
+*              out: totals
+*
+* n_blocks_per_fit: The number of blocks used to calculate one fit. It is 
+*                   equivalent to the number of subtotals per fit.
+*
+* n_fits: The number of fits.
+*
+* finished: An input vector which allows the calculation to be skipped
+*           for single fits.
+*
+* Calling the cuda_sum_chi_square_subtotals function
+* ==================================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int const example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_sum_chi_square_subtotals<<< blocks, threads >>>(
+*       chi_squares,
+*       n_blocks_per_fit,
+*       n_fits,
+*       finished);
+*
+*/
+
 __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
     int const n_blocks_per_fit,
@@ -187,6 +232,52 @@ __global__ void cuda_sum_chi_square_subtotals(
     
     chi_square[0] = sum;
 }
+
+/* Description of the cuda_check_fit_improvement function
+* =======================================================
+*
+* This function checks after each calculation of chi-square values whether the
+* currently calculated chi-square values are lower than chi-square values calculated
+* in the previous iteration and sets the iteration_failed flags.
+*
+* Parameters:
+*
+* iteration_failed: An output vector of flags which indicate whether the fitting
+*                   process improved the fit in the last iteration. If yes it is set
+*                   to 0 otherwise to 1.
+*
+* chi_squares: An input vector of chi-square values for multiple fits.
+*
+* prev_chi_squares: An input vector of chi-square values for multiple fits calculated
+*                   in the previous iteration.
+*
+* n_fits: The number of fits.
+*
+* finished: An input vector which allows the calculation to be skipped
+*           for single fits.
+*
+* Calling the cuda_check_fit_improvement function
+* ===============================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int const example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_check_fit_improvement <<< blocks, threads >>>(
+*       iteration_failed,
+*       chi_squares,
+*       prev_chi_squares,
+*       n_fits,
+*       finished);
+*
+*/
 
 __global__ void cuda_check_fit_improvement(
     int * iteration_failed,
@@ -215,7 +306,8 @@ __global__ void cuda_check_fit_improvement(
 /* Description of the cuda_calculate_chi_squares function
 * ========================================================
 *
-* This function calculates the chi-square values calling a __device__ function.
+* This function calls one of the estimator funktions depending on the input
+* parameter estimator_id. The estimator function calculates the chi-square values.
 * The calcluation is performed for multiple fits in parallel.
 *
 * Parameters:
@@ -227,21 +319,16 @@ __global__ void cuda_check_fit_improvement(
 *         it is only used for MLE. It is set to 3 if a fitting curve value is
 *         negative. This vector includes the states for multiple fits.
 *
-* iteration_failed: An output vector which indicates whether the chi-square values
-*                   calculated by the current iteration decreased compared to the
-*                   previous iteration.
-*
-* prev_chi_squares: An input vector of concatenated chi-square values calculated
-*                   by the previous iteration.
-*
 * data: An input vector of data for multiple fits
 *
 * values: An input vector of concatenated sets of model function values.
 *
-* weight: An input vector of values for weighting chi-square, gradient and hessian,
-*         while using LSE
+* weights: An input vector of values for weighting chi-square, gradient and hessian,
+*          while using LSE
 *
 * n_points: The number of data points per fit.
+*
+* n_fits: The number of fits.
 *
 * estimator_id: The estimator ID.
 *
@@ -252,7 +339,7 @@ __global__ void cuda_check_fit_improvement(
 *
 * user_info: An input vector containing user information.
 *
-* user_info_size: The number of elements in user_info.
+* user_info_size: The size of user_info in bytes.
 *
 * Calling the cuda_calculate_chi_squares function
 * ================================================
@@ -263,18 +350,19 @@ __global__ void cuda_check_fit_improvement(
 *   dim3  threads(1, 1, 1);
 *   dim3  blocks(1, 1, 1);
 *
-*   threads.x = power_of_two_n_points * n_fits_per_block;
-*   blocks.x = n_fits / n_fits_per_block;
+*   threads.x = power_of_two_n_points * n_fits_per_block / n_blocks_per_fit;
+*   blocks.x = n_fits / n_fits_per_block * n_blocks_per_fit;
 *
-*   cuda_calculate_chi_squares<<< blocks, threads >>>(
+*   int const shared_size = sizeof(float) * threads.x;
+*
+*   cuda_calculate_chi_squares<<< blocks, threads, shared_size >>>(
 *       chi_squares,
 *       states,
-*       iteration_failed,
-*       prev_chi_squares,
 *       data,
 *       values,
-*       weight,
+*       weights,
 *       n_points,
+*       n_fits,
 *       estimator_id,
 *       finished,
 *       n_fits_per_block,
@@ -294,7 +382,6 @@ __global__ void cuda_calculate_chi_squares(
     int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
-    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size)
 {
@@ -357,6 +444,52 @@ __global__ void cuda_calculate_chi_squares(
     chi_squares[fit_index + fit_piece * n_fits] = shared_chi_square[0];
 }
 
+/* Description of the cuda_sum_gradient_subtotals function
+* ========================================================
+*
+* This function sums up the chi-square gradient subtotals in place.
+*
+* Parameters:
+*
+* gradients: A vector of gradient values for multiple fits.
+*            in: subtotals
+*            out: totals
+*
+* n_blocks_per_fit: The number of blocks used to calculate one fit
+*
+* n_fits: The number of fits.
+*
+* n_parameters_to_fit: The number of model parameters, that are not held fixed. 
+*
+* skip: An input vector which allows the calculation to be skipped for single fits.
+*
+* finished: An input vector which allows the calculation to be skipped for single
+*           fits.
+*
+* Calling the cuda_sum_gradient_subtotals function
+* ================================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int const example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_sum_gradient_subtotals<<< blocks,threads >>>(
+*       gradients,
+*       n_blocks_per_fit,
+*       n_fits,
+*       n_parameters_to_fit,
+*       skip,
+*       finished);
+*
+*/
+
 __global__ void cuda_sum_gradient_subtotals(
     float * gradients,
     int const n_blocks_per_fit,
@@ -381,10 +514,12 @@ __global__ void cuda_sum_gradient_subtotals(
 }
 
 /* Description of the cuda_calculate_gradients function
-* ========================================================
+* =====================================================
 *
-* This function calculates the gradient values of the chi-square function calling
-* a __device__ function. The calcluation is performed for multiple fits in parallel.
+* This function calls one of the gradient functions depending on the input
+* parameter estimator_id. The gradient function calculates the gradient values
+* of the chi-square function calling a __device__ function. The calcluation is
+* performed for multiple fits in parallel.
 *
 * Parameters:
 *
@@ -397,10 +532,12 @@ __global__ void cuda_sum_gradient_subtotals(
 * derivatives: An input vector of concatenated sets of model function partial
 *              derivatives.
 *
-* weight: An input vector of values for weighting chi-square, gradient and hessian,
-*         while using LSE
+* weights: An input vector of values for weighting chi-square, gradient and hessian,
+*          while using LSE
 *
 * n_points: The number of data points per fit.
+*
+* n_fits: The number of fits.
 *
 * n_parameters: The number of fitting curve parameters.
 *
@@ -424,7 +561,7 @@ __global__ void cuda_sum_gradient_subtotals(
 * user_info_size: The number of elements in user_info.
 *
 * Calling the cuda_calculate_gradients function
-* ================================================
+* =============================================
 *
 * When calling the function, the blocks and threads must be set up correctly,
 * as shown in the following example code.
@@ -432,16 +569,19 @@ __global__ void cuda_sum_gradient_subtotals(
 *   dim3  threads(1, 1, 1);
 *   dim3  blocks(1, 1, 1);
 *
-*   threads.x = power_of_two_n_points * n_fits_per_block;
-*   blocks.x = n_fits / n_fits_per_block;
+*   threads.x = power_of_two_n_points * n_fits_per_block / n_blocks_per_fit;
+*   blocks.x = n_fits / n_fits_per_block * n_blocks_per_fit;
 *
-*   cuda_calculate_gradients<<< blocks, threads >>>(
+*   int const shared_size = sizeof(float) * threads.x;
+*
+*   cuda_calculate_gradients<<< blocks, threads, shared_size >>>(
 *       gradients,
 *       data,
 *       values,
 *       derivatives,
 *       weight,
 *       n_points,
+*       n_fits,
 *       n_parameters,
 *       n_parameters_to_fit,
 *       parameters_to_fit_indices,
@@ -469,7 +609,6 @@ __global__ void cuda_calculate_gradients(
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
-    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size)
 {
@@ -539,11 +678,12 @@ __global__ void cuda_calculate_gradients(
 }
 
 /* Description of the cuda_calculate_hessians function
-* ========================================================
+* ====================================================
 *
-* This function calculates the hessian matrix values of the chi-square function
-* calling a __device__ functions. The calcluation is performed for multiple fits
-* in parallel.
+* This function calls one of the hessian function depending on the input
+* parameter estimator_id. The hessian funcion calculates the hessian matrix
+* values of the chi-square function calling a __device__ functions. The
+* calcluation is performed for multiple fits in parallel.
 *
 * Parameters:
 *
@@ -556,8 +696,8 @@ __global__ void cuda_calculate_gradients(
 * derivatives: An input vector of concatenated sets of model function partial
 *              derivatives.
 *
-* weight: An input vector of values for weighting chi-square, gradient and hessian,
-*         while using LSE
+* weights: An input vector of values for weighting chi-square, gradient and hessian,
+*          while using LSE
 *
 * n_points: The number of data points per fit.
 *
@@ -578,10 +718,10 @@ __global__ void cuda_calculate_gradients(
 *
 * user_info: An input vector containing user information.
 *
-* user_info_size: The number of elements in user_info.
+* user_info_size: The size of user_info in bytes.
 *
 * Calling the cuda_calculate_hessians function
-* ================================================
+* ============================================
 *
 * When calling the function, the blocks and threads must be set up correctly,
 * as shown in the following example code.
@@ -767,17 +907,20 @@ __global__ void cuda_modify_step_widths(
 *
 * Parameters:
 *
-* deltas: An input vector of concatenated delta values, which are added to the
-*         model parameters.
-*
 * parameters: An input and output vector of concatenated sets of model
 *             parameters.
+*
+* prev_parameters: An input and output vector of concatenated sets of model
+*                  parameters calculated by the previous iteration.
+*
+* deltas: An input vector of concatenated delta values, which are added to the
+*         model parameters.
 *
 * n_parameters_to_fit: The number of fitted curve parameters.
 *
 * parameters_to_fit_indices: The indices of fitted curve parameters.
 *
-* finished: An input vector which allows the calculation to be skipped for single fits.
+* finished: An input vector which allows the parameter update to be skipped for single fits.
 *
 * n_fits_per_block: The number of fits calculated by each threadblock.
 *
@@ -794,8 +937,9 @@ __global__ void cuda_modify_step_widths(
 *   blocks.x = n_fits / n_fits_per_block;
 *
 *   cuda_update_parameters<<< blocks, threads >>>(
-*       deltas,
 *       parameters,
+*       prev_parameters,
+*       deltas,
 *       n_parameters_to_fit,
 *       parameters_to_fit_indices,
 *       finished,
@@ -874,7 +1018,6 @@ __global__ void cuda_update_parameters(
 *
 */
 
-
 __global__ void cuda_update_state_after_gaussjordan(
     int const n_fits,
     int const * singular_checks,
@@ -909,14 +1052,14 @@ __global__ void cuda_update_state_after_gaussjordan(
 *
 * states: An output vector of values which indicate whether the fitting process
 *         was carreid out correctly or which problem occurred. If the maximum
-*         number of iterationsis reached without converging, it is set to 1. If
+*         number of iterations is reached without converging, it is set to 1. If
 *         the fit converged it keeps its initial value of 0.
 *
 * chi_squares: An input vector of chi-square values for multiple fits. Used for the
-*             convergence check.
+*              convergence check.
 *
 * prev_chi_squares: An input vector of chi-square values for multiple fits calculated
-*                  in the previous iteration. Used for the convergence check.
+*                   in the previous iteration. Used for the convergence check.
 *
 * iteration: The value of the current iteration. It is compared to the value
 *            of the maximum number of iteration set by user.
@@ -973,7 +1116,9 @@ __global__ void cuda_check_for_convergence(
         return;
     }
 
-    int const fit_found = abs(chi_squares[fit_index] - prev_chi_squares[fit_index])  < tolerance * fmaxf(1, chi_squares[fit_index]);
+    int const fit_found 
+        = abs(chi_squares[fit_index] - prev_chi_squares[fit_index]) 
+        < tolerance * fmaxf(1, chi_squares[fit_index]);
 
     int const max_n_iterations_reached = iteration == max_n_iterations - 1;
 
@@ -1001,7 +1146,7 @@ __global__ void cuda_check_for_convergence(
 *
 * n_iterations: An output vector of needed iterations for each fit.
 *
-* finished: An input and output  vector which allows the evaluation to be skipped
+* finished: An input and output vector which allows the evaluation to be skipped
 *           for single fits
 *
 * iteration: The values of the current iteration.
@@ -1031,7 +1176,7 @@ __global__ void cuda_check_for_convergence(
 *       finished,
 *       iteration,
 *       states,
-*       n_fits)
+*       n_fits);
 *
 */
 
@@ -1069,8 +1214,9 @@ __global__ void cuda_evaluate_iteration(
 /* Description of the cuda_prepare_next_iteration function
 * ========================================================
 *
-* This function prepares the next iteration. It either updates chi-square values
-* or sets chi-squares and curve parameters to previous values. This function also
+* This function prepares the next iteration. It either updates previous
+* chi-square values or sets currently calculated chi-square values and
+* parameters to values calculated by the previous iteration. This function also
 * updates lambda values.
 *
 * Parameters:
@@ -1078,10 +1224,10 @@ __global__ void cuda_evaluate_iteration(
 * lambdas: An output vector of values which control the step width by modifying
 *          the diagonal elements of the hessian matrices.
 *
-* chi_squares: An input vector of chi-square values for multiple fits.
+* chi_squares: An input and output vector of chi-square values for multiple fits.
 *
-* prev_chi_squares: An input vector of chi-square values for multiple fits calculated
-*                  in the previous iteration.
+* prev_chi_squares: An input and output vector of chi-square values for multiple
+*                   fits calculated in the previous iteration.
 *
 * parameters: An output vector of concatenated sets of model parameters.
 *

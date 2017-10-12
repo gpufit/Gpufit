@@ -25,7 +25,6 @@ extern __global__ void cuda_calculate_chi_squares(
     int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
-    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size);
 extern __global__ void cuda_sum_gradient_subtotals(
@@ -50,7 +49,6 @@ extern __global__ void cuda_calculate_gradients(
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
-    int const n_blocks_per_fit,
     char * user_info,
     std::size_t const user_info_size);
 extern __global__ void cuda_calculate_hessians(

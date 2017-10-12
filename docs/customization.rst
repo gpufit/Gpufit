@@ -35,26 +35,23 @@ Detailed step by step instructions for adding a model function are given below.
         float const * parameters,
         int const n_fits,
         int const n_points,
-        int const n_parameters,
-        float * values,
-        float * derivatives,
+        float * value,
+        float * derivative,
         int const point_index,
         int const fit_index,
         int const chunk_index,
         char * user_info,
         std::size_t const user_info_size)
     {
-        ///////////////////////////// values //////////////////////////////
-        float* current_value = &values[fit_index*n_points];
-        float const * current_parameters = &parameters[fit_index*n_parameters];
+        ///////////////////////////// value //////////////////////////////
 
-        current_value[point_index] = ... ;                      // formula calculating fit model values
+        value[point_index] = ... ;                      // formula calculating fit model values
 
-        /////////////////////////// derivatives ///////////////////////////
-        float * current_derivative = &derivatives[fit_index * n_points*n_parameters];
+        /////////////////////////// derivative ///////////////////////////
+        float * current_derivative = derivative + point_index;
 
-        current_derivative[0 * n_points + point_index] = ... ;  // formula calculating derivative values with respect to parameters[0]
-        current_derivative[1 * n_points + point_index] = ... ;  // formula calculating derivative values with respect to parameters[1]
+        current_derivative[0 * n_points] = ... ;  // formula calculating derivative values with respect to parameters[0]
+        current_derivative[1 * n_points] = ... ;  // formula calculating derivative values with respect to parameters[1]
         .
         .
         .
@@ -70,13 +67,13 @@ function values and partial derivative values of the model function for a partic
 
     if (model_id == GAUSS_1D)
         calculate_gauss1d
-            (parameters, n_fits, n_points, n_parameters, values, derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+            (current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
             .
             .
             .
     else if (model_id == ...)       // model ID
         ...                         // function name
-            (parameters, n_fits, n_points, n_parameters, values, derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+            (current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
 
 Compare model_id with the defined model of the new model and call the calculate model values function of your model.
 
