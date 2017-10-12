@@ -24,7 +24,7 @@ graphics cards of various architectures (on different computers with different v
 compare to the results of Passmark G3D. By and large, the results seem to correlate, i.e. a high Passmark G3D score
 also relates to a high Gpufit fitting speed.
 
-.. figure:: /images/Gpufit_PassmarkG3D_relative_performance.png
+.. figure:: /images/GPUfit_PassmarkG3D_relative_performance.png
    :width: 14 cm
    :align: center
 

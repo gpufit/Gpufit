@@ -212,7 +212,7 @@ shown in :numref:`installation-gpufit-cpufit-performance-comparison`.
 
 .. _installation-gpufit-cpufit-performance-comparison:
 
-.. figure:: /images/Gpufit_Cpufit_Performance_Comparison.png
+.. figure:: /images/GPUFIT_CPUFIT_Performance_Comparison.png
    :width: 10 cm
    :align: center
 
