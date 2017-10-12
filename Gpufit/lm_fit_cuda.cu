@@ -70,6 +70,7 @@ void LMFitCUDA::solve_equation_system()
     CUDA_CHECK_STATUS(cudaFree(singular_tests));
 
     threads.x = info_.n_parameters_*info_.n_fits_per_block_;
+    threads.y = 1;
     blocks.x = n_fits_ / info_.n_fits_per_block_;
 
     cuda_update_parameters<<< blocks, threads >>>(
