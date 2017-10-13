@@ -9,7 +9,7 @@ A flowchart of the implementation of the Levenberg-Marquardt algorithm is given 
 
 .. _appendix-gpufit-flowchart:
 
-.. figure:: /images/gpufit_program_flow_skeleton_v2.png
+.. figure:: /images/gpufit_program_flow_skeleton_v3.png
    :width: 14 cm
    :align: center
 

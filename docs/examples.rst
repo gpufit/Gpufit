@@ -117,7 +117,7 @@ This example features:
 It is contained in Gauss_Fit_2D_Example.cpp_ and can be built and executed within the project environment. The optional
 inputs to gpufit(), *weights* and *user info*, are not used.
 
-In this example, a 2D Gaussian curve is fit to 10\ :sup:`4` noisy data sets having a size of 20 x 20 points each.
+In this example, a 2D Gaussian curve is fit to 10\ :sup:`4` noisy data sets having a size of 50 x 50 points each.
 The model function and the model parameters are described in :ref:`gauss-2d`.
 
 In this example the true parameters used to generate the Gaussian data are set to
@@ -125,9 +125,9 @@ In this example the true parameters used to generate the Gaussian data are set t
 .. code-block:: cpp
 
     // true parameters
-	std::vector< float > true_parameters{ 10.f, 9.5f, 9.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
+	std::vector< float > true_parameters{ 10.f, 15.5f, 15.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
 
-which defines a 2D Gaussian peak centered at the middle of the grid (position 9.5, 9.5), with a width (standard deviation) of 3.0, an amplitude of 10
+which defines a 2D Gaussian peak centered at the middle of the grid (position 15.5, 15.5), with a width (standard deviation) of 3.0, an amplitude of 10
 and a background of 10.
 
 The guesses for the initial parameters are drawn from the true parameters with a uniformly distributed deviation
@@ -152,7 +152,7 @@ of about 20%. The initial guesses for the center coordinates are chosen with a d
 		}
 	}
 
-The 2D grid of x and y values (each ranging from 0 to 19 with an increment of 1) is computed with a double for loop.
+The 2D grid of x and y values (each ranging from 0 to 49 with an increment of 1) is computed with a double for loop.
 
 .. code-block:: cpp
 

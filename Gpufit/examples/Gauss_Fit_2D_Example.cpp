@@ -47,7 +47,7 @@ void gauss_fit_2d_example()
 
 
 	// number of fits, fit points and parameters
-	size_t const number_fits = 1;
+	size_t const number_fits = 10000;
 	size_t const size_x = 50;
 	size_t const number_points = size_x * size_x;
 	size_t const number_parameters = 5;

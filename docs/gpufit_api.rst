@@ -367,7 +367,7 @@ installed CUDA driver version in *driver_version*.
 :runtime_version: Pointer to the CUDA runtime version number. Format is Minor version times 10 plus Major version times 1000.
                   (is 0 if the CUDA runtime version is incompatible with the installed CUDA driver version)
 
-:driver_version: Pointer to the CUDA driver version number. Format is Minor version times 10 plust Major version times 1000.
+:driver_version: Pointer to the CUDA driver version number. Format is Minor version times 10 plus Major version times 1000.
                  (is 0 if no CUDA enabled graphics card was detected)
 
 :return value: Status code

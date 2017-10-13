@@ -3,8 +3,8 @@
 Fit Model functions
 -------------------
 
-This section describes the fit model functions which are included with the Gpufit library. The headings are the names
-of the ModelID parameter used in the gpufit()_ call. They are defined in gpufit.h_.
+This section describes the fit model functions which are included with the Gpufit library. The model IDs usable
+in the call of the gpufit :ref:`c-interface` are defined in gpufit.h_.
 
 Note that additional model functions may be added as described in the documentation, see :ref:`gpufit-customization`.
 
@@ -72,7 +72,7 @@ Here, p is the vector of parameters (p0..p4) and the model function g exists for
 
 .. math::
 
-    g(x,y,p)=p_0 e^{-\left(\left(x-p_1\right)^2+\left(y-p_2\right)^2\right)/\left(2p_3^2\right)}+p_4
+    g(x,y,\vec{p})=p_0 e^{-\left(\left(x-p_1\right)^2+\left(y-p_2\right)^2\right)/\left(2p_3^2\right)}+p_4
 
 :`x,y`: (independent variables) *X,Y* coordinates
 	
