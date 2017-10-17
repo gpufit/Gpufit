@@ -13,8 +13,11 @@ Note that additional model functions may be added as described in the documentat
 Linear regression
 +++++++++++++++++
 
-A 1D linear function defined by two parameters (offset and slope). The user information data may be used to specify the
-X coordinate of each data point. The model ID of this function is ``LINEAR_1D``, and it is implemented in linear_1d.cuh_.
+A 1D linear function defined by two parameters (offset and slope).  The model ID of this function is ``LINEAR_1D``, and it is implemented in linear_1d.cuh_.
+
+*Optional*:  The X coordinate of each data point may be specified via the user information data parameter of the Gpufit interface.  If the user information is not provided, the 
+*X* coordinate of the first data value is assumed to be (0.0).  In this case, for a fit size of *M* data points, the *X* coordinates of the data are set equal to the indices of the 
+data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
 
 .. math::
 
@@ -22,8 +25,7 @@ X coordinate of each data point. The model ID of this function is ``LINEAR_1D``,
 
 :`x`: (independent variable) *X* coordinate
 
-    The X coordinate values may be specified in the user information data.
-    For details on how to do this, see the linear regression code example, :ref:`linear-regression-example`.
+    The X coordinate values may be specified in the user information data.  For details, see the linear regression code example, :ref:`linear-regression-example`.
 
     If no independent variables are provided, the *X* coordinate of the first data value is assumed to be (0.0).
     In this case, for a fit size of *M* data points, the *X* coordinates of the data are simply the corresponding array
