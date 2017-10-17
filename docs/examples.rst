@@ -2,74 +2,74 @@
 Examples
 ========
 
-C++ Examples_ are part of the library code base and can be built and run through the project environment. Here they are
+C++ Examples_ are part of the library codebase and can be built and run through the project environment. Here the examples are
 described and important steps are highlighted.
 
-Please note, that additionally, the C++ Tests_ contained in the code base also demonstrate the usage of |GF|. However, a
-detailed description of the tests is not provided.
+Please note, that additionally, the C++ Tests_ included in the codebase may also be of value as examples demonstrating the 
+use of Gpufit. However, a detailed description of the the test code is not provided.
 
 .. _c-example-simple:
 
 Simple skeleton example
 -----------------------
 
-This example shows the minimal code providing all required parameters and the call to the C interface. It is contained
-in Simple_Example.cpp_ and can be built and executed within the project environment. Please note, that it this code does
-not do anything other than call gpufit().
+This example demonstrates a simple, minimal program containing all of the required parameters for a call to the Gpufit function.  The example is contained
+in the file Simple_Example.cpp_ and it can be built and executed within the project environment. Please note that it this code does not actually do anything other than 
+make a single call to gpufit().
 
-In the first section of the code, the model ID is set, space for initial parameters and data values is reserved (in a normal
-application, however, the data array would already exist), the fit tolerance is set, the maximal number of iterations is set, 
-the estimator ID is set, and the parameters to fit array is initialized to indicate that all parameters should be fit.
+In the first section of the code, the *model ID* is set, memory space for initial parameters and data values is allocated, the *fit tolerance* is set, the *maximum number of iterations* is set, 
+the *estimator ID* is set, and the *parameters to fit array* is initialized.  Note that in most applications, the data array will already exist and it will be unnecessary to allocate additional
+space for data.  In this example, the *parameters to fit* array is initialized to all ones, indicating that all model parameters should be adjusted in the fit.
 
 .. code-block:: cpp
 
 	// number of fits, number of points per fit
-	size_t const number_fits = 10;
-	size_t const number_points = 10;
+	size_t const n_fits = 10;
+	size_t const n_points_per_fit = 10;
 
-	// model ID and number of parameter
+	// model ID and number of model parameters
 	int const model_id = GAUSS_1D;
-	size_t const number_parameters = 5;
+	size_t const n_model_parameters = 5;
 
 	// initial parameters
-	std::vector< float > initial_parameters(number_fits * number_parameters);
+	std::vector< float > initial_parameters(n_fits * n_model_parameters);
 
 	// data
-	std::vector< float > data(number_points * number_fits);
+	std::vector< float > data(n_points_per_fit * n_fits);
 
 	// tolerance
 	float const tolerance = 0.001f;
 
-	// maximal number of iterations
+	// maximum number of iterations
 	int const max_number_iterations = 10;
 
 	// estimator ID
 	int const estimator_id = LSE;
 
 	// parameters to fit (all of them)
-	std::vector< int > parameters_to_fit(number_parameters, 1);
+	std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
-In a next step, sufficient memory is reserved for all four output parameters.
+	
+In the next section of code, sufficient memory is allocated for the *fit results*, *output states*, *chi-square*, and *number of iterations* arrays. 
 
 .. code-block:: cpp
 
 	// output parameters
-	std::vector< float > output_parameters(number_fits * number_parameters);
-	std::vector< int > output_states(number_fits);
-	std::vector< float > output_chi_square(number_fits);
-	std::vector< int > output_number_iterations(number_fits);
+	std::vector< float > output_parameters(n_fits * n_model_parameters);
+	std::vector< int > output_states(n_fits);
+	std::vector< float > output_chi_square(n_fits);
+	std::vector< int > output_number_iterations(n_fits);
 
-Finally, there is a call to the C interface of Gpufit (in this example, the optional 
-inputs *weights* and *user info* are not used) and a check of the return status.
-If an error occurred, the last error message is obtained and an exception is thrown.
+Finally, a call to the C interface of Gpufit is made.  In this example, the optional inputs *weights* and *user_info* are not used.  The program 
+then checks the return status from Gpufit.  If an error occurred, the last error message is obtained and an exception is thrown.
 
 .. code-block:: cpp
 
 	// call to gpufit (C interface)
 	int const status = gpufit
         (
-            number_fits,
-            number_points,
+            n_fits,
+            n_points_per_fit,
             data.data(),
             0,
             model_id,
@@ -92,16 +92,16 @@ If an error occurred, the last error message is obtained and an exception is thr
 		throw std::runtime_error(gpufit_get_last_error());
 	}
 
-This simple example can easily be adapted to real applications by:
+This simple example can be adapted for real applications by:
 
-- choosing your own model ID
-- choosing your own estimator ID
-- choosing your own fit tolerance and maximal number of iterations
-- filling the data structure with the data values to be fitted
-- filling the initial parameters structure with suitable estimates of the true parameters
+- choosing a model ID
+- choosing an estimator ID
+- setting the fit tolerance and maximum number of iterations
+- using a data variable containing the data values to be fit
+- providing initial parameters with suitable estimates of the true parameters
 - processing the output data
 
-The following two examples show |GF| can be used to fit real data.
+In the following sections, examples are provided in which Gpufit is used to fit simulated datasets.
 
 .. _c-example-2d-gaussian:
 
@@ -136,18 +136,18 @@ of about 20%. The initial guesses for the center coordinates are chosen with a d
 .. code-block:: cpp
 
 	// initial parameters (randomized)
-	std::vector< float > initial_parameters(number_fits * number_parameters);
-	for (size_t i = 0; i < number_fits; i++)
+	std::vector< float > initial_parameters(n_fits * n_model_parameters);
+	for (size_t i = 0; i < n_fits; i++)
 	{
-		for (size_t j = 0; j < number_parameters; j++)
+		for (size_t j = 0; j < n_model_parameters; j++)
 		{
 			if (j == 1 || j == 2)
 			{
-				initial_parameters[i * number_parameters + j] = true_parameters[j] + true_parameters[3] * (-0.2f + 0.4f * uniform_dist(rng));
+				initial_parameters[i * n_model_parameters + j] = true_parameters[j] + true_parameters[3] * (-0.2f + 0.4f * uniform_dist(rng));
 			}
 			else
 			{
-				initial_parameters[i * number_parameters + j] = true_parameters[j] * (0.8f + 0.4f*uniform_dist(rng));
+				initial_parameters[i * n_model_parameters + j] = true_parameters[j] * (0.8f + 0.4f*uniform_dist(rng));
 			}
 		}
 	}
@@ -157,8 +157,8 @@ The 2D grid of x and y values (each ranging from 0 to 49 with an increment of 1)
 .. code-block:: cpp
 
 	// generate x and y values
-	std::vector< float > x(number_points);
-	std::vector< float > y(number_points);
+	std::vector< float > x(n_points_per_fit);
+	std::vector< float > y(n_points_per_fit);
 	for (size_t i = 0; i < size_x; i++)
 	{
 		for (size_t j = 0; j < size_x; j++) {
@@ -189,18 +189,18 @@ Stored in variable temp, it is then used in every fit to generate Poisson distri
 .. code-block:: cpp
 
 	// generate data with noise
-	std::vector< float > temp(number_points);
+	std::vector< float > temp(n_points_per_fit);
 	// compute the model function
 	generate_gauss_2d(x, y, temp, true_parameters.begin());
 
-	std::vector< float > data(number_fits * number_points);
-	for (size_t i = 0; i < number_fits; i++)
+	std::vector< float > data(n_fits * n_points_per_fit);
+	for (size_t i = 0; i < n_fits; i++)
 	{
 		// generate Poisson random numbers
-		for (size_t j = 0; j < number_points; j++)
+		for (size_t j = 0; j < n_points_per_fit; j++)
 		{
 			std::poisson_distribution< int > poisson_dist(temp[j]);
-			data[i * number_points + j] = static_cast<float>(poisson_dist(rng));
+			data[i * n_points_per_fit + j] = static_cast<float>(poisson_dist(rng));
 		}
 	}
 
@@ -225,8 +225,8 @@ won't be used during the fits.
 	// call to gpufit (C interface)
 	int const status = gpufit
         (
-            number_fits,
-            number_points,
+            n_fits,
+            n_points_per_fit,
             data.data(),
             0,
             model_id,
@@ -272,19 +272,19 @@ the means of the output parameters iterating over all fits and all parameters.
 .. code-block:: cpp
 
 	// compute mean of fitted parameters for converged fits
-	std::vector< float > output_parameters_mean(number_parameters, 0);
-	for (size_t i = 0; i != number_fits; i++)
+	std::vector< float > output_parameters_mean(n_model_parameters, 0);
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == STATE_CONVERGED)
 		{
-			for (size_t j = 0; j < number_parameters; j++)
+			for (size_t j = 0; j < n_model_parameters; j++)
 			{
-				output_parameters_mean[j] += output_parameters[i * number_parameters + j];
+				output_parameters_mean[j] += output_parameters[i * n_model_parameters + j];
 			}
 		}
 	}
 	// normalize
-	for (size_t j = 0; j < number_parameters; j++)
+	for (size_t j = 0; j < n_model_parameters; j++)
 	{
 		output_parameters_mean[j] /= output_states_histogram[0];
 	}
@@ -296,7 +296,6 @@ Linear Regression Example
 
 This example features:
 
-- Multiple fits of a 1D Linear curve
 - Noisy data and random initial guesses for the parameters
 - Unequal spaced x position values given as custom user info
 
@@ -311,16 +310,16 @@ The custom x positions of the linear model are stored in the user_info.
 .. code-block:: cpp
 
 	// custom x positions for the data points of every fit, stored in user info
-	std::vector< float > user_info(number_points);
-	for (size_t i = 0; i < number_points; i++)
+	std::vector< float > user_info(n_points_per_fit);
+	for (size_t i = 0; i < n_points_per_fit; i++)
 	{
 		user_info[i] = static_cast<float>(pow(2, i));
 	}
 
 	// size of user info in bytes
-	size_t const user_info_size = number_points * sizeof(float);
+	size_t const user_info_size = n_points_per_fit * sizeof(float);
 
-Because only number_points values are specified, this means that the same custom x position values are used for every fit.
+Because only n_points_per_fit values are specified, this means that the same custom x position values are used for every fit.
 
 The initial parameters for every fit are set to random values uniformly distributed around the true parameter value.
 
@@ -330,13 +329,13 @@ The initial parameters for every fit are set to random values uniformly distribu
 	std::vector< float > true_parameters { 5, 2 }; // offset, slope
 
 	// initial parameters (randomized)
-	std::vector< float > initial_parameters(number_fits * number_parameters);
-	for (size_t i = 0; i != number_fits; i++)
+	std::vector< float > initial_parameters(n_fits * n_model_parameters);
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random offset
-		initial_parameters[i * number_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
 		// random slope
-		initial_parameters[i * number_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
 	}
 
 The data is generated as the value of a linear function and some additive normally distributed noise term.
@@ -344,11 +343,11 @@ The data is generated as the value of a linear function and some additive normal
 .. code-block:: cpp
 
 	// generate data
-	std::vector< float > data(number_points * number_fits);
+	std::vector< float > data(n_points_per_fit * n_fits);
 	for (size_t i = 0; i != data.size(); i++)
 	{
-		size_t j = i / number_points; // the fit
-		size_t k = i % number_points; // the position within a fit
+		size_t j = i / n_points_per_fit; // the fit
+		size_t k = i % n_points_per_fit; // the position within a fit
 
 		float x = user_info[k];
 		float y = true_parameters[0] + x * true_parameters[1];
@@ -372,8 +371,8 @@ And call the gpufit :ref:`c-interface`. Parameter weights is set to 0, indicatin
 	// call to gpufit (C interface)
 	int const status = gpufit
         (
-            number_fits,
-            number_points,
+            n_fits,
+            n_points_per_fit,
             data.data(),
             0,
             model_id,
