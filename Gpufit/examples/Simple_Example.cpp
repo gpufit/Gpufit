@@ -5,58 +5,62 @@
 void simple_example()
 {
 	/*
-		Simple example demonstrating a minimal call of all needed parameters to
-        the C interface. It can be built and executed, but in this exeample
-        gpufit doesn't do anything useful and it doesn't yield meaningful
-        output. No test data is generated. The values of the input data vector
-        and the initial fit parameters vector are set to 0.
+		This example demonstrates a simple, minimal program containing all 
+		of the required parameters for a call to the Gpufit function.  The example 
+		can be built and executed within the project environment. Please note that 
+		this code does not actually do anything other than make a single call to 
+		gpufit().
 
-        This example can be devided in three parts:
-            - definition of input and output parameters
-            - call to gpufit
-            - status check
+		In the first section of the code, the *model ID* is set, memory space for 
+		initial parameters and data values is allocated, the *fit tolerance* is set, 
+		the *maximum number of iterations* is set, the *estimator ID* is set, and 
+		the *parameters to fit array* is initialized.  Note that in most applications, 
+		the data array will already exist and it will be unnecessary to allocate 
+		additional space for data.  In this example, the *parameters to fit* array 
+		is initialized to all ones, indicating that all model parameters should be 
+		adjusted in the fit.
 	*/
 
     /*************** definition of input and output parameters  ***************/
 
 	// number of fits, number of points per fit
-	size_t const number_fits = 10;
-	size_t const number_points = 10;
+	size_t const n_fits = 10;
+	size_t const n_points_per_fit = 10;
 
-	// model ID and number of parameter
+	// model ID and number of model parameters
 	int const model_id = GAUSS_1D;
-	size_t const number_parameters = 4;
+	size_t const n_model_parameters = 4;
 
 	// initial parameters
-	std::vector< float > initial_parameters(number_fits * number_parameters);
+	std::vector< float > initial_parameters(n_fits * n_model_parameters);
 
 	// data
-	std::vector< float > data(number_points * number_fits);
+	std::vector< float > data(n_points_per_fit * n_fits);
 
 	// tolerance
 	float const tolerance = 0.001f;
 
-	// maximal number of iterations
+	// maximum number of iterations
 	int const max_number_iterations = 10;
 
 	// estimator ID
 	int const estimator_id = LSE;
 
 	// parameters to fit (all of them)
-	std::vector< int > parameters_to_fit(number_parameters, 1);
+	std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
 	// output parameters
-	std::vector< float > output_parameters(number_fits * number_parameters);
-	std::vector< int > output_states(number_fits);
-	std::vector< float > output_chi_square(number_fits);
-	std::vector< int > output_number_iterations(number_fits);
+	std::vector< float > output_parameters(n_fits * n_model_parameters);
+	std::vector< int > output_states(n_fits);
+	std::vector< float > output_chi_square(n_fits);
+	std::vector< int > output_number_iterations(n_fits);
 
     /***************************** call to gpufit  ****************************/
 
 	int const status = gpufit
         (
-            number_fits,
-            number_points,
+            n_fits,
+            n_points_per_fit,
             data.data(),
             0,
             model_id,
