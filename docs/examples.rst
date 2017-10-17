@@ -197,9 +197,9 @@ Then a 2D Gaussian peak model function (without noise) is calculated once for th
 		for (size_t i = 0; i < x_coordinates.size(); i++)
 		{
 			
-			float arg = -(   (x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
-						   + (y_coordinates[i] - gauss_params[2]) * (y_coordinates[i] - gauss_params[2])   ) 
-						   / (2.f * gauss_params[3] * gauss_params[3]);
+			float arg = -((x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
+						+ (y_coordinates[i] - gauss_params[2]) * (y_coordinates[i] - gauss_params[2])) 
+						/ (2.f * gauss_params[3] * gauss_params[3]);
 						 
 			output_values[i] = gauss_params[0] * exp(arg) + gauss_params[4];
 			
