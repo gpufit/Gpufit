@@ -108,26 +108,26 @@ In the following sections, examples are provided in which Gpufit is used to fit 
 Fit 2D Gaussian functions example
 ---------------------------------
 
+This example demonstrates the use of Gpufit to fit a dataset consisting of 2D Gaussian peaks.  The example is contained
+in the file Gauss_Fit_2D_Example.cpp_ and it can be built and executed within the project environment.  The optional
+inputs to gpufit(), *weights* and *user_info*, are not used.
+
 This example features:
 
-- Multiple fits using a 2D Gaussian function
 - Noisy data and random initial guesses for the fit parameters
-- A Poisson noise adapted maximum likelihood estimator
+- Use of the maximum likelihood estimator which is appropriate for data subject to Poisson noise
 
-It is contained in Gauss_Fit_2D_Example.cpp_ and can be built and executed within the project environment. The optional
-inputs to gpufit(), *weights* and *user info*, are not used.
+In this example, a set of simulated data is generated, consisting of 10\ :sup:`4` 2D Gaussian peaks, with a size of 30 x 30 points.  
+Random noise is added to the data.  The model function and the model parameters are described in :ref:`gauss-2d`.
 
-In this example, a 2D Gaussian curve is fit to 10\ :sup:`4` noisy data sets having a size of 50 x 50 points each.
-The model function and the model parameters are described in :ref:`gauss-2d`.
-
-In this example the true parameters used to generate the Gaussian data are set to
+In this example the true parameters used to generate the Gaussian data are defined in the following code block.
 
 .. code-block:: cpp
 
     // true parameters
 	std::vector< float > true_parameters{ 10.f, 15.5f, 15.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
 
-which defines a 2D Gaussian peak centered at the middle of the grid (position 15.5, 15.5), with a width (standard deviation) of 3.0, an amplitude of 10
+These parameters define a 2D Gaussian peak centered at the middle of the grid (position 15.5, 15.5), with a width (standard deviation) of 3.0, an amplitude of 10
 and a background of 10.
 
 The guesses for the initial parameters are drawn from the true parameters with a uniformly distributed deviation
@@ -171,18 +171,40 @@ Then a 2D Gaussian peak model function (without noise) is calculated once for th
 
 .. code-block:: cpp
 
-    void generate_gauss_2d(std::vector<float> &x, std::vector<float> &y, std::vector<float> &g, std::vector<float>::iterator &p)
-    {
-        // generates a Gaussian 2D peak function on a set of x and y values with some paramters p (size 5)
-        // we assume that x.size == y.size == g.size, no checks done
-
-        // given x and y values and parameters p computes a model function g
-        for (size_t i = 0; i < x.size(); i++)
-        {
-            float arg = -((x[i] - p[1]) * (x[i] - p[1]) + (y[i] - p[2]) * (y[i] - p[2])) / (2 * p[3] * p[3]);
-            g[i] = p[0] * exp(arg) + p[4];
-        }
-    }
+	void generate_gauss_2d(
+		std::vector<float> const & x_coordinates,
+		std::vector<float> const & y_coordinates,
+		std::vector<float> const & gauss_params, 
+		std::vector<float> & output_values)
+	{
+		// Generates a Gaussian 2D function at a set of X and Y coordinates.  The Gaussian is defined by
+		// an array of five parameters.
+		
+		// x_coordinates: Vector of X coordinates.
+		// y_coordinates: Vector of Y coordinates.
+		// gauss_params:  Vector of function parameters.
+		// output_values: Output vector containing the values of the Gaussian function at the
+		//                corresponding X, Y coordinates.
+		
+		// gauss_params[0]: Amplitude
+		// gauss_params[1]: Center X position
+		// guass_params[2]: Center Y position
+		// gauss_params[3]: Gaussian width (standard deviation)
+		// gauss_params[4]: Baseline offset
+		
+		// This code assumes that x_coordinates.size == y_coordinates.size == output_values.size
+		
+		for (size_t i = 0; i < x_coordinates.size(); i++)
+		{
+			
+			float arg = -(   (x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
+						   + (y_coordinates[i] - gauss_params[2]) * (y_coordinates[i] - gauss_params[2])   ) 
+						 / (2.f * gauss_params[3] * gauss_params[3]);
+						 
+			output_values[i] = gauss_params[0] * exp(arg) + gauss_params[4];
+			
+		}
+	}
 
 Stored in variable temp, it is then used in every fit to generate Poisson distributed random numbers.
 
@@ -297,7 +319,7 @@ Linear Regression Example
 This example features:
 
 - Noisy data and random initial guesses for the parameters
-- Unequal spaced x position values given as custom user info
+- Unequal spaced x position values given as custom user_info
 
 It is contained in Linear_Regression_Example.cpp_ and can be built and executed within the project environment.
 
@@ -309,14 +331,14 @@ The custom x positions of the linear model are stored in the user_info.
 
 .. code-block:: cpp
 
-	// custom x positions for the data points of every fit, stored in user info
+	// custom x positions for the data points of every fit, stored in user_info
 	std::vector< float > user_info(n_points_per_fit);
 	for (size_t i = 0; i < n_points_per_fit; i++)
 	{
 		user_info[i] = static_cast<float>(pow(2, i));
 	}
 
-	// size of user info in bytes
+	// size of user_info in bytes
 	size_t const user_info_size = n_points_per_fit * sizeof(float);
 
 Because only n_points_per_fit values are specified, this means that the same custom x position values are used for every fit.
