@@ -40,6 +40,7 @@ X coordinate of each data point. The model ID of this function is ``LINEAR_1D``,
 ++++++++++++++++++++
 
 A 1D Gaussian function defined by four parameters. Its model ID is ``GAUSS_1D`` and it is implemented in gauss_1d.cuh_.
+The user information data may be used to specify the X coordinate of each data point.
 Here, p is the vector of parameters (p0..p3) and the model function g exists for each x coordinate of the input data.
 
 .. math::
@@ -48,10 +49,12 @@ Here, p is the vector of parameters (p0..p3) and the model function g exists for
 
 :`x`: (independent variable) *X* coordinate
 
-    No independent variables are passed to this model function.
-    Hence, the *X* coordinate of the first data value is assumed to be (0.0). For a fit size of *M* data points,
-    the *X* coordinates of the data are simply the corresponding array indices of the data array, starting from
-    zero (i.e. :math:`0, 1, 2, ...`).
+    The X coordinate values may be specified in the user information data. For details on how to do this, see the linear
+    regression code example, :ref:`linear-regression-example`.
+
+    If no independent variables are passed to this model function, the *X* coordinate of the first data value is assumed
+    to be (0.0). For a fit size of *M* data points, the *X* coordinates of the data are simply the corresponding array
+    indices of the data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
 
 :`p_0`: amplitude
 

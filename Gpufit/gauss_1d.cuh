@@ -59,13 +59,32 @@ __device__ void calculate_gauss1d(
     char * user_info,
     std::size_t const user_info_size)
 {
+    // indices
+
+    float * user_info_float = (float*)user_info;
+    float x = 0.0f;
+    if (!user_info_float)
+    {
+        x = point_index;
+    }
+    else if (user_info_size / sizeof(float) == n_points)
+    {
+        x = user_info_float[point_index];
+    }
+    else if (user_info_size / sizeof(float) > n_points)
+    {
+        int const chunk_begin = chunk_index * n_fits * n_points;
+        int const fit_begin = fit_index * n_points;
+        x = user_info_float[chunk_begin + fit_begin + point_index];
+    }
+
     // parameters
 
     float const * p = parameters;
     
     // value
 
-    float const argx = (point_index - p[1]) * (point_index - p[1]) / (2 * p[2] * p[2]);
+    float const argx = (x - p[1]) * (x - p[1]) / (2 * p[2] * p[2]);
     float const ex = exp(-argx);
     value[point_index] = p[0] * ex + p[3];
 
@@ -74,8 +93,8 @@ __device__ void calculate_gauss1d(
     float * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points]  = ex;
-    current_derivative[1 * n_points]  = p[0] * ex * (point_index - p[1]) / (p[2] * p[2]);
-    current_derivative[2 * n_points]  = p[0] * ex * (point_index - p[1]) * (point_index - p[1]) / (p[2] * p[2] * p[2]);
+    current_derivative[1 * n_points]  = p[0] * ex * (x - p[1]) / (p[2] * p[2]);
+    current_derivative[2 * n_points]  = p[0] * ex * (x - p[1]) * (x - p[1]) / (p[2] * p[2] * p[2]);
     current_derivative[3 * n_points]  = 1.f;
 }
 
