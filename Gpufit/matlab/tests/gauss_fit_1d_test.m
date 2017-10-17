@@ -1,5 +1,7 @@
 % Equivalent/similar to tests/Gauss_Fit_1D.cpp
 
+assert(gpufit_cuda_available(), 'CUDA not available');
+
 % constants
 n_fits = 1;
 n_points = 5;

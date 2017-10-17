@@ -300,6 +300,9 @@ The CUDA error was: cannot set while device is active in this process).
 Matlab Interface
 ++++++++++++++++
 
+gpufit
+......
+
 Optional parameters are passed in as empty matrices (``[]``). The numbers of points, fits and parameters is deduced from the dimensions of
 the input data and initial parameters matrices.
 
@@ -359,6 +362,17 @@ The signature of the gpufit function is
     In seconds.
 
 Errors are raised if checks on parameters fail or if the execution of gpufit fails.
+
+gpufit_cuda_available
+.....................
+
+The signature of the gputfit_cuda_available method (equivalent to calling the C interface function *gpufit_cuda_available*) is
+
+.. code-block:: matlab
+
+    function r = gpufit_cuda_available():
+
+Returns True if CUDA is available and False otherwise.
 
 Matlab Examples
 +++++++++++++++

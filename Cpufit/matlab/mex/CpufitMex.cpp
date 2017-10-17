@@ -23,42 +23,26 @@ template<class T> inline bool get_scalar(const mxArray *p, T &v, const mxClassID
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
 {
-    int expected_nrhs = 0;
-    int expected_nlhs = 0;
-    bool wrong_nrhs = false;
-    bool wrong_nlhs = false;
-    
-    expected_nrhs = 13;
-    expected_nlhs = 4;
+    int const expected_nrhs = 13;
+    int const expected_nlhs = 4;
     if (nrhs != expected_nrhs)
     {
-        wrong_nrhs = true;
+		char s1[50];
+		_itoa_s(expected_nrhs, s1, 10);
+		char const s2[] = " input arguments required.";
+		size_t const string_length = strlen(s1) + 1 + strlen(s2);
+		strcat_s(s1, string_length, s2);
+		mexErrMsgIdAndTxt("Cpufit:Mex", s1);
     }
-    else if (nlhs != expected_nlhs)
+    
+	if (nlhs != expected_nlhs)
     {
-        wrong_nlhs = true;
-    }
-
-    if (wrong_nrhs || wrong_nlhs)
-    {
-        if (nrhs != expected_nrhs)
-        {
-            char s1[50];
-            _itoa_s(expected_nrhs, s1, 10);
-            char const s2[] = " input arguments required.";
-            size_t const string_length = strlen(s1) + 1 + strlen(s2);
-            strcat_s(s1, string_length, s2);
-            mexErrMsgIdAndTxt("Cpufit:Mex", s1);
-        }
-        else if (nlhs != expected_nlhs)
-        {
-            char s1[50];
-            _itoa_s(expected_nlhs, s1, 10);
-            char const s2[] = " output arguments required.";
-            size_t const string_length = strlen(s1) + 1 + strlen(s2);
-            strcat_s(s1, string_length, s2);
-            mexErrMsgIdAndTxt("Cpufit:Mex", s1);
-        }
+		char s1[50];
+		_itoa_s(expected_nlhs, s1, 10);
+		char const s2[] = " output arguments required.";
+		size_t const string_length = strlen(s1) + 1 + strlen(s2);
+		strcat_s(s1, string_length, s2);
+		mexErrMsgIdAndTxt("Cpufit:Mex", s1);
     }
 
 	// input parameters

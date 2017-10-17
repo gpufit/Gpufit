@@ -8,6 +8,8 @@ function gauss2d_plot()
 % results
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+assert(gpufit_cuda_available(), 'CUDA not available');
+
 %% number of fit points
 size_x = 5;
 n_points = size_x * size_x;
