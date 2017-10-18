@@ -10,7 +10,7 @@ as example code demonstrating the use of Gpufit. However, a detailed description
 
 .. _c-example-simple:
 
-Simple example (minimal call to *gpufit()*)
+Simple example (minimal call to :code:`gpufit()`)
 ------------------------
 
 This example demonstrates a simple, minimal program containing all of the required parameters for a call to the Gpufit function.  The example is contained
@@ -92,7 +92,7 @@ then checks the return status from Gpufit.  If an error occurred, the last error
 		throw std::runtime_error(gpufit_get_last_error());
 	}
 
-In summary, the above example illustrates the basic details of the parameters which are passed to the *gpufit()* function, such
+In summary, the above example illustrates the basic details of the parameters which are passed to the :code:`gpufit()` function, such
 as the size of the input and output variables, etc.  This example could be adapted for real applications by:
 
 - choosing a model ID
@@ -317,7 +317,7 @@ contains an example of the calculation of the means of the output parameters, it
 		output_parameters_mean[j] /= output_states_histogram[0];
 	}
 
-In summary, the above example illustrates a simple call to *gpufit()* using a real dataset.  When the fit is complete, the 
+In summary, the above example illustrates a simple call to :code:`gpufit()` using a real dataset.  When the fit is complete, the 
 fit results are obtained and the output states are checked.  Additionally, this example calculates some basic statistics 
 describing the results.  The code also illustrates how the input and output parameters are organized in memory.
 	
@@ -331,7 +331,7 @@ in the file Linear_Regression_Example.cpp_ and it can be built and executed with
 illustrates how independent variables may be used in the fitting process, by taking advantage of the user_info parameter.  
 In this example, a set of 10\ :sup:`4` individual fits are calculated.  Each simulated dataset consists of 20 randomly generated 
 data values.  The *X* coordinates of the data points do not have a uniform spacing, but increase non-linearly. 
-The user information data is used to pass the *X* values to *gpufit()*.  The fits are unweighted, and the model function 
+The user information data is used to pass the *X* values to :code:`gpufit()`.  The fits are unweighted, and the model function 
 and model parameters are described in :ref:`linear-1d`.
 
 For details of how user_info is used to store the values of the independent variable for this fit model function, 
@@ -340,7 +340,7 @@ see the section of the Gpufit documentation describing the model functions, :ref
 This example features:
 
 - Noisy data and random initial guesses for the parameters
-- Unequally spaced *X* position values, passed to *gpufit()* using the user_info parameter.
+- Unequally spaced *X* position values, passed to :code:`gpufit()` using the user_info parameter.
 
 
 The following code illustrates how the *X* positions of the data points are stored in the user_info variable, for this model function.  
@@ -404,7 +404,7 @@ In the following code, the model and estimator IDs for the fit are initialized.
 	// model ID
 	int const model_id = LINEAR_1D;
 
-Finally, a call is made to *gpufit()* (:ref:`c-interface`).  The weights parameter is set to 0, indicating that 
+Finally, a call is made to :code:`gpufit()` (:ref:`c-interface`).  The weights parameter is set to 0, indicating that 
 the fits are unweighted.
 
 .. code-block:: cpp
