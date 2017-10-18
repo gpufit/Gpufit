@@ -71,7 +71,7 @@ void gauss_fit_2d_example()
 	size_t const n_model_parameters = 5;
 
 	// true parameters (amplitude, center x position, center y position, width, offset)
-	std::vector< float > true_parameters{ 10.f, 15.5f, 15.5f, 3.f, 10.f}; 
+	std::vector< float > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; 
 
 	// initialize random number generator
 	std::mt19937 rng;
