@@ -8,12 +8,36 @@
 * and their partial derivatives with respect to the model parameters. 
 *
 * This function makes use of the user information data to pass in the 
-* independent variables (X values) corresponding to the data.  
+* independent variables (X values) corresponding to the data.  The X values
+* must be of type float.
 *
 * Note that if no user information is provided, the (X) coordinate of the 
 * first data value is assumed to be (0.0).  In this case, for a fit size of 
 * M data points, the (X) coordinates of the data are simply the corresponding 
 * array index values of the data array, starting from zero.
+*
+* There are three possibilities regarding the X values:
+*
+*   No X values provided: 
+*
+*       If no user information is provided, the (X) coordinate of the 
+*       first data value is assumed to be (0.0).  In this case, for a 
+*       fit size of M data points, the (X) coordinates of the data are 
+*       simply the corresponding array index values of the data array, 
+*       starting from zero.
+*
+*   X values provided for one fit:
+*
+*       If the user_info array contains the X values for one fit, then 
+*       the same X values will be used for all fits.  In this case, the 
+*       size of the user_info array (in bytes) must equal 
+*       sizeof(float) * n_points.
+*
+*   Unique X values provided for all fits:
+*
+*       In this case, the user_info array must contain X values for each
+*       fit in the dataset.  In this case, the size of the user_info array 
+*       (in bytes) must equal sizeof(float) * n_points * nfits.
 *
 * Parameters:
 *

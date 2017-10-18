@@ -7,11 +7,32 @@
 * This function calculates the values of one-dimensional gauss model functions
 * and their partial derivatives with respect to the model parameters. 
 *
-* No independent variables are passed to this model function.  Hence, the 
-* (X) coordinate of the first data value is assumed to be (0.0).  For
-* a fit size of M data points, the (X) coordinates of the data are
-* simply the corresponding array index values of the data array, starting from
-* zero.
+* This function makes use of the user information data to pass in the 
+* independent variables (X values) corresponding to the data.  The X values
+* must be of type float.
+*
+* There are three possibilities regarding the X values:
+*
+*   No X values provided: 
+*
+*       If no user information is provided, the (X) coordinate of the 
+*       first data value is assumed to be (0.0).  In this case, for a 
+*       fit size of M data points, the (X) coordinates of the data are 
+*       simply the corresponding array index values of the data array, 
+*       starting from zero.
+*
+*   X values provided for one fit:
+*
+*       If the user_info array contains the X values for one fit, then 
+*       the same X values will be used for all fits.  In this case, the 
+*       size of the user_info array (in bytes) must equal 
+*       sizeof(float) * n_points.
+*
+*   Unique X values provided for all fits:
+*
+*       In this case, the user_info array must contain X values for each
+*       fit in the dataset.  In this case, the size of the user_info array 
+*       (in bytes) must equal sizeof(float) * n_points * nfits.
 *
 * Parameters:
 *
@@ -35,9 +56,9 @@
 *
 * chunk_index: The chunk index. (not used)
 *
-* user_info: An input vector containing user information. (not used)
+* user_info: An input vector containing user information. 
 *
-* user_info_size: The size of user_info in bytes. (not used)
+* user_info_size: The size of user_info in bytes. 
 *
 * Calling the calculate_gauss1d function
 * ======================================
