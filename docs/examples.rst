@@ -1,6 +1,6 @@
-========
-Examples
-========
+===============
+Examples in C++
+===============
 
 Example programs, written in C++, are part of the Gpufit project and can be built and run through the project environment.  
 Here the example programs are described and the important steps in each program are highlighted.
