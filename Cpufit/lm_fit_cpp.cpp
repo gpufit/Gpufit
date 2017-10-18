@@ -140,15 +140,32 @@ void LMFitCPP::calc_derivatives_gauss2drotated(
 void LMFitCPP::calc_derivatives_gauss1d(
     std::vector<float> & derivatives)
 {
-    for (std::size_t x = 0; x < info_.n_points_; x++)
+    float * user_info_float = (float*)user_info_;
+    float x = 0.f;
+
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
+        if (!user_info_float)
+        {
+            x = float(point_index);
+        }
+        else if (info_.user_info_size_ / sizeof(float) == info_.n_points_)
+        {
+            x = user_info_float[point_index];
+        }
+        else if (info_.user_info_size_ / sizeof(float) > info_.n_points_)
+        {
+            std::size_t const fit_begin = fit_index_ * info_.n_points_;
+            x = user_info_float[fit_begin + point_index];
+        }
+
         float argx = ((x - parameters_[1])*(x - parameters_[1])) / (2 * parameters_[2] * parameters_[2]);
         float ex = exp(-argx);
 
-        derivatives[0 * info_.n_points_ + x] = ex;
-        derivatives[1 * info_.n_points_ + x] = (parameters_[0] * (x - parameters_[1])*ex) / (parameters_[2] * parameters_[2]);
-        derivatives[2 * info_.n_points_ + x] = (parameters_[0] * (x - parameters_[1])*(x - parameters_[1])*ex) / (parameters_[2] * parameters_[2] * parameters_[2]);
-        derivatives[3 * info_.n_points_ + x] = 1;
+        derivatives[0 * info_.n_points_ + point_index] = ex;
+        derivatives[1 * info_.n_points_ + point_index] = (parameters_[0] * (x - parameters_[1])*ex) / (parameters_[2] * parameters_[2]);
+        derivatives[2 * info_.n_points_ + point_index] = (parameters_[0] * (x - parameters_[1])*(x - parameters_[1])*ex) / (parameters_[2] * parameters_[2] * parameters_[2]);
+        derivatives[3 * info_.n_points_ + point_index] = 1;
     }
 }
 
@@ -303,13 +320,29 @@ void LMFitCPP::calc_values_gauss2drotated(std::vector<float>& gaussian)
 
 void LMFitCPP::calc_values_gauss1d(std::vector<float>& gaussian)
 {
-    for (std::size_t ix = 0; ix < info_.n_points_; ix++)
+    float * user_info_float = (float*)user_info_;
+    float x = 0.f;
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
+        if (!user_info_float)
+        {
+            x = float(point_index);
+        }
+        else if (info_.user_info_size_ / sizeof(float) == info_.n_points_)
+        {
+            x = user_info_float[point_index];
+        }
+        else if (info_.user_info_size_ / sizeof(float) > info_.n_points_)
+        {
+            std::size_t const fit_begin = fit_index_ * info_.n_points_;
+            x = user_info_float[fit_begin + point_index];
+        }
+
         float argx
-            = ((ix - parameters_[1])*(ix - parameters_[1]))
+            = ((x - parameters_[1])*(x - parameters_[1]))
             / (2 * parameters_[2] * parameters_[2]);
         float ex = exp(-argx);
-        gaussian[ix] = parameters_[0] * ex + parameters_[3];
+        gaussian[point_index] = parameters_[0] * ex + parameters_[3];
     }
 }
 

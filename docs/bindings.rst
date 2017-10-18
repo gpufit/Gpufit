@@ -39,7 +39,7 @@ Python
 
 The Gpufit binding for Python is a project named pyGpufit. This project contains a Python package named pygpufit, which
 contains a module gpufit, and this module implements a method called fit. Calling this method is equivalent to
-calling the C interface function *gpufit* of |GF|. The package expects the input data to be
+calling the C interface function :code:`gpufit()` of the Gpufit library. The package expects the input data to be
 stored as NumPy array. NumPy follows row-major order by default.
 
 Installation
@@ -59,7 +59,7 @@ Python Interface
 fit
 ...
 
-The signature of the fit method (equivalent to calling the C interface function *gpufit*) is
+The signature of the fit method (equivalent to calling the C interface function :code:`gpufit()`) is
 
 .. code-block:: python
 
@@ -288,7 +288,7 @@ Matlab
 ------
 
 The Matlab binding for Gpufit is a Matlab script (gpufit.m_). This script checks the input data, sets default parameters, and
-calls the C interface of |GF|, via a compiled .mex file.
+calls the C interface of the Gpufit library, via a compiled .mex file.
 
 Please note, that before using the Matlab binding, the path to gpufit.m_ must be added to the Matlab path.
 
@@ -299,6 +299,9 @@ The CUDA error was: cannot set while device is active in this process).
 
 Matlab Interface
 ++++++++++++++++
+
+gpufit
+......
 
 Optional parameters are passed in as empty matrices (``[]``). The numbers of points, fits and parameters is deduced from the dimensions of
 the input data and initial parameters matrices.
@@ -359,6 +362,17 @@ The signature of the gpufit function is
     In seconds.
 
 Errors are raised if checks on parameters fail or if the execution of gpufit fails.
+
+gpufit_cuda_available
+.....................
+
+The signature of the gputfit_cuda_available method (equivalent to calling the C interface function *gpufit_cuda_available*) is
+
+.. code-block:: matlab
+
+    function r = gpufit_cuda_available():
+
+Returns True if CUDA is available and False otherwise.
 
 Matlab Examples
 +++++++++++++++
@@ -423,7 +437,7 @@ The model and estimator IDs can be set as
     % model ID
     model_id = ModelID.GAUSS_2D;
 
-When all input parameters are set we can call the C interface of |GF|.
+When all input parameters are set we can call the C interface of the Gpufit library.
 
 .. code-block:: matlab
 
