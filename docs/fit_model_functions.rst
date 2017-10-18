@@ -4,7 +4,14 @@ Fit Model functions
 -------------------
 
 This section describes the fit model functions which are included with the Gpufit library. The model IDs usable
-in the call of the gpufit :ref:`c-interface` are defined in gpufit.h_.
+in the call of the Gpufit :ref:`c-interface` are defined in gpufit.h_.
+
+Currently only the one-dimensional model functions `Linear regression`_ and `1D Gaussian function`_ provide an option to pass in custom *X* coordinate values
+using the user information parameter of the Gpufit interface. The data type of the values must be single precision
+floating point. If calling Gpufit by its :ref:`c-interface`, the user information size parameter must be set to the
+product of the number of values in the user information array and the size of the data type in bytes. The number of the *X* coordinate
+values must be equal to the total number of data points or the number of data points per fit. In the second case the
+same *X* coordinates will be used for each fit.
 
 Note that additional model functions may be added as described in the documentation, see :ref:`gpufit-customization`.
 
@@ -15,9 +22,24 @@ Linear regression
 
 A 1D linear function defined by two parameters (offset and slope).  The model ID of this function is ``LINEAR_1D``, and it is implemented in linear_1d.cuh_.
 
-*Optional*:  The X coordinate of each data point may be specified via the user information data parameter of the Gpufit interface.  If the user information is not provided, the 
-*X* coordinate of the first data value is assumed to be (0.0).  In this case, for a fit size of *M* data points, the *X* coordinates of the data are set equal to the indices of the 
-data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
+**Optional**: The *X* coordinate of each data point may be specified via the user information data parameter of the
+Gpufit interface.
+
+    :`Default X coordinates`:
+
+        If the user information is not provided, the *X* coordinate of the first data value is assumed to be (0.0).
+        In this case, for a fit size of *M* data points, the *X* coordinates of the data are set equal to the indices of the
+        data array, starting from zero (i.e. :math:`0, 1, 2, ..., M-1`).
+
+    :`Unique X coordinate values for each fit`:
+
+        If the number of values in the user information array is equal to the total number of data points, unique *X*
+        coordinate values are used for each fit.
+
+    :`Same X coordinate values for all fits`:
+
+        If the number of values in the user information array is equal to the number of data points per fit, the same *X*
+        coordinate values are used for all fits.
 
 .. math::
 
@@ -25,11 +47,7 @@ data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
 
 :`x`: (independent variable) *X* coordinate
 
-    The X coordinate values may be specified in the user information data.  For details, see the linear regression code example, :ref:`linear-regression-example`.
-
-    If no independent variables are provided, the *X* coordinate of the first data value is assumed to be (0.0).
-    In this case, for a fit size of *M* data points, the *X* coordinates of the data are simply the corresponding array
-    indices of the data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
+    The *X* coordinate values may be specified in the user information data.  For details, see the linear regression code example, :ref:`linear-regression-example`.
 
 :`p_0`: offset
 
@@ -43,7 +61,26 @@ data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
 
 A 1D Gaussian function defined by four parameters. Its model ID is ``GAUSS_1D`` and it is implemented in gauss_1d.cuh_.
 The user information data may be used to specify the X coordinate of each data point.
-Here, p is the vector of parameters (p0..p3) and the model function g exists for each x coordinate of the input data.
+Here, p is the vector of parameters (p0..p3) and the model function g exists for each *X* coordinate of the input data.
+
+**Optional**: The *X* coordinate of each data point may be specified via the user information data parameter of the
+Gpufit interface.
+
+    :`Default X coordinates`:
+
+        If the user information is not provided, the *X* coordinate of the first data value is assumed to be (0.0).
+        In this case, for a fit size of *M* data points, the *X* coordinates of the data are set equal to the indices of the
+        data array, starting from zero (i.e. :math:`0, 1, 2, ..., M-1`).
+
+    :`Unique X coordinate values for each fit`:
+
+        If the number of values in the user information array is equal to the total number of data points, unique *X*
+        coordinate values are used for each fit.
+
+    :`Same X coordinate values for all fits`:
+
+        If the number of values in the user information array is equal to the number of data points per fit, the same *X*
+        coordinate values are used for all fits.
 
 .. math::
 
@@ -53,10 +90,6 @@ Here, p is the vector of parameters (p0..p3) and the model function g exists for
 
     The X coordinate values may be specified in the user information data. For details on how to do this, see the linear
     regression code example, :ref:`linear-regression-example`.
-
-    If no independent variables are passed to this model function, the *X* coordinate of the first data value is assumed
-    to be (0.0). For a fit size of *M* data points, the *X* coordinates of the data are simply the corresponding array
-    indices of the data array, starting from zero (i.e. :math:`0, 1, 2, ...`).
 
 :`p_0`: amplitude
 

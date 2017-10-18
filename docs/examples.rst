@@ -10,8 +10,8 @@ use of Gpufit. However, a detailed description of the the test code is not provi
 
 .. _c-example-simple:
 
-Simple skeleton example
------------------------
+Simple example (minimal)
+------------------------
 
 This example demonstrates a simple, minimal program containing all of the required parameters for a call to the Gpufit function.  The example is contained
 in the file Simple_Example.cpp_ and it can be built and executed within the project environment. Please note that it this code does not actually do anything other than 
@@ -92,7 +92,8 @@ then checks the return status from Gpufit.  If an error occurred, the last error
 		throw std::runtime_error(gpufit_get_last_error());
 	}
 
-This simple example can be adapted for real applications by:
+In summary, the above example illustrates the basic details of the parameters which are passed to the *gpufit()* function, such
+as the size of the input and output variables, etc.  This example could be adapted for real applications by:
 
 - choosing a model ID
 - choosing an estimator ID
@@ -105,8 +106,8 @@ In the following sections, examples are provided in which Gpufit is used to fit 
 
 .. _c-example-2d-gaussian:
 
-Fit 2D Gaussian functions example
----------------------------------
+Example of 2D Gaussian fits
+---------------------------
 
 This example demonstrates the use of Gpufit to fit a dataset consisting of 2D Gaussian peaks.  The example is contained
 in the file Gauss_Fit_2D_Example.cpp_ and it can be built and executed within the project environment.  The optional
@@ -117,7 +118,7 @@ This example features:
 - Noisy data and random initial guesses for the fit parameters
 - Use of the maximum likelihood estimator which is appropriate for data subject to Poisson noise
 
-In this example, a set of simulated data is generated, consisting of 10\ :sup:`4` 2D Gaussian peaks, with a size of 30 x 30 points.  
+In this example, a set of simulated data is generated, consisting of 10\ :sup:`4` individual Gaussian peaks, with a size of 30 x 30 points.  
 Random noise is added to the data.  The model function and the model parameters are described in :ref:`gauss-2d`.
 
 In this example the true parameters used to generate the Gaussian data are defined in the following code block.
@@ -127,8 +128,9 @@ In this example the true parameters used to generate the Gaussian data are defin
     // true parameters
 	std::vector< float > true_parameters{ 10.f, 15.5f, 15.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
 
-These parameters define a 2D Gaussian peak centered at the middle of the grid (position 15.5, 15.5), with a width (standard deviation) of 3.0, an amplitude of 10
-and a background of 10.
+These parameters define a 2D Gaussian peak centered at the middle of the grid (position 14.5, 14.5), with a width (standard deviation) of 3.0, an amplitude of 10
+and a background of 10.  Note that, since we are not providing the independent variables (X values) in the call to Gpufit, the X and Y coordinates of the first 
+data point are assumed to be 0.0, and increasing linearly from this point (i.e. :math:`0, 1, 2, ...`).
 
 The guesses for the initial parameters are drawn from the true parameters with a uniformly distributed deviation
 of about 20%. The initial guesses for the center coordinates are chosen with a deviation relative to the width of the Gaussian.
@@ -152,7 +154,7 @@ of about 20%. The initial guesses for the center coordinates are chosen with a d
 		}
 	}
 
-The 2D grid of x and y values (each ranging from 0 to 49 with an increment of 1) is computed with a double for loop.
+The 2D grid of *X* and *Y* values (each ranging from 0 to 29 with an increment of 1) is computed using a double for loop.
 
 .. code-block:: cpp
 
@@ -167,7 +169,7 @@ The 2D grid of x and y values (each ranging from 0 to 49 with an increment of 1)
 		}
 	}
 
-Then a 2D Gaussian peak model function (without noise) is calculated once for the true parameters
+Next, a 2D Gaussian peak function (without noise) is calculated, once, using the true parameters.
 
 .. code-block:: cpp
 
@@ -206,14 +208,15 @@ Then a 2D Gaussian peak model function (without noise) is calculated once for th
 		}
 	}
 
-Stored in variable temp, it is then used in every fit to generate Poisson distributed random numbers.
+The variable temp_gauss is used to store the values of the Gaussian peak.  This variable is then used
+as a template to generate a set of Gaussian peaks with random, Poisson-distributed noise.
 
 .. code-block:: cpp
 
 	// generate data with noise
-	std::vector< float > temp(n_points_per_fit);
+	std::vector< float > temp_gauss(n_points_per_fit);
 	// compute the model function
-	generate_gauss_2d(x, y, temp, true_parameters.begin());
+	generate_gauss_2d(x, y, true_parameters.begin(), temp_gauss);
 
 	std::vector< float > data(n_fits * n_points_per_fit);
 	for (size_t i = 0; i < n_fits; i++)
@@ -221,15 +224,15 @@ Stored in variable temp, it is then used in every fit to generate Poisson distri
 		// generate Poisson random numbers
 		for (size_t j = 0; j < n_points_per_fit; j++)
 		{
-			std::poisson_distribution< int > poisson_dist(temp[j]);
+			std::poisson_distribution< int > poisson_dist(temp_gauss[j]);
 			data[i * n_points_per_fit + j] = static_cast<float>(poisson_dist(rng));
 		}
 	}
 
-Thus, in this example the difference between data for each fit only in the random noise. This, and the
+Thus, in this example, the data for each fit differs only in the random noise. This, and the
 randomized initial guesses for each fit, result in each fit returning slightly different best-fit parameters.
 
-We set the model and estimator IDs for the fit accordingly.
+Next, the model and estimator IDs are set, corresponding to the 2D Gaussian fit model function, and the MLE estimator.
 
 .. code-block:: cpp
 
@@ -239,8 +242,8 @@ We set the model and estimator IDs for the fit accordingly.
 	// model ID
 	int const model_id = GAUSS_2D;
 
-And call the gpufit :ref:`c-interface`. Parameters weights, user_info and user_info_size are set to 0, indicating that they
-won't be used during the fits.
+Next, the gpufit function is called via the :ref:`c-interface`. Parameters weights, user_info and user_info_size are set to 0, 
+indicating that they are not used in this example.
 
 .. code-block:: cpp
 
@@ -271,13 +274,16 @@ won't be used during the fits.
 		throw std::runtime_error(gpufit_get_last_error());
 	}
 
-After the fits have been executed and the return value is checked to ensure that no error occurred, some statistics
-about the fits are displayed.
+After the fits are complete, the return value is checked to ensure that no error occurred.  
 
 Output statistics
 +++++++++++++++++
 
-A histogram of all possible fit states (see :ref:`api-output-parameters`) is obtained by iterating over the state of each fit.
+The last part of this example obtains statistics describing the fit results, and testing whether the fits converged, etc.
+
+The output_states variable contains a state code which indicates whether the fit converged, or if an error occured 
+(see the Gpufit API documentation, :ref:`api-output-parameters`, for details).  In this example, a histogram of all possible fit states 
+is obtained by iterating over the state of each fit.
 
 .. code-block:: cpp
 
@@ -288,8 +294,8 @@ A histogram of all possible fit states (see :ref:`api-output-parameters`) is obt
 		output_states_histogram[*it]++;
 	}
 
-In the computation of the mean and standard deviation only converged fits are taken into account. Here is an example of computing
-the means of the output parameters iterating over all fits and all parameters.
+In computing the mean and standard deviation of the results, only the converged fits are taken into account. The following code 
+contains an example of the calculation of the means of the output parameters, iterating over all fits and all model parameters.
 
 .. code-block:: cpp
 
@@ -311,23 +317,34 @@ the means of the output parameters iterating over all fits and all parameters.
 		output_parameters_mean[j] /= output_states_histogram[0];
 	}
 
-.. _linear-regression-example:
+In summary, the above example illustrates a simple call to *gpufit()* using a real dataset.  When the fit is complete, the 
+fit results are obtained and the output states are checked.  Additionally, this example calculates some basic statistics 
+describing the results.  The code also illustrates how the input and output parameters are organized in memory.
+	
+.. _linear-regression-example:	
 	
 Linear Regression Example
 -------------------------
 
+This example demonstrates the use of Gpufit to compute linear fits to a randomly generated dataset.  The example is contained
+in the file Linear_Regression_Example.cpp_ and it can be built and executed within the project environment.  This example
+illustrates how independent variables may be used in the fitting process, by taking advantage of the user_info parameter.  
+In this example, a set of 10\ :sup:`4` individual fits are calculated.  Each simulated dataset consists of 20 randomly generated 
+data values.  The *X* coordinates of the data points do not have a uniform spacing, but increase non-linearly. 
+The user information data is used to pass the *X* values to *gpufit()*.  The fits are unweighted, and the model function 
+and model parameters are described in :ref:`linear-1d`.
+
+For details of how user_info is used to store the values of the independent variable for this fit model function, 
+see the section of the Gpufit documentation describing the model functions, :ref:`fit-model-functions`.
+
 This example features:
 
 - Noisy data and random initial guesses for the parameters
-- Unequal spaced x position values given as custom user_info
+- Unequally spaced *X* position values, passed to *gpufit()* using the user_info parameter.
 
-It is contained in Linear_Regression_Example.cpp_ and can be built and executed within the project environment.
 
-In this example, a straight line is fitted to 10\ :sup:`4` noisy data sets. Each data set includes 20 data points.
-Locations of data points are scaled non-linear (exponentially). The user information given implicates the x positions of the data
-sets. The fits are unweighted and the model function and the model parameters are described in :ref:`linear-1d`.
-
-The custom x positions of the linear model are stored in the user_info.
+The following code illustrates how the *X* positions of the data points are stored in the user_info variable, for this model function.  
+Note, however, that the way in which user_info is used by a model function may vary from function to function.  
 
 .. code-block:: cpp
 
@@ -341,9 +358,10 @@ The custom x positions of the linear model are stored in the user_info.
 	// size of user_info in bytes
 	size_t const user_info_size = n_points_per_fit * sizeof(float);
 
-Because only n_points_per_fit values are specified, this means that the same custom x position values are used for every fit.
+Here, by providing the data coordinates for only one fit in user_info, the model function will use the same coordinates for
+all fits in the dataset, as described in :ref:`fit-model-functions`.  
 
-The initial parameters for every fit are set to random values uniformly distributed around the true parameter value.
+In the next section, the initial parameters for each fit are set to random values, uniformly distributed around the true parameter value.
 
 .. code-block:: cpp
 
@@ -360,7 +378,7 @@ The initial parameters for every fit are set to random values uniformly distribu
 		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
 	}
 
-The data is generated as the value of a linear function and some additive normally distributed noise term.
+The data is then generated as the value of a linear function plus additive, normally distributed, random noise.
 
 .. code-block:: cpp
 
@@ -376,7 +394,7 @@ The data is generated as the value of a linear function and some additive normal
 		data[i] = y + normal_dist(rng);
 	}
 
-We set the model and estimator IDs for the fit accordingly.
+In the following code, the model and estimator IDs for the fit are initialized.
 
 .. code-block:: cpp
 
@@ -386,7 +404,8 @@ We set the model and estimator IDs for the fit accordingly.
 	// model ID
 	int const model_id = LINEAR_1D;
 
-And call the gpufit :ref:`c-interface`. Parameter weights is set to 0, indicating that they won't be used during the fits.
+Finally, a call is made to *gpufit()* (:ref:`c-interface`).  The weights parameter is set to 0, indicating that 
+the fits are unweighted.
 
 .. code-block:: cpp
 
@@ -411,5 +430,5 @@ And call the gpufit :ref:`c-interface`. Parameter weights is set to 0, indicatin
             output_number_iterations.data()
         );
 
-After the fits have been executed and the return value is checked to ensure that no error occurred, some statistics
-about the fits are displayed (see `Output statistics`_).
+After the fits have been executed and the return value is checked to ensure that no error occurred, statistics 
+describing the fit results are calculated and displayed, as in the previous example (see `Output statistics`_).
