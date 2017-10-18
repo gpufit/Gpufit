@@ -39,7 +39,7 @@ Python
 
 The Gpufit binding for Python is a project named pyGpufit. This project contains a Python package named pygpufit, which
 contains a module gpufit, and this module implements a method called fit. Calling this method is equivalent to
-calling the C interface function :code:`gpufit()` of |GF|. The package expects the input data to be
+calling the C interface function :code:`gpufit()` of the Gpufit library. The package expects the input data to be
 stored as NumPy array. NumPy follows row-major order by default.
 
 Installation
@@ -288,7 +288,7 @@ Matlab
 ------
 
 The Matlab binding for Gpufit is a Matlab script (gpufit.m_). This script checks the input data, sets default parameters, and
-calls the C interface of |GF|, via a compiled .mex file.
+calls the C interface of the Gpufit library, via a compiled .mex file.
 
 Please note, that before using the Matlab binding, the path to gpufit.m_ must be added to the Matlab path.
 
@@ -437,7 +437,7 @@ The model and estimator IDs can be set as
     % model ID
     model_id = ModelID.GAUSS_2D;
 
-When all input parameters are set we can call the C interface of |GF|.
+When all input parameters are set we can call the C interface of the Gpufit library.
 
 .. code-block:: matlab
 

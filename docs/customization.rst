@@ -4,7 +4,7 @@
 Customization
 =============
 
-This sections explains how to add custom fit model functions and custom fit estimators within |GF|.
+This sections explains how to add custom fit model functions and custom fit estimators within the Gpufit library.
 Functions calculating the estimator and model values are CUDA device functions that are defined in CUDA header files
 using the C syntax. For each function and estimator there exists a separate file. Therefore, to add an additional model
 or estimator a new CUDA header file containing the new model or estimator function must be created and included in the
@@ -100,7 +100,7 @@ Compare model_id with the defined model of the new model and call the calculate 
 Add a new fit estimator
 ------------------------
 
-To extend |GF| by additional estimators, three CUDA device functions must be defined and integrated. The sections requiring modification are
+To extend the Gpufit library with additional estimators, three CUDA device functions must be defined and integrated. The sections requiring modification are
 the functions which calculate the estimator function values, and its gradient and hessian values. Also, a new estimator ID must be defined.
 Detailed step by step instructions for adding an additional estimator is given below.
 

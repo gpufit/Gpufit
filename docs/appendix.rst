@@ -13,7 +13,7 @@ A flowchart of the implementation of the Levenberg-Marquardt algorithm is given 
    :width: 14 cm
    :align: center
 
-   Levenberg-Marquardt algorithm flow as implemented in |GF|.
+   Levenberg-Marquardt algorithm flow as implemented in the Gpufit library.
    
    
 Performance comparison to other GPU benchmarks
