@@ -10,7 +10,7 @@ as example code demonstrating the use of Gpufit. However, a detailed description
 
 .. _c-example-simple:
 
-Simple example (minimal)
+Simple example (minimal call to *gpufit()*)
 ------------------------
 
 This example demonstrates a simple, minimal program containing all of the required parameters for a call to the Gpufit function.  The example is contained
