@@ -97,6 +97,26 @@ Compare model_id with the defined model of the new model and call the calculate 
             break;
     }
 
+6.  If using CMAKE to configure the build properties, the new .cuh file name must be added to the list of CUDA headers 
+in the CMakeLists.txt file is located in the Gpufit\Gpufit subdirectory.  Specifically, the following section must be
+modified to include the new filename.
+
+.. code-block:: cpp
+
+	set( GpuCudaHeaders
+		linear_1d.cuh
+		gauss_1d.cuh
+		gauss_2d.cuh
+		gauss_2d_rotated.cuh
+		gauss_2d_elliptic.cuh
+		cauchy_2d_elliptic.cuh
+		lse.cuh
+		mle.cuh
+		cuda_gaussjordan.cuh
+		cuda_kernels.cuh
+		gpu_data.cuh
+	)
+	
 Add a new fit estimator
 ------------------------
 
