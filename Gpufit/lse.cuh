@@ -16,7 +16,7 @@
 *
 * value: An input vector of fitting curve values.
 *
-* weight: An input vector of values for weighting the chi-square values.
+* weight: An optional input vector of values for weighting the chi-square values.
 *
 * state: A pointer to a value which indicates whether the fitting
 *        process was carreid out correctly or which problem occurred.
@@ -61,7 +61,7 @@ __device__ void calculate_chi_square_lse(
 /* Description of the calculate_hessian_lse function
 * ==================================================
 *
-* This function calculates the hessian matrix values of the weighted LSE equation.
+* This function calculates the hessian matrix values of the weighted LSE estimator.
 * The calculation is performed based on previously calculated fitting curve derivative
 * values.
 *
@@ -75,14 +75,14 @@ __device__ void calculate_chi_square_lse(
 *
 * parameter_index_j: Index of the hessian row.
 *
-* data: An input vector of data values.
+* data: An input vector of data values. (not used)
 *
-* value: An input vector of fitting curve values.
+* value: An input vector of fitting curve values. (not used)
 *
 * derivative: An input vector of partial derivative values of the fitting
-*             curve for each data point.
+*             curve with respect to the fitting parameters for each data point.
 *
-* weight: An input vector of values for weighting the hessian matrix values.
+* weight: An optional input vector of values for weighting the hessian matrix values.
 *
 * user_info: An input vector containing user information. (not used)
 *
@@ -124,7 +124,7 @@ __device__ void calculate_hessian_lse(
 /* Description of the calculate_gradient_lse function
 * ===================================================
 *
-* This function calculates the gradient values of the weighted LSE equation
+* This function calculates the gradient values of the weighted LSE estimator
 * based on previously calculated fitting curve derivative values.
 *
 * Parameters:
@@ -142,9 +142,9 @@ __device__ void calculate_hessian_lse(
 * value: An input vector of fitting curve values.
 *
 * derivative: An input vector of partial derivative values of the fitting
-*             curve for each data point.
+*             curve with respect to the fitting parameters for each data point.
 *
-* weight: An input vector of values for weighting gradient values.
+* weight: An optional input vector of values for weighting gradient values.
 *
 * user_info: An input vector containing user information. (not used)
 *

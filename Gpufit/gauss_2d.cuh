@@ -15,7 +15,7 @@
 *
 * Parameters:
 *
-* parameters: An input vector of concatenated sets of model parameters.
+* parameters: An input vector of model parameters.
 *             p[0]: amplitude
 *             p[1]: center coordinate x
 *             p[2]: center coordinate y
@@ -26,33 +26,25 @@
 *
 * n_points: The number of data points per fit.
 *
-* n_parameters: The number of model parameters.
+* value: An output vector of model function values.
 *
-* values: An output vector of concatenated sets of model function values.
+* derivative: An output vector of model function partial derivatives.
 *
-* derivatives: An output vector of concatenated sets of model function partial
-*              derivatives.
+* point_index: The data point index.
+*
+* fit_index: The fit index. (not used)
 *
 * chunk_index: The chunk index. (not used)
 *
 * user_info: An input vector containing user information. (not used)
 *
-* user_info_size: The number of elements in user_info. (not used)
+* user_info_size: The size of user_info in bytes. (not used)
 *
 * Calling the calculate_gauss2d function
 * ======================================
 *
 * This __device__ function can be only called from a __global__ function or an other
-* __device__ function. When calling the function, the blocks and threads of the __global__
-* function must be set up correctly, as shown in the following example code.
-*
-*   dim3  threads(1, 1, 1);
-*   dim3  blocks(1, 1, 1);
-*
-*   threads.x = n_points * n_fits_per_block;
-*   blocks.x = n_fits / n_fits_per_block;
-*
-*   global_function<<< blocks,threads >>>(parameter1, ...);
+* __device__ function.
 *
 */
 
@@ -60,29 +52,34 @@ __device__ void calculate_gauss2d(
     float const * parameters,
     int const n_fits,
     int const n_points,
-    int const n_parameters,
-    float * values,
-    float * derivatives,
+    float * value,
+    float * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
 {
+    // indices
+
     int const n_points_x = sqrt((float)n_points);
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - point_index_y * n_points_x;
 
+    // parameters
+
     float const * p = parameters;
+
+    // value
 
     float const argx = (point_index_x - p[1]) * (point_index_x - p[1]) / (2 * p[3] * p[3]);
     float const argy = (point_index_y - p[2]) * (point_index_y - p[2]) / (2 * p[3] * p[3]);
     float const ex = exp(-(argx + argy));
-    values[point_index] = p[0] * ex + p[4];
+    value[point_index] = p[0] * ex + p[4];
 
     // derivatives
 
-    float * current_derivative = derivatives + point_index;
+    float * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points] = ex;
     current_derivative[1 * n_points] = p[0] * ex * (point_index_x - p[1]) / (p[3] * p[3]);

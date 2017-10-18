@@ -37,33 +37,22 @@ void mexFunction(
     expected_nlhs = 5;
     if (nrhs != expected_nrhs)
     {
-        wrong_nrhs = true;
-    }
-    else if (nlhs != expected_nlhs)
-    {
-        wrong_nlhs = true;
+		char s1[50];
+		_itoa_s(expected_nrhs, s1, 10);
+		char const s2[] = " input arguments required.";
+		size_t const string_length = strlen(s1) + 1 + strlen(s2);
+		strcat_s(s1, string_length, s2);
+		mexErrMsgIdAndTxt("Gpufit:Mex", s1);
     }
 
-    if (wrong_nrhs || wrong_nlhs)
+    if (nlhs != expected_nlhs)
     {
-        if (nrhs != expected_nrhs)
-        {
-            char s1[50];
-            _itoa_s(expected_nrhs, s1, 10);
-            char const s2[] = " input arguments required.";
-            size_t const string_length = strlen(s1) + 1 + strlen(s2);
-            strcat_s(s1, string_length, s2);
-            mexErrMsgIdAndTxt("Gpufit:Mex", s1);
-        }
-        else if (nlhs != expected_nlhs)
-        {
-            char s1[50];
-            _itoa_s(expected_nlhs, s1, 10);
-            char const s2[] = " output arguments required.";
-            size_t const string_length = strlen(s1) + 1 + strlen(s2);
-            strcat_s(s1, string_length, s2);
-            mexErrMsgIdAndTxt("Gpufit:Mex", s1);
-        }
+		char s1[50];
+		_itoa_s(expected_nlhs, s1, 10);
+		char const s2[] = " output arguments required.";
+		size_t const string_length = strlen(s1) + 1 + strlen(s2);
+		strcat_s(s1, string_length, s2);
+		mexErrMsgIdAndTxt("Gpufit:Mex", s1);
     }
 
 	// input parameters

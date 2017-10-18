@@ -17,10 +17,10 @@ The C interface is defined in the Gpufit header file: gpufit.h_.
 gpufit()
 ++++++++
 
-This is the main fit function. A single call to the *gpufit()* function executes a block of *N* fits.
-The inputs to *gpufit()* are scalars and pointers to arrays, and the outputs are also array pointers.
+This is the main fit function. A single call to the :code:`gpufit()` function executes a block of *N* fits.
+The inputs to :code:`gpufit()` are scalars and pointers to arrays, and the outputs are also array pointers.
 
-The inputs to the *gpufit()* function are:
+The inputs to the :code:`gpufit()` function are:
 
 - the number of fits (*N*),
 - the number of data points per fit (each fit has equal size),
@@ -36,14 +36,14 @@ The inputs to the *gpufit()* function are:
 - the user info data, which may have multiple uses, for example to pass additional parameters to the fit functions,
   or to include independent variables (e.g. X values) with the fit data.
 
-The outputs of *gpufit()* are:
+The outputs of :code:`gpufit()` are:
 
 - the best fit model parameters for each fit,
 - an array of flags indicating, for example, whether each fit converged,
 - the final value of :math:`\chi^2` for each fit,
 - the number of iterations needed for each fit to converge.
 
-The *gpufit()* function call is defined below.
+The :code:`gpufit()` function call is defined below.
 
 .. code-block:: cpp
 
@@ -183,11 +183,11 @@ Description of input parameters
 :user_info: Pointer to user information data
 
     This parameter is intended to provide flexibility to the Gpufit interface. The user information data is a generic
-    block of memory which is passed in to the *gpufit()* function, and which is accessible in shared GPU memory by the
-    fit model functions. Possible uses for the user information data is to pass in value for independent variables
-    (e.g. X values) or to supply additional data to the fit model function. For a coded example which makes use of
-    the user information data, see :ref:`linear-regression-example`. The user information data is an optional parameter
-    - if no user information is required this parameter may be set to NULL.
+    block of memory which is passed in to the :code:`gpufit()` function, and which is accessible in shared GPU memory by the
+    fit model functions and the estimator functions. Possible uses for the user information data are to pass in values 
+    for independent variables (e.g. X values) or to supply additional data to the fit model function or estimator. For 
+    a coded example which makes use of the user information data, see :ref:`linear-regression-example`. The user 
+    information data is an optional parameter - if no user information is required this parameter may be set to NULL.
 
     :type: char *
     :length: user_info_size
@@ -246,7 +246,7 @@ Description of output parameters
 gpufit_portable_interface()
 +++++++++++++++++++++++++++
 
-This function is a simple wrapper around the *gpufit()* function, providing an alternative means of passing the function parameters.
+This function is a simple wrapper around the :code:`gpufit()` function, providing an alternative means of passing the function parameters.
 
 .. code-block:: cpp
 
@@ -324,7 +324,7 @@ Description of parameters
 		:type: int *	
 	
 
-:return value: This function simply returns the *gpufit()* return status code.
+:return value: This function simply returns the :code:`gpufit()` return status code.
 
 gpufit_get_last_error()
 +++++++++++++++++++++++
@@ -367,7 +367,7 @@ installed CUDA driver version in *driver_version*.
 :runtime_version: Pointer to the CUDA runtime version number. Format is Minor version times 10 plus Major version times 1000.
                   (is 0 if the CUDA runtime version is incompatible with the installed CUDA driver version)
 
-:driver_version: Pointer to the CUDA driver version number. Format is Minor version times 10 plust Major version times 1000.
+:driver_version: Pointer to the CUDA driver version number. Format is Minor version times 10 plus Major version times 1000.
                  (is 0 if no CUDA enabled graphics card was detected)
 
 :return value: Status code

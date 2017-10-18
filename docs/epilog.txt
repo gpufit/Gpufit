@@ -2,7 +2,6 @@
 ..
    The content of this file will be appended to every documentation file. Put common substitutions and links here.
 
-.. |GF| replace:: the Gpufit library
 .. |GF_version| replace:: 1.0.1
 
 .. _CUDA: http://developer.nvidia.com/cuda-zone

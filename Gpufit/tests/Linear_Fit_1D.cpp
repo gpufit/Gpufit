@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 
     std::array< float, 2 > initial_parameters{ { 1, 0 } } ;
 
-    float tolerance{ 0.001f } ;
+    float tolerance{ 0.00001f } ;
     
 	int max_n_iterations{ 10 } ;
     
@@ -98,6 +98,6 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 	BOOST_CHECK(output_chi_squares < 1e-6f);
 
 	BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-	BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-4f);
+	BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
 
 }

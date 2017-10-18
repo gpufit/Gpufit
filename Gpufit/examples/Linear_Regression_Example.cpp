@@ -26,19 +26,19 @@ void linear_regression_example()
     */
 
 	// number of fits, fit points and parameters
-	size_t const number_fits = 10000;
-	size_t const number_points = 20;
-	size_t const number_parameters = 2;
+	size_t const n_fits = 10000;
+	size_t const n_points_per_fit = 20;
+	size_t const n_model_parameters = 2;
 
 	// custom x positions for the data points of every fit, stored in user info
-	std::vector< float > user_info(number_points);
-	for (size_t i = 0; i < number_points; i++)
+	std::vector< float > user_info(n_points_per_fit);
+	for (size_t i = 0; i < n_points_per_fit; i++)
 	{
 		user_info[i] = static_cast<float>(pow(2, i));
 	}
 
 	// size of user info in bytes
-	size_t const user_info_size = number_points * sizeof(float); 
+	size_t const user_info_size = n_points_per_fit * sizeof(float); 
 
 	// initialize random number generator
 	std::mt19937 rng;
@@ -50,21 +50,21 @@ void linear_regression_example()
 	std::vector< float > true_parameters { 5, 2 }; // offset, slope
 
 	// initial parameters (randomized)
-	std::vector< float > initial_parameters(number_fits * number_parameters);
-	for (size_t i = 0; i != number_fits; i++)
+	std::vector< float > initial_parameters(n_fits * n_model_parameters);
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random offset
-		initial_parameters[i * number_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
 		// random slope
-		initial_parameters[i * number_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
 	}
 
 	// generate data
-	std::vector< float > data(number_points * number_fits);
+	std::vector< float > data(n_points_per_fit * n_fits);
 	for (size_t i = 0; i != data.size(); i++)
 	{
-		size_t j = i / number_points; // the fit
-		size_t k = i % number_points; // the position within a fit
+		size_t j = i / n_points_per_fit; // the fit
+		size_t k = i % n_points_per_fit; // the position within a fit
 
 		float x = user_info[k];
 		float y = true_parameters[0] + x * true_parameters[1];
@@ -74,7 +74,7 @@ void linear_regression_example()
 	// tolerance
 	float const tolerance = 0.001f;
 
-	// maximal number of iterations
+	// maximum number of iterations
 	int const max_number_iterations = 20;
 
 	// estimator ID
@@ -84,19 +84,19 @@ void linear_regression_example()
 	int const model_id = LINEAR_1D;
 
 	// parameters to fit (all of them)
-	std::vector< int > parameters_to_fit(number_parameters, 1);
+	std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
 	// output parameters
-	std::vector< float > output_parameters(number_fits * number_parameters);
-	std::vector< int > output_states(number_fits);
-	std::vector< float > output_chi_square(number_fits);
-	std::vector< int > output_number_iterations(number_fits);
+	std::vector< float > output_parameters(n_fits * n_model_parameters);
+	std::vector< int > output_states(n_fits);
+	std::vector< float > output_chi_square(n_fits);
+	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
 	int const status = gpufit
         (
-            number_fits,
-            number_points,
+            n_fits,
+            n_points_per_fit,
             data.data(),
             0,
             model_id,
@@ -127,37 +127,37 @@ void linear_regression_example()
 		output_states_histogram[*it]++;
 	}
 
-	std::cout << "ratio converged              " << (float) output_states_histogram[0] / number_fits << "\n";
-	std::cout << "ratio max iteration exceeded " << (float) output_states_histogram[1] / number_fits << "\n";
-	std::cout << "ratio singular hessian       " << (float) output_states_histogram[2] / number_fits << "\n";
-	std::cout << "ratio neg curvature MLE      " << (float) output_states_histogram[3] / number_fits << "\n";
-	std::cout << "ratio gpu not read           " << (float) output_states_histogram[4] / number_fits << "\n";
+	std::cout << "ratio converged              " << (float) output_states_histogram[0] / n_fits << "\n";
+	std::cout << "ratio max iteration exceeded " << (float) output_states_histogram[1] / n_fits << "\n";
+	std::cout << "ratio singular hessian       " << (float) output_states_histogram[2] / n_fits << "\n";
+	std::cout << "ratio neg curvature MLE      " << (float) output_states_histogram[3] / n_fits << "\n";
+	std::cout << "ratio gpu not read           " << (float) output_states_histogram[4] / n_fits << "\n";
 
 	// compute mean fitted parameters for converged fits
-	std::vector< float > output_parameters_mean(number_parameters, 0);
-	for (size_t i = 0; i != number_fits; i++)
+	std::vector< float > output_parameters_mean(n_model_parameters, 0);
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == STATE_CONVERGED)
 		{
 			// add offset
-			output_parameters_mean[0] += output_parameters[i * number_parameters + 0];
+			output_parameters_mean[0] += output_parameters[i * n_model_parameters + 0];
 			// add slope
-			output_parameters_mean[1] += output_parameters[i * number_parameters + 1];
+			output_parameters_mean[1] += output_parameters[i * n_model_parameters + 1];
 		}
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
 	output_parameters_mean[1] /= output_states_histogram[0];
 
 	// compute std of fitted parameters for converged fits
-	std::vector< float > output_parameters_std(number_parameters, 0);
-	for (size_t i = 0; i != number_fits; i++)
+	std::vector< float > output_parameters_std(n_model_parameters, 0);
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == STATE_CONVERGED)
 		{
 			// add squared deviation for offset
-			output_parameters_std[0] += (output_parameters[i * number_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * number_parameters + 0] - output_parameters_mean[0]);
+			output_parameters_std[0] += (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]);
 			// add squared deviation for slope
-			output_parameters_std[1] += (output_parameters[i * number_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * number_parameters + 1] - output_parameters_mean[1]);
+			output_parameters_std[1] += (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]);
 		}
 	}
 	// divide and take square root
@@ -170,7 +170,7 @@ void linear_regression_example()
 
 	// compute mean chi-square for those converged
 	float  output_chi_square_mean = 0;
-	for (size_t i = 0; i != number_fits; i++)
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == STATE_CONVERGED)
 		{
@@ -182,7 +182,7 @@ void linear_regression_example()
 
 	// compute mean number of iterations for those converged
 	float  output_number_iterations_mean = 0;
-	for (size_t i = 0; i != number_fits; i++)
+	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == STATE_CONVERGED)
 		{

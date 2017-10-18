@@ -8,6 +8,8 @@ function gauss2d_comparison()
 % the gradient by the user (uses quasi-newton as algorithm)
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+assert(gpufit_cuda_available(), 'CUDA not available');
+
 %% number of fits and fit points
 number_fits = 1e3;
 size_x = 20;
