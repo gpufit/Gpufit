@@ -39,7 +39,7 @@ Python
 
 The Gpufit binding for Python is a project named pyGpufit. This project contains a Python package named pygpufit, which
 contains a module gpufit, and this module implements a method called fit. Calling this method is equivalent to
-calling the C interface function *gpufit* of |GF|. The package expects the input data to be
+calling the C interface function :code:`gpufit()` of |GF|. The package expects the input data to be
 stored as NumPy array. NumPy follows row-major order by default.
 
 Installation
@@ -59,7 +59,7 @@ Python Interface
 fit
 ...
 
-The signature of the fit method (equivalent to calling the C interface function *gpufit*) is
+The signature of the fit method (equivalent to calling the C interface function :code:`gpufit()`) is
 
 .. code-block:: python
 
