@@ -126,7 +126,7 @@ In this example the true parameters used to generate the Gaussian data are defin
 .. code-block:: cpp
 
     // true parameters
-	std::vector< float > true_parameters{ 10.f, 15.5f, 15.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
+	std::vector< float > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
 
 These parameters define a 2D Gaussian peak centered at the middle of the grid (position 14.5, 14.5), with a width (standard deviation) of 3.0, an amplitude of 10
 and a background of 10.  Note that, since we are not providing the independent variables (X values) in the call to Gpufit, the X and Y coordinates of the first 
