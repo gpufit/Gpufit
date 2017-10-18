@@ -43,18 +43,18 @@ it is implemented in linear_1d.cuh_.
 **Optional**: The *X* coordinate of each data point may be specified via the user information data parameter of the
 Gpufit interface.
 
-    :`Default *X* coordinates`:
+    :`Default X coordinates`:
 
         If user information is not provided, the *X* coordinate of the first data value is assumed to be (0.0).
         In this case, for a fit size of *M* data points, the *X* coordinates of the data are set equal to the indices of the
         data array, starting from zero (i.e. :math:`0, 1, 2, ..., M-1`).
 
-    :`Identical *X* coordinate values for all fits`:
+    :`Identical X coordinate values for all fits`:
 
         If the number of values in the user information array is equal to the number of data points per fit, the same *X*
         coordinate values are used for all fits.
 		
-    :`Unique *X* coordinate values for each fit`:
+    :`Unique X coordinate values for each fit`:
 
         If the number of values in the user information array is equal to the total number of data points, unique *X*
         coordinate values are used for each fit.
@@ -84,18 +84,18 @@ and the model function :code:`g` exists for each *X* coordinate of the input dat
 **Optional**: The *X* coordinate of each data point may be specified via the user information data parameter of the
 Gpufit interface.
 
-    :`Default *X* coordinates`:
+    :`Default X coordinates`:
 
         If user information is not provided, the *X* coordinate of the first data value is assumed to be (0.0).
         In this case, for a fit size of *M* data points, the *X* coordinates of the data are set equal to the indices of the
         data array, starting from zero (i.e. :math:`0, 1, 2, ..., M-1`).
 
-    :`Identical *X* coordinate values for all fits`:
+    :`Identical X coordinate values for all fits`:
 
         If the number of values in the user information array is equal to the number of data points per fit, the same *X*
         coordinate values are used for all fits.
 		
-    :`Unique *X* coordinate values for each fit`:
+    :`Unique X coordinate values for each fit`:
 
         If the number of values in the user information array is equal to the total number of data points, unique *X*
         coordinate values are used for each fit.
