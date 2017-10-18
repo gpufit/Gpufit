@@ -2,11 +2,11 @@
 Examples
 ========
 
-C++ Examples_ are part of the library codebase and can be built and run through the project environment. Here the examples are
-described and important steps are highlighted.
+Example programs, written in C++, are part of the Gpufit project and can be built and run through the project environment.  
+Here the example programs are described and the important steps in each program are highlighted.
 
-Please note, that additionally, the C++ Tests_ included in the codebase may also be of value as examples demonstrating the 
-use of Gpufit. However, a detailed description of the the test code is not provided.
+Please note, that additionally, the C++ boost tests, and the Gpufit/Cpufit performance comparison test, may also be of value 
+as example code demonstrating the use of Gpufit. However, a detailed description of these tests programs is not provided.
 
 .. _c-example-simple:
 
