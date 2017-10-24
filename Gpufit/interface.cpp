@@ -1,5 +1,6 @@
 #include "gpufit.h"
 #include "interface.h"
+#include "cuda_kernels.cuh"
 
 FitInterface::FitInterface
 (
@@ -99,7 +100,8 @@ void FitInterface::configure_info(Info & info, int const model_id)
 
 void FitInterface::fit(int const model_id)
 {
-    set_number_of_parameters(model_id);
+    int n_dimensions = 0;
+    configure_model(model_id, n_parameters_, n_dimensions);
 
     check_sizes();
 
