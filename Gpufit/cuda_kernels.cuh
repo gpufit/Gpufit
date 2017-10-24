@@ -3,6 +3,12 @@
 
 #include <device_launch_parameters.h>
 
+void configure_model(int const model_id, int * n_parameters, int * n_dimensions);
+extern __global__ void cuda_configure_model(int const model_id, int * n_parameters, int * n_dimensions);
+
+void configure_estimator(int const estimator_id);
+extern __global__ void cuda_configure_estimator(int const estimator_id);
+
 extern __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
     int const n_blocks_per_fit,

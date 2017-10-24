@@ -125,6 +125,8 @@ set( GpuCudaHeaders
 	cuda_gaussjordan.cuh
 	cuda_kernels.cuh
 	gpu_data.cuh
+	models.cuh
+	estimators.cuh
 )
 
 set( GpuCudaSources
