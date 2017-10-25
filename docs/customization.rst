@@ -23,12 +23,12 @@ values of the partial derivatives of the model, with respect to the model parame
 coordinates, must be implemented.
 
 Additionally, a new model ID must be defined and included in the list of available model IDs, and the number 
-of model parameters must be specified as well.
+of model parameters and dimensions must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
 1. Define an additional model ID in file gpufit.h_
-2. Implement a CUDA device function within a newly created .cuh file according to the following template.
+2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template.
 
 .. code-block:: cuda
 
@@ -61,61 +61,51 @@ Detailed step by step instructions for adding a model function are given below.
 This code can be used as a pattern, where the placeholders ". . ." must be replaced by user code which calculates model
 function values and partial derivative values of the model function for a particular set of parameters. See for example linear_1d.cuh_.
 
-3.	Include the newly created .cuh file in cuda_kernels.cu_
-4.	Add an if branch in the CUDA global function ``cuda_calc_curve()`` in file cuda_kernels.cu_ to allow calling the added model function
-
-.. code-block:: cpp
-
-    if (model_id == GAUSS_1D)
-        calculate_gauss1d
-            (current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-            .
-            .
-            .
-    else if (model_id == ...)       // model ID
-        ...                         // function name
-            (current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-
-Compare model_id with the defined model of the new model and call the calculate model values function of your model.
-
-5.	Add a switch case in function set_number_of_parameters in file interface.cpp_
+3.	Include the newly created .cuh file in models.cuh_
+4.	Add a switch case in the CUDA device function ``calculate_model()`` in file models.cuh_ to allow calling the added model function
 
 .. code-block:: cpp
 
     switch (model_id)
     {
-        case GAUSS_1D:
-            n_parameters_ = 4;
-            break;
-            .
-            .
-            .
-        case ... :                  // model ID
-            n_parameters_ = ... ;   // number of model parameters
-            break;
-        default:
-            break;
+    case GAUSS_1D:
+        calculate_gauss1d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+        .
+        .
+        .
+    case ...:                       // model ID
+        ...                         // function name
+            (parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+        .
+        .
+        .
+    default:
+        break;
     }
 
-6.	If using CMAKE to configure the build properties, the new .cuh file name must be added to the list of CUDA headers 
-in the CMakeLists.txt file is located in the Gpufit\Gpufit subdirectory.  Specifically, the following section must be
-modified to include the new filename.
+Compare model_id with the defined model of the new model and call the calculate model values function of your model.
+
+5.	Add a switch case in function ``configure_model()`` in file models.cuh_
 
 .. code-block:: cpp
 
-	set( GpuCudaHeaders
-		linear_1d.cuh
-		gauss_1d.cuh
-		gauss_2d.cuh
-		gauss_2d_rotated.cuh
-		gauss_2d_elliptic.cuh
-		cauchy_2d_elliptic.cuh
-		lse.cuh
-		mle.cuh
-		cuda_gaussjordan.cuh
-		cuda_kernels.cuh
-		gpu_data.cuh
-	)
+    switch (model_id)
+    {
+    case GAUSS_1D:              n_parameters = 4; n_dimensions = 1; break;
+    .
+    .
+    .
+    case ...:                   // model ID
+        n_parameters = ...;     // number of model parameters
+        n_dimensions = ...;     // number of model dimensions
+        break;
+
+    default:                                                        break;
+    }
+
+6.	Rerun CMAKE
 	
 Add a new fit estimator
 ------------------------
@@ -125,7 +115,7 @@ the functions which calculate the estimator function values, and its gradient an
 Detailed step by step instructions for adding an additional estimator is given below.
 
 1. Define an additional estimator ID in gpufit.h_
-2. Implement three functions within a newly created .cuh file calculating :math:`\chi^2` values and
+2. Implement three functions within a newly created .cuh file in the folder Gpufit/Gpufit/estimators calculating :math:`\chi^2` values and
    its gradient and hessian according to the following template.
 
 .. code-block:: cuda
@@ -177,158 +167,81 @@ Detailed step by step instructions for adding an additional estimator is given b
     }
 
 This code can be used as a pattern, where the placeholders ". . ." must be replaced by user code which calculates the estimator
-and the hessian values of the estimator given. For a concrete example, see lse.cuh_.
+and the gradient and hessian values of the estimator given. For a concrete example, see lse.cuh_.
 
-3. Include the newly created .cuh file in cuda_kernels.cu_
+3. Include the newly created .cuh file in estimators.cuh_
 
 .. code-block:: cpp
 
     #include "....cuh"              // filename
 
-4. Add an if branch in 3 CUDA global functions in the file cuda_kernels.cu_
+4. Add a switch case in 3 CUDA device functions in the file estimators.cuh_
 
 For calculation of Chi-squares.
 
     .. code-block:: cuda
 
-        __global__ void cuda_calculate_chi_squares(
-        .
-        .
-        .
-        if (estimator_id == LSE)
+        switch (estimator_id)
         {
-            calculate_chi_square_lse(
-                shared_chi_square,
-                point_index,
-                current_data,
-                current_value,
-                current_weight,
-                current_state,
-                user_info,
-                user_info_size);
+        case LSE:
+            calculate_chi_square_lse(chi_square, point_index, data, value, weight, state, user_info, user_info_size);
+            break;
+            .
+            .
+            .
+        case ...:           // estimator ID
+            ...             // function name Chi-square
+                (chi_square, point_index, data, value, weight, state, user_info, user_info_size);
+            break;
+
+        default:
+            break;
         }
-        .
-        .
-        .
-        else if (estimator_id == ...)   // estimator ID
-        {
-            ...(                        // function name Chi-square
-                shared_chi_square,
-                point_index,
-                current_data,
-                current_value,
-                current_weight,
-                current_state,
-                user_info,
-                user_info_size);
-        }
-        .
-        .
-        .
 
 For calculation of the gradients of Chi-square.
 
     .. code-block:: cuda
 
-        __global__ void cuda_calculate_gradients(
-        .
-        .
-        .
-        if (estimator_id == LSE)
+        switch (estimator_id)
         {
-            calculate_gradient_lse(
-                shared_gradient,
-                point_index,
-                derivative_index,
-                current_data,
-                current_value,
-                current_derivative,
-                current_weight,
-                user_info,
-                user_info_size);
+        case LSE:
+            calculate_gradient_lse(gradient, point_index, parameter_index, data, value, derivative, weight, user_info, user_info_size);
+            break;
+            .
+            .
+            .
+        case ...:           // estimator ID
+            ...             // function name gradient
+                (gradient, point_index, parameter_index, data, value, derivative, weight, user_info, user_info_size);
+            break;
+
+        default:
+            break;
         }
-        .
-        .
-        .
-        else if (estimator_id == ...)   // estimator ID
-        {
-            ...(                        // function name gradient
-                shared_gradient,
-                point_index,
-                derivative_index,
-                current_data,
-                current_value,
-                current_derivative,
-                current_weight,
-                user_info,
-                user_info_size);
-        }
-        .
-        .
-        .
 
 For the calculation of the Hessian.
 
     .. code-block:: cuda
 
-        __global__ void cuda_calculate_hessians(
-        .
-        .
-        .
-        if (estimator_id == LSE)
+        switch (estimator_id)
         {
-            calculate_hessian_lse(
-                &sum,
-                point_index,
-                derivative_index_i + point_index,
-                derivative_index_j + point_index,
-                current_data,
-                current_value,
-                current_derivative,
-                current_weight,
-                user_info,
-                user_info_size);
+        case LSE:
+            calculate_hessian_lse
+                (hessian, point_index, parameter_index_i, parameter_index_j, data, value, derivative, weight, user_info,user_info_size);
+            break;
+            .
+            .
+            .
+        case ...:           // estimator ID
+            ...             // function name hessian
+                (hessian, point_index, parameter_index_i, parameter_index_j, data, value, derivative, weight, user_info, user_info_size);
+            break;
+
+        default:
+            break;
         }
-        .
-        .
-        .
-        else if (estimator_id == ...)   // estimator ID
-        {
-            ...(                        // function name hessian
-                &sum,
-                point_index,
-                derivative_index_i + point_index,
-                derivative_index_j + point_index,
-                current_data,
-                current_value,
-                current_derivative,
-                current_weight,
-                user_info,
-                user_info_size);
-        }
-        .
-        .
-        .
 		
-5.	If using CMAKE to configure the build properties, the new .cuh file name must be added to the list of CUDA headers 
-in the CMakeLists.txt file is located in the Gpufit\Gpufit subdirectory.  Specifically, the following section must be
-modified to include the new filename.
-
-.. code-block:: cpp
-
-	set( GpuCudaHeaders
-		linear_1d.cuh
-		gauss_1d.cuh
-		gauss_2d.cuh
-		gauss_2d_rotated.cuh
-		gauss_2d_elliptic.cuh
-		cauchy_2d_elliptic.cuh
-		lse.cuh
-		mle.cuh
-		cuda_gaussjordan.cuh
-		cuda_kernels.cuh
-		gpu_data.cuh
-	)
+5.	Rerun CMAKE
 		
 Future releases
 ---------------
