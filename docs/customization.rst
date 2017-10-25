@@ -27,7 +27,7 @@ of model parameters and dimensions must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
-1. Define an additional model ID in file gpufit.h_
+1. Define an additional model ID in file gpufit.h_.
 2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template.
 
 .. code-block:: cuda
@@ -62,7 +62,7 @@ This code can be used as a pattern, where the placeholders ". . ." must be repla
 function values and partial derivative values of the model function for a particular set of parameters. See for example linear_1d.cuh_.
 
 3.	Include the newly created .cuh file in models.cuh_
-4.	Add a switch case in the CUDA device function ``calculate_model()`` in file models.cuh_ to allow calling the newly added model function
+4.	Add a switch case in the CUDA device function ``calculate_model()`` in file models.cuh_ to allow calling the newly added model function.
 
 .. code-block:: cpp
 
@@ -86,7 +86,7 @@ function values and partial derivative values of the model function for a partic
     }
 
 
-5.	Add a switch case in function ``configure_model()`` in file models.cuh_
+5.	Add a switch case in function ``configure_model()`` in file models.cuh_.
 
 .. code-block:: cpp
 
@@ -169,15 +169,15 @@ Detailed step by step instructions for adding an additional estimator is given b
 This code can be used as a pattern, where the placeholders ". . ." must be replaced by user code which calculates the estimator
 and the gradient and hessian values of the estimator given. For a concrete example, see lse.cuh_.
 
-3. Include the newly created .cuh file in estimators.cuh_
+3. Include the newly created .cuh file in estimators.cuh_.
 
 .. code-block:: cpp
 
     #include "....cuh"              // filename
 
-4. Add a switch case in three CUDA device functions in the file estimators.cuh_
+4. Add a switch case in three CUDA device functions in the file estimators.cuh_.
 
-  4a. For calculation of Chi-squares:
+  4a. Calculation of Chi-square:
 
     .. code-block:: cuda
 
@@ -198,7 +198,7 @@ and the gradient and hessian values of the estimator given. For a concrete examp
             break;
         }
 
-  4b. For calculation of the gradients of Chi-square:
+  4b. Calculation of the gradients of Chi-square:
 
     .. code-block:: cuda
 
@@ -219,7 +219,7 @@ and the gradient and hessian values of the estimator given. For a concrete examp
             break;
         }
 
-  4c. For the calculation of the Hessian:
+  4c. Calculation of the Hessian:
 
     .. code-block:: cuda
 
