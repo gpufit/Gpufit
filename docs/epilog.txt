@@ -19,14 +19,16 @@
 .. _gpufit.h: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gpufit.h
 .. _interface.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/interface.cpp
 
-.. _gauss_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_1d.cuh
-.. _gauss_2d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_2d.cuh
-.. _gauss_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_2d_elliptic.cuh
-.. _gauss_2d_rotated.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gauss_2d_rotated.cuh
-.. _cauchy_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/cauchy2delliptic.cuh
-.. _linear_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/linear_1d.cuh
-.. _lse.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/lse.cuh
-.. _mle.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/mle.cuh
+.. _gauss_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/gauss_1d.cuh
+.. _gauss_2d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/gauss_2d.cuh
+.. _gauss_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/gauss_2d_elliptic.cuh
+.. _gauss_2d_rotated.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/gauss_2d_rotated.cuh
+.. _cauchy_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/cauchy2delliptic.cuh
+.. _linear_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/linear_1d.cuh
+.. _models.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/models.cuh
+.. _lse.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/estimators/lse.cuh
+.. _mle.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/estimators/mle.cuh
+.. _estimators.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/estimators/estimators.cuh
 .. _cuda_kernels.cu: https://github.com/gpufit/Gpufit/blob/master/Gpufit/cuda_kernels.cu
 
 .. _Tests: https://github.com/gpufit/Gpufit/tree/master/Gpufit/tests

@@ -1,5 +1,6 @@
 #include "gpufit.h"
 #include "interface.h"
+#include "cuda_kernels.cuh"
 
 FitInterface::FitInterface
 (
@@ -55,33 +56,6 @@ void FitInterface::check_sizes()
     }
 }
 
-void FitInterface::set_number_of_parameters(int const model_id)
-{
-    switch (model_id)
-    {
-    case GAUSS_1D:
-        n_parameters_ = 4;
-        break;
-    case GAUSS_2D:
-        n_parameters_ = 5;
-        break;
-    case GAUSS_2D_ELLIPTIC:
-        n_parameters_ = 6;
-        break;
-    case GAUSS_2D_ROTATED:
-        n_parameters_ = 7;
-        break;
-    case CAUCHY_2D_ELLIPTIC:
-        n_parameters_ = 6;
-        break;
-    case LINEAR_1D:
-        n_parameters_ = 2;
-        break;
-    default:
-        break;
-    }
-}
-
 void FitInterface::configure_info(Info & info, int const model_id)
 {
     info.model_id_ = model_id;
@@ -99,7 +73,8 @@ void FitInterface::configure_info(Info & info, int const model_id)
 
 void FitInterface::fit(int const model_id)
 {
-    set_number_of_parameters(model_id);
+    int n_dimensions = 0;
+    configure_model(model_id, n_parameters_, n_dimensions);
 
     check_sizes();
 

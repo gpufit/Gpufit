@@ -11,7 +11,7 @@ as example code demonstrating the use of Gpufit. However, a detailed description
 .. _c-example-simple:
 
 Simple example (minimal call to :code:`gpufit()`)
-------------------------
+-------------------------------------------------
 
 This example demonstrates a simple, minimal program containing all of the required parameters for a call to the Gpufit function.  The example is contained
 in the file Simple_Example.cpp_ and it can be built and executed within the project environment. Please note that it this code does not actually do anything other than 
