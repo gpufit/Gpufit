@@ -104,7 +104,7 @@ function values and partial derivative values of the model function for a partic
     default:                                                        break;
     }
 
-6.	After adding a new model function, if CMake is being used to configure the compiler, then CMake must be run again.
+6.	After adding a new model function, if CMake is being used to configure the compiler, then CMake must be run again.  If not using CMake, the new model function file (the .cuh file) must be included in the project.
 7.	Re-build the Gpufit project.
 	
 Add a new fit estimator
@@ -241,7 +241,7 @@ and the gradient and hessian values of the estimator given. For a concrete examp
             break;
         }
 		
-5.	After adding a new estimator, if CMake is being used to configure the compiler, then CMake must be run again.
+5.	After adding a new estimator, if CMake is being used to configure the compiler, then CMake must be run again.  If not using CMake, the new estimator file (the .cuh file) must be included in the project.
 6.	Re-build the Gpufit project.
 		
 Future releases
