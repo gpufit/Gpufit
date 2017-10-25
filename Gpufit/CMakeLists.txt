@@ -114,19 +114,9 @@ set( GpuSources
 )
 
 set( GpuCudaHeaders
-	linear_1d.cuh
-	gauss_1d.cuh
-	gauss_2d.cuh
-	gauss_2d_rotated.cuh
-	gauss_2d_elliptic.cuh
-	cauchy_2d_elliptic.cuh
-	lse.cuh
-	mle.cuh
 	cuda_gaussjordan.cuh
 	cuda_kernels.cuh
 	gpu_data.cuh
-	models.cuh
-	estimators.cuh
 )
 
 set( GpuCudaSources
@@ -137,14 +127,29 @@ set( GpuCudaSources
 	gpu_data.cu
 )
 
+file( GLOB Models
+	RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/models/*.cuh
+)
+
+file( GLOB Estimators
+	RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/estimators/*.cuh
+)
+
+source_group("CUDA Source Files" FILES ${GpuCudaSources})
 source_group("CUDA Source Files" FILES ${GpuCudaSources})
 source_group("CUDA Header Files" FILES ${GpuCudaHeaders})
+source_group("CUDA Model Files" FILES ${Models})
+source_group("CUDA Estimator Files" FILES ${Estimators})
 
 cuda_add_library( Gpufit SHARED
 	${GpuHeaders}
 	${GpuSources}
 	${GpuCudaHeaders}
 	${GpuCudaSources}
+	${Models}
+	${Estimators}
 )
 
 set_property( TARGET Gpufit

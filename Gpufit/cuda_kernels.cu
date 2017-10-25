@@ -1,8 +1,8 @@
 #include "gpufit.h"
 #include "cuda_kernels.cuh"
 #include "definitions.h"
-#include "models.cuh"
-#include "estimators.cuh"
+#include "models\models.cuh"
+#include "estimators\estimators.cuh"
 
 /* Description of the cuda_calc_curve_values function
 * ===================================================

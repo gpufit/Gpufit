@@ -1,3 +1,6 @@
+#ifndef GPUFIT_MODELS_CUH_INCLUDED
+#define GPUFIT_MODELS_CUH_INCLUDED
+
 #include "linear_1d.cuh"
 #include "gauss_1d.cuh"
 #include "gauss_2d.cuh"
@@ -56,3 +59,5 @@ void configure_model(int const model_id, int & n_parameters, int & n_dimensions)
     default:                                                        break;
     }
 }
+
+#endif

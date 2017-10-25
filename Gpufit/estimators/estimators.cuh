@@ -1,3 +1,6 @@
+#ifndef GPUFIT_ESTIMATORS_CUH_INCLUDED
+#define GPUFIT_ESTIMATORS_CUH_INCLUDED
+
 #include "lse.cuh"
 #include "mle.cuh"
 
@@ -77,3 +80,5 @@ __device__ void calculate_hessian(
         break;
     }
 }
+
+#endif

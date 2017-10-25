@@ -31,7 +31,6 @@ public:
     void fit(int const model_id);
 
 private:
-    void set_number_of_parameters(int const model_id);
     void check_sizes();
     void configure_info(Info & info, int const model_id);
 
