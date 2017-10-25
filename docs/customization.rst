@@ -62,7 +62,7 @@ This code can be used as a pattern, where the placeholders ". . ." must be repla
 function values and partial derivative values of the model function for a particular set of parameters. See for example linear_1d.cuh_.
 
 3.	Include the newly created .cuh file in models.cuh_
-4.	Add a switch case in the CUDA device function ``calculate_model()`` in file models.cuh_ to allow calling the added model function
+4.	Add a switch case in the CUDA device function ``calculate_model()`` in file models.cuh_ to allow calling the newly added model function
 
 .. code-block:: cpp
 
@@ -85,7 +85,6 @@ function values and partial derivative values of the model function for a partic
         break;
     }
 
-Compare model_id with the defined model of the new model and call the calculate model values function of your model.
 
 5.	Add a switch case in function ``configure_model()`` in file models.cuh_
 
@@ -105,7 +104,8 @@ Compare model_id with the defined model of the new model and call the calculate 
     default:                                                        break;
     }
 
-6.	Rerun CMAKE
+6.	After adding a new model function, if CMake is being used to configure the compiler, then CMake must be run again.
+7.	Re-build the Gpufit project.
 	
 Add a new fit estimator
 ------------------------
@@ -175,9 +175,9 @@ and the gradient and hessian values of the estimator given. For a concrete examp
 
     #include "....cuh"              // filename
 
-4. Add a switch case in 3 CUDA device functions in the file estimators.cuh_
+4. Add a switch case in three CUDA device functions in the file estimators.cuh_
 
-For calculation of Chi-squares.
+  4a. For calculation of Chi-squares:
 
     .. code-block:: cuda
 
@@ -198,7 +198,7 @@ For calculation of Chi-squares.
             break;
         }
 
-For calculation of the gradients of Chi-square.
+  4b. For calculation of the gradients of Chi-square:
 
     .. code-block:: cuda
 
@@ -219,7 +219,7 @@ For calculation of the gradients of Chi-square.
             break;
         }
 
-For the calculation of the Hessian.
+  4c. For the calculation of the Hessian:
 
     .. code-block:: cuda
 
@@ -241,7 +241,8 @@ For the calculation of the Hessian.
             break;
         }
 		
-5.	Rerun CMAKE
+5.	After adding a new estimator, if CMake is being used to configure the compiler, then CMake must be run again.
+6.	Re-build the Gpufit project.
 		
 Future releases
 ---------------
