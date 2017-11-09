@@ -1,9 +1,10 @@
 #ifndef GPUFIT_PARAMETERS_H_INCLUDED
 #define GPUFIT_PARAMETERS_H_INCLUDED
 
+#include "gpufit.h"
+#include "constants.h"
 #include "definitions.h"
 #include <vector>
-
 
 class Info
 {
@@ -35,8 +36,9 @@ public:
 	std::size_t max_chunk_size_;
     int n_fits_per_block_;
     int n_blocks_per_fit_;
-    int model_id_;
-    int estimator_id_;
+    ModelID model_id_;
+    EstimatorID estimator_id_;
+
     bool use_weights_;
 
 private:

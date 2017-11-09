@@ -1,4 +1,5 @@
 #include "gpufit.h"
+#include "constants.h"
 #include "cuda_kernels.cuh"
 #include "definitions.h"
 #include "models\models.cuh"
@@ -81,7 +82,7 @@ __global__ void cuda_calc_curve_values(
     float * derivatives,
     int const n_fits_per_block,
     int const n_blocks_per_fit,
-    int const model_id,
+    ModelID const model_id,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
@@ -362,7 +363,7 @@ __global__ void cuda_calculate_chi_squares(
     float const * weights,
     int const n_points,
     int const n_fits,
-    int const estimator_id,
+	int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
     char * user_info,
@@ -574,7 +575,7 @@ __global__ void cuda_calculate_gradients(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    int const estimator_id,
+	int const estimator_id,
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
@@ -715,7 +716,7 @@ __global__ void cuda_calculate_hessians(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    int const estimator_id,
+	int const estimator_id,
     int const * skip,
     int const * finished,
     char * user_info,
@@ -970,7 +971,7 @@ __global__ void cuda_update_state_after_gaussjordan(
 
     if (singular_checks[fit_index] == 1)
     {
-        states[fit_index] = STATE_SINGULAR_HESSIAN;
+        states[fit_index] = FitState::SINGULAR_HESSIAN;
     }
 
 }
@@ -1066,7 +1067,7 @@ __global__ void cuda_check_for_convergence(
     }
     else if (max_n_iterations_reached)
     {
-        states[fit_index] = STATE_MAX_ITERATION;
+        states[fit_index] = FitState::MAX_ITERATION;
     }
 }
 
@@ -1133,7 +1134,7 @@ __global__ void cuda_evaluate_iteration(
         return;
     }
 
-    if (states[fit_index] != STATE_CONVERGED)
+    if (states[fit_index] != FitState::CONVERGED)
     {
         finished[fit_index] = 1;
     }

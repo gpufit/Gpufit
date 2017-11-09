@@ -106,7 +106,7 @@ Description of input parameters
 
     Determines the model which is used for all fits in this call. See :ref:`fit-model-functions` for more details.
 
-    As defined in gpufit.h_:
+    As defined in constants.h_:
 
         :0: GAUSS_1D
         :1: GAUSS_2D
@@ -114,6 +114,7 @@ Description of input parameters
         :3: GAUSS_2D_ROTATED
         :4: CAUCHY_2D_ELLIPTIC
         :5: LINEAR_1D
+
 
     :type: int
 
@@ -167,7 +168,7 @@ Description of input parameters
 
     Determines the fit estimator which is used. See :ref:`estimator-functions` for more details.
 
-    As defined in gpufit.h_:
+    As defined in constants.h_:
 
         :0: LSE
         :1: MLE
@@ -211,7 +212,7 @@ Description of output parameters
     For each fit the result of the fit is indicated by a state ID. The state ID codes are defined below.
     A state ID of 0 indicates that the fit converged successfully.
 
-    As defined in gpufit.h_:
+    As defined in constants.h_:
 
         :0: The fit converged, tolerance is satisfied, the maximum number of iterations is not exceeded
         :1: Maximum number of iterations exceeded
@@ -238,7 +239,7 @@ Description of output parameters
 
 :return value: Status code
 
-    The return value of the function call indicates whether an error occurred.
+    The return value of the function call indicates whether an error occurred. As defined in constants.h_.
 
     :0: No error
     :-1: Error

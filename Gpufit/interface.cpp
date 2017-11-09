@@ -10,7 +10,7 @@ FitInterface::FitInterface
     int n_points,
     float tolerance,
     int max_n_iterations,
-    int estimator_id,
+    EstimatorID estimator_id,
     float const * initial_parameters,
     int * parameters_to_fit,
     char * user_info,
@@ -56,7 +56,7 @@ void FitInterface::check_sizes()
     }
 }
 
-void FitInterface::configure_info(Info & info, int const model_id)
+void FitInterface::configure_info(Info & info, ModelID const model_id)
 {
     info.model_id_ = model_id;
     info.n_fits_ = n_fits_;
@@ -71,7 +71,7 @@ void FitInterface::configure_info(Info & info, int const model_id)
     info.configure();
 }
 
-void FitInterface::fit(int const model_id)
+void FitInterface::fit(ModelID const model_id)
 {
     int n_dimensions = 0;
     configure_model(model_id, n_parameters_, n_dimensions);

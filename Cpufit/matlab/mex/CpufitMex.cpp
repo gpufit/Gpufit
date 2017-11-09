@@ -121,7 +121,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
             ) ;
 
 	// check status
-    if (status != STATUS_OK)
+    if (status != ReturnState::OK)
     {
         std::string const error = cpufit_get_last_error() ;
         mexErrMsgIdAndTxt( "Cpufit:Mex", error.c_str() ) ;

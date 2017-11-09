@@ -4,7 +4,7 @@ Fit Model functions
 -------------------
 
 This section describes the fit model functions which are included with the Gpufit library. The model IDs usable
-in the call of the Gpufit :ref:`c-interface` are defined in gpufit.h_.  Note that additional model functions may 
+in the call of the Gpufit :ref:`c-interface` are defined in constants.h_.  Note that additional model functions may
 be added as described in the documentation, see :ref:`gpufit-customization`.
 
 Note: Handling of independent variables

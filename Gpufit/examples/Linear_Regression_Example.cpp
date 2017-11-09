@@ -114,7 +114,7 @@ void linear_regression_example()
         );
 
 	// check status
-	if (status != STATUS_OK)
+	if (status != ReturnState::OK)
 	{
 		throw std::runtime_error(gpufit_get_last_error());
 	}
@@ -136,7 +136,7 @@ void linear_regression_example()
 	std::vector< float > output_parameters_mean(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			// add offset
 			output_parameters_mean[0] += output_parameters[i * n_model_parameters + 0];
@@ -151,7 +151,7 @@ void linear_regression_example()
 	std::vector< float > output_parameters_std(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			// add squared deviation for offset
 			output_parameters_std[0] += (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]);
@@ -171,7 +171,7 @@ void linear_regression_example()
 	float  output_chi_square_mean = 0;
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			output_chi_square_mean += output_chi_square[i];
 		}
@@ -183,7 +183,7 @@ void linear_regression_example()
 	float  output_number_iterations_mean = 0;
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			output_number_iterations_mean += static_cast<float>(output_number_iterations[i]);
 		}

@@ -16,7 +16,7 @@ public:
         int n_points,
         float tolerance,
         int max_n_iterations,
-        int estimator_id,
+        EstimatorID estimator_id,
         float const * initial_parameters,
         int * parameters_to_fit,
         char * user_info,
@@ -28,11 +28,11 @@ public:
     ) ;
     
     virtual ~FitInterface();
-    void fit(int const model_id);
+    void fit(ModelID const model_id);
 
 private:
     void check_sizes();
-    void configure_info(Info & info, int const model_id);
+    void configure_info(Info & info, ModelID const model_id);
 
 public:
 
@@ -49,7 +49,7 @@ private:
     int const n_points_;
     float const  tolerance_;
     int const max_n_iterations_;
-    int const estimator_id_;
+    EstimatorID estimator_id_;
     std::size_t const user_info_size_;
 
     //output

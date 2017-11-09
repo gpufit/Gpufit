@@ -28,7 +28,7 @@ The external bindings make some input parameters optional. The optional paramete
 :max_n_iterations:
     default value 25 iterations
 :estimator_id:
-    the default estimator is LSE as defined in gpufit.h_
+    the default estimator is LSE as defined in constants.h_
 :parameters_to_fit:
     by default all parameters are fit
 
@@ -86,11 +86,11 @@ the input data and initial parameters arrays.
     :special: If None, the default value will be used.
 :estimator_id: estimator ID
 
-    :type: EstimatorID which is an Enum in the same module and defined analogously to gpufit.h_.
+    :type: EstimatorID which is an Enum in the same module and defined analogously to constants.h_.
     :special: If None, the default value is used.
 :model_id: model ID
 
-    :type: ModelID which is an Enum in the same module and defined analogously to gpufit.h_.
+    :type: ModelID which is an Enum in the same module and defined analogously to constants.h_.
 :initial_parameters: Initial parameters
     2D NumPy array of shape (number_fits, number_parameter)
 
@@ -112,7 +112,7 @@ the input data and initial parameters arrays.
     2D NumPy array of shape (number_fits, number_parameter) and data type np.float32
 :states: Fit result states for each fit
     1D NumPy array of length number_parameter of data type np.int32
-    As defined in gpufit.h_:
+    As defined in constants.h_:
 :chi_squares: :math:`\chi^2` values for each fit
     1D NumPy array of length number_parameter of data type np.float32
 :n_iterations: Number of iterations done for each fit
@@ -330,11 +330,11 @@ The signature of the gpufit function is
     :special: If empty ([]), the default value will be used.
 :estimator_id: estimator ID
 
-    :type: EstimatorID which is defined in EstimatorID.m analogously to gpufit.h_.
+    :type: EstimatorID which is defined in EstimatorID.m analogously to constants.h_.
     :special: If empty ([]), the default value is used.
 :model_id: model ID
 
-    :type: ModelID which is defined in ModelID.m analogously to gpufit.h_.
+    :type: ModelID which is defined in ModelID.m analogously to constants.h_.
 :initial_parameters: Initial parameters
     2D matrix of size: [number_parameter, number_fits]
 
@@ -353,7 +353,7 @@ The signature of the gpufit function is
     2D matrix of size: [number_parameter, number_fits] of data type single
 :states: Fit result states for each fit
     vector of length number_parameter of data type int32
-    As defined in gpufit.h_:
+    As defined in constants.h_:
 :chi_squares: :math:`\chi^2` values for each fit
     vector of length number_parameter of data type single
 :n_iterations: Number of iterations done for each fit

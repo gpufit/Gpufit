@@ -9,7 +9,7 @@
 #include "cauchy_2d_elliptic.cuh"
 
 __device__ void calculate_model(
-    int const model_id,
+    ModelID const model_id,
     float const * parameters,
     int const n_fits,
     int const n_points,
@@ -46,7 +46,7 @@ __device__ void calculate_model(
     }
 }
 
-void configure_model(int const model_id, int & n_parameters, int & n_dimensions)
+void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensions)
 {
     switch (model_id)
     {
@@ -60,4 +60,4 @@ void configure_model(int const model_id, int & n_parameters, int & n_dimensions)
     }
 }
 
-#endif
+#endif // GPUFIT_MODELS_CUH_INCLUDED
