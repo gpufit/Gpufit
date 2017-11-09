@@ -80,7 +80,7 @@ void simple_example()
 
     /****************************** status check  *****************************/
 
-	if (status != STATUS_OK)
+	if (status != ReturnState::OK)
 	{
 		throw std::runtime_error(gpufit_get_last_error());
 	}

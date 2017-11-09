@@ -12,8 +12,6 @@ Info::Info() :
     user_info_size_(0),
     n_fits_per_block_(0),
     n_blocks_per_fit_(0),
-    model_id_(0),
-    estimator_id_(0),
     max_threads_(0),
     max_blocks_(0),
     available_gpu_memory_(0)

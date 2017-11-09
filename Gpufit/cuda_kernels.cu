@@ -1,14 +1,9 @@
 #include "gpufit.h"
+#include "constants.h"
 #include "cuda_kernels.cuh"
 #include "definitions.h"
-#include "linear_1d.cuh"
-#include "gauss_1d.cuh"
-#include "gauss_2d.cuh"
-#include "gauss_2d_elliptic.cuh"
-#include "gauss_2d_rotated.cuh"
-#include "cauchy_2d_elliptic.cuh"
-#include "lse.cuh"
-#include "mle.cuh"
+#include "models\models.cuh"
+#include "estimators\estimators.cuh"
 
 /* Description of the cuda_calc_curve_values function
 * ===================================================
@@ -87,7 +82,7 @@ __global__ void cuda_calc_curve_values(
     float * derivatives,
     int const n_fits_per_block,
     int const n_blocks_per_fit,
-    int const model_id,
+    ModelID const model_id,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size)
@@ -107,18 +102,7 @@ __global__ void cuda_calc_curve_values(
     if (point_index >= n_points)
         return;
 
-    if (model_id == GAUSS_1D)
-        calculate_gauss1d(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-    else if (model_id == GAUSS_2D)
-        calculate_gauss2d(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-    else if (model_id == GAUSS_2D_ELLIPTIC)
-        calculate_gauss2delliptic(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-    else if (model_id == GAUSS_2D_ROTATED)
-        calculate_gauss2drotated(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-    else if (model_id == CAUCHY_2D_ELLIPTIC)
-        calculate_cauchy2delliptic(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
-    else if (model_id == LINEAR_1D)
-        calculate_linear1d(current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
+    calculate_model(model_id, current_parameters, n_fits, n_points, current_values, current_derivatives, point_index, fit_index, chunk_index, user_info, user_info_size);
 }
 
 /* Description of the sum_up_floats function
@@ -379,7 +363,7 @@ __global__ void cuda_calculate_chi_squares(
     float const * weights,
     int const n_points,
     int const n_fits,
-    int const estimator_id,
+	int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
     char * user_info,
@@ -414,30 +398,16 @@ __global__ void cuda_calculate_chi_squares(
 
     if (point_index < n_points)
     {
-        if (estimator_id == LSE)
-        {
-            calculate_chi_square_lse(
-                shared_chi_square,
-                point_index,
-                current_data,
-                current_value,
-                current_weight,
-                current_state,
-                user_info,
-                user_info_size);
-        }
-        else if (estimator_id == MLE)
-        {
-            calculate_chi_square_mle(
-                shared_chi_square,
-                point_index,
-                current_data,
-                current_value,
-                current_weight,
-                current_state,
-                user_info,
-                user_info_size);
-        }
+        calculate_chi_square(
+            estimator_id,
+            shared_chi_square,
+            point_index,
+            current_data,
+            current_value,
+            current_weight,
+            current_state,
+            user_info,
+            user_info_size);
     }
     shared_chi_square += fit_piece * shared_size;
     sum_up_floats(shared_chi_square, shared_size);
@@ -605,7 +575,7 @@ __global__ void cuda_calculate_gradients(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    int const estimator_id,
+	int const estimator_id,
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
@@ -644,32 +614,17 @@ __global__ void cuda_calculate_gradients(
         {
             int const derivative_index  = parameters_to_fit_indices[parameter_index] * n_points + point_index;
 
-            if (estimator_id == LSE)
-            {
-                calculate_gradient_lse(
-                    shared_gradient,
-                    point_index,
-                    derivative_index,
-                    current_data,
-                    current_value,
-                    current_derivative,
-                    current_weight,
-                    user_info,
-                    user_info_size);
-            }
-            else if (estimator_id == MLE)
-            {
-                calculate_gradient_mle(
-                    shared_gradient,
-                    point_index,
-                    derivative_index,
-                    current_data,
-                    current_value,
-                    current_derivative,
-                    current_weight,
-                    user_info,
-                    user_info_size);
-            }
+            calculate_gradient(
+                estimator_id,
+                shared_gradient,
+                point_index,
+                derivative_index,
+                current_data,
+                current_value,
+                current_derivative,
+                current_weight,
+                user_info,
+                user_info_size);
         }
         sum_up_floats(shared_gradient + fit_piece * shared_size, shared_size);
         gradients[(fit_index * n_parameters_to_fit + parameter_index) + fit_piece * n_fits * n_parameters_to_fit]
@@ -761,7 +716,7 @@ __global__ void cuda_calculate_hessians(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    int const estimator_id,
+	int const estimator_id,
     int const * skip,
     int const * finished,
     char * user_info,
@@ -791,34 +746,18 @@ __global__ void cuda_calculate_hessians(
     double sum = 0.0;
     for (int point_index = 0; point_index < n_points; point_index++)
     {
-        if (estimator_id == LSE)
-        {
-            calculate_hessian_lse(
-                &sum,
-                point_index,
-                derivative_index_i + point_index,
-                derivative_index_j + point_index,
-                current_data,
-                current_value,
-                current_derivative,
-                current_weight,
-                user_info,
-                user_info_size);
-        }
-        else if (estimator_id == MLE)
-        {
-            calculate_hessian_mle(
-                &sum,
-                point_index,
-                derivative_index_i + point_index,
-                derivative_index_j + point_index,
-                current_data,
-                current_value,
-                current_derivative,
-                current_weight,
-                user_info,
-                user_info_size);
-        }
+        calculate_hessian(
+            estimator_id,
+            &sum,
+            point_index,
+            derivative_index_i + point_index,
+            derivative_index_j + point_index,
+            current_data,
+            current_value,
+            current_derivative,
+            current_weight,
+            user_info,
+            user_info_size);
     }
     current_hessian[hessian_index_ij] = sum;
 }
@@ -1032,7 +971,7 @@ __global__ void cuda_update_state_after_gaussjordan(
 
     if (singular_checks[fit_index] == 1)
     {
-        states[fit_index] = STATE_SINGULAR_HESSIAN;
+        states[fit_index] = FitState::SINGULAR_HESSIAN;
     }
 
 }
@@ -1128,7 +1067,7 @@ __global__ void cuda_check_for_convergence(
     }
     else if (max_n_iterations_reached)
     {
-        states[fit_index] = STATE_MAX_ITERATION;
+        states[fit_index] = FitState::MAX_ITERATION;
     }
 }
 
@@ -1195,7 +1134,7 @@ __global__ void cuda_evaluate_iteration(
         return;
     }
 
-    if (states[fit_index] != STATE_CONVERGED)
+    if (states[fit_index] != FitState::CONVERGED)
     {
         finished[fit_index] = 1;
     }

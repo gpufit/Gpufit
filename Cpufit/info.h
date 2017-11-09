@@ -2,6 +2,8 @@
 #define CPUFIT_PARAMETERS_H_INCLUDED
 
 #include <vector>
+#include "cpufit.h"
+#include "../Gpufit/constants.h"
 
 class Info
 {
@@ -18,8 +20,8 @@ public:
     std::size_t n_fits_;
     std::size_t n_points_;
     int max_n_iterations_;
-    int model_id_;
-    int estimator_id_;
+    ModelID model_id_;
+    EstimatorID estimator_id_;
     std::size_t user_info_size_;
     
 private:
