@@ -83,10 +83,10 @@ void gauss_fit_1d()
     BOOST_CHECK(output_chi_square < 1e-6f);
     BOOST_CHECK(output_n_iterations <= max_n_iterations);
 
-    BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[2] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[3] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
 }
 
 void gauss_fit_1d_custom_x()
@@ -109,7 +109,7 @@ void gauss_fit_1d_custom_x()
     std::array< float, n_points > one_fit_data{};
     generate_gauss_1d(one_fit_data, x_data, true_parameters);
     std::array< float, n_points * n_fits> data{};
-    
+
     for (int i = 0; i < n_points; i++)
     {
         data[i] = one_fit_data[i];
@@ -152,26 +152,26 @@ void gauss_fit_1d_custom_x()
         );
     // check gpufit status
     BOOST_CHECK(status == 0);
-    
+
     // check first fit
     BOOST_CHECK(output_states[0] == 0);
     BOOST_CHECK(output_chi_square[0] < 1e-6f);
     BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
 
-    BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[2] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[3] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
 
     // check second fit
     BOOST_CHECK(output_states[1] == 0);
     BOOST_CHECK(output_chi_square[1] < 1e-6f);
     BOOST_CHECK(output_n_iterations[1] <= max_n_iterations);
 
-    BOOST_CHECK(std::fabsf(output_parameters[4] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[5] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[6] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[7] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[4] - true_parameters[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[5] - true_parameters[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[6] - true_parameters[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[7] - true_parameters[3]) < 1e-6f);
 
     // compare rusults of both fits
     BOOST_CHECK(output_states[0] == output_states[1]);

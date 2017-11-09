@@ -2,6 +2,10 @@
 #include "interface.h"
 #include "cuda_kernels.cuh"
 
+
+
+
+
 FitInterface::FitInterface
 (
     float const * data,
@@ -44,12 +48,12 @@ FitInterface::~FitInterface()
 void FitInterface::check_sizes()
 {
     std::size_t maximum_size = std::numeric_limits< std::size_t >::max();
-    
+
     if (n_fits_ > maximum_size / n_points_ / sizeof(float))
     {
         throw std::runtime_error("maximum absolute number of data points exceeded");
     }
-    
+
     if (n_fits_ > maximum_size / n_parameters_ / sizeof(float))
     {
         throw std::runtime_error("maximum number of fits and/or parameters exceeded");

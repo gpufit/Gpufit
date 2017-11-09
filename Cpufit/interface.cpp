@@ -1,6 +1,12 @@
 #include "cpufit.h"
 #include "interface.h"
 
+
+#include <cstddef>
+#include <limits>
+#include <stdexcept>
+
+
 FitInterface::FitInterface(
     float const * data,
     float const * weights,

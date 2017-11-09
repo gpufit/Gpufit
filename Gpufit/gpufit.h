@@ -28,6 +28,10 @@
 extern "C" {
 #endif
 
+
+#include <cstddef>
+
+
 int gpufit
 (
     size_t n_fits,

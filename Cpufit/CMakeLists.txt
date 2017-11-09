@@ -2,14 +2,14 @@
 # Cpufit
 
 set( CpuHeaders
-	Cpufit.h
+	cpufit.h
 	info.h
 	lm_fit.h
 	interface.h
 )
 
 set( CpuSources
-	Cpufit.cpp
+	cpufit.cpp
 	info.cpp
 	lm_fit.cpp
 	lm_fit_cpp.cpp
@@ -18,7 +18,7 @@ set( CpuSources
 )
 
 add_library( Cpufit SHARED
-	${CpuHeaders} 
+	${CpuHeaders}
 	${CpuSources}
 )
 set_property( TARGET Cpufit
@@ -26,4 +26,4 @@ set_property( TARGET Cpufit
 
 #install( TARGETS Cpufit RUNTIME DESTINATION bin )
 
-add_subdirectory( matlab )
+#add_subdirectory( matlab )

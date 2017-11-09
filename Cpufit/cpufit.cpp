@@ -3,6 +3,15 @@
 
 #include <string>
 
+#include <cstdint>
+#include <limits>
+#include <stdexcept>
+
+#ifndef __int32
+#define __int32  int32_t
+#endif
+
+
 std::string last_error ;
 
 int cpufit

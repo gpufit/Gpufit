@@ -27,6 +27,10 @@
 extern "C" {
 #endif
 
+
+#include <cstddef>
+
+
 int cpufit
 (
     size_t n_fits,
