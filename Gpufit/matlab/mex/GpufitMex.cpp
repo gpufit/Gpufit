@@ -131,7 +131,7 @@ void mexFunction(
             ) ;
 
 	// check status
-    if (status != STATUS_OK)
+    if (status != ReturnState::OK)
     {
         std::string const error = gpufit_get_last_error() ;
         mexErrMsgIdAndTxt( "Gpufit:Mex", error.c_str() ) ;

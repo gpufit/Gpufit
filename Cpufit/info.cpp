@@ -6,8 +6,6 @@ Info::Info(void) :
     max_n_iterations_(0),
     n_fits_(0),
     n_points_(0),
-    model_id_(0),
-    estimator_id_(0),
     user_info_size_(0)
 {
 }

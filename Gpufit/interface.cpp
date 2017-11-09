@@ -1,5 +1,6 @@
 #include "gpufit.h"
 #include "interface.h"
+#include "cuda_kernels.cuh"
 #include "../Cpufit/profile.h"
 
 FitInterface::FitInterface
@@ -10,7 +11,7 @@ FitInterface::FitInterface
     int n_points,
     float tolerance,
     int max_n_iterations,
-    int estimator_id,
+    EstimatorID estimator_id,
     float const * initial_parameters,
     int * parameters_to_fit,
     char * user_info,
@@ -56,34 +57,7 @@ void FitInterface::check_sizes()
     }
 }
 
-void FitInterface::set_number_of_parameters(int const model_id)
-{
-    switch (model_id)
-    {
-    case GAUSS_1D:
-        n_parameters_ = 4;
-        break;
-    case GAUSS_2D:
-        n_parameters_ = 5;
-        break;
-    case GAUSS_2D_ELLIPTIC:
-        n_parameters_ = 6;
-        break;
-    case GAUSS_2D_ROTATED:
-        n_parameters_ = 7;
-        break;
-    case CAUCHY_2D_ELLIPTIC:
-        n_parameters_ = 6;
-        break;
-    case LINEAR_1D:
-        n_parameters_ = 2;
-        break;
-    default:
-        break;
-    }
-}
-
-void FitInterface::configure_info(Info & info, int const model_id)
+void FitInterface::configure_info(Info & info, ModelID const model_id)
 {
     info.model_id_ = model_id;
     info.n_fits_ = n_fits_;
@@ -98,12 +72,13 @@ void FitInterface::configure_info(Info & info, int const model_id)
     info.configure();
 }
 
-void FitInterface::fit(int const model_id)
+void FitInterface::fit(ModelID const model_id)
 {
 	std::chrono::high_resolution_clock::time_point t1, t2;
 	t1 = std::chrono::high_resolution_clock::now();
 
-    set_number_of_parameters(model_id);
+    int n_dimensions = 0;
+    configure_model(model_id, n_parameters_, n_dimensions);
 
     check_sizes();
 

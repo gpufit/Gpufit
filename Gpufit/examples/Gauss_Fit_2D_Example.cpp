@@ -168,7 +168,7 @@ void gauss_fit_2d_example()
 	std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
 
 	// check status
-	if (status != STATUS_OK)
+	if (status != ReturnState::OK)
 	{
 		throw std::runtime_error(gpufit_get_last_error());
 	}
@@ -195,7 +195,7 @@ void gauss_fit_2d_example()
 	std::vector< float > output_parameters_mean(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			for (size_t j = 0; j < n_model_parameters; j++)
 			{
@@ -213,7 +213,7 @@ void gauss_fit_2d_example()
 	std::vector< float > output_parameters_std(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			for (size_t j = 0; j < n_model_parameters; j++)
 			{
@@ -243,7 +243,7 @@ void gauss_fit_2d_example()
 	float  output_chi_square_mean = 0;
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			output_chi_square_mean += output_chi_square[i];
 		}
@@ -255,7 +255,7 @@ void gauss_fit_2d_example()
 	float  output_number_iterations_mean = 0;
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		if (output_states[i] == STATE_CONVERGED)
+		if (output_states[i] == FitState::CONVERGED)
 		{
 			output_number_iterations_mean += static_cast<float>(output_number_iterations[i]);
 		}

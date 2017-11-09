@@ -1,4 +1,5 @@
 #include "cpufit.h"
+#include "../Gpufit/constants.h"
 #include "interface.h"
 #include "profile.h"
 
@@ -46,7 +47,7 @@ try
         n_points_32,
         tolerance,
         max_n_iterations,
-        estimator_id,
+        static_cast<EstimatorID>(estimator_id),
         initial_parameters,
         parameters_to_fit,
         user_info,
@@ -57,7 +58,7 @@ try
         output_n_iterations);
     t2 = std::chrono::high_resolution_clock::now();
 
-    fi.fit(model_id);
+    fi.fit(static_cast<ModelID>(model_id));
 
     t3 = std::chrono::high_resolution_clock::now();
 
@@ -66,19 +67,19 @@ try
 
 	display_profiler_results();
 
-	return STATUS_OK;
+	return ReturnState::OK;
 }
 catch (std::exception & exception)
 {
     last_error = exception.what();
 
-    return STATUS_ERROR;
+    return ReturnState::ERROR;
 }
 catch (...)
 {
     last_error = "Unknown Error";
 
-    return STATUS_ERROR;
+    return ReturnState::ERROR;
 }
 
 char const * cpufit_get_last_error()

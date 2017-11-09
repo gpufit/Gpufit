@@ -1,4 +1,5 @@
 #include "cpufit.h"
+#include "../Gpufit/constants.h"
 #include "lm_fit.h"
 #include "profile.h"
 
@@ -528,7 +529,7 @@ void LMFitCPP::calc_chi_square(
         {
             if (values[pixel_index] <= 0.f)
             {
-                (*state_) = 3;
+                *state_ = FitState::NEG_CURVATURE_MLE;
                 return;
             }
             if (data_[pixel_index] != 0.f)
@@ -635,7 +636,7 @@ void LMFitCPP::gauss_jordan()
         indxc[kp] = icol;
         if (alpha[icol*info_.n_parameters_to_fit_ + icol] == 0.0)
         {
-            (*state_) = 2;
+            *state_ = FitState::SINGULAR_HESSIAN;
             break;
         }
         pivinv = 1.0f / alpha[icol*info_.n_parameters_to_fit_ + icol];
@@ -690,7 +691,7 @@ void LMFitCPP::evaluate_iteration(int const iteration)
         (*n_iterations_) = iteration + 1;
         if (!converged_)
         {
-            (*state_) = 1;
+            *state_ = FitState::MAX_ITERATION;
         }
     }
 }
@@ -737,7 +738,7 @@ void LMFitCPP::run()
     for (int i = 0; i < info_.n_parameters_; i++)
         parameters_[i] = initial_parameters_[i];
 
-    (*state_) = 0;
+    *state_ = FitState::CONVERGED;
 
 	t2 = std::chrono::high_resolution_clock::now();
 
@@ -784,7 +785,7 @@ void LMFitCPP::run()
         profiler.compute_model += t3 - t2;
         profiler.evaluate_iteration += t5 - t4;
 
-        if (converged_ || (*state_) != 0)
+        if (converged_ || (*state_) != FitState::CONVERGED)
         {
             break;
         }

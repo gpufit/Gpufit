@@ -2,14 +2,15 @@
 # Cpufit
 
 set( CpuHeaders
-	Cpufit.h
+	cpufit.h
+	../Gpufit/constants.h
 	info.h
 	lm_fit.h
 	interface.h
 )
 
 set( CpuSources
-	Cpufit.cpp
+	cpufit.cpp
 	info.cpp
 	lm_fit.cpp
 	lm_fit_cpp.cpp
