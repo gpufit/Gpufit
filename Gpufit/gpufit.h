@@ -28,9 +28,7 @@
 extern "C" {
 #endif
 
-
 #include <cstddef>
-
 
 int gpufit
 (

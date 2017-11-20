@@ -6,6 +6,7 @@
 #include <chrono>
 #include <numeric>
 #include <math.h>
+#include <stdexcept>
 
 void generate_gauss_2d(
     std::vector<float> const & x_coordinates,

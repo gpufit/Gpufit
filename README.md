@@ -25,6 +25,22 @@ as a PDF file in the binary distribution of Gpufit.
 
 Instructions for building Gpufit are found in the documentation: [Building from source code](https://github.com/gpufit/Gpufit/blob/master/docs/installation.rst).
 
+#### Installing python wrapper after compiling the library:
+- [Windows] copy ***Gpufit.dll*** from the build directory to ***<src_folder>/Gpufit/python/pygpufit***
+- [Linux] copy ***libGpufit.so*** from the build directory to ***<src_folder>/Gpufit/python/pygpufit***
+
+Then run:
+```python
+python setup_windows.py install # Windows installation looks for *.dll library
+```
+
+or:
+```python
+python setup_linux.py install # Linux installation looks for *.so library
+```
+
+according to which OS you are using.
+
 ## Using the Gpufit binary distribution
 
 Instructions for using the bindary distribution may be found in the documentation.  The binary package contains:

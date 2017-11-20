@@ -1,6 +1,7 @@
 #include "../gpufit.h"
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 
 void simple_example()
 {

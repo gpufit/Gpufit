@@ -4,6 +4,7 @@
 #include <random>
 #include <iostream>
 #include <math.h>
+#include <stdexcept>
 
 void linear_regression_example()
 {
