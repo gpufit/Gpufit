@@ -9,7 +9,8 @@ enum ModelID : int
     GAUSS_2D_ELLIPTIC = 2,
     GAUSS_2D_ROTATED = 3,
     CAUCHY_2D_ELLIPTIC = 4,
-    LINEAR_1D = 5
+    LINEAR_1D = 5,
+    BICOMP_3EXP_3K = 6
 };
 
 // estimator ID

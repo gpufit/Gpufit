@@ -9,8 +9,8 @@ set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 set (CMAKE_CXX_STANDARD 11)
 
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -g" )
-set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3" )
+set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O0 -g -std=c++11" )
+set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -O3 -std=c++11" )
 
 if( NOT PROJECT_NAME )
   project( Gpufit VERSION 1.0.2 )
@@ -136,19 +136,19 @@ endif()
 #    )
 #  endif()
 #endif()
-#
-#if( PYTHONINTERP_FOUND )
-#  set( Python_WORKING_DIRECTORY "${home}" CACHE PATH "Python working directory" )
-#  if( Python_WORKING_DIRECTORY )
-#    add_custom_target( RUN_PYTHON )
-#    set_property( TARGET RUN_PYTHON PROPERTY FOLDER CMakePredefinedTargets )
-#    add_dependencies( RUN_PYTHON Gpufit )
-#    add_python_launcher( RUN_PYTHON
-#      "${CMAKE_SOURCE_DIR}/Gpufit/python"
-#      "${Python_WORKING_DIRECTORY}"
-#    )
-#  endif()
-#endif()
+
+if( PYTHONINTERP_FOUND )
+  set( Python_WORKING_DIRECTORY "${home}" CACHE PATH "Python working directory" )
+  if( Python_WORKING_DIRECTORY )
+    add_custom_target( RUN_PYTHON )
+    set_property( TARGET RUN_PYTHON PROPERTY FOLDER CMakePredefinedTargets )
+    add_dependencies( RUN_PYTHON Gpufit )
+    add_python_launcher( RUN_PYTHON
+      "${CMAKE_SOURCE_DIR}/Gpufit/python"
+      "${Python_WORKING_DIRECTORY}"
+    )
+  endif()
+endif()
 
 # Tests
 

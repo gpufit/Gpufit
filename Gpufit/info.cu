@@ -12,7 +12,7 @@ void Info::get_gpu_properties()
     std::size_t total_bytes;
     CUDA_CHECK_STATUS(cudaMemGetInfo(&free_bytes, &total_bytes));
     available_gpu_memory_ = std::size_t(double(free_bytes) * 0.1);
-    
+
     if (available_gpu_memory_ > user_info_size_)
     {
         available_gpu_memory_ -= user_info_size_;
@@ -25,7 +25,7 @@ void Info::get_gpu_properties()
 
 int getDeviceCount()
 {
-	int deviceCount;
-	CUDA_CHECK_STATUS(cudaGetDeviceCount(&deviceCount));
-	return deviceCount;
+    int deviceCount;
+    CUDA_CHECK_STATUS(cudaGetDeviceCount(&deviceCount));
+    return deviceCount;
 }

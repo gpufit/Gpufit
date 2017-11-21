@@ -1,5 +1,6 @@
 #include "cpufit.h"
 #include "interface.h"
+#include "../Gpufit/constants.h"
 
 #include <string>
 
@@ -64,19 +65,19 @@ try
 
     fi.fit(model_id);
 
-    return STATUS_OK;
+    return ReturnState::OK;
 }
 catch (std::exception & exception)
 {
     last_error = exception.what();
 
-    return STATUS_ERROR;
+    return ReturnState::ERROR;
 }
 catch (...)
 {
     last_error = "Unknown Error";
 
-    return STATUS_ERROR;
+    return ReturnState::ERROR;
 }
 
 char const * cpufit_get_last_error()

@@ -6,19 +6,19 @@
 void simple_example()
 {
 	/*
-		This example demonstrates a simple, minimal program containing all 
-		of the required parameters for a call to the Gpufit function.  The example 
-		can be built and executed within the project environment. Please note that 
-		this code does not actually do anything other than make a single call to 
+		This example demonstrates a simple, minimal program containing all
+		of the required parameters for a call to the Gpufit function.  The example
+		can be built and executed within the project environment. Please note that
+		this code does not actually do anything other than make a single call to
 		gpufit().
 
-		In the first section of the code, the *model ID* is set, memory space for 
-		initial parameters and data values is allocated, the *fit tolerance* is set, 
-		the *maximum number of iterations* is set, the *estimator ID* is set, and 
-		the *parameters to fit array* is initialized.  Note that in most applications, 
-		the data array will already exist and it will be unnecessary to allocate 
-		additional space for data.  In this example, the *parameters to fit* array 
-		is initialized to all ones, indicating that all model parameters should be 
+		In the first section of the code, the *model ID* is set, memory space for
+		initial parameters and data values is allocated, the *fit tolerance* is set,
+		the *maximum number of iterations* is set, the *estimator ID* is set, and
+		the *parameters to fit array* is initialized.  Note that in most applications,
+		the data array will already exist and it will be unnecessary to allocate
+		additional space for data.  In this example, the *parameters to fit* array
+		is initialized to all ones, indicating that all model parameters should be
 		adjusted in the fit.
 	*/
 
@@ -29,7 +29,7 @@ void simple_example()
 	size_t const n_points_per_fit = 10;
 
 	// model ID and number of model parameters
-	int const model_id = GAUSS_1D;
+	ModelID const model_id = GAUSS_1D;
 	size_t const n_model_parameters = 4;
 
 	// initial parameters
@@ -45,7 +45,7 @@ void simple_example()
 	int const max_number_iterations = 10;
 
 	// estimator ID
-	int const estimator_id = LSE;
+	EstimatorID const estimator_id = LSE;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
@@ -80,7 +80,7 @@ void simple_example()
 
     /****************************** status check  *****************************/
 
-	if (status != STATUS_OK)
+	if (status != ReturnState::OK)
 	{
 		throw std::runtime_error(gpufit_get_last_error());
 	}
@@ -94,6 +94,6 @@ int main(int argc, char *argv[])
     std::cout << std::endl << "Example completed!" << std::endl;
     std::cout << "Press ENTER to exit" << std::endl;
     std::getchar();
-	
+
 	return 0;
 }

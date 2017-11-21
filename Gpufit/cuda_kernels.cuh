@@ -2,8 +2,9 @@
 #define GPUFIT_CUDA_KERNELS_CUH_INCLUDED
 
 #include <device_launch_parameters.h>
+#include "constants.h"
 
-void configure_model(int const model_id, int & n_parameters, int & n_dimensions);
+void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensions);
 
 extern __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
@@ -24,7 +25,7 @@ extern __global__ void cuda_calculate_chi_squares(
     float const * weights,
     int const n_points,
     int const n_fits,
-    int const estimator_id,
+    EstimatorID const estimator_id,
     int const * finished,
     int const n_fits_per_block,
     char * user_info,
@@ -47,7 +48,7 @@ extern __global__ void cuda_calculate_gradients(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    int const estimator_id,
+    EstimatorID const estimator_id,
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
@@ -63,7 +64,7 @@ extern __global__ void cuda_calculate_hessians(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    int const estimator_id,
+    EstimatorID const estimator_id,
     int const * skip,
     int const * finished,
     char * user_info,
@@ -85,7 +86,7 @@ extern __global__ void cuda_calc_curve_values(
     float * derivatives,
     int const n_fits_per_block,
     int const n_blocks_per_fit,
-    int const model_id,
+    ModelID const model_id,
     int const chunk_index,
     char * user_info,
     std::size_t const user_info_size);

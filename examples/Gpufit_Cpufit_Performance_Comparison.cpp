@@ -228,7 +228,7 @@ int main(int argc, char * argv[])
 	// check for CUDA runtime and driver
     int cuda_runtime_version = 0;
     int cuda_driver_version = 0;
-    bool const version_available = gpufit_get_cuda_version(&cuda_runtime_version, &cuda_driver_version) == STATUS_OK;
+    bool const version_available = gpufit_get_cuda_version(&cuda_runtime_version, &cuda_driver_version) == ReturnState::OK;
     int const cuda_runtime_major = cuda_runtime_version / 1000;
     int const cuda_runtime_minor = cuda_runtime_version % 1000 / 10;
     int const cuda_driver_major = cuda_driver_version / 1000;

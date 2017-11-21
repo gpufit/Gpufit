@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <cstdint>
-#include <limits>
+//#include <cstdint>
+//#include <limits>
 #include <stdexcept>
 
 #ifndef __int32
@@ -20,7 +20,7 @@ int gpufit
     size_t n_points,
     float * data,
     float * weights,
-    int model_id,
+    ModelID model_id,
     float * initial_parameters,
     float tolerance,
     int max_n_iterations,
@@ -52,7 +52,7 @@ try
         n_points_32,
         tolerance,
         max_n_iterations,
-        estimator_id,
+        static_cast<EstimatorID>(estimator_id),
         initial_parameters,
         parameters_to_fit,
         user_info,
@@ -62,21 +62,21 @@ try
         output_chi_squares,
         output_n_iterations);
 
-    fi.fit(model_id);
+    fi.fit(static_cast<ModelID>(model_id));
 
-    return STATUS_OK ;
+    return ReturnState::OK  ;
 }
 catch( std::exception & exception )
 {
     last_error = exception.what() ;
 
-    return STATUS_ERROR ;
+    return ReturnState::ERROR  ;
 }
 catch( ... )
 {
     last_error = "unknown error" ;
 
-    return STATUS_ERROR;
+    return ReturnState::ERROR ;
 }
 
 char const * gpufit_get_last_error()
@@ -105,13 +105,13 @@ int gpufit_get_cuda_version(int * runtime_version, int * driver_version)
     {
         cudaRuntimeGetVersion(runtime_version);
         cudaDriverGetVersion(driver_version);
-        return STATUS_OK;
+        return ReturnState::OK;
     }
     catch (std::exception & exception)
     {
         last_error = exception.what();
 
-        return STATUS_ERROR;
+        return ReturnState::ERROR;
     }
 }
 
@@ -123,7 +123,7 @@ int gpufit_portable_interface(int argc, void *argv[])
         *((size_t *) argv[1]),
         (float *) argv[2],
         (float *) argv[3],
-        *((int *) argv[4]),
+        *((ModelID *) argv[4]),
         (float *) argv[5],
         *((float *) argv[6]),
         *((int *) argv[7]),

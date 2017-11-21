@@ -12,8 +12,6 @@ Info::Info() :
     user_info_size_(0),
     n_fits_per_block_(0),
     n_blocks_per_fit_(0),
-    model_id_(0),
-    estimator_id_(0),
     max_threads_(0),
     max_blocks_(0),
     available_gpu_memory_(0)
@@ -55,7 +53,7 @@ void Info::set_fits_per_block(std::size_t const current_chunk_size)
 void Info::set_blocks_per_fit()
 {
     n_blocks_per_fit_ = 1;
-    
+
     if (power_of_two_n_points_ > max_threads_)
     {
         bool enough_threads = false;
@@ -86,7 +84,7 @@ void Info::set_max_chunk_size()
         one_fit_memory += sizeof(float) * n_points_;
 
     std::size_t tmp_chunk_size = available_gpu_memory_ / one_fit_memory;
-    
+
     if (tmp_chunk_size == 0)
     {
         throw std::runtime_error("not enough free GPU memory available");
