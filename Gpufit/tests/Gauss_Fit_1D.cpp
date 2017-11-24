@@ -56,6 +56,7 @@ void gauss_fit_1d()
     int output_states;
     float output_chi_square;
     int output_n_iterations;
+    float output_data;
 
     int const status
         = gpufit
@@ -75,7 +76,8 @@ void gauss_fit_1d()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations
+            &output_n_iterations,
+            &output_data
         );
 
     BOOST_CHECK(status == 0);
@@ -129,6 +131,7 @@ void gauss_fit_1d_custom_x()
     std::array< int, n_fits > output_states;
     std::array< float, n_fits > output_chi_square;
     std::array< int, n_fits > output_n_iterations;
+    std::array< float, n_points * n_fits> output_data{};
 
     int const status
         = gpufit
@@ -148,7 +151,8 @@ void gauss_fit_1d_custom_x()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_n_iterations.data()
+            output_n_iterations.data(),
+            output_data.data()
         );
     // check gpufit status
     BOOST_CHECK(status == 0);

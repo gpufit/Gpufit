@@ -6,7 +6,7 @@
 #include <chrono>
 #include <numeric>
 #include <math.h>
-//#include <../constants.h>
+#include "../constants.h"
 
 #include <stdexcept>
 
@@ -66,7 +66,7 @@ void gauss_fit_2d_example()
 
 
     // number of fits, fit points and parameters
-    size_t const n_fits = 10000;
+    size_t const n_fits = 1;
     size_t const size_x = 50;
     size_t const n_points_per_fit = size_x * size_x;
     size_t const n_model_parameters = 5;
@@ -144,6 +144,7 @@ void gauss_fit_2d_example()
     std::vector< int > output_states(n_fits);
     std::vector< float > output_chi_square(n_fits);
     std::vector< int > output_number_iterations(n_fits);
+    std::vector< float > output_data(n_fits * n_points_per_fit);
 
     // call to gpufit (C interface)
     std::chrono::high_resolution_clock::time_point time_0 = std::chrono::high_resolution_clock::now();
@@ -164,8 +165,18 @@ void gauss_fit_2d_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data()
+            output_number_iterations.data(),
+            output_data.data()
         );
+
+
+    std::cout << output_parameters[0] <<" | " << true_parameters[0] <<"\n";
+    std::cout << output_parameters[1] <<" | " << true_parameters[1] <<"\n";
+    std::cout << output_parameters[2] <<" | " << true_parameters[2] <<"\n";
+    std::cout << output_parameters[3] <<" | " << true_parameters[3] <<"\n";
+
+    std::cout << output_number_iterations[0] <<" | " << max_number_iterations <<"\n";
+
     std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
 
     // check status
@@ -234,7 +245,7 @@ void gauss_fit_2d_example()
     for (size_t j = 0; j < n_model_parameters; j++)
     {
         std::cout
-            << "parameter "     << j
+            << " parameter "     << j
             << " true "         << true_parameters[j]
             << " fitted mean "  << output_parameters_mean[j]
             << " std "          << output_parameters_std[j] << "\n";

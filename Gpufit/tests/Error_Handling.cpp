@@ -21,6 +21,7 @@ BOOST_AUTO_TEST_CASE( Error_Handling )
     int output_states ;
     float output_chi_square ;
     int output_n_iterations ;
+    float output_data;
 
     int const status
             = gpufit
@@ -38,9 +39,10 @@ BOOST_AUTO_TEST_CASE( Error_Handling )
                 n_points * sizeof( int ),
                 reinterpret_cast< char * >( user_info.data() ),
                 output_parameters.data(),
-                & output_states,
-                & output_chi_square,
-                & output_n_iterations
+                &output_states,
+                &output_chi_square,
+                &output_n_iterations,
+                &output_data
             ) ;
 
     BOOST_CHECK( status == - 1 ) ;

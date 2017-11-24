@@ -77,40 +77,15 @@ __device__ void calculate_bicompartment_3expIF_3k(
     int const point_index, // current time point idx
     int const fit_index, // current voxel idx
     int const chunk_index,
-    //float * times,
-    //float * IFpar,
-    //float * IFvalue,
+    float * times,
+    float * IFpar,
+    float * IFvalue,
     char * user_info, // we use this to pass the time vector unequally spaced
     std::size_t const user_info_size)
 {
     // indices
 
-    float const times_float[24] =
-    { 0.08333333 ,0.25,0.41666666,0.58333334,0.75,0.91666666,
-      1.08333333,1.25,1.41666667,1.58333333,1.75,1.91666667,
-      2.25,2.75,3.5,4.5,5.5,7.,9.,12.5,17.5,22.5,27.5,35.
-    };
-
-    float const IFpar[7] =
-    { 0.458300896195880,
-      758028.906510941,
-      3356.00773871079,
-      7042.64861309165,
-     -9.91821801288336,
-      0.0134846319687693,
-     -0.0585800774301212
-    };
-
-    float const IFvalue[24] =
-    {0.,0.,24409.38070751,29004.28711479,
-     16902.29913917,12060.98208071,10612.57271934,10197.68263123,
-     10054.6062693,9978.15052684,9917.65977008,9861.25459037,
-     9698.43991838,9541.40325626,9243.27864281,8965.43931906,
-     8706.77619679,8242.85724982,7843.85989999,7087.59694672,
-     6609.51306567,6344.98718338,6246.22490223,6414.56761034
-    };
-
-    //float const times_float[24] = {*times};
+    float * times_float = (float*)times;
     float x = 0.0f;
     if (!times_float)
     {
@@ -155,7 +130,6 @@ __device__ void calculate_bicompartment_3expIF_3k(
     float const argx = (x - p[1]) * (x - p[1]) / (2 * p[2] * p[2]);
     float const ex = exp(-argx);
     value[point_index] = p[0] * ex + p[3];
-
 
     for (uint ii=1; ii<=3; ii+=2) { //i = 1:2:4 % 2 compartiments
         delta0  = p[ii+1] + IFpar[4];
@@ -204,16 +178,14 @@ __device__ void calculate_bicompartment_3expIF_3k(
         }
 
 
-    TAC  *= exp(-dk*times_float[point_index]);
+    TAC  *= exp(-dk*times[point_index]);
     current_derivative[0 * n_points] = IFvalue[point_index] - TAC;
     TAC  = ((1-p[0]) * TAC) + (p[0] * IFvalue[point_index]);
-    if (TAC < 0.0)
-    {
+    if (TAC < 0.0) {
             TAC = 1e-16;
     }
 
     value[point_index] = TAC;
-    }
-
 }
+
 #endif

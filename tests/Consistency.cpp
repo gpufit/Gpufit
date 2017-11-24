@@ -139,6 +139,7 @@ void perform_cpufit_gpufit_and_check(void (*func)(FitInput &))
 	clean_resize(gpu.parameters, i.n_fits * i.n_parameters);
 	clean_resize(gpu.states, i.n_fits);
 	clean_resize(gpu.chi_squares, i.n_fits);
+	clean_resize(gpu.fitted_data, i.n_fits * i.n_points);
 	clean_resize(gpu.n_iterations, i.n_fits);
 
 	clean_resize(cpu.parameters, i.n_fits * i.n_parameters);
@@ -190,7 +191,8 @@ void perform_cpufit_gpufit_and_check(void (*func)(FitInput &))
 			gpu.parameters.data(),
 			gpu.states.data(),
 			gpu.chi_squares.data(),
-			gpu.n_iterations.data()
+			gpu.n_iterations.data(),
+			gpu.fitted_data.data()
 		);
 
 	BOOST_CHECK(gpu_status == 0);

@@ -55,6 +55,7 @@ void simple_example()
 	std::vector< int > output_states(n_fits);
 	std::vector< float > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
+    std::vector< float > output_data(n_fits * n_points_per_fit);
 
     /***************************** call to gpufit  ****************************/
 
@@ -75,7 +76,8 @@ void simple_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data()
+            output_number_iterations.data(),
+            output_data.data()
         );
 
     /****************************** status check  *****************************/

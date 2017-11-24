@@ -27,7 +27,7 @@ void linear_regression_example()
     */
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 10000;
+	size_t const n_fits = 1000;
 	size_t const n_points_per_fit = 20;
 	size_t const n_model_parameters = 2;
 
@@ -92,6 +92,7 @@ void linear_regression_example()
 	std::vector< int > output_states(n_fits);
 	std::vector< float > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
+    std::vector< float > output_data(n_fits * n_points_per_fit);
 
 	// call to gpufit (C interface)
 	int const status = gpufit
@@ -111,7 +112,8 @@ void linear_regression_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data()
+            output_number_iterations.data(),
+            output_data.data()
         );
 
 	// check status
@@ -127,11 +129,11 @@ void linear_regression_example()
 		output_states_histogram[*it]++;
 	}
 
-	std::cout << "ratio converged              " << (float) output_states_histogram[0] / n_fits << "\n";
-	std::cout << "ratio max iteration exceeded " << (float) output_states_histogram[1] / n_fits << "\n";
-	std::cout << "ratio singular hessian       " << (float) output_states_histogram[2] / n_fits << "\n";
-	std::cout << "ratio neg curvature MLE      " << (float) output_states_histogram[3] / n_fits << "\n";
-	std::cout << "ratio gpu not read           " << (float) output_states_histogram[4] / n_fits << "\n";
+	std::cout << "ratio converged              " << (float) output_states_histogram[0] / n_fits * 100 << "%\n";
+	std::cout << "ratio max iteration exceeded " << (float) output_states_histogram[1] / n_fits * 100 << "%\n";
+	std::cout << "ratio singular hessian       " << (float) output_states_histogram[2] / n_fits * 100 << "%\n";
+	std::cout << "ratio neg curvature MLE      " << (float) output_states_histogram[3] / n_fits * 100 << "%\n";
+	std::cout << "ratio gpu not read           " << (float) output_states_histogram[4] / n_fits * 100 << "%\n";
 
 	// compute mean fitted parameters for converged fits
 	std::vector< float > output_parameters_mean(n_model_parameters, 0);
@@ -193,6 +195,7 @@ void linear_regression_example()
 	// normalize
 	output_number_iterations_mean /= static_cast<float>(output_states_histogram[0]);
 	std::cout << "mean number of iterations " << output_number_iterations_mean << "\n";
+
 }
 
 

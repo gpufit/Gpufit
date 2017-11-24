@@ -1,4 +1,5 @@
 #include "lm_fit.h"
+#include <iostream>
 
 LMFitCUDA::LMFitCUDA(
     float const tolerance,
@@ -20,6 +21,7 @@ LMFitCUDA::~LMFitCUDA()
 
 void LMFitCUDA::run()
 {
+    std::cout << "LMFitCUDA::run" <<"\n";
     // initialize the chi-square values
 	calc_curve_values();
     calc_chi_squares();
@@ -31,6 +33,7 @@ void LMFitCUDA::run()
         gpu_data_.chi_squares_,
         n_fits_);
 
+    int test_n_iter;
     // loop over the fit iterations
     for (int iteration = 0; !all_finished_; iteration++)
     {
@@ -53,5 +56,15 @@ void LMFitCUDA::run()
         // check whether chi-squares are increasing or decreasing
         // update chi-squares, curve parameters and lambdas
         evaluate_iteration(iteration);
+
+        CUDA_CHECK_STATUS(cudaMemcpy(&test_n_iter, gpu_data_.n_iterations_, sizeof(int) , cudaMemcpyDeviceToHost));
+        std::cout << "LMFitCUDA::run --> iterations:"<< test_n_iter <<"\n";
     }
+}
+
+void LMFitCUDA::simul()
+{
+    std::cout << "LMFitCUDA::simul" <<"\n";
+    // initialize the chi-square values
+    calc_curve_values();
 }

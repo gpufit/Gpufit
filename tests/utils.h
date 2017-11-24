@@ -172,6 +172,7 @@ struct FitOutput
 	std::vector< int > states;
 	std::vector< float > chi_squares;
 	std::vector< int > n_iterations;
+    std::vector< float > fitted_data;
 };
 
 #endif

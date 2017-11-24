@@ -52,16 +52,16 @@ void GPUData::init
         data_,
         &data[chunk_index_*info_.max_chunk_size_*info_.n_points_],
         chunk_size_*info_.n_points_);
-    
+
     if (info_.use_weights_)
         write(weights_, &weights[chunk_index_*info_.max_chunk_size_*info_.n_points_],
                 chunk_size_*info_.n_points_);
-    
+
     write(
         parameters_,
         &initial_parameters[chunk_index_*info_.max_chunk_size_*info_.n_parameters_],
         chunk_size_ * info_.n_parameters_);
-    
+
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
     set(lambdas_, 0.001f, chunk_size_);

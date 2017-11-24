@@ -212,8 +212,8 @@ int main(int argc, char * argv[])
 	}
 
 	// all numbers of fits
-	std::size_t const n_fits_gpu = 2000000;
-    std::size_t const n_fits_cpu = 100000;
+	std::size_t const n_fits_gpu = 200;
+    std::size_t const n_fits_cpu = 10;
 	std::size_t const size_x = 15;
 	std::size_t const n_points = size_x * size_x;
 
@@ -298,9 +298,11 @@ int main(int argc, char * argv[])
 	std::vector<int> gpufit_states(n_fits_gpu);
 	std::vector<float> gpufit_chi_squares(n_fits_gpu);
 	std::vector<int> gpufit_n_iterations(n_fits_gpu);
+    std::vector<float> gpufit_output_data(n_fits_gpu * n_points);
 
 	// run Gpufit and measure time
 	t0 = std::chrono::high_resolution_clock::now();
+
 	int const gpu_status
 		= gpufit
 		(
@@ -319,8 +321,10 @@ int main(int argc, char * argv[])
 			gpufit_parameters.data(),
 			gpufit_states.data(),
 			gpufit_chi_squares.data(),
-			gpufit_n_iterations.data()
+			gpufit_n_iterations.data(),
+            gpufit_output_data.data()
 		);
+    std::cout << n_fits_gpu << " fits on the GPU" << std::endl;
 	std::chrono::milliseconds::rep const dt_gpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 
 	if (gpu_status != 0)

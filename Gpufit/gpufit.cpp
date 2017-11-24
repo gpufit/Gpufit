@@ -1,6 +1,6 @@
 #include "gpufit.h"
 #include "interface.h"
-
+#include <iostream>
 #include <string>
 
 //#include <cstdint>
@@ -31,7 +31,8 @@ int gpufit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    float * output_data
 )
 try
 {
@@ -60,7 +61,8 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations);
+        output_n_iterations,
+        output_data);
 
     fi.fit(static_cast<ModelID>(model_id));
 
@@ -83,6 +85,82 @@ char const * gpufit_get_last_error()
 {
     return last_error.c_str() ;
 }
+
+
+
+int gpusimul
+(
+    size_t n_fits,
+    size_t n_points,
+    ModelID model_id,
+    float * parameters,
+    size_t user_info_size,
+    char * user_info,
+    float * output_data
+)
+try
+{
+    std::vector< float > temp_float = {0};
+    std::vector< int > temp_int = {0};
+
+    __int32 n_points_32 = 0;
+    float * data = temp_float.data() ;
+    float * weights = temp_float.data() ;
+    float tolerance = 0 ;
+    int max_n_iterations = 1 ;
+    int * parameters_to_fit =  temp_int.data() ;
+    EstimatorID estimator_id = LSE ;
+    float * output_parameters = temp_float.data() ;
+    int * output_states = temp_int.data();
+    float * output_chi_squares = temp_float.data() ;
+    int * output_n_iterations = temp_int.data() ;
+
+    if (n_points <= (unsigned int)(std::numeric_limits<__int32>::max()))
+    {
+        n_points_32 = __int32(n_points);
+    }
+    else
+    {
+        throw std::runtime_error("maximum number of data points per fit exceeded");
+    }
+
+    FitInterface fi(
+        data,
+        weights,
+        n_fits,
+        n_points_32,
+        tolerance,
+        max_n_iterations,
+        estimator_id,
+        parameters,
+        parameters_to_fit,
+        user_info,
+        user_info_size,
+        output_parameters,
+        output_states,
+        output_chi_squares,
+        output_n_iterations,
+        output_data);
+
+    fi.simulate(model_id);
+
+    return ReturnState::OK  ;
+}
+catch( std::exception & exception )
+{
+    last_error = exception.what() ;
+
+    return ReturnState::ERROR  ;
+}
+catch( ... )
+{
+    last_error = "unknown error" ;
+
+    return ReturnState::ERROR ;
+}
+
+
+
 
 int gpufit_cuda_available()
 {
@@ -134,6 +212,7 @@ int gpufit_portable_interface(int argc, void *argv[])
         (float *) argv[12],
         (int *) argv[13],
         (float *) argv[14],
-        (int *) argv[15]);
-
+        (int *) argv[15],
+        (float *) argv[16]
+        );
 }

@@ -391,6 +391,7 @@ int main(int argc, char * argv[])
             std::vector<int> gpufit_states(n_fits);
             std::vector<float> gpufit_chi_squares(n_fits);
             std::vector<int> gpufit_n_iterations(n_fits);
+            std::vector<float> gpufit_output_data(n_fits * n_points);
 
             // run Gpufit and measure time
             t0 = std::chrono::high_resolution_clock::now();
@@ -412,7 +413,8 @@ int main(int argc, char * argv[])
                 gpufit_parameters.data(),
                 gpufit_states.data(),
                 gpufit_chi_squares.data(),
-                gpufit_n_iterations.data()
+                gpufit_n_iterations.data(),
+                gpufit_output_data.data()
                 );
             dt_gpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 

@@ -60,6 +60,7 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
     int output_states;
     float output_chi_square;
     int output_n_iterations;
+    float output_data;
 
     int const status
             = gpufit
@@ -79,7 +80,8 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
                 output_parameters.data(),
                 &output_states,
                 &output_chi_square,
-                &output_n_iterations
+                &output_n_iterations,
+                &output_data
             ) ;
 
     BOOST_CHECK(status == 0);

@@ -1139,6 +1139,11 @@ __global__ void cuda_evaluate_iteration(
         finished[fit_index] = 1;
     }
 
+    if (iteration == 0)
+    {
+        n_iterations[fit_index] = iteration;
+    }
+
     if (finished[fit_index] && n_iterations[fit_index] == 0)
     {
         n_iterations[fit_index] = iteration + 1;

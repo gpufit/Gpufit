@@ -26,7 +26,19 @@ int gpufit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    float * output_data
+) ;
+
+int gpusimul
+(
+    size_t n_fits,
+    size_t n_points,
+    ModelID model_id,
+    float * parameters,
+    size_t user_info_size,
+    char * user_info,
+    float * output_data
 ) ;
 
 char const * gpufit_get_last_error() ;

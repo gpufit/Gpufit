@@ -82,7 +82,7 @@ public:
     void copy(float * dst, float const * src, std::size_t const count);
 
 private:
-	
+
 	void set(int* arr, int const value, int const count);
     void write(float* dst, float const * src, int const count);
     void write(int* dst, std::vector<int> const & src);

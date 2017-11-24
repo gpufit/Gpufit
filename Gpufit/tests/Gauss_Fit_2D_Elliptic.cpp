@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Elliptic )
     int output_state;
     float output_chi_square;
     int output_n_iterations;
+    float output_data;
 
     int const status
             = gpufit
@@ -71,7 +72,8 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Elliptic )
                 output_parameters.data(),
                 &output_state,
                 &output_chi_square,
-                &output_n_iterations
+                &output_n_iterations,
+                &output_data
             ) ;
 
     BOOST_CHECK(status == 0);
