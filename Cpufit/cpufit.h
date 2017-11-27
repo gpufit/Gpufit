@@ -1,6 +1,7 @@
 #ifndef CPU_FIT_H_INCLUDED
 #define CPU_FIT_H_INCLUDED
 
+#include <cstddef>
 #include "../Gpufit/constants.h"
 
 #ifdef __cplusplus

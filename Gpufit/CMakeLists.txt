@@ -111,7 +111,7 @@ set( GpuSources
 	lm_fit.cpp
 	lm_fit_cuda.cpp
 	interface.cpp
-	gpufit.def
+	Gpufit.def
 )
 
 set( GpuCudaHeaders
