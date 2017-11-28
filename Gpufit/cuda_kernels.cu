@@ -1,4 +1,3 @@
-#include "gpufit.h"
 #include "constants.h"
 #include "cuda_kernels.cuh"
 #include "definitions.h"
