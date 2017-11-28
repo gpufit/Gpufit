@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include <stdexcept>
+
 // initialize random number generator
 std::mt19937 rng(0);
 

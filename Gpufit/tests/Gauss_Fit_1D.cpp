@@ -5,6 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 template<std::size_t n_points, std::size_t n_parameters>
 void generate_gauss_1d(
@@ -84,10 +85,10 @@ void gauss_fit_1d()
     BOOST_CHECK(output_chi_square < 1e-6f);
     BOOST_CHECK(output_n_iterations <= max_n_iterations);
 
-    BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[2] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[3] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
 }
 
 void gauss_fit_1d_custom_x()
@@ -178,20 +179,20 @@ void gauss_fit_1d_custom_x()
     BOOST_CHECK(output_chi_square[0] < 1e-6f);
     BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
 
-    BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters_1[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters_1[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[2] - true_parameters_1[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[3] - true_parameters_1[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters_1[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters_1[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters_1[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters_1[3]) < 1e-6f);
 
     // check second fit
     BOOST_CHECK(output_states[1] == 0);
     BOOST_CHECK(output_chi_square[1] < 1e-6f);
     BOOST_CHECK(output_n_iterations[1] <= max_n_iterations);
 
-    BOOST_CHECK(std::fabsf(output_parameters[4] - true_parameters_2[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[5] - true_parameters_2[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[6] - true_parameters_2[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[7] - true_parameters_2[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[4] - true_parameters_2[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[5] - true_parameters_2[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[6] - true_parameters_2[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[7] - true_parameters_2[3]) < 1e-6f);
 }
 
 BOOST_AUTO_TEST_CASE( Gauss_Fit_1D )
