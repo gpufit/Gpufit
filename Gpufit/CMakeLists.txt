@@ -98,6 +98,7 @@ message( STATUS "CUDA_NVCC_FLAGS=${code_generation_flags}" )
 
 set( GpuHeaders
 	gpufit.h
+	constants.h
 	definitions.h
 	info.h
 	lm_fit.h
@@ -127,29 +128,28 @@ set( GpuCudaSources
 	gpu_data.cu
 )
 
-file( GLOB Models
+file( GLOB GpuCudaModels
 	RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/models/*.cuh
 )
 
-file( GLOB Estimators
+file( GLOB GpuCudaEstimators
 	RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/estimators/*.cuh
 )
 
-source_group("CUDA Source Files" FILES ${GpuCudaSources})
-source_group("CUDA Source Files" FILES ${GpuCudaSources})
 source_group("CUDA Header Files" FILES ${GpuCudaHeaders})
-source_group("CUDA Model Files" FILES ${Models})
-source_group("CUDA Estimator Files" FILES ${Estimators})
+source_group("CUDA Source Files" FILES ${GpuCudaSources})
+source_group("CUDA Model Files" FILES ${GpuCudaModels})
+source_group("CUDA Estimator Files" FILES ${GpuCudaEstimators})
 
 cuda_add_library( Gpufit SHARED
 	${GpuHeaders}
 	${GpuSources}
 	${GpuCudaHeaders}
 	${GpuCudaSources}
-	${Models}
-	${Estimators}
+	${GpuCudaModels}
+	${GpuCudaEstimators}
 )
 
 set_property( TARGET Gpufit
@@ -169,6 +169,6 @@ endif()
 
 # Bindings
 
-#add_subdirectory( matlab )
-#add_subdirectory( python )
+add_subdirectory( matlab )
+add_subdirectory( python )
 

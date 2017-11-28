@@ -4,16 +4,7 @@
 
 #include <boost/test/included/unit_test.hpp>
 
-//#include <array>
-#include <vector>
-#include <random>
-#include <iostream>
-#include <chrono>
-#include <numeric>
-#include <math.h>
-#include "../constants.h"
-
-#include <stdexcept>
+#include <array>
 
 template<std::size_t SIZE>
 void generate_gauss_2d(std::array< float , SIZE>& values, float const s = 0.5f)
@@ -51,16 +42,10 @@ void gauss_fit_2d()
     float tolerance{ 0.001f };
     int max_n_iterations{ 10 };
     std::array< int, 5 > parameters_to_fit{ { 1, 1, 1, 1, 1 } };
-    /*std::array< float, 5 > output_parameters;
+    std::array< float, 5 > output_parameters;
     int output_states;
     float output_chi_square;
     int output_n_iterations;
-    float output_data;*/
-    std::vector< float > output_parameters(n_fits * 5);
-    std::vector< int > output_states(n_fits);
-    std::vector< float > output_chi_square(n_fits);
-    std::vector< int > output_n_iterations(n_fits);
-    std::vector< float > output_data(n_fits * n_points);
 
     int const status
         = gpufit
@@ -78,16 +63,15 @@ void gauss_fit_2d()
             0,
             0,
             output_parameters.data(),
-            output_states.data(),
-            output_chi_square.data(),
-            output_n_iterations.data(),
-            output_data.data()
+            &output_states,
+            &output_chi_square,
+            &output_n_iterations
         );
 
     BOOST_CHECK(status == 0);
-    BOOST_CHECK(output_states[0] == 0);
-    BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
-    BOOST_CHECK(output_chi_square[0] < 1e-6f);
+    BOOST_CHECK(output_states == 0);
+    BOOST_CHECK(output_n_iterations <= max_n_iterations);
+    BOOST_CHECK(output_chi_square < 1e-6f);
 
     int const status_with_weights
         = gpufit
@@ -105,16 +89,15 @@ void gauss_fit_2d()
             0,
             0,
             output_parameters.data(),
-            output_states.data(),
-            output_chi_square.data(),
-            output_n_iterations.data(),
-            output_data.data()
+            &output_states,
+            &output_chi_square,
+            &output_n_iterations
         );
 
     BOOST_CHECK(status_with_weights == 0);
-    BOOST_CHECK(output_states[0] == 0);
-    BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
-    BOOST_CHECK(output_chi_square[0] < 1e-6f);
+    BOOST_CHECK(output_states == 0);
+    BOOST_CHECK(output_n_iterations <= max_n_iterations);
+    BOOST_CHECK(output_chi_square < 1e-6f);
 }
 
 void gauss_fit_2d_large_dataset()
@@ -129,18 +112,10 @@ void gauss_fit_2d_large_dataset()
     float tolerance{ 0.001f };
     int max_n_iterations{ 10 };
     std::array< int, 5 > parameters_to_fit{ { 1, 1, 1, 1, 1 } };
-
-    /*std::array< float, 5 > output_parameters;
+    std::array< float, 5 > output_parameters;
     int output_states;
     float output_chi_square;
     int output_n_iterations;
-    float output_data;*/
-    std::vector< float > output_parameters(n_fits * 5);
-    std::vector< int > output_states(n_fits);
-    std::vector< float > output_chi_square(n_fits);
-    std::vector< int > output_n_iterations(n_fits);
-    std::vector< float > output_data(n_fits * n_points);
-
 
     int const status
         = gpufit
@@ -158,16 +133,15 @@ void gauss_fit_2d_large_dataset()
             0,
             0,
             output_parameters.data(),
-            output_states.data(),
-            output_chi_square.data(),
-            output_n_iterations.data(),
-            output_data.data()
+            &output_states,
+            &output_chi_square,
+            &output_n_iterations
         );
 
     BOOST_CHECK(status == 0);
-    BOOST_CHECK(output_states[0] == 0);
-    BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
-    BOOST_CHECK(output_chi_square[0] < 1e-6f);
+    BOOST_CHECK(output_states == 0);
+    BOOST_CHECK(output_n_iterations <= max_n_iterations);
+    BOOST_CHECK(output_chi_square < 1e-6f);
 
     int const status_with_weights
         = gpufit
@@ -185,16 +159,15 @@ void gauss_fit_2d_large_dataset()
             0,
             0,
             output_parameters.data(),
-            output_states.data(),
-            output_chi_square.data(),
-            output_n_iterations.data(),
-            output_data.data()
+            &output_states,
+            &output_chi_square,
+            &output_n_iterations
         );
 
     BOOST_CHECK(status_with_weights == 0);
-    BOOST_CHECK(output_states[0] == 0);
-    BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
-    BOOST_CHECK(output_chi_square[0] < 1e-6f);
+    BOOST_CHECK(output_states == 0);
+    BOOST_CHECK(output_n_iterations <= max_n_iterations);
+    BOOST_CHECK(output_chi_square < 1e-6f);
 }
 
 BOOST_AUTO_TEST_CASE( Gauss_Fit_2D )

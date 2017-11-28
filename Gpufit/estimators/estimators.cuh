@@ -3,10 +3,9 @@
 
 #include "lse.cuh"
 #include "mle.cuh"
-#include "../constants.h"
 
 __device__ void calculate_chi_square(
-    EstimatorID const estimator_id,
+    int const estimator_id,
     volatile float * chi_square,
     int const point_index,
     float const * data,
@@ -30,7 +29,7 @@ __device__ void calculate_chi_square(
 }
 
 __device__ void calculate_gradient(
-    EstimatorID const estimator_id,
+    int const estimator_id,
     volatile float * gradient,
     int const point_index,
     int const parameter_index,
@@ -55,7 +54,7 @@ __device__ void calculate_gradient(
 }
 
 __device__ void calculate_hessian(
-    EstimatorID const estimator_id,
+    int const estimator_id,
     double * hessian,
     int const point_index,
     int const parameter_index_i,

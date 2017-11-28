@@ -6,11 +6,11 @@
 
 #include <array>
 
-template<std::size_t n_points>
+template<std::size_t n_points, std::size_t n_parameters>
 void generate_gauss_1d(
     std::array< float, n_points >& values,
     std::array< float, n_points >& x_data,
-    std::array< float, 4 > const & parameters )
+    std::array< float, n_parameters > const & parameters )
 {
     float const a = parameters[ 0 ];
     float const x0 = parameters[ 1 ];
@@ -37,26 +37,26 @@ void gauss_fit_1d()
 
     std::size_t const n_fits{ 1 };
     std::size_t const n_points{ 5 };
+    std::size_t const n_parameters{ 4 };
 
-    std::array< float, 4 > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
+    std::array< float, n_parameters > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
 
     std::array< float, n_points > x_data{ { 0.f, 1.f, 2.f, 3.f, 4.f} };
     std::array< float, n_points > data{};
     generate_gauss_1d(data, x_data, true_parameters);
 
-    std::array< float, 4 > initial_parameters{ { 2.f, 1.5f, 0.3f, 0.f } };
+    std::array< float, n_parameters > initial_parameters{ { 2.f, 1.5f, 0.3f, 0.f } };
 
     float tolerance{ 0.001f };
 
     int max_n_iterations{ 10 };
 
-    std::array< int, 4 > parameters_to_fit{ { 1, 1, 1, 1 } };
+    std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1, 1 } };
 
-    std::array< float, 4 > output_parameters;
+    std::array< float, n_parameters > output_parameters;
     int output_states;
     float output_chi_square;
     int output_n_iterations;
-    float output_data;
 
     int const status
         = gpufit
@@ -76,8 +76,7 @@ void gauss_fit_1d()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations,
-            &output_data
+            &output_n_iterations
         );
 
     BOOST_CHECK(status == 0);
@@ -96,42 +95,60 @@ void gauss_fit_1d_custom_x()
     /*
     Performs two fits using the GAUSS_1D model.
     - Doesn't use or weights.
-    - Uses user_info for custom x coordinate values.
+    - Uses user_info for custom x coordinate values, unique for each fit.
     - No noise is added.
     - Checks fitted parameters equalling the true parameters.
-    - Compares fitted parameters of both fits
     */
 
     std::size_t const n_fits{ 2 };
     std::size_t const n_points{ 5 };
+    std::size_t const n_parameters{ 4 };
 
-    std::array< float, 4 > const true_parameters{ { 4.f, 0.f, 0.25f, 1.f } };
+    std::array< float, n_parameters > const true_parameters_1{ { 4.f, 0.f, .25f, 1.f } };
+    std::array< float, n_parameters > const true_parameters_2{ { 6.f, .5f, .15f, 2.f } };
 
-    std::array< float, n_points > x_data = { { -1.f, -.5f, 0.f, .5f, 1.f } };
-    std::array< float, n_points > one_fit_data{};
-    generate_gauss_1d(one_fit_data, x_data, true_parameters);
+    std::array< float, n_parameters > initial_parameters_1{ { 2.f, .25f, .15f, 0.f } };
+    std::array< float, n_parameters > initial_parameters_2{ { 8.f, .75f, .2f, 3.f } };
+
+    std::array< float, n_points > x_data_1 = { { -1.f, -.5f, 0.f, .5f, 1.f } };
+    std::array< float, n_points > x_data_2 = { { 0.f, .25f, .5f, .75f, 1.f } };
+
+    std::array< float, n_points > fit_data_1{};
+    std::array< float, n_points > fit_data_2{};
+
+    generate_gauss_1d(fit_data_1, x_data_1, true_parameters_1);
+    generate_gauss_1d(fit_data_2, x_data_2, true_parameters_2);
+    
     std::array< float, n_points * n_fits> data{};
-
+    std::array< float, n_points * n_fits> x_data{};
+    
     for (int i = 0; i < n_points; i++)
     {
-        data[i] = one_fit_data[i];
-        data[n_points + i] = one_fit_data[i];
+        data[i] = fit_data_1[i];
+        data[n_points + i] = fit_data_2[i];
+
+        x_data[i] = x_data_1[i];
+        x_data[n_points + i] = x_data_2[i];
     }
 
-    std::array< float, 4 * n_fits > initial_parameters{ { 2.f, .25f, 0.15f, 0.f,
-                                                          2.f, .25f, 0.15f, 0.f} };
+    std::array< float, n_parameters * n_fits> initial_parameters{};
 
-    float tolerance{ 0.001f };
+    for (int i = 0; i < n_parameters; i++)
+    {
+        initial_parameters[i] = initial_parameters_1[i];
+        initial_parameters[n_parameters + i] = initial_parameters_2[i];
+    }
 
-    int max_n_iterations{ 10 };
+    float tolerance{ 1e-6f };
 
-    std::array< int, 4 > parameters_to_fit{ { 1, 1, 1, 1 } };
+    int max_n_iterations{ 20 };
 
-    std::array< float, 4 * n_fits > output_parameters;
+    std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1, 1 } };
+
+    std::array< float, n_parameters * n_fits > output_parameters;
     std::array< int, n_fits > output_states;
     std::array< float, n_fits > output_chi_square;
     std::array< int, n_fits > output_n_iterations;
-    std::array< float, n_points * n_fits> output_data{};
 
     int const status
         = gpufit
@@ -146,46 +163,35 @@ void gauss_fit_1d_custom_x()
             max_n_iterations,
             parameters_to_fit.data(),
             LSE,
-            n_points * sizeof(float),
+            n_points * n_fits * sizeof(float),
             reinterpret_cast< char * >(x_data.data()),
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_n_iterations.data(),
-            output_data.data()
+            output_n_iterations.data()
         );
     // check gpufit status
     BOOST_CHECK(status == 0);
-
+    
     // check first fit
     BOOST_CHECK(output_states[0] == 0);
     BOOST_CHECK(output_chi_square[0] < 1e-6f);
     BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
 
-    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters_1[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters_1[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters_1[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters_1[3]) < 1e-6f);
 
     // check second fit
     BOOST_CHECK(output_states[1] == 0);
     BOOST_CHECK(output_chi_square[1] < 1e-6f);
     BOOST_CHECK(output_n_iterations[1] <= max_n_iterations);
 
-    BOOST_CHECK(std::abs(output_parameters[4] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::abs(output_parameters[5] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::abs(output_parameters[6] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::abs(output_parameters[7] - true_parameters[3]) < 1e-6f);
-
-    // compare rusults of both fits
-    BOOST_CHECK(output_states[0] == output_states[1]);
-    BOOST_CHECK(output_chi_square[0] == output_chi_square[1]);
-    BOOST_CHECK(output_n_iterations[0] == output_n_iterations[1]);
-
-    BOOST_CHECK(output_parameters[0] == output_parameters[4]);
-    BOOST_CHECK(output_parameters[1] == output_parameters[5]);
-    BOOST_CHECK(output_parameters[2] == output_parameters[6]);
-    BOOST_CHECK(output_parameters[3] == output_parameters[7]);
+    BOOST_CHECK(std::abs(output_parameters[4] - true_parameters_2[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[5] - true_parameters_2[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[6] - true_parameters_2[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[7] - true_parameters_2[3]) < 1e-6f);
 }
 
 BOOST_AUTO_TEST_CASE( Gauss_Fit_1D )

@@ -1,17 +1,8 @@
 #include "cpufit.h"
-#include "interface.h"
 #include "../Gpufit/constants.h"
+#include "interface.h"
 
 #include <string>
-
-#include <cstdint>
-#include <limits>
-#include <stdexcept>
-
-#ifndef __int32
-#define __int32  int32_t
-#endif
-
 
 std::string last_error ;
 
@@ -36,24 +27,14 @@ int cpufit
 )
 try
 {
-    __int32 n_points_32 = 0;
-    if (n_points <= (unsigned int)(std::numeric_limits<__int32>::max()))
-    {
-        n_points_32 = __int32(n_points);
-    }
-    else
-    {
-        throw std::runtime_error("maximum number of data points per fit exceeded");
-    }
-
     FitInterface fi(
         data,
         weights,
         n_fits,
-        n_points_32,
+        static_cast<int>(n_points),
         tolerance,
         max_n_iterations,
-        estimator_id,
+        static_cast<EstimatorID>(estimator_id),
         initial_parameters,
         parameters_to_fit,
         user_info,
@@ -63,7 +44,7 @@ try
         output_chi_squares,
         output_n_iterations);
 
-    fi.fit(model_id);
+    fi.fit(static_cast<ModelID>(model_id));
 
     return ReturnState::OK;
 }

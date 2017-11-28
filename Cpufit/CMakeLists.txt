@@ -3,6 +3,7 @@
 
 set( CpuHeaders
 	cpufit.h
+	../Gpufit/constants.h
 	info.h
 	lm_fit.h
 	interface.h
@@ -26,4 +27,4 @@ set_property( TARGET Cpufit
 
 #install( TARGETS Cpufit RUNTIME DESTINATION bin )
 
-#add_subdirectory( matlab )
+add_subdirectory( matlab )

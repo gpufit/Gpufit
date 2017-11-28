@@ -1,13 +1,13 @@
 #ifndef GPU_FIT_H_INCLUDED
 #define GPU_FIT_H_INCLUDED
 
+#include <cstddef>
+#include <stdexcept>
 #include "constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <cstddef>
 
 int gpufit
 (
@@ -15,7 +15,7 @@ int gpufit
     size_t n_points,
     float * data,
     float * weights,
-    ModelID model_id,
+    int model_id,
     float * initial_parameters,
     float tolerance,
     int max_n_iterations,
@@ -26,19 +26,7 @@ int gpufit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations,
-    float * output_data
-) ;
-
-int gpusimul
-(
-    size_t n_fits,
-    size_t n_points,
-    ModelID model_id,
-    float * parameters,
-    size_t user_info_size,
-    char * user_info,
-    float * output_data
+    int * output_n_iterations
 ) ;
 
 char const * gpufit_get_last_error() ;

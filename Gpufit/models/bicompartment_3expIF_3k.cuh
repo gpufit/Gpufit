@@ -1,6 +1,5 @@
 #ifndef GPUFIT_BICOMP3EXP3K_CUH_INCLUDED
 #define GPUFIT_BICOMP3EXP3K_CUH_INCLUDED
-
 /* Description of the calculate_gauss1d function
 * ==============================================
 *
@@ -83,8 +82,9 @@ __device__ void calculate_bicompartment_3expIF_3k(
     char * user_info, // we use this to pass the time vector unequally spaced
     std::size_t const user_info_size)
 {
-    // indices
+    //float * user_info_float = (float*) user_info;
 
+    // indices
     float const times_float[24] =
     { 0.08333333 ,0.25,0.41666666,0.58333334,0.75,0.91666666,
       1.08333333,1.25,1.41666667,1.58333333,1.75,1.91666667,
@@ -112,7 +112,7 @@ __device__ void calculate_bicompartment_3expIF_3k(
 
     //float const times_float[24] = {*times};
     float x = 0.0f;
-    if (!times_float)
+    /*if (!times_float)
     {
         x = point_index;
     }
@@ -125,7 +125,8 @@ __device__ void calculate_bicompartment_3expIF_3k(
         int const chunk_begin = chunk_index * n_fits * n_points;
         int const fit_begin = fit_index * n_points;
         x = times_float[chunk_begin + fit_begin + point_index];
-    }
+    }*/
+    x = times_float[point_index];
 
     // derivative
     float * current_derivative = derivative + point_index;
@@ -136,84 +137,82 @@ __device__ void calculate_bicompartment_3expIF_3k(
                                     //p[2] =
                                     //p[3] =
                                     //p[4] =
-    float delta0;
-    float delta;
     float Ahat[3];
     float Abar[3];
-    float sum = 0.f;
-    float TAC = 0.f;
-    float Jb = 0.f;
-    float Jl = 0.f;
     float dk = (float)(log(2.)/109.8);
+    float t0 = IFpar[0];
+    float fv = p[0];
+    float TAC = 0.;
+    float dt = x-t0;
 
     Abar[0] = -IFpar[2]-IFpar[3];
     Abar[1] =  IFpar[2];
     Abar[2] =  IFpar[3];
 
-
-    // value
-    float const argx = (x - p[1]) * (x - p[1]) / (2 * p[2] * p[2]);
-    float const ex = exp(-argx);
-    value[point_index] = p[0] * ex + p[3];
-
-
     for (uint ii=1; ii<=3; ii+=2) { //i = 1:2:4 % 2 compartiments
-        delta0  = p[ii+1] + IFpar[4];
-        Ahat[0] = -IFpar[2]-IFpar[3]-(IFpar[1]/delta0);
-        Ahat[1] =  IFpar[2];
-        Ahat[2] =  IFpar[3];
-        sum = 0.f;
-        Jb  = 0.f;
-        Jl  = 0.f;
+
+        float Bi      =  p[ii];
+        float Li      =  p[ii+1];
+        float sumTerm     =  0.f;
+        float Jb      =  0.f;
+        float Jl      =  0.f;
+        float delta0  =  Li + IFpar[4];
+        Ahat[0]       = -IFpar[2]-IFpar[3]-(IFpar[1]/delta0);
+        Ahat[1]       =  IFpar[2];
+        Ahat[2]       =  IFpar[3];
 
         for (uint jj=0; jj<3; ++jj) {
-            delta  = p[ii+1]+IFpar[4+jj];
-            if (times_float[point_index]>=IFpar[0]) {
-                sum += Ahat[jj] * (1.0f / delta) *
-                        ( exp(IFpar[4+jj]*(times_float[point_index]-IFpar[0]))
-                         -exp(-p[ii+1]*(times_float[point_index]-IFpar[0]))
-                         );
-                Jb  += Ahat[jj] * (1.0f / delta) *
-                        ( exp(IFpar[4+jj]*(times_float[point_index]-IFpar[0]))
-                         -exp(-p[ii+1]*(times_float[point_index]-IFpar[0]))
-                        );
-                Jl  += Abar[jj] * (1.0f / (delta*delta)) *
-                        ( exp(-p[ii+1]*(times_float[point_index]-IFpar[0]))
-                            -exp(IFpar[4+jj]*(times_float[point_index]-IFpar[0])))
-                        + Abar[jj] * (1.0f / delta)*
-                        (times_float[point_index]-IFpar[0]) *
-                        exp(-p[ii+1]*(times_float[point_index]-IFpar[0]));
+
+            float Ahat_j = Ahat[jj];
+            float Abar_j = Abar[jj];
+            float lj     = IFpar[4+jj];
+            float delta  = Li+lj;
+
+            if (x>=t0) {
+                sumTerm += Ahat_j * (1.0f / delta) *
+                            ( exp(lj*dt) -exp(-Li*dt) );
+                Jb  += Ahat_j * (1.0f / delta) *
+                            ( exp(lj*dt) -exp(-Li*dt) );
+                Jl  += Abar_j * (1.0f / (delta*delta)) *
+                            ( exp(-Li*dt) -exp(lj*dt))
+                            + Abar_j * (1.0f / delta)* dt * exp(-Li*dt);
             }
         }
 
-        if (times_float[point_index]>=IFpar[0]) {
+        if (x>=t0)
+        {
+            TAC += Bi * (sumTerm + ((IFpar[1]*dt)/delta0)
+                                *exp(IFpar[4]*dt));
 
-            TAC += p[ii] * (sum + ((IFpar[1]*(times_float[point_index]-IFpar[0]))/delta0)
-                            *exp(IFpar[4]*(times_float[point_index]-IFpar[0])));
+            current_derivative[(ii) * n_points] =
+                                        (1-fv) * (Jb + ((IFpar[1]*dt)/delta0)
+                                                    *exp(IFpar[4]*dt));
 
-            current_derivative[ii+1 * n_points] =
-                        (1-p[0]) * (Jb + ((IFpar[1]*(times_float[point_index]-IFpar[0]))/delta0)
-                                 *exp(IFpar[4]*(times_float[point_index]-IFpar[0])));
-
-            current_derivative[ii+2 * n_points] = (1-p[0]) * (p[ii] * (Jl +
-                                 (   exp(-p[ii+1]*(times_float[point_index]-IFpar[0]))
-                                    -exp(IFpar[4]*(times_float[point_index]-IFpar[0])))
-                                 * (IFpar[1] *(times_float[point_index]-IFpar[0]) *
-                                    (1.0f / (delta0*delta0)) + 2*IFpar[1] *
-                                    (1.0f / (delta0*delta0*delta0))) ));
+            current_derivative[(ii+1) * n_points] =
+                                           (1-fv) * (Bi * (Jl + ( exp(-Li*dt) -exp(IFpar[4]*dt))
+                                                            * (IFpar[1] *dt *
+                                                                (1.0f / (delta0*delta0))
+                                                             + 2*IFpar[1] *
+                                                                (1.0f / (delta0*delta0*delta0)))
+                                                        )
+                                                    );
         }
+        else
+        {
+            current_derivative[(ii) * n_points] = 0;
+            current_derivative[(ii+1) * n_points] = 0;
+        }
+    }
 
-
-    TAC  *= exp(-dk*times_float[point_index]);
-    current_derivative[0 * n_points] = IFvalue[point_index] - TAC;
-    TAC  = ((1-p[0]) * TAC) + (p[0] * IFvalue[point_index]);
-    if (TAC < 0.0)
+    TAC  *= exp(-dk*x);
+    current_derivative[(0) * n_points] = IFvalue[point_index] - TAC;
+    TAC  = ((1-fv) * TAC) + (fv * IFvalue[point_index]);
+    if (TAC <= 1e-16)
     {
             TAC = 1e-16;
     }
-
     value[point_index] = TAC;
-    }
-
+    // how to debug Jacobian
+    // value[point_index] = current_derivative[4 * n_points];
 }
 #endif

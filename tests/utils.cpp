@@ -1,8 +1,5 @@
 #include "utils.h"
 
-#include <stdexcept>
-
-
 // initialize random number generator
 std::mt19937 rng(0);
 
@@ -29,7 +26,7 @@ void generate_gauss_2d(std::vector< float > & v, std::vector< float > const & p)
     {
         throw std::runtime_error("v.size() is not a perfect square number");
     }
-
+    
     for (std::size_t j = 0; j < n; j++)
     {
         float const argy = ((j - p[2]) * (j - p[2]));

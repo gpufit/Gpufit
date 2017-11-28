@@ -2,7 +2,6 @@
 #include <algorithm>
 #include "cuda_kernels.cuh"
 #include "cuda_gaussjordan.cuh"
-#include <iostream>
 
 void LMFitCUDA::solve_equation_system()
 {
@@ -87,7 +86,6 @@ void LMFitCUDA::solve_equation_system()
 
 void LMFitCUDA::calc_curve_values()
 {
-    std::cout << "LMFitCUDA::calc_curve_values" <<"\n";
 	dim3  threads(1, 1, 1);
 	dim3  blocks(1, 1, 1);
 
@@ -111,19 +109,6 @@ void LMFitCUDA::calc_curve_values()
 		gpu_data_.user_info_,
 		info_.user_info_size_);
 	CUDA_CHECK_STATUS(cudaGetLastError());
-
-    //std::cout << info_.max_chunk_size_ << "\n";
-    //std::cout << info_.n_points_ << "\n";
-
-    /*float* fitted_volume = 0;
-    std::cout << fitted_volume << "\n";
-    //CUDA_CHECK_STATUS(cudaMemcpy(&fitted_volume, gpu_data_.values_, sizeof(float) , cudaMemcpyDeviceToHost));
-    for (int i = 0; i < info_.n_points_; i++)
-    {
-        CUDA_CHECK_STATUS(cudaMemcpy(&fitted_volume, gpu_data_.values_, sizeof(float) , cudaMemcpyDeviceToHost));
-        std::cout << fitted_volume << ' ';
-    }
-    std::cout << "\n";*/
 }
 
 void LMFitCUDA::calc_chi_squares()
@@ -248,11 +233,6 @@ void LMFitCUDA::calc_hessians()
 
 void LMFitCUDA::evaluate_iteration(int const iteration)
 {
-    int test_n_iter;
-    std::cout << "it:" << iteration <<"\n";
-    CUDA_CHECK_STATUS(cudaMemcpy(&test_n_iter, gpu_data_.n_iterations_, sizeof(int) , cudaMemcpyDeviceToHost));
-    std::cout << "gpu_it_pre:"<< test_n_iter <<"\n";
-
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
 
@@ -292,9 +272,4 @@ void LMFitCUDA::evaluate_iteration(int const iteration)
         n_fits_,
         info_.n_parameters_);
     CUDA_CHECK_STATUS(cudaGetLastError());
-
-    CUDA_CHECK_STATUS(cudaMemcpy(&test_n_iter, gpu_data_.n_iterations_, sizeof(int) , cudaMemcpyDeviceToHost));
-    std::cout << "gpu_it_post:"<< test_n_iter <<"\n";
-    std::cout << "-----------\n";
-    //gpu_data_.read(&test_n_iter, gpu_data_.n_iterations_);
 }

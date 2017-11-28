@@ -1,7 +1,6 @@
 #include "gpufit.h"
 #include "interface.h"
 #include "cuda_kernels.cuh"
-#include <iostream>
 
 FitInterface::FitInterface
 (
@@ -19,8 +18,7 @@ FitInterface::FitInterface
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations,
-    float * output_data
+    int * output_n_iterations
 ) :
     data_( data ),
     weights_( weights ),
@@ -37,7 +35,6 @@ FitInterface::FitInterface
     output_states_(output_states),
     output_chi_squares_(output_chi_squares),
     output_n_iterations_(output_n_iterations),
-    output_data_(output_data),
     n_parameters_(0)
 {}
 
@@ -47,12 +44,12 @@ FitInterface::~FitInterface()
 void FitInterface::check_sizes()
 {
     std::size_t maximum_size = std::numeric_limits< std::size_t >::max();
-
+    
     if (n_fits_ > maximum_size / n_points_ / sizeof(float))
     {
         throw std::runtime_error("maximum absolute number of data points exceeded");
     }
-
+    
     if (n_fits_ > maximum_size / n_parameters_ / sizeof(float))
     {
         throw std::runtime_error("maximum number of fits and/or parameters exceeded");
@@ -95,36 +92,7 @@ void FitInterface::fit(ModelID const model_id)
         output_parameters_,
         output_states_,
         output_chi_squares_,
-        output_n_iterations_,
-        output_data_
+        output_n_iterations_
     ) ;
     lmfit.run(tolerance_);
-}
-
-void FitInterface::simulate(ModelID const model_id)
-{
-    std::cout << "FitInterface::simulate" <<"\n";
-    int n_dimensions = 0;
-    configure_model(model_id, n_parameters_, n_dimensions);
-
-    check_sizes();
-
-    Info info;
-    configure_info(info, model_id);
-
-    LMFit modelsim
-    (
-        data_,
-        weights_,
-        info,
-        initial_parameters_,
-        parameters_to_fit_,
-        user_info_,
-        output_parameters_,
-        output_states_,
-        output_chi_squares_,
-        output_n_iterations_,
-        output_data_
-    ) ;
-    modelsim.simul(tolerance_);
 }

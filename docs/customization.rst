@@ -27,7 +27,7 @@ of model parameters and dimensions must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
-1. Define an additional model ID in file gpufit.h_.
+1. Define an additional model ID in file constants.h_.
 2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template.
 
 .. code-block:: cuda
@@ -114,7 +114,7 @@ To extend the Gpufit library with additional estimators, three CUDA device funct
 the functions which calculate the estimator function values, and its gradient and hessian values. Also, a new estimator ID must be defined.
 Detailed step by step instructions for adding an additional estimator is given below.
 
-1. Define an additional estimator ID in gpufit.h_
+1. Define an additional estimator ID in constants.h_
 2. Implement three functions within a newly created .cuh file in the folder Gpufit/Gpufit/estimators calculating :math:`\chi^2` values and
    its gradient and hessian according to the following template.
 

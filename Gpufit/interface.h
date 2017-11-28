@@ -24,13 +24,11 @@ public:
         float * output_parameters,
         int * output_states,
         float * output_chi_squares,
-        int * output_n_iterations,
-        float * output_data
+        int * output_n_iterations
     ) ;
-
+    
     virtual ~FitInterface();
     void fit(ModelID const model_id);
-    void simulate(ModelID const model_id);
 
 private:
     void check_sizes();
@@ -59,7 +57,6 @@ private:
     int * output_states_;
     float * output_chi_squares_;
     int * output_n_iterations_;
-    float * output_data_;
 };
 
 #endif

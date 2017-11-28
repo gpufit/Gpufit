@@ -3,7 +3,7 @@
 
 #include<vector>
 #include<random>
-#include "../Gpufit/constants.h"
+#include <stdexcept>
 
 #define CHK(x) if (!x) return false
 
@@ -120,8 +120,8 @@ struct FitInput
 	std::vector< float > data;
 	std::vector< float > weights_; // size 0 means no weights
 
-	ModelID model_id;
-	EstimatorID estimator_id;
+	int model_id;
+	int estimator_id;
 
 	std::vector< float > initial_parameters;
 	std::vector< int > parameters_to_fit;
@@ -172,7 +172,6 @@ struct FitOutput
 	std::vector< int > states;
 	std::vector< float > chi_squares;
 	std::vector< int > n_iterations;
-    std::vector< float > fitted_data;
 };
 
 #endif

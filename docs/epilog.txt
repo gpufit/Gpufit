@@ -17,6 +17,7 @@
 .. _Gpufit-master.zip: https://github.com/gpufit/Gpufit/archive/master.zip
 
 .. _gpufit.h: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gpufit.h
+.. _constants.h: https://github.com/gpufit/Gpufit/blob/master/Gpufit/constants.h
 .. _interface.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/interface.cpp
 
 .. _gauss_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/gauss_1d.cuh

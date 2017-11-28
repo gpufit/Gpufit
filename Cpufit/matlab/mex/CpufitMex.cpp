@@ -25,24 +25,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
 {
     int const expected_nrhs = 13;
     int const expected_nlhs = 4;
+
     if (nrhs != expected_nrhs)
     {
-		char s1[50];
-		_itoa_s(expected_nrhs, s1, 10);
-		char const s2[] = " input arguments required.";
-		size_t const string_length = strlen(s1) + 1 + strlen(s2);
-		strcat_s(s1, string_length, s2);
-		mexErrMsgIdAndTxt("Cpufit:Mex", s1);
+		char msg[50];
+		std::snprintf(msg, 50, "%d input arguments required.", expected_nrhs);
+		mexErrMsgIdAndTxt("Cpufit:Mex", msg);
     }
     
 	if (nlhs != expected_nlhs)
     {
-		char s1[50];
-		_itoa_s(expected_nlhs, s1, 10);
-		char const s2[] = " output arguments required.";
-		size_t const string_length = strlen(s1) + 1 + strlen(s2);
-		strcat_s(s1, string_length, s2);
-		mexErrMsgIdAndTxt("Cpufit:Mex", s1);
+		char msg[50];
+		std::snprintf(msg, 50, "%d output arguments required.", expected_nlhs);
+		mexErrMsgIdAndTxt("Cpufit:Mex", msg);
     }
 
 	// input parameters
@@ -121,7 +116,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
             ) ;
 
 	// check status
-    if (status != STATUS_OK)
+    if (status != ReturnState::OK)
     {
         std::string const error = cpufit_get_last_error() ;
         mexErrMsgIdAndTxt( "Cpufit:Mex", error.c_str() ) ;

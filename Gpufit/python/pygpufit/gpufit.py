@@ -10,17 +10,10 @@ import os
 import time
 from ctypes import cdll, POINTER, byref, c_int, c_float, c_char, c_char_p, c_size_t
 import numpy as np
-import sys
 
 # define library loader (actual loading is lazy)
 package_dir = os.path.dirname(os.path.realpath(__file__))
-if os.name == 'nt':
-    lib_path = os.path.join(package_dir, 'Gpufit.dll') # this will only work on Windows
-elif os.name == 'posix':
-    lib_path = os.path.join(package_dir, 'libGpufit.so') # this will only work on Linux
-else:
-    sys.exit('Operative System not recognized / not supported')
-
+lib_path = os.path.join(package_dir, 'Gpufit.dll') # this will only work on Windows
 lib = cdll.LoadLibrary(lib_path)
 
 # gpufit function in the dll

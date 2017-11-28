@@ -1,4 +1,3 @@
-#include "gpufit.h"
 #include "constants.h"
 #include "cuda_kernels.cuh"
 #include "definitions.h"
@@ -363,7 +362,7 @@ __global__ void cuda_calculate_chi_squares(
     float const * weights,
     int const n_points,
     int const n_fits,
-    EstimatorID const estimator_id,
+    int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
     char * user_info,
@@ -383,7 +382,7 @@ __global__ void cuda_calculate_chi_squares(
 
     float const * current_data = &data[first_point];
     float const * current_weight = weights ? &weights[first_point] : NULL;
-    float const * current_value  = &values[first_point];
+    float const * current_value = &values[first_point];
     int * current_state = &states[fit_index];
 
     extern __shared__ float extern_array[];
@@ -575,7 +574,7 @@ __global__ void cuda_calculate_gradients(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    EstimatorID const estimator_id,
+    int const estimator_id,
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
@@ -612,7 +611,7 @@ __global__ void cuda_calculate_gradients(
     {
         if (point_index < n_points)
         {
-            int const derivative_index  = parameters_to_fit_indices[parameter_index] * n_points + point_index;
+            int const derivative_index = parameters_to_fit_indices[parameter_index] * n_points + point_index;
 
             calculate_gradient(
                 estimator_id,
@@ -716,7 +715,7 @@ __global__ void cuda_calculate_hessians(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-    EstimatorID const estimator_id,
+    int const estimator_id,
     int const * skip,
     int const * finished,
     char * user_info,
@@ -971,7 +970,7 @@ __global__ void cuda_update_state_after_gaussjordan(
 
     if (singular_checks[fit_index] == 1)
     {
-        states[fit_index] = SINGULAR_HESSIAN;
+        states[fit_index] = FitState::SINGULAR_HESSIAN;
     }
 
 }
@@ -1067,7 +1066,7 @@ __global__ void cuda_check_for_convergence(
     }
     else if (max_n_iterations_reached)
     {
-        states[fit_index] = MAX_ITERATION;
+        states[fit_index] = FitState::MAX_ITERATION;
     }
 }
 
@@ -1134,14 +1133,9 @@ __global__ void cuda_evaluate_iteration(
         return;
     }
 
-    if (states[fit_index] != CONVERGED)
+    if (states[fit_index] != FitState::CONVERGED)
     {
         finished[fit_index] = 1;
-    }
-
-    if (iteration == 0)
-    {
-        n_iterations[fit_index] = iteration;
     }
 
     if (finished[fit_index] && n_iterations[fit_index] == 0)
@@ -1151,7 +1145,7 @@ __global__ void cuda_evaluate_iteration(
 
     if (!finished[fit_index])
     {
-        * all_finished = 0;
+        *all_finished = 0;
     }
 }
 

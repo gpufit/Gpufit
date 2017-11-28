@@ -25,7 +25,7 @@ public:
     int n_parameters_;
     int n_parameters_to_fit_;
 
-    int n_points_;
+	int n_points_;
     int power_of_two_n_points_;
 
     std::size_t n_fits_;
@@ -33,7 +33,7 @@ public:
     std::size_t user_info_size_;
 
     int max_n_iterations_;
-    std::size_t max_chunk_size_;
+	std::size_t max_chunk_size_;
     int n_fits_per_block_;
     int n_blocks_per_fit_;
     ModelID model_id_;

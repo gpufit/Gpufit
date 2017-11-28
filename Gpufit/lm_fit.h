@@ -21,23 +21,16 @@ public:
         float * output_parameters,
         int * output_states,
         float * output_chi_squares,
-        int * output_n_iterations,
-        float * output_data
+        int * output_n_iterations
     ) ;
 
     virtual ~LMFit();
 
     void run(float const tolerance);
-    void simul(float const tolerance);
 
 private:
     void set_parameters_to_fit_indices();
     void get_results(GPUData const & gpu_data, int const n_fits);
-    void read_out(float * dst, Device_Array< float > const src, int const size);
-    void read_out(std::vector<float> * dst, Device_Array< float > const src, float const size);
-    void read_out(int * dst, Device_Array< int > const src, int const size);
-    void read_out(std::vector<int> * dst, Device_Array< int > const src, int const size);
-
 
     float const * const data_ ;
     float const * const weights_ ;
@@ -49,7 +42,6 @@ private:
     int * output_states_ ;
     float * output_chi_squares_ ;
     int * output_n_iterations_ ;
-    float * output_data_ ;
 
     int ichunk_;
     int chunk_size_;
@@ -72,7 +64,6 @@ public:
     virtual ~LMFitCUDA();
 
     void run();
-    void simul();
 
 private:
 	void calc_curve_values();

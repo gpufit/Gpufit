@@ -46,18 +46,17 @@ BOOST_AUTO_TEST_CASE( Cauchy_Fit_2D_Elliptic )
     std::fill(weights.begin(), weights.end(), 1.f);
 
     std::array< float, 6 > initial_parameters{ { 2.f, 1.8f, 2.2f, 0.5f, 0.5f, 0.f } };
-
+    
     float tolerance{ 0.00001f };
-
+    
     int max_n_iterations{ 10 };
-
+    
     std::array< int, 6 > parameters_to_fit{ { 1, 1, 1, 1, 1, 1 } };
-
+    
     std::array< float, 6 > output_parameters;
     int output_state;
     float output_chi_square;
     int output_n_iterations;
-    float output_data;
 
     int const status
             = gpufit
@@ -77,8 +76,7 @@ BOOST_AUTO_TEST_CASE( Cauchy_Fit_2D_Elliptic )
                 output_parameters.data(),
                 &output_state,
                 &output_chi_square,
-                &output_n_iterations,
-                &output_data
+                &output_n_iterations
             ) ;
 
     BOOST_CHECK(status == 0);

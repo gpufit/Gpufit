@@ -6,7 +6,7 @@ function( add_example modules name )
   add_executable( ${target} ${name}.cpp
     ${PROJECT_SOURCE_DIR}/tests/utils.h
     ${PROJECT_SOURCE_DIR}/tests/utils.cpp
-  )
+  )  
   target_include_directories( ${target} PRIVATE ${PROJECT_SOURCE_DIR} )
   target_link_libraries( ${target} ${modules} )
   set_property( TARGET ${target}

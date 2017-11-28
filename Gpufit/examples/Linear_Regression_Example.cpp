@@ -4,7 +4,6 @@
 #include <random>
 #include <iostream>
 #include <math.h>
-#include <stdexcept>
 
 void linear_regression_example()
 {
@@ -13,7 +12,7 @@ void linear_regression_example()
     curves with the size of 20 data points per curve. It is noised by normal
     distributed noise. The initial guesses were randomized, within a specified
     range of the true value. The LINEAR_1D model is fitted to the test data sets
-    using the LSE estimator. The optional parameter user_info is used to pass
+    using the LSE estimator. The optional parameter user_info is used to pass 
     custom x positions of the data sets. The same x position values are used for
     every fit.
 
@@ -27,7 +26,7 @@ void linear_regression_example()
     */
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 1000;
+	size_t const n_fits = 1000000;
 	size_t const n_points_per_fit = 20;
 	size_t const n_model_parameters = 2;
 
@@ -39,7 +38,7 @@ void linear_regression_example()
 	}
 
 	// size of user info in bytes
-	size_t const user_info_size = n_points_per_fit * sizeof(float);
+	size_t const user_info_size = n_points_per_fit * sizeof(float); 
 
 	// initialize random number generator
 	std::mt19937 rng;
@@ -79,10 +78,10 @@ void linear_regression_example()
 	int const max_number_iterations = 20;
 
 	// estimator ID
-	EstimatorID const estimator_id = LSE;
+	int const estimator_id = LSE;
 
 	// model ID
-	ModelID const model_id = LINEAR_1D;
+	int const model_id = LINEAR_1D;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
@@ -92,7 +91,6 @@ void linear_regression_example()
 	std::vector< int > output_states(n_fits);
 	std::vector< float > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
-    std::vector< float > output_data(n_fits * n_points_per_fit);
 
 	// call to gpufit (C interface)
 	int const status = gpufit
@@ -112,8 +110,7 @@ void linear_regression_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data(),
-            output_data.data()
+            output_number_iterations.data()
         );
 
 	// check status
@@ -129,11 +126,11 @@ void linear_regression_example()
 		output_states_histogram[*it]++;
 	}
 
-	std::cout << "ratio converged              " << (float) output_states_histogram[0] / n_fits * 100 << "%\n";
-	std::cout << "ratio max iteration exceeded " << (float) output_states_histogram[1] / n_fits * 100 << "%\n";
-	std::cout << "ratio singular hessian       " << (float) output_states_histogram[2] / n_fits * 100 << "%\n";
-	std::cout << "ratio neg curvature MLE      " << (float) output_states_histogram[3] / n_fits * 100 << "%\n";
-	std::cout << "ratio gpu not read           " << (float) output_states_histogram[4] / n_fits * 100 << "%\n";
+	std::cout << "ratio converged              " << (float) output_states_histogram[0] / n_fits << "\n";
+	std::cout << "ratio max iteration exceeded " << (float) output_states_histogram[1] / n_fits << "\n";
+	std::cout << "ratio singular hessian       " << (float) output_states_histogram[2] / n_fits << "\n";
+	std::cout << "ratio neg curvature MLE      " << (float) output_states_histogram[3] / n_fits << "\n";
+	std::cout << "ratio gpu not read           " << (float) output_states_histogram[4] / n_fits << "\n";
 
 	// compute mean fitted parameters for converged fits
 	std::vector< float > output_parameters_mean(n_model_parameters, 0);
@@ -195,7 +192,6 @@ void linear_regression_example()
 	// normalize
 	output_number_iterations_mean /= static_cast<float>(output_states_histogram[0]);
 	std::cout << "mean number of iterations " << output_number_iterations_mean << "\n";
-
 }
 
 
@@ -206,6 +202,6 @@ int main(int argc, char *argv[])
     std::cout << std::endl << "Example completed!" << std::endl;
     std::cout << "Press ENTER to exit" << std::endl;
     std::getchar();
-
+	
 	return 0;
 }

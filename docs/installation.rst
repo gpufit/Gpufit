@@ -135,10 +135,10 @@ CMake variable BOOST_ROOT to the corresponding directory, and configure again.
 If you need a specific CUDA architecture, set CUDA_ARCHITECTURES according 
 to CUDA_SELECT_NVCC_ARCH_FLAGS_.
 
-**CMake finds lowest installed CUDA version by default**
+**CMake finds last installed CUDA toolkit version by default**
 
 If there are multiple CUDA toolkits installed on the computer, CMake 3.7.1 
-seems to find by default the lowest installed version. Set the desired CUDA 
+seems to find by default the lowest installed version. In this case set the desired CUDA
 version manually (e.g. by editing the CUDA_TOOLKIT_ROOT_DIR variable in CMake).
 
 **Specify CUDA version to use**

@@ -1,11 +1,8 @@
-#include "cpufit.h"
-#include "interface.h"
-
-
-#include <cstddef>
 #include <limits>
 #include <stdexcept>
 
+#include "cpufit.h"
+#include "interface.h"
 
 FitInterface::FitInterface(
     float const * data,
@@ -14,7 +11,7 @@ FitInterface::FitInterface(
     int n_points,
     float tolerance,
     int max_n_iterations,
-    int estimator_id,
+    EstimatorID estimator_id,
     float const * initial_parameters,
     int const * parameters_to_fit,
     char * user_info,
@@ -59,7 +56,7 @@ void FitInterface::check_sizes()
     }
 }
 
-void FitInterface::configure_info(Info & info, int const model_id)
+void FitInterface::configure_info(Info & info, ModelID const model_id)
 {
     info.model_id_ = model_id;
     info.n_fits_ = n_fits_;
@@ -72,7 +69,7 @@ void FitInterface::configure_info(Info & info, int const model_id)
     info.set_number_of_parameters_to_fit(parameters_to_fit_);
 }
 
-void FitInterface::set_number_of_parameters(int const model_id)
+void FitInterface::set_number_of_parameters(ModelID const model_id)
 {
     switch (model_id)
     {
@@ -99,7 +96,7 @@ void FitInterface::set_number_of_parameters(int const model_id)
     }
 }
 
-void FitInterface::fit(int const model_id)
+void FitInterface::fit(ModelID const model_id)
 {
     set_number_of_parameters(model_id);
 
