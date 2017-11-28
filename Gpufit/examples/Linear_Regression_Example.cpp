@@ -26,7 +26,7 @@ void linear_regression_example()
     */
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 1000000;
+	size_t const n_fits = 10000;
 	size_t const n_points_per_fit = 20;
 	size_t const n_model_parameters = 2;
 

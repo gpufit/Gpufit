@@ -5,6 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 {

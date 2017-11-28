@@ -5,6 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 template<std::size_t n_points, std::size_t n_parameters>
 void generate_gauss_1d(

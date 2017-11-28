@@ -206,7 +206,7 @@ No weights, Model: Gauss_2D, Estimator: LSE
 */
 int main(int argc, char * argv[])
 {
-    // title
+    // title 
     std::cout << "----------------------------------------" << std::endl;
     std::cout << "Performance comparison Gpufit vs. Cpufit" << std::endl;
     std::cout << "----------------------------------------" << std::endl << std::endl;
@@ -369,10 +369,7 @@ int main(int argc, char * argv[])
                 cpufit_chi_squares.data(),
                 cpufit_n_iterations.data()
             );
-
-        std::chrono::milliseconds::rep dt_cpufit = 0;
-
-        dt_cpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
+        std::chrono::milliseconds::rep const dt_cpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 
         if (cpu_status != 0)
         {
@@ -383,7 +380,6 @@ int main(int argc, char * argv[])
         std::chrono::milliseconds::rep dt_gpufit = 0;
 
         // if we do not do gpufit, we skip the rest of the loop
-        do_gpufits = 0;
         if (do_gpufits)
         {
             // Gpufit output parameters
@@ -414,7 +410,6 @@ int main(int argc, char * argv[])
                 gpufit_chi_squares.data(),
                 gpufit_n_iterations.data()
                 );
-
             dt_gpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 
             if (gpu_status != 0)
@@ -451,8 +446,8 @@ int main(int argc, char * argv[])
             std::cout << std::setw(13) << "inf" << std::setw(3) << "|";
             std::cout << std::setw(12) << "inf";
         }
-
-        std::cout << std::endl;
+        
+        std::cout << std::endl;        
     }
     std::cout << std::endl << "Test completed!" << std::endl;
     std::cout << "Press ENTER to exit" << std::endl;

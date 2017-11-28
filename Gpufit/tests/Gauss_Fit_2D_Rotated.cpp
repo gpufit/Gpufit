@@ -7,6 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 template<std::size_t SIZE>
 void generate_gauss_2d_rotated(std::array< float, SIZE>& values, std::array< float, 7 > const & parameters)

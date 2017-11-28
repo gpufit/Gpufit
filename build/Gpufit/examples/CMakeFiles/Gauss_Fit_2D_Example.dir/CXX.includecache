@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/media/MAXTOR/___backup/home/mscipio/Scrivania/GPUFIT_SRC/Gpufit/Gpufit/constants.h
+
+/media/MAXTOR/___backup/home/mscipio/Scrivania/GPUFIT_SRC/Gpufit/Gpufit/examples/Gauss_Fit_2D_Example.cpp
+../gpufit.h
+/media/MAXTOR/___backup/home/mscipio/Scrivania/GPUFIT_SRC/Gpufit/Gpufit/gpufit.h
+vector
+-
+random
+-
+iostream
+-
+chrono
+-
+numeric
+-
+math.h
+-
+
+/media/MAXTOR/___backup/home/mscipio/Scrivania/GPUFIT_SRC/Gpufit/Gpufit/gpufit.h
+cstddef
+-
+stdexcept
+-
+constants.h
+/media/MAXTOR/___backup/home/mscipio/Scrivania/GPUFIT_SRC/Gpufit/Gpufit/constants.h
+

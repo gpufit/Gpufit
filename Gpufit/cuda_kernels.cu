@@ -970,7 +970,7 @@ __global__ void cuda_update_state_after_gaussjordan(
 
     if (singular_checks[fit_index] == 1)
     {
-        states[fit_index] = FitState::SINGULAR_HESSIAN;
+        states[fit_index] = SINGULAR_HESSIAN;
     }
 
 }
@@ -1066,7 +1066,7 @@ __global__ void cuda_check_for_convergence(
     }
     else if (max_n_iterations_reached)
     {
-        states[fit_index] = FitState::MAX_ITERATION;
+        states[fit_index] = MAX_ITERATION;
     }
 }
 
@@ -1133,7 +1133,7 @@ __global__ void cuda_evaluate_iteration(
         return;
     }
 
-    if (states[fit_index] != FitState::CONVERGED)
+    if (states[fit_index] != CONVERGED)
     {
         finished[fit_index] = 1;
     }

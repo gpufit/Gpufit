@@ -3,7 +3,6 @@
 
 #include<vector>
 #include<random>
-#include <stdexcept>
 
 #define CHK(x) if (!x) return false
 

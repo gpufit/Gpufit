@@ -48,6 +48,7 @@ void mexFunction(
         char msg[50];
         std::snprintf(msg, 50, "%d output arguments required.", expected_nlhs);
         mexErrMsgIdAndTxt("Gpufit:Mex", msg);
+	}
 
 	// input parameters
 	float * data = (float*)mxGetPr(prhs[0]);
@@ -130,5 +131,4 @@ void mexFunction(
         std::string const error = gpufit_get_last_error() ;
         mexErrMsgIdAndTxt( "Gpufit:Mex", error.c_str() ) ;
     }
-}
 }

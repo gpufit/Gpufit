@@ -7,24 +7,19 @@
 cmake_minimum_required( VERSION 3.7 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
-set (CMAKE_CXX_STANDARD 14)
-
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g3 -Wall -c -fmessage-length=0 -std=c++11" )
-set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O0 -g3 -Wall -c -fmessage-length=0 -std=c++11" )
-
 if( NOT PROJECT_NAME )
   project( Gpufit VERSION 1.0.2 )
   include( CTest )
 endif()
 
 if( NOT CMAKE_CXX_STANDARD )
-	set( CMAKE_CXX_STANDARD 11 )
+	set( CMAKE_CXX_STANDARD 14 )
 endif()
 
 if( MSVC ) # link runtime statically
   foreach( type ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} )
     string( TOUPPER ${type} TYPE )
-    foreach( flags CMAKE_C_FLAGS_${TYPE} CMAKE_CXX_FLAGS_${TYPE})
+    foreach( flags CMAKE_C_FLAGS_${TYPE} CMAKE_CXX_FLAGS_${TYPE} )
       get_property( help CACHE ${flags} PROPERTY HELPSTRING )
       string( REPLACE "/MD" "/MT" ${flags} "${${flags}}" )
       set( ${flags} "${${flags}}" CACHE STRING "${help}" FORCE )
