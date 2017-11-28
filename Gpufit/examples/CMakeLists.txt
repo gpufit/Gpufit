@@ -8,7 +8,7 @@ function( add_example module name )
 endfunction()
 
 # Examples
-
+add_example( Gpufit Double_Exponent_Example )#added
 add_example( Gpufit Simple_Example )
 add_example( Gpufit Linear_Regression_Example )
 add_example( Gpufit Gauss_Fit_2D_Example )
