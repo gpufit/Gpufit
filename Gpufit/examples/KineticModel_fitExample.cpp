@@ -7,18 +7,20 @@
 #include <numeric>
 #include <math.h>
 #include "../constants.h"
-
 #include <stdexcept>
 
 
 void kinetic_fit_example()
 {
     /*
-        This example generates test data in form of 10000 two dimensional Gaussian
-        peaks with the size of 5x5 data points per peak. It is noised by Poisson
-        distributed noise. The initial guesses were randomized, within a specified
-        range of the true value. The GAUSS_2D model is fitted to the test data sets
-        using the MLE estimator.
+        This example generates test data in form of 2'000'000 one dimensional Positron
+        Emission Tomography (PET) time-activity curve (TAC).
+        It starts from a real TAC array and then it replicates it adding gaussian noise
+        to have 2'000'000 slightly different curves to fit.
+        The initial guesses were randomized, within a specified range of the true value,
+	where with true value we mean a reference output of the fitting computed with
+	another already validated software. 
+	The BICOMP_3EXP_3K model is fitted to the test data sets using the LSE estimator.
         The console output shows
          - the execution time,
          - the ratio of converged fits including ratios of not converged fits for
@@ -27,7 +29,6 @@ void kinetic_fit_example()
            parameters including their standard deviation,
          - the mean chi square value
          - and the mean number of iterations needed.
-        True parameters and noise and number of fits is the same as for the Matlab/Python 2D Gaussian examples.
     */
 
 
