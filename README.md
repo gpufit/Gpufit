@@ -4,7 +4,7 @@ Levenberg Marquardt curve fitting in CUDA.
 
 Homepage: [github.com/gpufit/Gpufit](https://github.com/gpufit/Gpufit)
 
-The manuscript describing Gpufit is now online at [Biorxiv](http://www.biorxiv.org/content/early/2017/10/19/174110).
+The manuscript describing Gpufit is now published in [Scientific Reports](https://www.nature.com/articles/s41598-017-15313-9).
 
 ## Quick start instructions
 
@@ -45,11 +45,11 @@ Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Kelle
 
 ## How to cite Gpufit
 
-If you use Gpufit in your research, please cite our publication describing the software.  Note that a paper describing the software is currently in peer review.  A pre-print of the manuscript is available at the Biorxiv preprint server, [here](http://www.biorxiv.org/content/early/2017/08/10/174110).
+If you use Gpufit in your research, please cite our publication describing the software.  A paper describing the software was published in Scientific Reports.  The open-access manuscript is available from the Scientific Reports website, [here](https://www.nature.com/articles/s41598-017-15313-9).
 
   *  Gpufit: An open-source toolkit for GPU-accelerated curve fitting  
-     Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, Mark Bates  
-     bioRxiv 174110; doi: https://doi.org/10.1101/174110  
+     Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates  
+     Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9 
 
 ## License
 

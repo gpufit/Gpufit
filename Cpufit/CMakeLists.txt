@@ -20,7 +20,7 @@ set( CpuSources
 )
 
 add_library( Cpufit SHARED
-	${CpuHeaders} 
+	${CpuHeaders}
 	${CpuSources}
 )
 set_property( TARGET Cpufit

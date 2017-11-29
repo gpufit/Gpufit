@@ -5,6 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 {
@@ -66,8 +67,8 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 	BOOST_CHECK( output_n_iterations <= max_n_iterations );
 	BOOST_CHECK( output_chi_squares < 1e-6f );
 
-	BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-	BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
+	BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
+	BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
 
 	// test with MLE
 	status = gpufit
@@ -95,7 +96,7 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 	BOOST_CHECK(output_n_iterations <= max_n_iterations);
 	BOOST_CHECK(output_chi_squares < 1e-6f);
 
-	BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-	BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
+	BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
+	BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
 
 }

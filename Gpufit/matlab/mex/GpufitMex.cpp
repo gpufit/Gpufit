@@ -35,25 +35,20 @@ void mexFunction(
     // expects a certain number of input (nrhs) and output (nlhs) arguments
     expected_nrhs = 13;
     expected_nlhs = 4;
+
     if (nrhs != expected_nrhs)
     {
-		char s1[50];
-		_itoa_s(expected_nrhs, s1, 10);
-		char const s2[] = " input arguments required.";
-		size_t const string_length = strlen(s1) + 1 + strlen(s2);
-		strcat_s(s1, string_length, s2);
-		mexErrMsgIdAndTxt("Gpufit:Mex", s1);
+        char msg[50];
+        std::snprintf(msg, 50, "%d input arguments required.", expected_nrhs);
+        mexErrMsgIdAndTxt("Gpufit:Mex", msg);
     }
 
     if (nlhs != expected_nlhs)
     {
-		char s1[50];
-		_itoa_s(expected_nlhs, s1, 10);
-		char const s2[] = " output arguments required.";
-		size_t const string_length = strlen(s1) + 1 + strlen(s2);
-		strcat_s(s1, string_length, s2);
-		mexErrMsgIdAndTxt("Gpufit:Mex", s1);
-    }
+        char msg[50];
+        std::snprintf(msg, 50, "%d output arguments required.", expected_nlhs);
+        mexErrMsgIdAndTxt("Gpufit:Mex", msg);
+	}
 
 	// input parameters
 	float * data = (float*)mxGetPr(prhs[0]);

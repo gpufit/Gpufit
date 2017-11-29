@@ -1,9 +1,8 @@
-#include "gpufit.h"
 #include "constants.h"
 #include "cuda_kernels.cuh"
 #include "definitions.h"
-#include "models\models.cuh"
-#include "estimators\estimators.cuh"
+#include "models/models.cuh"
+#include "estimators/estimators.cuh"
 
 /* Description of the cuda_calc_curve_values function
 * ===================================================
@@ -167,7 +166,7 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
 *              in: subtotals
 *              out: totals
 *
-* n_blocks_per_fit: The number of blocks used to calculate one fit. It is 
+* n_blocks_per_fit: The number of blocks used to calculate one fit. It is
 *                   equivalent to the number of subtotals per fit.
 *
 * n_fits: The number of fits.
@@ -209,11 +208,11 @@ __global__ void cuda_sum_chi_square_subtotals(
         return;
 
     float * chi_square = chi_squares + index;
-    
+
     double sum = 0.0;
     for (int i = 0; i < n_blocks_per_fit; i++)
         sum += chi_square[i * n_fits];
-    
+
     chi_square[0] = sum;
 }
 
@@ -363,7 +362,7 @@ __global__ void cuda_calculate_chi_squares(
     float const * weights,
     int const n_points,
     int const n_fits,
-	int const estimator_id,
+    int const estimator_id,
     int const * finished,
     int const n_fits_per_block,
     char * user_info,
@@ -383,14 +382,14 @@ __global__ void cuda_calculate_chi_squares(
 
     float const * current_data = &data[first_point];
     float const * current_weight = weights ? &weights[first_point] : NULL;
-    float const * current_value  = &values[first_point];
+    float const * current_value = &values[first_point];
     int * current_state = &states[fit_index];
 
     extern __shared__ float extern_array[];
-    
+
     volatile float * shared_chi_square
         = extern_array + (fit_in_block - fit_piece) * shared_size;
-    
+
     if (point_index >= n_points)
     {
         shared_chi_square[point_index] = 0.f;
@@ -429,7 +428,7 @@ __global__ void cuda_calculate_chi_squares(
 *
 * n_fits: The number of fits.
 *
-* n_parameters_to_fit: The number of model parameters, that are not held fixed. 
+* n_parameters_to_fit: The number of model parameters, that are not held fixed.
 *
 * skip: An input vector which allows the calculation to be skipped for single fits.
 *
@@ -575,7 +574,7 @@ __global__ void cuda_calculate_gradients(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-	int const estimator_id,
+    int const estimator_id,
     int const * finished,
     int const * skip,
     int const n_fits_per_block,
@@ -612,7 +611,7 @@ __global__ void cuda_calculate_gradients(
     {
         if (point_index < n_points)
         {
-            int const derivative_index  = parameters_to_fit_indices[parameter_index] * n_points + point_index;
+            int const derivative_index = parameters_to_fit_indices[parameter_index] * n_points + point_index;
 
             calculate_gradient(
                 estimator_id,
@@ -716,7 +715,7 @@ __global__ void cuda_calculate_hessians(
     int const n_parameters,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
-	int const estimator_id,
+    int const estimator_id,
     int const * skip,
     int const * finished,
     char * user_info,
@@ -805,7 +804,7 @@ __global__ void cuda_calculate_hessians(
 *       n_fits_per_block);
 *
 */
-        
+
 __global__ void cuda_modify_step_widths(
     float * hessians,
     float const * lambdas,
@@ -832,7 +831,7 @@ __global__ void cuda_modify_step_widths(
             = current_hessian[parameter_index * n_parameters + parameter_index]
             / (1.0f + lambdas[fit_index] / 10.f);
     }
-    
+
     current_hessian[parameter_index * n_parameters + parameter_index]
         = current_hessian[parameter_index * n_parameters + parameter_index]
         * (1.0f + lambdas[fit_index]);
@@ -885,7 +884,7 @@ __global__ void cuda_modify_step_widths(
 *       n_fits_per_block);
 *
 */
-    
+
 __global__ void cuda_update_parameters(
     float * parameters,
     float * prev_parameters,
@@ -930,7 +929,7 @@ __global__ void cuda_update_parameters(
 *
 * n_fits: The number of fits.
 *
-* singular_checks: An input vector used to report whether a fit is singular.  
+* singular_checks: An input vector used to report whether a fit is singular.
 *
 * states: An output vector of values which indicate whether the fitting process
 *         was carreid out correctly or which problem occurred. If a hessian
@@ -971,7 +970,7 @@ __global__ void cuda_update_state_after_gaussjordan(
 
     if (singular_checks[fit_index] == 1)
     {
-        states[fit_index] = FitState::SINGULAR_HESSIAN;
+        states[fit_index] = SINGULAR_HESSIAN;
     }
 
 }
@@ -1055,8 +1054,8 @@ __global__ void cuda_check_for_convergence(
         return;
     }
 
-    int const fit_found 
-        = abs(chi_squares[fit_index] - prev_chi_squares[fit_index]) 
+    int const fit_found
+        = abs(chi_squares[fit_index] - prev_chi_squares[fit_index])
         < tolerance * fmaxf(1, chi_squares[fit_index]);
 
     int const max_n_iterations_reached = iteration == max_n_iterations - 1;
@@ -1067,7 +1066,7 @@ __global__ void cuda_check_for_convergence(
     }
     else if (max_n_iterations_reached)
     {
-        states[fit_index] = FitState::MAX_ITERATION;
+        states[fit_index] = MAX_ITERATION;
     }
 }
 
@@ -1134,7 +1133,7 @@ __global__ void cuda_evaluate_iteration(
         return;
     }
 
-    if (states[fit_index] != FitState::CONVERGED)
+    if (states[fit_index] != CONVERGED)
     {
         finished[fit_index] = 1;
     }
@@ -1146,7 +1145,7 @@ __global__ void cuda_evaluate_iteration(
 
     if (!finished[fit_index])
     {
-        * all_finished = 0;
+        *all_finished = 0;
     }
 }
 
@@ -1212,7 +1211,7 @@ __global__ void cuda_prepare_next_iteration(
     int const n_parameters)
 {
     int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
-        
+
     if (fit_index >= n_fits)
     {
         return;

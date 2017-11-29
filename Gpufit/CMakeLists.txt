@@ -112,9 +112,7 @@ set( GpuSources
 	lm_fit.cpp
 	lm_fit_cuda.cpp
 	interface.cpp
-	../Cpufit/profile.cpp
-	gpufit.def
-)
+	Gpufit.def	../Cpufit/profile.cpp)
 
 set( GpuCudaHeaders
 	cuda_gaussjordan.cuh
