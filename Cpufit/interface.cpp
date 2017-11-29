@@ -1,3 +1,6 @@
+#include <limits>
+#include <stdexcept>
+
 #include "cpufit.h"
 #include "interface.h"
 

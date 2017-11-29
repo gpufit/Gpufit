@@ -27,21 +27,11 @@ int gpufit
 )
 try
 {
-    __int32 n_points_32 = 0;
-    if (n_points <= (unsigned int)(std::numeric_limits<__int32>::max()))
-    {
-        n_points_32 = __int32(n_points);
-    }
-    else
-    {
-        throw std::runtime_error("maximum number of data points per fit exceeded");
-    }
-
     FitInterface fi(
         data,
         weights,
         n_fits,
-        n_points_32,
+        static_cast<int>(n_points),
         tolerance,
         max_n_iterations,
         static_cast<EstimatorID>(estimator_id),

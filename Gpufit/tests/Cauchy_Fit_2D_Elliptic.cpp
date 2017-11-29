@@ -5,6 +5,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 template<std::size_t SIZE>
 void generate_cauchy_2d_elliptic(std::array< float, SIZE>& values, std::array< float, 6 > const & parameters)
@@ -45,13 +46,13 @@ BOOST_AUTO_TEST_CASE( Cauchy_Fit_2D_Elliptic )
     std::fill(weights.begin(), weights.end(), 1.f);
 
     std::array< float, 6 > initial_parameters{ { 2.f, 1.8f, 2.2f, 0.5f, 0.5f, 0.f } };
-    
+
     float tolerance{ 0.00001f };
-    
+
     int max_n_iterations{ 10 };
-    
+
     std::array< int, 6 > parameters_to_fit{ { 1, 1, 1, 1, 1, 1 } };
-    
+
     std::array< float, 6 > output_parameters;
     int output_state;
     float output_chi_square;
@@ -84,10 +85,10 @@ BOOST_AUTO_TEST_CASE( Cauchy_Fit_2D_Elliptic )
     BOOST_CHECK(output_n_iterations <= max_n_iterations);
     BOOST_CHECK(output_chi_square < 1e-6f);
 
-    BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[2] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[3] - true_parameters[3]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[4] - true_parameters[4]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[5] - true_parameters[5]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[4] - true_parameters[4]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[5] - true_parameters[5]) < 1e-6f);
 }

@@ -5,7 +5,7 @@
 
 #include "Cpufit/cpufit.h"
 #include "Gpufit/gpufit.h"
-#include "Tests/utils.h"
+#include "tests/utils.h"
 
 #include <stdexcept>
 #include <array>

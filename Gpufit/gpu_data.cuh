@@ -12,53 +12,53 @@
 template< typename Type >
 struct Device_Array
 {
-    explicit Device_Array( std::size_t const size )
+    explicit Device_Array(std::size_t const size)
     {
-        std::size_t const maximum_size = std::numeric_limits< std::size_t >::max() ;
-        std::size_t const type_size = sizeof( Type ) ;
+        std::size_t const maximum_size = std::numeric_limits< std::size_t >::max();
+        std::size_t const type_size = sizeof(Type);
         if (size <= maximum_size / type_size)
         {
-            cudaError_t const status = cudaMalloc( & data_, size * type_size ) ;
+            cudaError_t const status = cudaMalloc(&data_, size * type_size);
             if (status == cudaSuccess)
             {
-                return ;
+                return;
             }
             else
             {
-                throw std::runtime_error( cudaGetErrorString( status ) ) ;
+                throw std::runtime_error(cudaGetErrorString(status));
             }
         }
         else
         {
-            throw std::runtime_error( "maximum array size exceeded" ) ;
+            throw std::runtime_error("maximum array size exceeded");
         }
     }
 
-    ~Device_Array() { cudaFree( data_ ) ; }
+    ~Device_Array() { cudaFree(data_); }
 
-    operator Type * () { return static_cast< Type * >( data_ ) ; }
-    operator Type const * () const { return static_cast< Type * >( data_ ) ; }
+    operator Type * () { return static_cast<Type *>(data_); }
+    operator Type const * () const { return static_cast<Type *>(data_); }
 
-    Type * copy( std::size_t const size, Type * const to ) const
+    Type * copy(std::size_t const size, Type * const to) const
     {
-        /// \todo check size parameter
+        // TODO check size parameter
 
-        std::size_t const type_size = sizeof( Type ) ;
+        std::size_t const type_size = sizeof(Type);
         cudaError_t const status
-            = cudaMemcpy( to, data_, size * type_size, cudaMemcpyDeviceToHost ) ;
+            = cudaMemcpy(to, data_, size * type_size, cudaMemcpyDeviceToHost);
         if (status == cudaSuccess)
         {
-            return to + size ;
+            return to + size;
         }
         else
         {
-            throw std::runtime_error( cudaGetErrorString( status ) ) ;
+            throw std::runtime_error(cudaGetErrorString(status));
         }
     }
 
 private:
-    void * data_ ;
-} ;
+    void * data_;
+};
 
 class GPUData
 {
@@ -73,7 +73,7 @@ public:
         float const * weights,
         float const * initial_parameters,
         std::vector<int> const & parameters_to_fit_indices
-    ) ;
+    );
     void init_user_info(char const * user_info);
 
     void read(bool * dst, int const * src);
@@ -82,8 +82,8 @@ public:
     void copy(float * dst, float const * src, std::size_t const count);
 
 private:
-	
-	void set(int* arr, int const value, int const count);
+
+    void set(int* arr, int const value, int const count);
     void write(float* dst, float const * src, int const count);
     void write(int* dst, std::vector<int> const & src);
     void write(char* dst, char const * src, std::size_t const count);

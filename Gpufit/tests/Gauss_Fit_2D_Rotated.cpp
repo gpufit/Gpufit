@@ -7,6 +7,7 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include <array>
+#include <cmath>
 
 template<std::size_t SIZE>
 void generate_gauss_2d_rotated(std::array< float, SIZE>& values, std::array< float, 7 > const & parameters)
@@ -88,11 +89,11 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
     BOOST_CHECK(output_n_iterations <= max_n_iterations);
     BOOST_CHECK(output_chi_square < 1e-6f);
 
-    BOOST_CHECK(std::fabsf(output_parameters[0] - true_parameters[0]) < 2e-5f);
-    BOOST_CHECK(std::fabsf(output_parameters[1] - true_parameters[1]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[2] - true_parameters[2]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[3] - true_parameters[3]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[4] - true_parameters[4]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[5] - true_parameters[5]) < 1e-6f);
-    BOOST_CHECK(std::fabsf(output_parameters[6] - true_parameters[6]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 2e-5f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[4] - true_parameters[4]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[5] - true_parameters[5]) < 1e-6f);
+    BOOST_CHECK(std::abs(output_parameters[6] - true_parameters[6]) < 1e-6f);
 }

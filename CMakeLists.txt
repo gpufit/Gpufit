@@ -12,7 +12,11 @@ if( NOT PROJECT_NAME )
   include( CTest )
 endif()
 
-if( MSVC ) # link runtime statically
+if( NOT CMAKE_CXX_STANDARD )
+	set( CMAKE_CXX_STANDARD 14 )
+endif()
+
+if( MSVC ) # link runtime statically with MSVC
   foreach( type ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} )
     string( TOUPPER ${type} TYPE )
     foreach( flags CMAKE_C_FLAGS_${TYPE} CMAKE_CXX_FLAGS_${TYPE} )
@@ -46,8 +50,8 @@ if( Boost_FOUND )
     string( REPLACE ";" "_" prefix "${modules}" )
     set( target ${prefix}_Test_${name} )
     add_executable( ${target} ${name}.cpp
-      ${PROJECT_SOURCE_DIR}/Tests/utils.h
-      ${PROJECT_SOURCE_DIR}/Tests/utils.cpp
+      ${PROJECT_SOURCE_DIR}/tests/utils.h
+      ${PROJECT_SOURCE_DIR}/tests/utils.cpp
     )
     target_include_directories( ${target} PRIVATE ${PROJECT_SOURCE_DIR} )
     target_link_libraries( ${target} ${modules} Boost::boost )

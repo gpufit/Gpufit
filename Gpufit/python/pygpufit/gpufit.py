@@ -13,7 +13,14 @@ import numpy as np
 
 # define library loader (actual loading is lazy)
 package_dir = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.join(package_dir, 'Gpufit.dll') # this will only work on Windows
+
+if os.name == 'nt':
+	lib_path = os.path.join(package_dir, 'Gpufit.dll') # library name on Windows
+elif os.name == 'posix':
+	lib_path = os.path.join(package_dir, 'libGpufit.so') # library name on Unix
+else:
+	raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
+
 lib = cdll.LoadLibrary(lib_path)
 
 # gpufit function in the dll
