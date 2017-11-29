@@ -72,6 +72,8 @@ void gauss_fit_2d_example()
 
 	// true parameters (amplitude, center x position, center y position, width, offset)
 	std::vector< float > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; 
+	
+	std::cout << "generate example data" << std::endl;
 
 	// initialize random number generator
 	std::mt19937 rng;
@@ -174,9 +176,8 @@ void gauss_fit_2d_example()
 	}
 
 	// print execution time
-	std::cout
-        << "execution time "
-        << std::chrono::duration_cast<std::chrono::milliseconds>(time_1 - time_0).count() << " ms\n";
+	std::cout << "execution time "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(time_1 - time_0).count() << " ms" << std::endl;
 
 	// get fit states
 	std::vector< int > output_states_histogram(5, 0);
@@ -236,7 +237,7 @@ void gauss_fit_2d_example()
             << "parameter "     << j
             << " true "         << true_parameters[j]
             << " fitted mean "  << output_parameters_mean[j]
-            << " std "          << output_parameters_std[j] << "\n";
+            << " std "          << output_parameters_std[j] << std::endl;
 	}
 
 	// compute mean chi-square for those converged
@@ -249,7 +250,7 @@ void gauss_fit_2d_example()
 		}
 	}
 	output_chi_square_mean /= static_cast<float>(output_states_histogram[0]);
-	std::cout << "mean chi square " << output_chi_square_mean << "\n";
+	std::cout << "mean chi square " << output_chi_square_mean << std::endl;
 
 	// compute mean number of iterations for those converged
 	float  output_number_iterations_mean = 0;
@@ -262,7 +263,7 @@ void gauss_fit_2d_example()
 	}
 	// normalize
 	output_number_iterations_mean /= static_cast<float>(output_states_histogram[0]);
-	std::cout << "mean number of iterations " << output_number_iterations_mean << "\n";
+	std::cout << "mean number of iterations " << output_number_iterations_mean << std::endl;
 
 }
 

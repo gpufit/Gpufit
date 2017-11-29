@@ -9,6 +9,13 @@ import os
 from io import open # to have encoding as parameter of open on Python >=2.6
 import pygpufit.version as vs
 
+if os.name == 'nt':
+	lib_ext = '.dll' # library name extension on Windows
+elif os.name == 'posix':
+	lib_ext = '.so'  # library name extensions on Unix
+else:
+	raise RuntimeError('OS {} not supported'.format(os.name))
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 CLASSIFIERS = ['Development Status :: 5 - Production/Stable',
@@ -36,6 +43,6 @@ if __name__ == "__main__":
         classifiers=[],
         keywords='Levenberg Marquardt, curve fitting, CUDA',
         packages=find_packages(where=HERE),
-        package_data={'pygpufit': ['*.dll']},
+        package_data={'pygpufit': ['*{}'.format(lib_ext)]},
         install_requires=['NumPy>=1.0'],
         zip_safe=False)

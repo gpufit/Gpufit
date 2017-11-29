@@ -16,7 +16,7 @@ if( NOT CMAKE_CXX_STANDARD )
 	set( CMAKE_CXX_STANDARD 14 )
 endif()
 
-if( MSVC ) # link runtime statically
+if( MSVC ) # link runtime statically with MSVC
   foreach( type ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} )
     string( TOUPPER ${type} TYPE )
     foreach( flags CMAKE_C_FLAGS_${TYPE} CMAKE_CXX_FLAGS_${TYPE} )

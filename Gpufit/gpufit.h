@@ -2,6 +2,7 @@
 #define GPU_FIT_H_INCLUDED
 
 #include <cstddef>
+#include <stdexcept>
 #include "constants.h"
 
 #ifdef __cplusplus
