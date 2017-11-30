@@ -808,6 +808,7 @@ __global__ void cuda_calculate_hessians(
 __global__ void cuda_modify_step_widths(
     float * hessians,
     float const * lambdas,
+    float * scaling_vectors,
     unsigned int const n_parameters,
     int const * iteration_failed,
     int const * finished,
@@ -823,18 +824,29 @@ __global__ void cuda_modify_step_widths(
         return;
     }
 
-    float * current_hessian = &hessians[fit_index * n_parameters * n_parameters];
+    float * hessian = &hessians[fit_index * n_parameters * n_parameters];
+    float * scaling_vector = &scaling_vectors[fit_index * n_parameters];
+    float const & lambda = lambdas[fit_index];
+
+    int const diagonal_index = parameter_index * n_parameters + parameter_index;
 
     if (iteration_failed[fit_index])
     {
-        current_hessian[parameter_index * n_parameters + parameter_index]
-            = current_hessian[parameter_index * n_parameters + parameter_index]
-            / (1.0f + lambdas[fit_index] / 10.f);
+        hessian[diagonal_index] -= scaling_vector[parameter_index] * lambda / 10.f;
     }
 
-    current_hessian[parameter_index * n_parameters + parameter_index]
-        = current_hessian[parameter_index * n_parameters + parameter_index]
-        * (1.0f + lambdas[fit_index]);
+    // adaptive scaling
+    scaling_vector[parameter_index]
+        = fmaxf(scaling_vector[parameter_index], hessian[diagonal_index]);
+
+    // continuous scaling
+    //scaling_vector[parameter_index] = hessian[diagonal_index];
+    
+    // initial scaling
+    //if (scaling_vector[parameter_index] == 0.f)
+    //    scaling_vector[parameter_index] = hessian[diagonal_index];
+
+    hessian[diagonal_index] += scaling_vector[parameter_index] * lambda;
 }
 
 /* Description of the cuda_update_parameters function
