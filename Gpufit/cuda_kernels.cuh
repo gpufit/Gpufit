@@ -77,6 +77,7 @@ extern __global__ void cuda_calculate_hessians(
 extern __global__ void cuda_modify_step_widths(
     float * hessians,
     float const * lambdas,
+    float * scaling_vectors,
     unsigned int const n_parameters,
     int const * iteration_failed,
     int const * finished,

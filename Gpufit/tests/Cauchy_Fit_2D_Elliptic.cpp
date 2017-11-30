@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( Cauchy_Fit_2D_Elliptic )
 
     std::array< float, 6 > initial_parameters{ { 2.f, 1.8f, 2.2f, 0.5f, 0.5f, 0.f } };
 
-    float tolerance{ 0.00001f };
+    float tolerance{ 1e-8f };
 
     int max_n_iterations{ 10 };
 

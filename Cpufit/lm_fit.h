@@ -62,7 +62,7 @@ public:
     void run();
 
 private:
-	void calc_curve_values();
+	void calc_model();
     void calc_coefficients();
 
     void calc_curve_values(std::vector<float>& curve, std::vector<float>& derivatives);
@@ -84,6 +84,12 @@ private:
 
     void calc_values_linear1d(std::vector<float>& line);
     void calc_derivatives_linear1d(std::vector<float> & derivatives);
+
+    void calc_values_fletcher_powell_helix(std::vector<float>& values);
+    void calc_derivatives_fletcher_powell_helix(std::vector<float> & derivatives);
+
+    void calc_values_brown_dennis(std::vector<float>& values);
+    void calc_derivatives_brown_dennis(std::vector<float> & derivatives);
 
     void calculate_hessian(std::vector<float> const & derivatives,
         std::vector<float> const & curve);
@@ -128,6 +134,7 @@ private:
     std::vector<float> modified_hessian_;
     std::vector<float> gradient_;
     std::vector<float> delta_;
+    std::vector<float> scaling_vector_;
     float prev_chi_square_;
     float const tolerance_;
 

@@ -34,6 +34,7 @@ LMFitCPP::LMFitCPP(
     modified_hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
     gradient_(info.n_parameters_to_fit_),
     delta_(info.n_parameters_to_fit_),
+    scaling_vector_(info.n_parameters_to_fit_),
     prev_chi_square_(0),
     lambda_(0.001f),
     prev_parameters_(info.n_parameters_to_fit_),
@@ -230,6 +231,50 @@ void LMFitCPP::calc_derivatives_linear1d(
     }
 }
 
+void LMFitCPP::calc_derivatives_fletcher_powell_helix(
+    std::vector<float> & derivatives)
+{
+    float const pi = 3.14159f;
+
+    float const * p = parameters_;
+
+    float const arg = p[0] * p[0] + p[1] * p[1];
+
+    // derivatives with respect to p[0]
+    derivatives[0 * info_.n_points_ + 0] = 100.f * 1.f / (2.f*pi) * p[1] / arg;
+    derivatives[0 * info_.n_points_ + 1] = 10.f * p[0] / std::sqrtf(arg);
+    derivatives[0 * info_.n_points_ + 2] = 0.f;
+
+    // derivatives with respect to p[1]
+    derivatives[1 * info_.n_points_ + 0] = -100.f * 1.f / (2.f*pi) * p[0] / (arg);
+    derivatives[1 * info_.n_points_ + 1] = 10.f * p[1] / std::sqrtf(arg);
+    derivatives[1 * info_.n_points_ + 2] = 0.f;
+
+    // derivatives with respect to p[2]
+    derivatives[2 * info_.n_points_ + 0] = 10.f;
+    derivatives[2 * info_.n_points_ + 1] = 0.f;
+    derivatives[2 * info_.n_points_ + 2] = 1.f;
+}
+
+void LMFitCPP::calc_derivatives_brown_dennis(
+    std::vector<float> & derivatives)
+{
+    float const * p = parameters_;
+
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    {
+        float const t = static_cast<float>(point_index) / 5.f;
+
+        float const arg1 = p[0] + p[1] * t - std::expf(t);
+        float const arg2 = p[2] + p[3] * std::sinf(t) - std::cosf(t);
+
+        derivatives[0 * info_.n_points_ + point_index] = 2.f * arg1;
+        derivatives[1 * info_.n_points_ + point_index] = 2.f * t * arg1;
+        derivatives[2 * info_.n_points_ + point_index] = 2.f * arg2;
+        derivatives[3 * info_.n_points_ + point_index] = 2.f * std::sinf(t) * arg2;
+    }
+}
+
 void LMFitCPP::calc_values_cauchy2delliptic(std::vector<float>& cauchy)
 {
     int const size_x = int(std::sqrt(float(info_.n_points_)));
@@ -369,6 +414,45 @@ void LMFitCPP::calc_values_linear1d(std::vector<float>& line)
     }
 }
 
+void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<float>& values)
+{
+    float const * p = parameters_;
+
+    float const pi = 3.14159f;
+
+    float theta = 0.f;
+
+    if (0.f < p[0])
+        theta = .5f * atan(p[1] / p[0]) / pi;
+    else if (p[0] < 0.f)
+        theta = .5f * atan(p[1] / p[0]) / pi + .5f;
+    else if (0.f < p[1])
+        theta = .25f;
+    else if (p[1] < 0.f)
+        theta = -.25f;
+    else
+        theta = 0.f;
+
+    values[0] = 10.f * (p[2] - 10.f * theta);
+    values[1] = 10.f * (std::sqrtf(p[0] * p[0] + p[1] * p[1]) - 1.f);
+    values[2] = p[2];
+}
+
+void LMFitCPP::calc_values_brown_dennis(std::vector<float>& values)
+{
+    float const * p = parameters_;
+
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    {
+        float const t = static_cast<float>(point_index) / 5.f;
+
+        float const arg1 = p[0] + p[1] * t - std::expf(t);
+        float const arg2 = p[2] + p[3] * std::sinf(t) - std::cosf(t);
+
+        values[point_index] = arg1*arg1 + arg2*arg2;
+    }
+}
+
 void LMFitCPP::calc_curve_values(std::vector<float>& curve, std::vector<float>& derivatives)
 {           
     if (info_.model_id_ == GAUSS_1D)
@@ -400,6 +484,16 @@ void LMFitCPP::calc_curve_values(std::vector<float>& curve, std::vector<float>& 
     {
         calc_values_linear1d(curve);
         calc_derivatives_linear1d(derivatives);
+    }
+    else if (info_.model_id_ == FLETCHER_POWELL_HELIX)
+    {
+        calc_values_fletcher_powell_helix(curve);
+        calc_derivatives_fletcher_powell_helix(derivatives);
+    }
+    else if (info_.model_id_ == BROWN_DENNIS)
+    {
+        calc_values_brown_dennis(curve);
+        calc_derivatives_brown_dennis(derivatives);
     }
 }
 
@@ -545,7 +639,7 @@ void LMFitCPP::calc_chi_square(
     *chi_square_ = float(sum);
 }
 
-void LMFitCPP::calc_curve_values()
+void LMFitCPP::calc_model()
 {
 	std::vector<float> & curve = curve_;
 	std::vector<float> & derivatives = derivatives_;
@@ -704,9 +798,20 @@ void LMFitCPP::modify_step_width()
     size_t const n_parameters = (size_t)(sqrt((float)(hessian_.size())));
     for (size_t parameter_index = 0; parameter_index < n_parameters; parameter_index++)
     {
-        modified_hessian_[parameter_index*n_parameters + parameter_index]
-            = modified_hessian_[parameter_index*n_parameters + parameter_index]
-            * (1.0f + (lambda_));
+        size_t const diagonal_index = parameter_index * n_parameters + parameter_index;
+
+        // adaptive scaling
+        scaling_vector_[parameter_index]
+            = std::fmaxf(scaling_vector_[parameter_index], modified_hessian_[diagonal_index]);
+
+        // continuous scaling
+        //scaling_vector_[parameter_index] = modified_hessian_[diagonal_index];
+
+        // initial scaling
+        //if (scaling_vector_[parameter_index] == 0.f)
+        //    scaling_vector_[parameter_index] = modified_hessian_[diagonal_index];
+
+        modified_hessian_[diagonal_index] += scaling_vector_[parameter_index] * lambda_;
     }
 }
 
@@ -716,7 +821,7 @@ void LMFitCPP::run()
         parameters_[i] = initial_parameters_[i];
 
     *state_ = FitState::CONVERGED;
-	calc_curve_values();
+	calc_model();
     calc_coefficients();
     prev_chi_square_ = (*chi_square_);
         
@@ -728,7 +833,7 @@ void LMFitCPP::run()
 
         update_parameters();
 
-		calc_curve_values();
+		calc_model();
         calc_coefficients();
 
         converged_ = check_for_convergence();

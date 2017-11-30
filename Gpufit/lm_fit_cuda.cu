@@ -14,6 +14,7 @@ void LMFitCUDA::solve_equation_system()
     cuda_modify_step_widths<<< blocks, threads >>>(
         gpu_data_.hessians_,
         gpu_data_.lambdas_,
+        gpu_data_.scaling_vectors_,
         info_.n_parameters_to_fit_,
         gpu_data_.iteration_failed_,
         gpu_data_.finished_,

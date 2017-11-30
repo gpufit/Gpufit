@@ -91,6 +91,12 @@ void FitInterface::set_number_of_parameters(ModelID const model_id)
     case LINEAR_1D:
         n_parameters_ = 2;
         break;
+    case FLETCHER_POWELL_HELIX:
+        n_parameters_ = 3;
+        break;
+    case BROWN_DENNIS:
+        n_parameters_ = 4;
+        break;
     default:
         break;
     }
