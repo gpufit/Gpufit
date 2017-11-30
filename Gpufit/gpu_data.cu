@@ -18,6 +18,7 @@ GPUData::GPUData(Info const & info) :
     gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_),
     hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
     deltas_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
+    scaling_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
 
     values_( info_.max_chunk_size_ * info_.n_points_ ),
     derivatives_( info_.max_chunk_size_ * info_.n_points_ * info_.n_parameters_ ),
@@ -47,6 +48,7 @@ void GPUData::init
     set(prev_chi_squares_, 0.f, chunk_size_);
     set(states_, 0, chunk_size_);
     set(finished_, 0, chunk_size_);
+    set(scaling_vectors_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
 
     write(
         data_,

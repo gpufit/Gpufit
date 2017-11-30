@@ -74,7 +74,7 @@ void Info::set_max_chunk_size()
         + 1 * n_blocks_per_fit_                             // chi_square
         + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
         + 1 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian
-        + 1 * n_parameters_to_fit_                          // delta
+        + 2 * n_parameters_to_fit_                          // delta, scaling_vector
         + 1 * n_points_*n_parameters_                       // derivatives
         + 2)                                                // prev_chi_square, lambda
         + sizeof(int)
