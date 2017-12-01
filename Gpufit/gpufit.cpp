@@ -22,7 +22,8 @@ int gpufit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    float * output_data
 )
 try
 {
@@ -41,7 +42,8 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations);
+        output_n_iterations,
+        output_data);
 
     fi.fit(static_cast<ModelID>(model_id));
 
@@ -99,7 +101,6 @@ int gpufit_get_cuda_version(int * runtime_version, int * driver_version)
 
 int gpufit_portable_interface(int argc, void *argv[])
 {
-
     return gpufit(
         *((size_t *) argv[0]),
         *((size_t *) argv[1]),
@@ -116,6 +117,6 @@ int gpufit_portable_interface(int argc, void *argv[])
         (float *) argv[12],
         (int *) argv[13],
         (float *) argv[14],
-        (int *) argv[15]);
-
+        (int *) argv[15],
+        (float *) argv[16]);
 }

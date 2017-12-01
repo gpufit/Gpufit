@@ -12,7 +12,8 @@ LMFit::LMFit
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    float * output_data
 ) :
     data_( data ),
     weights_( weights ),
@@ -23,6 +24,7 @@ LMFit::LMFit
     output_states_( output_states ),
     output_chi_squares_( output_chi_squares ),
     output_n_iterations_( output_n_iterations ),
+    output_data_(output_data),
     info_(info),
     chunk_size_(0),
     ichunk_(0),
@@ -52,6 +54,10 @@ void LMFit::get_results(GPUData const & gpu_data, int const n_fits)
     output_states_ = gpu_data.states_.copy( n_fits, output_states_ ) ;
     output_chi_squares_ = gpu_data.chi_squares_.copy( n_fits, output_chi_squares_ ) ;
     output_n_iterations_ = gpu_data.n_iterations_.copy( n_fits, output_n_iterations_ ) ;
+    if(output_data_ != NULL )
+    {
+        output_data_ = gpu_data.values_.copy( n_fits*info_.n_points_, output_data_ ) ;
+    }
 }
 
 void LMFit::run(float const tolerance)

@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <iomanip>
 
+
 void kinetic_fit_example()
 {
     /*
@@ -53,26 +54,26 @@ void kinetic_fit_example()
                                            2.25,2.75,3.5,4.5,5.5,7.,9.,
                                            12.5,17.5,22.5,27.5,35.
                                         };
-    std::vector< float > IFvalue =  {0.,0.,24409.38070751,29004.28711479,
-                                    16902.29913917,12060.98208071,
-                                    10612.57271934,10197.68263123,
-                                    10054.6062693,9978.15052684,
-                                    9917.65977008,9861.25459037,
-                                    9698.43991838,9541.40325626,
-                                    9243.27864281,8965.43931906,
-                                    8706.77619679,8242.85724982,
-                                    7843.85989999,7087.59694672,
-                                    6609.51306567,6344.98718338,
-                                    6246.22490223,6414.56761034
+    std::vector< float > IFvalue =  {   0.,0.,24409.38070751,29004.28711479,
+                                        16902.29913917,12060.98208071,
+                                        10612.57271934,10197.68263123,
+                                        10054.6062693,9978.15052684,
+                                        9917.65977008,9861.25459037,
+                                        9698.43991838,9541.40325626,
+                                        9243.27864281,8965.43931906,
+                                        8706.77619679,8242.85724982,
+                                        7843.85989999,7087.59694672,
+                                        6609.51306567,6344.98718338,
+                                        6246.22490223,6414.56761034
                                     };
     std::vector< float > IFparam =  { 0.458300896195880,
-                                  758028.906510941,
-                                  3356.00773871079,
-                                  7042.64861309165,
-                                 -9.91821801288336,
-                                  0.0134846319687693,
-                                 -0.0585800774301212
-                                };
+                                      758028.906510941,
+                                      3356.00773871079,
+                                      7042.64861309165,
+                                     -9.91821801288336,
+                                      0.0134846319687693,
+                                     -0.0585800774301212
+                                    };
     size_t const user_info_size = ( IFvalue.size() + IFparam.size() + times_float.size() ) * sizeof(float);
     std::vector< float > user_info;
     user_info.reserve(user_info_size/sizeof(float));
@@ -108,14 +109,14 @@ void kinetic_fit_example()
     {
         size_t j = i / n_points_per_fit; // the fit
         size_t k = i % n_points_per_fit; // the position within a fit
-        data[i] = data_meas[k] + normal_dist(rng);
+        data[i] = data_meas[k] + 2*normal_dist(rng);
     }
 
     // tolerance
-    float const tolerance = 0.0001f;
+    float const tolerance = 0.001f;
 
     // maximum number of iterations
-    int const max_number_iterations = 40;
+    int const max_number_iterations = 10;
 
     // estimator ID
     EstimatorID const estimator_id = LSE;
@@ -131,7 +132,7 @@ void kinetic_fit_example()
     std::vector< int > output_states(n_fits);
     std::vector< float > output_chi_square(n_fits);
     std::vector< int > output_number_iterations(n_fits);
-    //std::vector< float > output_data(n_fits * n_points_per_fit);
+    std::vector< float > output_data(n_fits * n_points_per_fit);
 
     // call to gpufit (C interface)
     std::chrono::high_resolution_clock::time_point time_0 = std::chrono::high_resolution_clock::now();
@@ -152,8 +153,8 @@ void kinetic_fit_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data()
-            //output_data.data()
+            output_number_iterations.data(),
+            output_data.data()
         );
 
     std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
@@ -177,11 +178,11 @@ void kinetic_fit_example()
         output_states_histogram[*it]++;
     }
 
-    std::cout << "ratio converged              " << (float)output_states_histogram[0] / n_fits << "\n";
-    std::cout << "ratio max iteration exceeded " << (float)output_states_histogram[1] / n_fits << "\n";
-    std::cout << "ratio singular hessian       " << (float)output_states_histogram[2] / n_fits << "\n";
-    std::cout << "ratio neg curvature MLE      " << (float)output_states_histogram[3] / n_fits << "\n";
-    std::cout << "ratio gpu not read           " << (float)output_states_histogram[4] / n_fits << "\n";
+    std::cout << "ratio converged              " << (float)output_states_histogram[0] / n_fits * 100 << "%\n";
+    std::cout << "ratio max iteration exceeded " << (float)output_states_histogram[1] / n_fits * 100 << "%\n";
+    std::cout << "ratio singular hessian       " << (float)output_states_histogram[2] / n_fits * 100 << "%\n";
+    std::cout << "ratio neg curvature MLE      " << (float)output_states_histogram[3] / n_fits * 100 << "%\n";
+    std::cout << "ratio gpu not read           " << (float)output_states_histogram[4] / n_fits * 100 << "%\n";
 
     // compute mean of fitted parameters for converged fits
     std::vector< float > output_parameters_mean(n_model_parameters, 0);
@@ -255,6 +256,15 @@ void kinetic_fit_example()
     // normalize
     output_number_iterations_mean /= static_cast<float>(output_states_histogram[0]);
     std::cout << "mean number of iterations " << output_number_iterations_mean << "\n";
+
+    for (int i = 0; i < n_points_per_fit; i++)
+    {
+        std::cout << "measure : " << std::fixed << std::setw( 8 ) <<  std::setprecision( 2 ) << std::setfill( ' ' )
+                             << data_meas[i] << " || "
+                  << "fitting : " << std::fixed << std::setw( 8 ) <<  std::setprecision( 2 ) << std::setfill( ' ' )
+                             << output_data.data()[i]
+                  << '\n';
+    }
 
 }
 

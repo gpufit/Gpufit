@@ -21,7 +21,8 @@ public:
         float * output_parameters,
         int * output_states,
         float * output_chi_squares,
-        int * output_n_iterations
+        int * output_n_iterations,
+        float * output_data = NULL
     ) ;
 
     virtual ~LMFit();
@@ -42,6 +43,7 @@ private:
     int * output_states_ ;
     float * output_chi_squares_ ;
     int * output_n_iterations_ ;
+    float * output_data_ ;
 
     int ichunk_;
     int chunk_size_;

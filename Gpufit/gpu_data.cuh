@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <vector>
 #include <limits>
+#include <iostream>
 
 template< typename Type >
 struct Device_Array
@@ -42,7 +43,6 @@ struct Device_Array
     Type * copy(std::size_t const size, Type * const to) const
     {
         // TODO check size parameter
-
         std::size_t const type_size = sizeof(Type);
         cudaError_t const status
             = cudaMemcpy(to, data_, size * type_size, cudaMemcpyDeviceToHost);
