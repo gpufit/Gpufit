@@ -1,6 +1,14 @@
 #ifndef GPU_FIT_H_INCLUDED
 #define GPU_FIT_H_INCLUDED
 
+#ifdef __linux__
+#define VISIBLE __attribute__((visibility("default")))
+#endif
+
+#ifdef _WIN32
+#define VISIBLE
+#endif
+
 #include <cstddef>
 #include <stdexcept>
 #include "constants.h"
@@ -9,7 +17,7 @@
 extern "C" {
 #endif
 
-int gpufit
+VISIBLE int gpufit
 (
     size_t n_fits,
     size_t n_points,
@@ -29,14 +37,14 @@ int gpufit
     int * output_n_iterations
 ) ;
 
-char const * gpufit_get_last_error() ;
+VISIBLE char const * gpufit_get_last_error() ;
 
 // returns 1 if cuda is available and 0 otherwise
-int gpufit_cuda_available();
+VISIBLE int gpufit_cuda_available();
 
-int gpufit_get_cuda_version(int * runtime_version, int * driver_version);
+VISIBLE int gpufit_get_cuda_version(int * runtime_version, int * driver_version);
 
-int gpufit_portable_interface(int argc, void *argv[]);
+VISIBLE int gpufit_portable_interface(int argc, void *argv[]);
 
 #ifdef __cplusplus
 }
