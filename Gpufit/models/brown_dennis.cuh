@@ -74,7 +74,7 @@ __device__ void calculate_brown_dennis(
     current_derivative[0 * n_points] = 2.f * arg1;
     current_derivative[1 * n_points] = 2.f * x * arg1;
     current_derivative[2 * n_points] = 2.f * arg2;
-    current_derivative[3 * n_points] = 2.f * std::sinf(x) * arg2;
+    current_derivative[3 * n_points] = 2.f * sinf(x) * arg2;
 }
 
 #endif
