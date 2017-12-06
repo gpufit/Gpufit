@@ -179,10 +179,25 @@ the command line.
 Linux
 -----
 
-Gpufit has not yet been officially tested on a computer running a Linux variant 
-with a CUDA capable graphics card. However, satisfying the Prerequisites_ and
-using CMake, we estimate that the library should build in principle and one
-should also be able to run the examples on Linux.
+A successful build has been verified on Ubuntu 16.04 LTS with gcc 5.4 and CUDA 9
+following the `instructions<https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1604&target_type=debnetwork>`_
+on the NVidia website. CMake needs to be at least version 3.7. To perform the tests, a development version of Boost should be installed (e.g. *libboost-all-dev*).
+
+The following commands were executed. It is assumed that
+the sources are checked out in a path "Gpufit" relative to the current path.
+
+.. code-block:: bash
+
+   mkdir Gpufit-release
+   cd Gpufit-release
+   cmake -DCMAKE_BUILD_TYPE=RELEASE ../Gpufit
+   make all
+
+The tests can be run for example by "make test". Run the performance comparison with.
+
+.. code-block:: bash
+
+   ./Gpufit_Cpufit_performance_comparison
 
 MacOS
 -----
