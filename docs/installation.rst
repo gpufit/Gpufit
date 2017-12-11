@@ -176,28 +176,50 @@ The unit tests can be executed by building the target "RUN_TESTS" or by
 starting the created executables in the output directory from
 the command line.
 
-Linux
------
+Compiling Gpufit on Linux
+-------------------------
 
 A successful build has been verified on Ubuntu 16.04 LTS with gcc 5.4 and CUDA 9
-following the `instructions<https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1604&target_type=debnetwork>`_
+following the `instructions <https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1604&target_type=debnetwork>`_
 on the NVidia website. CMake needs to be at least version 3.7. To perform the tests, a development version of Boost should be installed (e.g. *libboost-all-dev*).
 
-The following commands were executed. It is assumed that
-the sources are checked out in a path "Gpufit" relative to the current path.
+The following commands were executed.
 
 .. code-block:: bash
 
-   mkdir Gpufit-release
-   cd Gpufit-release
-   cmake -DCMAKE_BUILD_TYPE=RELEASE ../Gpufit
-   make all
+	git clone https://github.com/gpufit/Gpufit.git Gpufit
+	mkdir Gpufit-build
+	cd Gpufit-build
+	cmake -DCMAKE_BUILD_TYPE=RELEASE ../Gpufit
+	make
 
-The tests can be run for example by "make test". Run the performance comparison with.
+The tests can be run for example by "make test". Run the performance comparison with
 
 .. code-block:: bash
 
    ./Gpufit_Cpufit_performance_comparison
+   
+To install the Python package
+
+.. code-block:: bash
+
+   cd pyGpufit/dist
+   pip install pyGpufit-X.Y.Z-py2.py3-none-any.whl
+   
+To run the Matlab package you need to tell Matlab to use a newer version of the C++ standard library
+
+.. code-block:: bash
+
+   export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+   matlab
+   
+Then in Matlab add the matlab output directory to the path and execute some examples.
+
+.. code-block:: bash
+
+   addpath('XX/Gpufit-build/matlab');
+   cd('XX/Gpufit/Gpufit/matlab/examples');
+   gauss2d();
 
 MacOS
 -----

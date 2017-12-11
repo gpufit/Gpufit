@@ -22,11 +22,12 @@ add_library( GpufitMex SHARED
   ${Sources}
   )
 
-set_property( TARGET GpufitMex
-  PROPERTY SUFFIX .${Matlab_MEX_EXTENSION} )
-
-set_property( TARGET GpufitMex
-  PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+set_target_properties( GpufitMex
+  PROPERTIES
+		PREFIX ""
+		SUFFIX .${Matlab_MEX_EXTENSION}
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
 
 target_include_directories( GpufitMex PRIVATE ${Matlab_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR} )
 
@@ -52,11 +53,12 @@ add_library( GpufitCudaAvailableMex SHARED
   ${Sources}
   )
 
-set_property( TARGET GpufitCudaAvailableMex
-  PROPERTY SUFFIX .${Matlab_MEX_EXTENSION} )
-
-set_property( TARGET GpufitCudaAvailableMex
-  PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+set_target_properties( GpufitCudaAvailableMex
+  PROPERTIES
+		PREFIX ""
+		SUFFIX .${Matlab_MEX_EXTENSION}
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
 
 target_include_directories( GpufitCudaAvailableMex PRIVATE ${Matlab_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR} )
 
