@@ -1,0 +1,17 @@
+group 'com.github.gpufit'
+version '1.0.2'
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+mainClassName = 'com.github.gpufit.RunIt'
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
