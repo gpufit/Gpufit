@@ -1,6 +1,14 @@
 #ifndef CPU_FIT_H_INCLUDED
 #define CPU_FIT_H_INCLUDED
 
+#ifdef __linux__
+#define VISIBLE __attribute__((visibility("default")))
+#endif
+
+#ifdef _WIN32
+#define VISIBLE
+#endif
+
 #include <cstddef>
 #include "../Gpufit/constants.h"
 
@@ -8,7 +16,7 @@
 extern "C" {
 #endif
 
-int cpufit
+VISIBLE int cpufit
 (
     size_t n_fits,
     size_t n_points,
@@ -28,7 +36,7 @@ int cpufit
     int * output_n_iterations
 ) ;
 
-char const * cpufit_get_last_error() ;
+VISIBLE char const * cpufit_get_last_error() ;
 
 #ifdef __cplusplus
 }
