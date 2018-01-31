@@ -243,12 +243,12 @@ void LMFitCPP::calc_derivatives_fletcher_powell_helix(
 
     // derivatives with respect to p[0]
     derivatives[0 * info_.n_points_ + 0] = 100.f * 1.f / (2.f*pi) * p[1] / arg;
-    derivatives[0 * info_.n_points_ + 1] = 10.f * p[0] / std::sqrtf(arg);
+    derivatives[0 * info_.n_points_ + 1] = 10.f * p[0] / std::sqrt(arg);
     derivatives[0 * info_.n_points_ + 2] = 0.f;
 
     // derivatives with respect to p[1]
     derivatives[1 * info_.n_points_ + 0] = -100.f * 1.f / (2.f*pi) * p[0] / (arg);
-    derivatives[1 * info_.n_points_ + 1] = 10.f * p[1] / std::sqrtf(arg);
+    derivatives[1 * info_.n_points_ + 1] = 10.f * p[1] / std::sqrt(arg);
     derivatives[1 * info_.n_points_ + 2] = 0.f;
 
     // derivatives with respect to p[2]
@@ -266,13 +266,13 @@ void LMFitCPP::calc_derivatives_brown_dennis(
     {
         float const t = static_cast<float>(point_index) / 5.f;
 
-        float const arg1 = p[0] + p[1] * t - std::expf(t);
-        float const arg2 = p[2] + p[3] * std::sinf(t) - std::cosf(t);
+        float const arg1 = p[0] + p[1] * t - std::exp(t);
+        float const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
 
         derivatives[0 * info_.n_points_ + point_index] = 2.f * arg1;
         derivatives[1 * info_.n_points_ + point_index] = 2.f * t * arg1;
         derivatives[2 * info_.n_points_ + point_index] = 2.f * arg2;
-        derivatives[3 * info_.n_points_ + point_index] = 2.f * std::sinf(t) * arg2;
+        derivatives[3 * info_.n_points_ + point_index] = 2.f * std::sin(t) * arg2;
     }
 }
 
@@ -435,7 +435,7 @@ void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<float>& values)
         theta = 0.f;
 
     values[0] = 10.f * (p[2] - 10.f * theta);
-    values[1] = 10.f * (std::sqrtf(p[0] * p[0] + p[1] * p[1]) - 1.f);
+    values[1] = 10.f * (std::sqrt(p[0] * p[0] + p[1] * p[1]) - 1.f);
     values[2] = p[2];
 }
 
@@ -447,8 +447,8 @@ void LMFitCPP::calc_values_brown_dennis(std::vector<float>& values)
     {
         float const t = static_cast<float>(point_index) / 5.f;
 
-        float const arg1 = p[0] + p[1] * t - std::expf(t);
-        float const arg2 = p[2] + p[3] * std::sinf(t) - std::cosf(t);
+        float const arg1 = p[0] + p[1] * t - std::exp(t);
+        float const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
 
         values[point_index] = arg1*arg1 + arg2*arg2;
     }

@@ -6,8 +6,9 @@
 
 #include <array>
 #include <cmath>
+#include <cfloat>
 
-BOOST_AUTO_TEST_CASE(Fletcher_Powell_Helix)
+BOOST_AUTO_TEST_CASE( Brown_Dennis )
 {
     /*
     Performs a single fit using the FLETCHER_POWELL_HELIX model.

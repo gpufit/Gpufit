@@ -21,10 +21,13 @@ add_library( CpufitMex SHARED
   ${Headers}
   ${Sources}
   )
-set_property( TARGET CpufitMex
-  PROPERTY SUFFIX .${Matlab_MEX_EXTENSION} )
-set_property( TARGET CpufitMex
-  PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+  
+set_target_properties( CpufitMex
+	PROPERTIES
+		PREFIX ""
+		SUFFIX .${Matlab_MEX_EXTENSION}
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
 
 target_include_directories( CpufitMex PRIVATE ${Matlab_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR})
 target_link_libraries( CpufitMex Cpufit ${Matlab_LIBRARIES} )

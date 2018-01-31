@@ -152,8 +152,11 @@ cuda_add_library( Gpufit SHARED
 	${GpuCudaEstimators}
 )
 
-set_property( TARGET Gpufit
-	PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+set_target_properties( Gpufit
+	PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+		CXX_VISIBILITY_PRESET hidden
+)
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 

@@ -8,6 +8,17 @@ if( NOT Matlab_FOUND )
   return()
 endif()
 
+# set C++ ABI version on Linux to work with Matlab (see documentation)
+
+if( CMAKE_CXX_COMPILER_ID STREQUAL GNU )
+  if( Matlab VERSION_LESS 9.1 )
+    message( STATUS "Matlab ${Matlab} is not supported - skipping Gpufit Matlab binding!" )
+    return()
+  endif()
+  set( abi_version 8 ) # g++ 4.9 (most likely)
+  string( APPEND CMAKE_CXX_FLAGS " -fabi-version=${abi_version}" )
+endif()
+
 # MATLAB MEX FILE for gpufit
 
 set( Headers
@@ -22,11 +33,12 @@ add_library( GpufitMex SHARED
   ${Sources}
   )
 
-set_property( TARGET GpufitMex
-  PROPERTY SUFFIX .${Matlab_MEX_EXTENSION} )
-
-set_property( TARGET GpufitMex
-  PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+set_target_properties( GpufitMex
+  PROPERTIES
+		PREFIX ""
+		SUFFIX .${Matlab_MEX_EXTENSION}
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
 
 target_include_directories( GpufitMex PRIVATE ${Matlab_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR} )
 
@@ -52,11 +64,12 @@ add_library( GpufitCudaAvailableMex SHARED
   ${Sources}
   )
 
-set_property( TARGET GpufitCudaAvailableMex
-  PROPERTY SUFFIX .${Matlab_MEX_EXTENSION} )
-
-set_property( TARGET GpufitCudaAvailableMex
-  PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+set_target_properties( GpufitCudaAvailableMex
+  PROPERTIES
+		PREFIX ""
+		SUFFIX .${Matlab_MEX_EXTENSION}
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
 
 target_include_directories( GpufitCudaAvailableMex PRIVATE ${Matlab_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR} )
 

@@ -23,8 +23,11 @@ add_library( Cpufit SHARED
 	${CpuHeaders}
 	${CpuSources}
 )
-set_property( TARGET Cpufit
-	PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
+set_target_properties( Cpufit
+	PROPERTIES
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+		CXX_VISIBILITY_PRESET hidden
+)
 
 #install( TARGETS Cpufit RUNTIME DESTINATION bin )
 
