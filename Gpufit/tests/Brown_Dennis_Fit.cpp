@@ -64,13 +64,13 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
 
     BOOST_CHECK(status == 0);
     BOOST_CHECK(output_state == 0);
-    BOOST_CHECK(output_n_iterations <= 70);
+    BOOST_CHECK(output_n_iterations <= 78);
     BOOST_CHECK(output_chi_square < expected_chi_square);
 
-    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < FLT_EPSILON);
-    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < FLT_EPSILON);
-    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < FLT_EPSILON);
-    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < FLT_EPSILON);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-2f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-2f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-2f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-2f);
 
     // test initial_parameters * 10.f
     for (int i = 0; i < n_parameters; i++)

@@ -28,9 +28,20 @@ GPUData::GPUData(Info const & info) :
     finished_( info_.max_chunk_size_ ),
     iteration_failed_(info_.max_chunk_size_),
     all_finished_( 1 ),
-    n_iterations_( info_.max_chunk_size_ )
-{
+    n_iterations_( info_.max_chunk_size_ ),
 
+    decomposed_hessians_(info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_),
+    pointer_decomposed_hessians_(info_.max_chunk_size_),
+    pointer_deltas_(info_.max_chunk_size_),
+    pivot_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
+    cublas_info_(info_.max_chunk_size_)
+{
+    cublasCreate(&cublas_handle_);
+}
+
+GPUData::~GPUData()
+{
+    cublasDestroy(cublas_handle_);
 }
 
 void GPUData::init

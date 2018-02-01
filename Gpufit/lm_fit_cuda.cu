@@ -1,7 +1,7 @@
 #include "lm_fit.h"
 #include <algorithm>
 #include "cuda_kernels.cuh"
-#include "cuda_gaussjordan.cuh"
+#include "cublas_v2.h"
 
 void LMFitCUDA::solve_equation_system()
 {
@@ -21,54 +21,64 @@ void LMFitCUDA::solve_equation_system()
         info_.n_fits_per_block_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 
-    int n_parameters_pow2 = 1;
+    // TODO: check output info
 
-    while (n_parameters_pow2 < info_.n_parameters_to_fit_)
-    {
-        n_parameters_pow2 *= 2;
-    }
+    // initialize components of equation systems
+    gpu_data_.copy(gpu_data_.decomposed_hessians_, gpu_data_.hessians_, n_fits_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
 
-    //set up to run the Gauss Jordan elimination
-    int const n_equations = info_.n_parameters_to_fit_;
-    int const n_solutions = n_fits_;
-
-    threads.x = n_equations + 1;
-    threads.y = n_equations;
-    blocks.x = n_solutions;
-
-    //set the size of the shared memory area for each block
-    int const shared_size
-        = sizeof(float) * ((threads.x * threads.y)
-        + n_parameters_pow2 + n_parameters_pow2);
-
-    //set up the singular_test vector
-    int * singular_tests;
-    CUDA_CHECK_STATUS(cudaMalloc((void**)&singular_tests, n_fits_ * sizeof(int)));
-
-    //run the Gauss Jordan elimination
-    cuda_gaussjordan<<< blocks, threads, shared_size >>>(
-        gpu_data_.deltas_,
-        gpu_data_.gradients_,
-        gpu_data_.hessians_,
-        gpu_data_.finished_,
-        singular_tests,
-        info_.n_parameters_to_fit_,
-        n_parameters_pow2);
-    CUDA_CHECK_STATUS(cudaGetLastError());
-
-    //set up to update the lm_state_gpu_ variable with the Gauss Jordan results
+    // configure kernels
     threads.x = std::min(n_fits_, 256);
-    threads.y = 1;
     blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
-    //update the lm_state_gpu_ variable
-    cuda_update_state_after_gaussjordan<<< blocks, threads >>>(
+    // convert hessians to array of pointers
+    convert_pointer <<< blocks, threads >>>(
+        gpu_data_.pointer_decomposed_hessians_,
+        gpu_data_.decomposed_hessians_,
         n_fits_,
-        singular_tests,
-        gpu_data_.states_);
-    CUDA_CHECK_STATUS(cudaGetLastError());
+        info_.n_parameters_to_fit_*info_.n_parameters_to_fit_,
+        gpu_data_.finished_);
 
-    CUDA_CHECK_STATUS(cudaFree(singular_tests));
+    // decompose hessians
+    cublasStatus_t lu_status_decopmposition = cublasSgetrfBatched(
+        gpu_data_.cublas_handle_,
+        info_.n_parameters_to_fit_,
+        gpu_data_.pointer_decomposed_hessians_,
+        info_.n_parameters_to_fit_,
+        gpu_data_.pivot_vectors_,
+        gpu_data_.cublas_info_,
+        n_fits_);
+
+    // initialize deltas with values of gradients
+    gpu_data_.copy(gpu_data_.deltas_, gpu_data_.gradients_, n_fits_ * info_.n_parameters_to_fit_);
+
+    // configure kernel convert_pointer
+    threads.x = std::min(n_fits_, 256);
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+
+    // convert deltas to array of pointers
+    convert_pointer <<< blocks, threads >>> (
+        gpu_data_.pointer_deltas_,
+        gpu_data_.deltas_,
+        n_fits_,
+        info_.n_parameters_to_fit_, gpu_data_.finished_);
+
+    // TODO: check solution_info
+    int solution_info;
+
+    // solve equation systems
+    cublasStatus_t lu_status_solution
+        = cublasSgetrsBatched(
+        gpu_data_.cublas_handle_,
+        CUBLAS_OP_N,
+        info_.n_parameters_to_fit_,
+        1,
+        (float const **)(gpu_data_.pointer_decomposed_hessians_.data()),
+        info_.n_parameters_to_fit_,
+        gpu_data_.pivot_vectors_,
+        gpu_data_.pointer_deltas_,
+        info_.n_parameters_to_fit_,
+        &solution_info,
+        n_fits_);
 
     threads.x = info_.n_parameters_*info_.n_fits_per_block_;
     threads.y = 1;
