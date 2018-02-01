@@ -4,6 +4,23 @@
 #include "models/models.cuh"
 #include "estimators/estimators.cuh"
 
+__global__ void convert_pointer(
+    float ** pointer_to_pointer,
+    float * pointer,
+    int const n_pointers,
+    int const size,
+    int const * skip)
+{
+    int const index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (index >= n_pointers)
+        return;
+
+    int const begin = index * size;
+
+    pointer_to_pointer[index] = pointer + begin;
+}
+
 /* Description of the cuda_calc_curve_values function
 * ===================================================
 *
@@ -929,62 +946,6 @@ __global__ void cuda_update_parameters(
     float const * current_deltas = &deltas[fit_index * n_parameters_to_fit];
 
     current_parameters[parameters_to_fit_indices[parameter_index]] += current_deltas[parameter_index];
-}
-
-/* Description of the cuda_update_state_after_gaussjordan function
-* ================================================================
-*
-* This function interprets the singular flag vector of the Gauss Jordan function
-* according to this LM implementation.
-*
-* Parameters:
-*
-* n_fits: The number of fits.
-*
-* singular_checks: An input vector used to report whether a fit is singular.
-*
-* states: An output vector of values which indicate whether the fitting process
-*         was carreid out correctly or which problem occurred. If a hessian
-*         matrix of a fit is singular, it is set to 2.
-*
-* Calling the cuda_update_state_after_gaussjordan function
-* ========================================================
-*
-* When calling the function, the blocks and threads must be set up correctly,
-* as shown in the following example code.
-*
-*   dim3  threads(1, 1, 1);
-*   dim3  blocks(1, 1, 1);
-*
-*   int const example_value = 256;
-*
-*   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
-*
-*   cuda_update_state_after_gaussjordan<<< blocks, threads >>>(
-*       n_fits,
-*       singular_checks,
-*       states);
-*
-*/
-
-__global__ void cuda_update_state_after_gaussjordan(
-    int const n_fits,
-    int const * singular_checks,
-    int * states)
-{
-    int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (fit_index >= n_fits)
-    {
-        return;
-    }
-
-    if (singular_checks[fit_index] == 1)
-    {
-        states[fit_index] = SINGULAR_HESSIAN;
-    }
-
 }
 
 /* Description of the cuda_check_for_convergence function

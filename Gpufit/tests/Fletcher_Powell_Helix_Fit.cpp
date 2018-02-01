@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
     BOOST_CHECK(status == 0);
     BOOST_CHECK(output_state == 0);
     BOOST_CHECK(output_n_iterations <= 29);
-    BOOST_CHECK(output_chi_square < 1e-21f);
+    BOOST_CHECK(output_chi_square < 1e-20f);
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-10f);
     BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-10f);

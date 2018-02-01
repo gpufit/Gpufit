@@ -4,7 +4,7 @@
 #include "info.h"
 
 #include <cuda_runtime.h>
-
+#include "cublas_v2.h"
 #include <stdexcept>
 #include <vector>
 #include <limits>
@@ -39,6 +39,11 @@ struct Device_Array
     operator Type * () { return static_cast<Type *>(data_); }
     operator Type const * () const { return static_cast<Type *>(data_); }
 
+    Type const * data() const
+    {
+        return static_cast<Type *>(data_);
+    }
+
     Type * copy(std::size_t const size, Type * const to) const
     {
         // TODO check size parameter
@@ -64,6 +69,7 @@ class GPUData
 {
 public:
     GPUData(Info const & info);
+    ~GPUData();
 
     void init
     (
@@ -95,6 +101,8 @@ private:
 public:
     int chunk_index_;
 
+    cublasHandle_t cublas_handle_;
+
     Device_Array< float > data_;
     Device_Array< float > weights_;
     Device_Array< float > parameters_;
@@ -118,6 +126,12 @@ public:
     Device_Array< int > iteration_failed_;
     Device_Array< int > all_finished_;
     Device_Array< int > n_iterations_;
+
+    Device_Array< float > decomposed_hessians_;
+    Device_Array< float * > pointer_decomposed_hessians_;
+    Device_Array< float * > pointer_deltas_;
+    Device_Array< int > pivot_vectors_;
+    Device_Array< int > cublas_info_;
 };
 
 #endif

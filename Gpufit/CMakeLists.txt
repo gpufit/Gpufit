@@ -115,14 +115,12 @@ set( GpuSources
 )
 
 set( GpuCudaHeaders
-	cuda_gaussjordan.cuh
 	cuda_kernels.cuh
 	gpu_data.cuh
 )
 
 set( GpuCudaSources
 	lm_fit_cuda.cu
-	cuda_gaussjordan.cu
 	cuda_kernels.cu
 	info.cu
 	gpu_data.cu
@@ -157,6 +155,8 @@ set_target_properties( Gpufit
 		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
 		CXX_VISIBILITY_PRESET hidden
 )
+
+target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 

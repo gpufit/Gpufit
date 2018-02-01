@@ -35,7 +35,7 @@ void LMFitCUDA::run()
     for (int iteration = 0; !all_finished_; iteration++)
     {
         // modify step width
-        // Gauss Jordan
+        // LUP decomposition
         // update fitting parameters
         solve_equation_system();
 
