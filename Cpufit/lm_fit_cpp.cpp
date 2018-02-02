@@ -32,6 +32,8 @@ LMFitCPP::LMFitCPP(
     derivatives_(info.n_points_*info.n_parameters_),
     hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
     modified_hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
+    decomposed_hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
+    pivot_array_(info_.n_parameters_to_fit_),
     gradient_(info.n_parameters_to_fit_),
     delta_(info.n_parameters_to_fit_),
     scaling_vector_(info.n_parameters_to_fit_),
@@ -44,6 +46,92 @@ LMFitCPP::LMFitCPP(
     chi_square_(output_chi_square),
     n_iterations_(output_n_iterations)
 {}
+
+template<class T>
+int decompose_LUP(std::vector<T> & matrix, int const N, double const Tol, std::vector<int> & permutation_vector) {
+
+    for (int i = 0; i < N; i++)
+        permutation_vector[i] = i;
+
+    for (int i = 0; i < N; i++)
+    {
+        T max_value = 0.;
+        int max_index = i;
+
+        for (int k = i; k < N; k++)
+        {
+            T absolute_value = std::abs(matrix[k * N + i]);
+            if (absolute_value > max_value)
+            {
+                max_value = absolute_value;
+                max_index = k;
+            }
+        }
+
+        if (max_value < Tol)
+            return 0; //failure, matrix is degenerate
+
+        if (max_index != i)
+        {
+            //pivoting permutation vector
+            std::swap(permutation_vector[i], permutation_vector[max_index]);
+
+            //pivoting rows of matrix
+            for (int j = 0; j < N; j++)
+                std::swap(matrix[i * N + j], matrix[max_index * N + j]);
+        }
+
+        for (int j = i + 1; j < N; j++)
+        {
+            matrix[j * N + i] /= matrix[i * N + i];
+
+            for (int k = i + 1; k < N; k++)
+                matrix[j * N + k] -= matrix[j * N + i] * matrix[i * N + k];
+        }
+    }
+
+    return 1;  //decomposition done 
+}
+
+template<class T>
+void solve_LUP(
+    std::vector<T> const & matrix,
+    std::vector<int> const & permutation_vector,
+    std::vector<T> const & vector,
+    int const N,
+    std::vector<T> & solution)
+{
+    for (int i = 0; i < N; i++)
+    {
+        solution[i] = vector[permutation_vector[i]];
+
+        for (int k = 0; k < i; k++)
+        {
+            solution[i] -= matrix[i * N + k] * solution[k];
+        }
+    }
+
+    for (int i = N - 1; i >= 0; i--)
+    {
+        for (int k = i + 1; k < N; k++)
+        {
+            solution[i] -= matrix[i * N + k] * solution[k];
+        }
+
+        solution[i] = solution[i] / matrix[i * N + i];
+    }
+}
+
+void LMFitCPP::decompose_hessian_LUP(std::vector<float> const & hessian)
+{
+    decomposed_hessian_ = hessian;
+
+    int const N = int(gradient_.size());
+
+    int const singular = decompose_LUP(decomposed_hessian_, info_.n_parameters_to_fit_, 0.0000f, pivot_array_);
+    if (singular == 0)
+        *state_ = FitState::SINGULAR_HESSIAN;
+}
 
 void LMFitCPP::calc_derivatives_gauss2d(
     std::vector<float> & derivatives)
@@ -661,83 +749,6 @@ void LMFitCPP::calc_coefficients()
     }
 }
 
-void LMFitCPP::gauss_jordan()
-{
-    delta_ = gradient_;
-
-    std::vector<float> & alpha = modified_hessian_;
-    std::vector<float> & beta = delta_;
-
-    int icol, irow;
-    float big, dum, pivinv;
-
-    std::vector<int> indxc(info_.n_parameters_to_fit_, 0);
-    std::vector<int> indxr(info_.n_parameters_to_fit_, 0);
-    std::vector<int> ipiv(info_.n_parameters_to_fit_, 0);
-
-    for (int kp = 0; kp < info_.n_parameters_to_fit_; kp++)
-    {
-        big = 0.0;
-        for (int jp = 0; jp < info_.n_parameters_to_fit_; jp++)
-        {
-            if (ipiv[jp] != 1)
-            {
-                for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
-                {
-                    if (ipiv[ip] == 0)
-                    {
-                        if (fabs(alpha[jp*info_.n_parameters_to_fit_ + ip]) >= big)
-                        {
-                            big = fabs(alpha[jp*info_.n_parameters_to_fit_ + ip]);
-                            irow = jp;
-                            icol = ip;
-                        }
-                    }
-                }
-            }
-        }
-        ++(ipiv[icol]);
-
-
-        if (irow != icol)
-        {
-            for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
-            {
-                std::swap(alpha[irow*info_.n_parameters_to_fit_ + ip], alpha[icol*info_.n_parameters_to_fit_ + ip]);
-            }
-            std::swap(beta[irow], beta[icol]);
-        }
-        indxr[kp] = irow;
-        indxc[kp] = icol;
-        if (alpha[icol*info_.n_parameters_to_fit_ + icol] == 0.0)
-        {
-            *state_ = FitState::SINGULAR_HESSIAN;
-            break;
-        }
-        pivinv = 1.0f / alpha[icol*info_.n_parameters_to_fit_ + icol];
-        alpha[icol*info_.n_parameters_to_fit_ + icol] = 1.0;
-        for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
-        {
-            alpha[icol*info_.n_parameters_to_fit_ + ip] *= pivinv;
-        }
-        beta[icol] *= pivinv;
-
-        for (int jp = 0; jp < info_.n_parameters_to_fit_; jp++)
-        {
-            if (jp != icol)
-            {
-                dum = alpha[jp*info_.n_parameters_to_fit_ + icol];
-                alpha[jp*info_.n_parameters_to_fit_ + icol] = 0.0;
-                for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
-                {
-                    alpha[jp*info_.n_parameters_to_fit_ + ip] -= alpha[icol*info_.n_parameters_to_fit_ + ip] * dum;
-                }
-                beta[jp] -= beta[icol] * dum;
-            }
-        }
-    }
-}
-
 void LMFitCPP::update_parameters()
 {
     for (int parameter_index = 0, delta_index = 0; parameter_index < info_.n_parameters_; parameter_index++)
@@ -829,7 +840,9 @@ void LMFitCPP::run()
     {
         modify_step_width();
         
-        gauss_jordan();
+        decompose_hessian_LUP(modified_hessian_);
+
+        solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
 
         update_parameters();
 

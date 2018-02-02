@@ -100,8 +100,9 @@ private:
     void calc_chi_square(
         std::vector<float> const & curve);
 
+    void decompose_hessian_LUP(std::vector<float> const & hessian);
+
     void modify_step_width();
-    void gauss_jordan();
     void update_parameters();
 
     bool check_for_convergence();
@@ -131,6 +132,8 @@ private:
     std::vector<float> curve_;
     std::vector<float> derivatives_;
     std::vector<float> hessian_;
+    std::vector<float> decomposed_hessian_;
+    std::vector<int> pivot_array_;
     std::vector<float> modified_hessian_;
     std::vector<float> gradient_;
     std::vector<float> delta_;
