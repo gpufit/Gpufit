@@ -7,45 +7,37 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     com_github_gpufit_Gpufit
- * Method:    add
- * Signature: (II)I
- */
-JNIEXPORT jint JNICALL Java_com_github_gpufit_Gpufit_add
-  (JNIEnv *, jclass, jint, jint);
+    /*
+    * Class:     com_github_gpufit_Gpufit
+    * Method:    fit
+    * Signature: (IILjava/nio/FloatBuffer;Ljava/nio/FloatBuffer;ILjava/nio/FloatBuffer;FILjava/nio/IntBuffer;IILjava/nio/ByteBuffer;Ljava/nio/FloatBuffer;Ljava/nio/IntBuffer;Ljava/nio/FloatBuffer;Ljava/nio/IntBuffer;)I
+    */
+    JNIEXPORT jint JNICALL Java_com_github_gpufit_Gpufit_fit
+    (JNIEnv *, jclass, jint, jint, jobject, jobject, jint, jobject, jfloat, jint, jobject, jint, jint, jobject, jobject, jobject, jobject, jobject);
 
-/*
- * Class:     com_github_gpufit_Gpufit
- * Method:    fit
- * Signature: (IILjava/nio/ByteBuffer;)I
- */
-JNIEXPORT jint JNICALL Java_com_github_gpufit_Gpufit_fit
-  (JNIEnv *, jclass, jint, jint, jobject);
+    /*
+    * Class:     com_github_gpufit_Gpufit
+    * Method:    getLastError
+    * Signature: ()Ljava/lang/String;
+    */
+    JNIEXPORT jstring JNICALL Java_com_github_gpufit_Gpufit_getLastError
+    (JNIEnv *, jclass);
 
-/*
- * Class:     com_github_gpufit_Gpufit
- * Method:    getLastError
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_com_github_gpufit_Gpufit_getLastError
-  (JNIEnv *, jclass);
+    /*
+    * Class:     com_github_gpufit_Gpufit
+    * Method:    isCudaAvailable
+    * Signature: ()Z
+    */
+    JNIEXPORT jboolean JNICALL Java_com_github_gpufit_Gpufit_isCudaAvailable
+    (JNIEnv *, jclass);
 
-/*
- * Class:     com_github_gpufit_Gpufit
- * Method:    isCudaAvailable
- * Signature: ()Z
- */
-JNIEXPORT jboolean JNICALL Java_com_github_gpufit_Gpufit_isCudaAvailable
-  (JNIEnv *, jclass);
-
-/*
- * Class:     com_github_gpufit_Gpufit
- * Method:    getCudaVersion
- * Signature: ()[I
- */
-JNIEXPORT jintArray JNICALL Java_com_github_gpufit_Gpufit_getCudaVersion
-  (JNIEnv *, jclass);
+    /*
+    * Class:     com_github_gpufit_Gpufit
+    * Method:    getCudaVersionAsArray
+    * Signature: ()[I
+    */
+    JNIEXPORT jintArray JNICALL Java_com_github_gpufit_Gpufit_getCudaVersionAsArray
+    (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }
