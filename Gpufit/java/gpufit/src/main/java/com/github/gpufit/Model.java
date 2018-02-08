@@ -1,7 +1,8 @@
 package com.github.gpufit;
 
 /**
- *
+ * Java binding for Gpufit, a Levenberg Marquardt curve fitting library written in CUDA
+ * See https://github.com/gpufit/Gpufit, http://gpufit.readthedocs.io/en/latest/bindings.html#java
  */
 public enum Model {
 

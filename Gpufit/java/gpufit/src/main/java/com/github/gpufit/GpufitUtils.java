@@ -8,16 +8,22 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /**
+ * Java binding for Gpufit, a Levenberg Marquardt curve fitting library written in CUDA
+ * See https://github.com/gpufit/Gpufit, http://gpufit.readthedocs.io/en/latest/bindings.html#java
  *
+ * Helper utilities.
  */
 public class GpufitUtils {
 
-    private GpufitUtils() {}
+    private GpufitUtils() {
+    }
 
     /**
+     * Creates a direct ByteBuffer with the native Byte order, which is exactly what we need to send and receive data
+     * arrays via JNI.
      *
-     * @param length
-     * @return
+     * @param length Desired number of elements in ByteBuffer
+     * @return Direct ByteBuffer
      */
     public static ByteBuffer allocateDirectByteBuffer(int length) {
         assertNotNegative(length, "Parameter length must be non-negative");
@@ -27,27 +33,30 @@ public class GpufitUtils {
     }
 
     /**
+     * Creates a FloatBuffer of a certain length backed up by a direct ByteBuffer.
      *
-     * @param length
-     * @return
+     * @param length Desired number of elements in FloatBuffer
+     * @return FloatBuffer backed by direct ByteBuffer
      */
     public static FloatBuffer allocateDirectFloatBuffer(int length) {
         return allocateDirectByteBuffer(Float.BYTES * length).asFloatBuffer();
     }
 
     /**
+     * Creates an IntBuffer of a certain length backed up by a direct ByteBuffer.
      *
-     * @param length
-     * @return
+     * @param length Desired number of elements in IntBuffer
+     * @return IntBuffer backed by direct ByteBuffer
      */
     public static IntBuffer allocateDirectIntBuffer(int length) {
         return allocateDirectByteBuffer(Integer.BYTES * length).asIntBuffer();
     }
 
     /**
+     * Ensures that an integer value is not negative. Throws a runtime exception otherwise.
      *
-     * @param value
-     * @param message
+     * @param value   Integer value
+     * @param message Error message
      */
     public static void assertNotNegative(int value, String message) {
         if (!(value >= 0)) {
@@ -56,20 +65,10 @@ public class GpufitUtils {
     }
 
     /**
+     * Ensures that a boolean is true. Throws a runtime exception otherwise.
      *
-     * @param value
-     * @param message
-     */
-    public static void assertNotNegative(float value, String message) {
-        if (!(value >= 0)) {
-            throw new RuntimeException(message);
-        }
-    }
-
-    /**
-     *
-     * @param value
-     * @param message
+     * @param value   Boolean value
+     * @param message Error message
      */
     public static void assertTrue(boolean value, String message) {
         if (!value) {
@@ -80,9 +79,9 @@ public class GpufitUtils {
     /**
      * Ensures that an object reference passed as a parameter to the calling method is not null.
      *
-     * @param reference an object reference
-     * @param <T>
-     * @return the non-null reference that was checked
+     * @param <T>       Type of the reference to be checked
+     * @param reference Object reference
+     * @return Non-null reference that was checked
      */
     public static <T> T verifyNotNull(T reference) throws NullPointerException {
         if (null == reference) {
@@ -92,8 +91,11 @@ public class GpufitUtils {
     }
 
     /**
+     * Adds a path to the java.library.path programmatically.
+     *
      * See also: https://stackoverflow.com/questions/11783632/how-do-i-load-and-use-native-library-in-java
-     * @param path
+     *
+     * @param path Path String to add to the java.library.path
      */
     public static void addPathToJavaLibraryPath(String path) {
 
@@ -105,12 +107,10 @@ public class GpufitUtils {
         // clear field in class loader
         try {
             Field fieldSysPath = ClassLoader.class.getDeclaredField("sys_paths");
-            fieldSysPath.setAccessible( true );
-            fieldSysPath.set( null, null );
+            fieldSysPath.setAccessible(true);
+            fieldSysPath.set(null, null);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException("Java Library Path addition failed.");
         }
     }
-
-
 }

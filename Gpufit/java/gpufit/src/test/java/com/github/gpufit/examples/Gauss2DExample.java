@@ -13,6 +13,8 @@ import java.util.Random;
  *
  * Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
  * http://gpufit.readthedocs.io/en/latest/bindings.html#java
+ *
+ * Note: The path of compiled Gpufit and GpufitJNI libraries must be in the Java library path.
  */
 public class Gauss2DExample {
 
@@ -63,9 +65,7 @@ public class Gauss2DExample {
         float[] gauss2D = generateGauss2D(trueParameters, xi, yi);
         float[] data = new float[numberFits * numberPoints];
         for (int i = 0; i < numberFits; i++) {
-            for (int j = 0; j < numberPoints; j++) {
-                data[i * numberPoints + j] = gauss2D[j];
-            }
+            System.arraycopy(gauss2D, 0, data, i * numberPoints, numberPoints);
         }
 
         // add Poisson noise
@@ -83,13 +83,13 @@ public class Gauss2DExample {
         fitModel.initialParameters.put(initialParameters);
 
         // fun Gpufit
-        FitResults fitResults = Gpufit.fit(fitModel);
+        FitResult fitResult = Gpufit.fit(fitModel);
 
         // count FitState outcomes and get a list of those who converged
         boolean[] converged = new boolean[numberFits];
         int numberConverged = 0, numberMaxIterationExceeded = 0, numberSingularHessian = 0, numberNegativeCurvatureMLE = 0;
         for (int i = 0; i < numberFits; i++) {
-            FitState fitState = FitState.fromID(fitResults.states.get(i));
+            FitState fitState = FitState.fromID(fitResult.states.get(i));
             converged[i] = fitState.equals(FitState.CONVERGED);
             switch (fitState) {
                 case CONVERGED:
@@ -112,7 +112,7 @@ public class Gauss2DExample {
         for (int i = 0; i < numberFits; i++) {
             for (int j = 0; j < model.numberParameters; j++) {
                 if (converged[i]) {
-                    convergedParameterMean[j] += fitResults.parameters.get(i * model.numberParameters + j);
+                    convergedParameterMean[j] += fitResult.parameters.get(i * model.numberParameters + j);
                 }
             }
         }
@@ -122,7 +122,7 @@ public class Gauss2DExample {
         for (int i = 0; i < numberFits; i++) {
             for (int j = 0; j < model.numberParameters; j++) {
                 if (converged[i]) {
-                    float dev = fitResults.parameters.get(i * model.numberParameters + j) - convergedParameterMean[j];
+                    float dev = fitResult.parameters.get(i * model.numberParameters + j) - convergedParameterMean[j];
                     convergedParameterStd[j] += dev * dev;
                 }
             }
@@ -136,9 +136,9 @@ public class Gauss2DExample {
         System.out.println(String.format("Model: %s", model.name()));
         System.out.println(String.format("Number of fits: %d", numberFits));
         System.out.println(String.format("Fit size: %d x %d", sizeX, sizeX));
-        System.out.println(String.format("Mean Chi²: %.2f", meanFloatBuffer(fitResults.chiSquares, converged)));
-        System.out.println(String.format("Mean  number iterations: %.2f", meanIntBuffer(fitResults.numberIterations, converged)));
-        System.out.println(String.format("Time: %.2fs", fitResults.fitDuration));
+        System.out.println(String.format("Mean Chi²: %.2f", meanFloatBuffer(fitResult.chiSquares, converged)));
+        System.out.println(String.format("Mean  number iterations: %.2f", meanIntBuffer(fitResult.numberIterations, converged)));
+        System.out.println(String.format("Time: %.2fs", fitResult.fitDuration));
         System.out.println(String.format("Ratio converged: %.2f %%", (float) numberConverged / numberFits * 100));
         System.out.println(String.format("Ratio max it. exceeded: %.2f %%", (float) numberMaxIterationExceeded / numberFits * 100));
         System.out.println(String.format("Ratio singular Hessian: %.2f %%", (float) numberSingularHessian / numberFits * 100));
@@ -148,16 +148,17 @@ public class Gauss2DExample {
         for (int i = 0; i < model.numberParameters; i++) {
             System.out.println(String.format("parameter %d, true: %.2f, mean %.2f, std: %.2f", i, trueParameters[i], convergedParameterMean[i], convergedParameterStd[i]));
         }
-
-
     }
 
     /**
+     * Computes a 2D Gaussian peak given x and y values and parameters.
      *
-     * @param p
-     * @param x
-     * @param y
-     * @return
+     * See also: http://gpufit.readthedocs.io/en/latest/api.html#gauss-2d
+     *
+     * @param p Parameter array
+     * @param x x values array
+     * @param y y values array
+     * @return Model values array
      */
     private static float[] generateGauss2D(float[] p, float[] x, float[] y) {
         // checks
@@ -174,10 +175,13 @@ public class Gauss2DExample {
     }
 
     /**
+     * Draws Poisson randomly distributed non-negative integer numbers.
+     *
      * See also: https://en.wikipedia.org/wiki/Inverse_transform_sampling
-     * @param lambda
-     * @param rand
-     * @return
+     *
+     * @param lambda The mean
+     * @param rand A random generator instance
+     * @return A Poisson distributed random number with the given mean.
      */
     private static int nextPoisson(float lambda, Random rand) {
         float sum = 0;
@@ -190,10 +194,11 @@ public class Gauss2DExample {
     }
 
     /**
+     * Conditional sum of a buffer of float values where a mask is true.
      *
-     * @param buffer
-     * @param mask
-     * @return
+     * @param buffer Input FloatBuffer
+     * @param mask Boolean mask.
+     * @return Conditional sum of buffer where mask is true.
      */
     private static float meanFloatBuffer(FloatBuffer buffer, boolean[] mask) {
         float sum = 0;
@@ -210,10 +215,11 @@ public class Gauss2DExample {
     }
 
     /**
+     * Conditional sum of a buffer of int values where a mask is true.
      *
-     * @param buffer
-     * @param mask
-     * @return
+     * @param buffer Input IntBuffer
+     * @param mask Boolean mask
+     * @return Conditional sum of buffer where mask is true.
      */
     private static float meanIntBuffer(IntBuffer buffer, boolean[] mask) {
         float sum = 0;
@@ -226,6 +232,6 @@ public class Gauss2DExample {
                 sum += value;
             }
         }
-        return (float) sum / n;
+        return sum / n;
     }
 }

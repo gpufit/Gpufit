@@ -9,11 +9,15 @@ import com.github.gpufit.*;
  *
  * Simple example demonstrating a minimal call of all needed parameters for the Java interface
  * http://gpufit.readthedocs.io/en/latest/bindings.html#java
+ *
+ * Note: The path of compiled Gpufit and GpufitJNI libraries must be in the Java library path.
  */
 public class SimpleExample {
 
     public static void main(String [] args)
     {
+        System.out.println(String.format("Gpufit version: %s", Gpufit.VERSION));
+
         // print general CUDA information
         System.out.println(String.format("CUDA available: %b", Gpufit.isCudaAvailable()));
         CudaVersion cudaVersion = Gpufit.getCudaVersion();
@@ -31,6 +35,6 @@ public class SimpleExample {
         FitModel fitModel = new FitModel(numberFits, numberPoints, false, model, null, null, null, estimator, 0);
 
         // run Gpufit
-        FitResults fitResults = Gpufit.fit(fitModel);
+        FitResult fitResult = Gpufit.fit(fitModel);
     }
 }
