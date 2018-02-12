@@ -48,3 +48,5 @@
 .. _`Python simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/simple.py
 .. _`Python Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d.py
 .. _`Python Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d_plot.py
+
+.. _`Java Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/java/gpufit/src/test/java/com/github/gpufit/examples/Gauss2DExample.java
