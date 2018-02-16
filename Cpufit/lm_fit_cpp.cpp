@@ -33,12 +33,13 @@ LMFitCPP::LMFitCPP(
     hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
     modified_hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
     decomposed_hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
+    inverted_hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
     pivot_array_(info_.n_parameters_to_fit_),
     gradient_(info.n_parameters_to_fit_),
     delta_(info.n_parameters_to_fit_),
     scaling_vector_(info.n_parameters_to_fit_),
     prev_chi_square_(0),
-    lambda_(0.001f),
+    lambda_(0.f),
     prev_parameters_(info.n_parameters_to_fit_),
     user_info_(user_info),
     parameters_(output_parameters),
@@ -120,6 +121,78 @@ void solve_LUP(
 
         solution[i] = solution[i] / matrix[i * N + i];
     }
+}
+
+template<class T>
+void invert_LUP(
+    std::vector<T> const & matrix,
+    std::vector<int> const & permutation_vector,
+    int const N,
+    std::vector<T> & inverse)
+{
+
+    for (int j = 0; j < N; j++) {
+        for (int i = 0; i < N; i++) {
+            if (permutation_vector[i] == j)
+                inverse[i * N + j] = 1.f;
+            else
+                inverse[i * N + j] = 0.f;
+
+            for (int k = 0; k < i; k++)
+                inverse[i * N + j] -= matrix[i * N + k] * inverse[k * N + j];
+        }
+
+        for (int i = N - 1; i >= 0; i--) {
+            for (int k = i + 1; k < N; k++)
+                inverse[i * N + j] -= matrix[i * N + k] * inverse[k * N + j];
+
+            inverse[i * N + j] = inverse[i * N + j] / matrix[i * N + i];
+        }
+    }
+}
+
+template< class T >
+T calc_euclidian_norm(std::vector<T> const & v, std::size_t size = 0)
+{
+    size = size ? size : v.size();
+
+    T norm = 0.;
+
+    for (std::size_t i = 0; i < size; i++)
+        norm += v[i] * v[i];
+
+    norm = std::sqrt(norm);
+
+    return norm;
+}
+
+template <class T>
+void multiply_matrix_vector(
+    std::vector<T> & product,
+    std::vector<T> const & matrix,
+    std::vector<T> const & vector)
+{
+    std::size_t const n_rows = matrix.size() / vector.size();
+    std::size_t const n_cols = vector.size();
+
+    for (std::size_t col = 0; col < n_cols; col++)
+    {
+        for (std::size_t row = 0; row < n_rows; row++)
+        {
+            product[row] += matrix[col * n_rows + row] * vector[col];
+        }
+    }
+}
+
+template< class T >
+T calc_scalar_product(std::vector<T> const & v1, std::vector<T> const & v2)
+{
+    T product = 0.;
+
+    for (std::size_t i = 0; i < v1.size(); i++)
+        product += v1[i] * v2[i];
+
+    return product;
 }
 
 void LMFitCPP::decompose_hessian_LUP(std::vector<float> const & hessian)
@@ -786,12 +859,11 @@ void LMFitCPP::prepare_next_iteration()
 {
     if ((*chi_square_) < prev_chi_square_)
     {
-        lambda_ *= 0.1f;
         prev_chi_square_ = (*chi_square_);
+        temp_derivatives_ = derivatives_;
     }
     else
     {
-        lambda_ *= 10.f;
         (*chi_square_) = prev_chi_square_;
         for (int parameter_index = 0, delta_index = 0; parameter_index < info_.n_parameters_; parameter_index++)
         {
@@ -826,6 +898,202 @@ void LMFitCPP::modify_step_width()
     }
 }
 
+void LMFitCPP::initialize_step_bound()
+{
+    std::vector<float> scaled_parameters(info_.n_parameters_);
+
+    for (std::size_t i = 0; i < scaled_parameters.size(); i++)
+        scaled_parameters[i] = parameters_[i] * std::sqrt(scaling_vector_[i]);
+
+    float const scaled_parameters_norm = calc_euclidian_norm(scaled_parameters);
+
+    float const factor = 100.f;
+
+    step_bound_ = factor * scaled_parameters_norm;
+
+    if (step_bound_ == 0.)
+        step_bound_ = factor;
+}
+
+void LMFitCPP::update_step_bound()
+{
+    std::vector<float> scaled_delta(info_.n_parameters_);
+
+    for (std::size_t i = 0; i < scaled_delta.size(); i++)
+        scaled_delta[i] = delta_[i] * std::sqrt(scaling_vector_[i]);
+
+    float const scaled_delta_norm = calc_euclidian_norm(scaled_delta);
+
+    if (approximation_ratio_ <= .25f)
+    {
+        float temp = 0.f;
+
+        if (actual_reduction_ >= 0.f)
+        {
+            temp = .5f;
+        }
+        else
+        {
+            temp = .5f * directive_derivative_ / (directive_derivative_ + .5f * actual_reduction_);
+        }
+
+        if (.1f * std::sqrt(*chi_square_) >= std::sqrt(prev_chi_square_) || temp < .1f)
+        {
+            temp = .1f;
+        }
+
+
+        step_bound_ = temp * std::min(step_bound_, scaled_delta_norm / .1f);
+        lambda_ /= temp;
+    }
+    else
+    {
+        if (lambda_ == 0. || approximation_ratio_ >= .75f)
+        {
+            step_bound_ = scaled_delta_norm / .5f;
+            lambda_ = .5f * lambda_;
+        }
+    }
+}
+
+void LMFitCPP::initialize_lambda_bounds()
+{
+    // scaled delta
+    std::vector<float> scaled_delta(info_.n_parameters_);
+    for (std::size_t i = 0; i < scaled_delta.size(); i++)
+        scaled_delta[i] = std::sqrt(scaling_vector_[i]) * delta_[i];
+
+    // temp vector
+    std::vector<float> temp(info_.n_parameters_);
+
+    float const scaled_delta_norm = calc_euclidian_norm(scaled_delta);
+
+    // lambda lower bound 
+    lambda_lower_bound_ = phi_ / phi_derivative_;
+
+    // lambda upper bound
+    for (int i = 0; i < info_.n_parameters_; i++)
+        temp[i] = gradient_[i] / std::sqrt(scaling_vector_[i]);
+
+    float const gradient_norm = calc_euclidian_norm(temp);
+
+    lambda_upper_bound_ = gradient_norm / step_bound_;
+
+    // check lambda bounds
+    lambda_ = std::max(lambda_, lambda_lower_bound_);
+    lambda_ = std::min(lambda_, lambda_upper_bound_);
+
+    if (lambda_ == 0.f)
+        lambda_ = gradient_norm / scaled_delta_norm;
+}
+
+void LMFitCPP::update_lambda()
+{
+    // update bounds
+    if (phi_ > .0f)
+        lambda_lower_bound_ = std::max(lambda_lower_bound_, lambda_);
+
+    if (phi_ < .0f)
+        lambda_upper_bound_ = std::min(lambda_upper_bound_, lambda_);
+
+    /////////////////////////////////////////////////////////
+    std::vector<float> sqrt_scaling_vector(info_.n_parameters_);
+    std::vector<float> scaled_delta(info_.n_parameters_);
+    for (std::size_t i = 0; i < scaled_delta.size(); i++)
+    {
+        sqrt_scaling_vector[i] = std::sqrt(scaling_vector_[i]);
+        scaled_delta[i] = sqrt_scaling_vector[i] * delta_[i];
+    }
+    float const scaled_delta_norm = calc_euclidian_norm(scaled_delta);
+
+    for (std::size_t i = 0; i < scaled_delta.size(); i++)
+        scaled_delta[i] = scaling_vector_[i] * delta_[i];
+
+    std::vector<float> temp(info_.n_parameters_);
+
+    multiply_matrix_vector(temp, inverted_hessian_, scaled_delta);
+    phi_derivative_
+        = calc_scalar_product(temp, scaled_delta)
+        / (scaled_delta_norm);
+    /////////////////////////////////////////////////////////
+
+    // update lambda
+    lambda_ += (phi_ + step_bound_) / step_bound_ * phi_ / phi_derivative_;
+
+    // check bounds
+    lambda_ = std::max(lambda_lower_bound_, lambda_);
+}
+
+void LMFitCPP::calc_phi()
+{
+    //scaled delta
+    std::vector<float> sqrt_scaling_vector(info_.n_parameters_);
+    std::vector<float> scaled_delta(info_.n_parameters_);
+    for (std::size_t i = 0; i < scaled_delta.size(); i++)
+    {
+        sqrt_scaling_vector[i] = std::sqrt(scaling_vector_[i]);
+        scaled_delta[i] = sqrt_scaling_vector[i] * delta_[i];
+    }
+
+    float const scaled_delta_norm = calc_euclidian_norm(scaled_delta);
+
+    // calculate phi
+    phi_ = scaled_delta_norm - step_bound_;
+
+    // recalculate scaled delta
+    for (std::size_t i = 0; i < info_.n_parameters_; i++)
+        scaled_delta[i] = scaling_vector_[i] * delta_[i];
+
+    // calculate derivative of phi
+    std::vector<float> temp(info_.n_parameters_);
+
+    multiply_matrix_vector(temp, inverted_hessian_, scaled_delta);
+
+    phi_derivative_
+        = step_bound_
+        * calc_scalar_product(temp, scaled_delta)
+        / (scaled_delta_norm * scaled_delta_norm);
+}
+
+void LMFitCPP::calc_approximation_quality()
+{
+    std::vector<float> derivatives_delta(info_.n_points_);
+
+    multiply_matrix_vector(derivatives_delta, temp_derivatives_, delta_);
+
+    float const & derivatives_delta_norm
+        = calc_euclidian_norm(derivatives_delta);
+
+    std::vector<float> scaled_delta(info_.n_parameters_);
+
+    for (int i = 0; i < info_.n_parameters_; i++)
+        scaled_delta[i] = delta_[i] * std::sqrt(scaling_vector_[i]);
+
+    float const & scaled_delta_norm
+        = calc_euclidian_norm(scaled_delta);
+
+    float const summand1
+        = derivatives_delta_norm * derivatives_delta_norm / prev_chi_square_;
+
+    float summand2
+        = 2.f
+        * lambda_
+        * scaled_delta_norm
+        * scaled_delta_norm
+        / prev_chi_square_;
+
+    predicted_reduction_ = summand1 + summand2;
+
+    directive_derivative_ = -summand1 - summand2 / 2.f;
+
+    actual_reduction_ = -1.f;
+
+    if (.1f * std::sqrt(*chi_square_) < std::sqrt(prev_chi_square_))
+        actual_reduction_ = 1.f - *chi_square_ / prev_chi_square_;
+
+    approximation_ratio_ = actual_reduction_ / predicted_reduction_;
+}
+
 void LMFitCPP::run()
 {
     for (int i = 0; i < info_.n_parameters_; i++)
@@ -833,21 +1101,67 @@ void LMFitCPP::run()
 
     *state_ = FitState::CONVERGED;
 	calc_model();
+    temp_derivatives_ = derivatives_;
     calc_coefficients();
     prev_chi_square_ = (*chi_square_);
         
     for (int iteration = 0; (*state_) == 0; iteration++)
     {
         modify_step_width();
+
+        if (iteration == 0)
+            initialize_step_bound();
         
         decompose_hessian_LUP(modified_hessian_);
-
+        invert_LUP(decomposed_hessian_, pivot_array_, info_.n_parameters_to_fit_, inverted_hessian_);
         solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
+
+        calc_phi();
+
+        if (phi_ > .1f * step_bound_)
+        {
+            initialize_lambda_bounds();
+            modify_step_width();
+            decompose_hessian_LUP(modified_hessian_);
+            invert_LUP(decomposed_hessian_, pivot_array_, info_.n_parameters_to_fit_, inverted_hessian_);
+            solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
+            calc_phi();
+
+            int iter_lambda = 0;
+
+            while (std::abs(phi_) > .1f * step_bound_ && iter_lambda < 10)
+            {
+                update_lambda();
+                modify_step_width();
+                decompose_hessian_LUP(modified_hessian_);
+                invert_LUP(decomposed_hessian_, pivot_array_, info_.n_parameters_to_fit_, inverted_hessian_);
+                solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
+                calc_phi();
+
+                iter_lambda++;
+            }
+        }
+        else
+        {
+            lambda_ = 0.f;
+        }
+
+        if (iteration == 0)
+        {
+            std::vector<float> scaled_delta(info_.n_parameters_);
+            for (int i = 0; i < info_.n_parameters_; i++)
+                scaled_delta[i] = delta_[i] * std::sqrt(scaling_vector_[i]);
+            float const delta_norm = calc_euclidian_norm(scaled_delta);
+            step_bound_ = std::min(step_bound_, delta_norm);
+        }
 
         update_parameters();
 
 		calc_model();
         calc_coefficients();
+        calc_approximation_quality();
+
+        update_step_bound();
 
         converged_ = check_for_convergence();
 
