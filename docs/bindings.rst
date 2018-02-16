@@ -4,7 +4,7 @@
 External bindings
 =================
 
-This sections describes the Gpufit bindings to other programming languages. The bindings (e.g. to Python or Matlab) aim to
+This sections describes the Gpufit bindings to other programming languages. The bindings (to Python, Matlab or Java) aim to
 emulate the :ref:`c-interface` as closely as possible.
 
 Most high level languages feature multidimensional numerical arrays. In the bindings implemented for Matlab and Python,
@@ -15,13 +15,17 @@ data in an array with dimensions [number_points_per_fit, number_fits]. In this m
 same way that is expected by the Gpufit C interface, and there is no need to copy or otherwise re-organize the data
 before passing it to the GPU. The same convention is used for the weights, the initial model parameters, and the output parameters.
 
+In Java we pre-allocate one dimensional FloatBuffers or IntBuffers for the data and the fit results. The user is responsible
+for himself to copy, convert his data into these buffers.
+
 Unlike the C interface, the external bindings to not require the number of fits and the number of data points per fit to be 
 specified explicitly. Instead, these numbers are inferred from the dimensions of the 2D input arrays.
 
 Optional parameters with default values
 ---------------------------------------
 
-The external bindings make some input parameters optional. The optional parameters are shown here.
+The external bindings make some input parameters optional. The optional parameters are shown here. They are kept the same
+for all bindings.
 
 :tolerance:
     default value 1e-4
@@ -475,3 +479,308 @@ fitted parameters are limited to those fits that converged.
     fprintf('mean chi-square: %6.2f\n', mean(chi_squares(converged)));
     fprintf('iterations: %6.2f\n', mean(n_iterations(converged)));
     fprintf('time: %6.2f s\n', time);
+
+
+Java
+----
+
+The Gpufit binding for Java consists of a small adapter C library named GpufitJNI and a Gpufit jar archive containing
+a com.github.gpufit package. In these the class Gpufit has static methods largely equivalent to calling the C interface
+function :code:`gpufit()` of the Gpufit library. The fit method expects the input to be given as a FitModel instance,
+which among other things specifies the model and the estimator as enums. The results are returned as a FitResult instance.
+
+Installation
+++++++++++++
+
+Build the Gpufit library and the GpufitJNI library from source as documented in :ref:`installation-and-testing`. Make sure
+both libraries are in the Java library path, for example by using the -Djava.library.path comman line switch for the VM.
+
+Build the Gpufit.jar from the sources using Gradle on Gpufit/java/gpufit/build.gradle. Make sure this jar is in the Java
+class path of your application, e.g. by adding it as a dependency to your project
+
+Java Interface
+++++++++++++++
+
+For a more complete description, see the Javadoc output of the Gpufit Java binding project.
+
+Gpufit.fit
+..........
+
+The signature of the fit method (calls the C interface function :code:`gpufit()`) is
+
+.. code-block:: java
+
+    public static FitResult fit(FitModel fitModel, FitResult fitResult)
+
+Input parameters are given as a FitModel, output parameters are stored in a FitResult. A FitResult can be re-used if
+the number of fits and the number of parameters of the model didn't change. It must then also be given as second parameter.
+
+*Input of the fit - Filling the FitModel*
+
+.. code-block:: java
+
+    public FitModel(int numberFits, int numberPoints, boolean withWeights, Model model, Float tolerance, Integer maxNumberIterations, Boolean[] parametersToFit, Estimator estimator, int userInfoSize)
+
+:numberFits: Number of fits
+:numberPoints: Number of data points per fit
+:widthWeights: If true, a buffer for giving weights is pre-allocated, otherwise not
+:model: An enum describing the model. See class Model for more information. Naming and id is equivalent to the C code.
+:tolerance: Fit tolerance
+    :special: If null, the default value will be used.
+:maxNumberIterations: Maximal number of iterations
+    :special: If null, the default value will be used.
+:parametersToFit: Boolean array indicating which parameters should be fitted
+    :special: If null, the default value will be used.
+:estimator: Enum describing the estimator function. See class Estimator for more information. Naming and id is equivalent
+            to the C code.
+    :special: If None, the default value is used.
+:userInfoSize: The size of the user info (in bytes).
+    :special: Must be positive, otherwise the buffer for user info is not pre-allocated.
+
+Afterwards the buffers for data, weights (if desired), initial parameters and user info (if desired) must be filled with
+the appropriate content. The internal layout is the same as in the C part of Gpufit, i.e. the data represents an
+1D number array of length of number fits times number data points per fit with an order of data points followed one
+after another for all fits. In this batch. The initial parameters are number fits times number of parameters in the model
+with the parameters for each fit changing fastest and the number of fits slowest.
+
+*Fit output - The FitResult*
+
+Memory for the fit output is either created automatically or a previous instance of FitResult can be reused to avoid
+recreation.
+
+.. code-block:: java
+
+public class FitResult {
+
+    public final FloatBuffer parameters;
+    public final IntBuffer states;
+    public final FloatBuffer chiSquares;
+    public final IntBuffer numberIterations;
+    public float fitDuration;
+
+:parameters: Fitted parameters for each fit
+:states: Fit result states for each fit
+    As defined in constants.h_:
+:chi_squares: :math:`\chi^2` values for each fit
+:n_iterations: Number of iterations done for each fit
+:time: Execution time of call to fit
+    In seconds.
+
+Errors are raised if checks on parameters fail or if the execution of fit failed.
+
+Gpufit.getLastError
+...................
+
+The signature of the get_last_error method (equivalent to calling the C interface function *gpufit_get_last_error*) is
+
+.. code-block:: java
+
+    public static native String getLastError()
+
+Returns a string representing the error message of the last occurred error.
+
+Gpufit.isCudaAvailable
+......................
+
+The signature of the cuda_available method (equivalent to calling the C interface function *gpufit_cuda_available*) is
+
+.. code-block:: java
+
+    public static native boolean isCudaAvailable()
+
+Returns True if CUDA is available and False otherwise.
+
+get_cuda_version
+................
+
+The signature of the get_cuda_version method (equivalent to calling the C interface function *gpufit_get_cuda_version*) is
+
+.. code-block:: java
+
+    public static CudaVersion getCudaVersion()
+
+The output is a CudaVersion instance with two simple member variables.
+
+:runtime version: String of "Major version.Minor version"
+:driver version: String of "Major version.Minor version"
+
+An error is raised if the execution failed (i.e. because CUDA is not available).
+
+Java Example
+++++++++++++
+
+2D Gaussian peak example
+........................
+
+An example can be found at `Java Gauss2D example`_. It is equivalent to :ref:`c-example-2d-gaussian`.
+
+First we test for availability of CUDA as well as CUDA driver and runtime versions.
+
+.. code-block:: java
+
+    // print general CUDA information
+    System.out.println(String.format("CUDA available: %b", Gpufit.isCudaAvailable()));
+    CudaVersion cudaVersion = Gpufit.getCudaVersion();
+    System.out.println(String.format("CUDA versions runtime: %s, driver: %s", cudaVersion.runtime, cudaVersion.driver));
+
+The model and estimator IDs can be set as
+
+.. code-block:: Java
+
+    Model model = Model.GAUSS_2D;
+    Estimator estimator = Estimator.MLE;
+
+The true parameters describing an example 2D Gaussian peak functions are:
+
+.. code-block:: java
+
+    // true parameters (order: amplitude, center-x, center-y, width, offset)
+    float[] trueParameters = new float[]{10, 5.5f, 5.5f, 3, 10};
+
+A 2D grid of x and y positions can conveniently be generated:
+
+.. code-block:: java
+
+    // generate x and y values
+    float[] xi = new float[numberPoints];
+    float[] yi = new float[numberPoints];
+    for (int i = 0; i < sizeX; i++) {
+        for (int j = 0; j < sizeX; j++) {
+            xi[i * sizeX + j] = i;
+            yi[i * sizeX + j] = j;
+        }
+    }
+
+Using these positions and the true parameter values a model function can be calculated as
+
+.. code-block:: java
+
+    /**
+     * Computes a 2D Gaussian peak given x and y values and parameters.
+     *
+     * See also: http://gpufit.readthedocs.io/en/latest/api.html#gauss-2d
+     *
+     * @param p Parameter array
+     * @param x x values array
+     * @param y y values array
+     * @return Model values array
+     */
+    private static float[] generateGauss2D(float[] p, float[] x, float[] y) {
+        // checks
+        assert(x.length == y.length);
+        assert(p.length == 5);
+
+        // calculate data
+        float[] data = new float[x.length];
+        for (int i = 0; i < x.length; i++) {
+            float arg = -((x[i] - p[1]) * (x[i] - p[1]) + (y[i] - p[2]) * (y[i] - p[2])) / (2 * p[3] * p[3]);
+            data[i] = p[0] * (float)Math.exp(arg) + p[4];
+        }
+        return data;
+    }
+
+The model function can be repeated and Poisson noise can be added.
+
+.. code-block:: java
+
+    // generate data
+    float[] gauss2D = generateGauss2D(trueParameters, xi, yi);
+    float[] data = new float[numberFits * numberPoints];
+    for (int i = 0; i < numberFits; i++) {
+        System.arraycopy(gauss2D, 0, data, i * numberPoints, numberPoints);
+    }
+
+    // add Poisson noise
+    for (int i = 0; i < numberFits * numberPoints; i++) {
+        data[i] = nextPoisson(data[i], rand);
+    }
+
+A FitModel containing all the input data including copying the data values from an array to a Java buffer can be done via
+
+.. code-block:: java
+
+    // assemble FitModel
+    FitModel fitModel = new FitModel(numberFits, numberPoints, false, model, tolerance, maxNumberIterations, null, estimator, 0);
+
+    // fill data and initial parameters in the fit model
+    fitModel.data.clear();
+    fitModel.data.put(data);
+    fitModel.initialParameters.clear();
+    fitModel.initialParameters.put(initialParameters);
+
+
+When all input parameters are set we can call the C interface of Gpufit.
+
+.. code-block:: java
+
+    // fun Gpufit
+    FitResult fitResult = Gpufit.fit(fitModel);
+
+And finally statistics about the results of the fits can be displayed where the mean and standard deviation of the
+fitted parameters are limited to those fits that converged.
+
+.. code-block:: java
+
+    // count FitState outcomes and get a list of those who converged
+    boolean[] converged = new boolean[numberFits];
+    int numberConverged = 0, numberMaxIterationExceeded = 0, numberSingularHessian = 0, numberNegativeCurvatureMLE = 0;
+    for (int i = 0; i < numberFits; i++) {
+        FitState fitState = FitState.fromID(fitResult.states.get(i));
+        converged[i] = fitState.equals(FitState.CONVERGED);
+        switch (fitState) {
+            case CONVERGED:
+                numberConverged++;
+                break;
+            case MAX_ITERATIONS:
+                numberMaxIterationExceeded++;
+                break;
+            case SINGULAR_HESSIAN:
+                numberSingularHessian++;
+                break;
+            case NEG_CURVATURE_MLE:
+                numberNegativeCurvatureMLE++;
+        }
+    }
+
+    // get mean and std of converged parameters
+    float [] convergedParameterMean = new float[]{0, 0, 0, 0, 0};
+    float [] convergedParameterStd = new float[]{0, 0, 0, 0, 0};
+    for (int i = 0; i < numberFits; i++) {
+        for (int j = 0; j < model.numberParameters; j++) {
+            if (converged[i]) {
+                convergedParameterMean[j] += fitResult.parameters.get(i * model.numberParameters + j);
+            }
+        }
+    }
+    for (int i = 0; i < model.numberParameters; i++) {
+        convergedParameterMean[i] /= numberConverged;
+    }
+    for (int i = 0; i < numberFits; i++) {
+        for (int j = 0; j < model.numberParameters; j++) {
+            if (converged[i]) {
+                float dev = fitResult.parameters.get(i * model.numberParameters + j) - convergedParameterMean[j];
+                convergedParameterStd[j] += dev * dev;
+            }
+        }
+    }
+    for (int i = 0; i < model.numberParameters; i++) {
+        convergedParameterStd[i] = (float)Math.sqrt(convergedParameterStd[i] / numberConverged);
+    }
+
+    // print fit results
+    System.out.println("*Gpufit*");
+    System.out.println(String.format("Model: %s", model.name()));
+    System.out.println(String.format("Number of fits: %d", numberFits));
+    System.out.println(String.format("Fit size: %d x %d", sizeX, sizeX));
+    System.out.println(String.format("Mean Chi²: %.2f", meanFloatBuffer(fitResult.chiSquares, converged)));
+    System.out.println(String.format("Mean  number iterations: %.2f", meanIntBuffer(fitResult.numberIterations, converged)));
+    System.out.println(String.format("Time: %.2fs", fitResult.fitDuration));
+    System.out.println(String.format("Ratio converged: %.2f %%", (float) numberConverged / numberFits * 100));
+    System.out.println(String.format("Ratio max it. exceeded: %.2f %%", (float) numberMaxIterationExceeded / numberFits * 100));
+    System.out.println(String.format("Ratio singular Hessian: %.2f %%", (float) numberSingularHessian / numberFits * 100));
+    System.out.println(String.format("Ratio neg. curvature MLE: %.2f %%", (float) numberNegativeCurvatureMLE / numberFits * 100));
+
+    System.out.println("\nParameters of 2D Gaussian peak");
+    for (int i = 0; i < model.numberParameters; i++) {
+        System.out.println(String.format("parameter %d, true: %.2f, mean %.2f, std: %.2f", i, trueParameters[i], convergedParameterMean[i], convergedParameterStd[i]));
+    }
