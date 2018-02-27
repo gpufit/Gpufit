@@ -8,5 +8,6 @@ classdef ModelID
         LINEAR_1D = 5
         FLETCHER_POWELL = 6
         BROWN_DENNIS = 7
+        RAMSEY_VAR_P = 9
     end
 end

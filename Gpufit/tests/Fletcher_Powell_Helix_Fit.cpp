@@ -19,21 +19,21 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
     std::size_t const n_points{ 3 } ;
     std::size_t const n_parameters{ 3 } ;
 
-    std::array< float, n_parameters > const true_parameters{ { 1.f, 0.f, 0.f } };
+    std::array< double, n_parameters > const true_parameters{ { 1.f, 0.f, 0.f } };
 
-    std::array< float, n_points > data{ { 0.f, 0.f, 0.f } } ;
+    std::array< double, n_points > data{ { 0.f, 0.f, 0.f } } ;
 
-    std::array< float, n_parameters > initial_parameters{ { -1.f, 0.f, 0.f } } ;
+    std::array< double, n_parameters > initial_parameters{ { -1.f, 0.f, 0.f } } ;
 
-    float tolerance{ 1e-8f } ;
+    double tolerance{ 1e-8f } ;
     
-    int max_n_iterations{ 30 } ;
+    int max_n_iterations{ 1000 } ;
     
     std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1 } } ;
     
-    std::array< float, n_parameters > output_parameters ;
+    std::array< double, n_parameters > output_parameters ;
     int output_state ;
-    float output_chi_square ;
+    double output_chi_square ;
     int output_n_iterations ;
 
     // test initial_parameters * 1.f
@@ -54,12 +54,13 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
             output_parameters.data(),
             & output_state,
             & output_chi_square,
-            & output_n_iterations
+            &output_n_iterations,
+            0
         ) ;
 
     BOOST_CHECK( status == 0 ) ;
     BOOST_CHECK( output_state == 0 );
-    BOOST_CHECK( output_n_iterations <= 9 );
+    BOOST_CHECK( output_n_iterations <= 10 );
     BOOST_CHECK( output_chi_square < 1e-26f );
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-13f);
@@ -87,12 +88,13 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
         output_parameters.data(),
         &output_state,
         &output_chi_square,
-        &output_n_iterations
+        &output_n_iterations,
+        0
     );
 
     BOOST_CHECK(status == 0);
     BOOST_CHECK(output_state == 0);
-    BOOST_CHECK(output_n_iterations <= 21);
+    BOOST_CHECK(output_n_iterations <= 33);
     BOOST_CHECK(output_chi_square < 1e-26f);
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-13f);
@@ -120,7 +122,8 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
         output_parameters.data(),
         &output_state,
         &output_chi_square,
-        &output_n_iterations
+        &output_n_iterations,
+        0
     );
 
     BOOST_CHECK(status == 0);

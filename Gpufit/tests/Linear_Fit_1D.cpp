@@ -20,25 +20,25 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
     std::size_t const n_fits{ 1 } ;
     std::size_t const n_points{ 2 } ;
 
-	std::array< float, 2 > const true_parameters{ { 1, 1 } };
+	std::array< double, 2 > const true_parameters{ { 1, 1 } };
 
-    std::array< float, n_points > data{ { 1, 2 } } ;
+    std::array< double, n_points > data{ { 1, 2 } } ;
     
-	std::array< float, n_points > weights{ { 1, 1 } } ;
+	std::array< double, n_points > weights{ { 1, 1 } } ;
 
-    std::array< float, 2 > initial_parameters{ { 1, 0 } } ;
+    std::array< double, 2 > initial_parameters{ { 1, 0 } } ;
 
-    float tolerance{ 0.00001f } ;
+    double tolerance{ 0.00001f } ;
     
 	int max_n_iterations{ 10 } ;
     
 	std::array< int, 2 > parameters_to_fit{ { 1, 1 } } ;
     
-	std::array< float, n_points > user_info{ { 0.f, 1.f } } ;
+	std::array< double, n_points > user_info{ { 0.f, 1.f } } ;
     
-	std::array< float, 2 > output_parameters ;
+	std::array< double, 2 > output_parameters ;
     int output_states ;
-    float output_chi_squares ;
+    double output_chi_squares ;
     int output_n_iterations ;
 
 	// test with LSE
@@ -54,12 +54,13 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
             max_n_iterations,
             parameters_to_fit.data(),
             LSE,
-            n_points * sizeof( float ),
+            n_points * sizeof( double ),
             reinterpret_cast< char * >( user_info.data() ),
             output_parameters.data(),
             & output_states,
             & output_chi_squares,
-            & output_n_iterations
+            & output_n_iterations,
+            0
         ) ;
 
     BOOST_CHECK( status == 0 ) ;
@@ -83,12 +84,13 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 			max_n_iterations,
 			parameters_to_fit.data(),
 			MLE,
-			n_points * sizeof(float),
+			n_points * sizeof(double),
 			reinterpret_cast< char * >(user_info.data()),
 			output_parameters.data(),
 			&output_states,
 			&output_chi_squares,
-			&output_n_iterations
+            &output_n_iterations,
+            0
 		);
 
 	BOOST_CHECK(status == 0);

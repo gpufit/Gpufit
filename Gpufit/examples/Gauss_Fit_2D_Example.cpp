@@ -8,10 +8,10 @@
 #include <math.h>
 
 void generate_gauss_2d(
-    std::vector<float> const & x_coordinates,
-    std::vector<float> const & y_coordinates,
-    std::vector<float> const & gauss_params, 
-    std::vector<float> & output_values)
+    std::vector<double> const & x_coordinates,
+    std::vector<double> const & y_coordinates,
+    std::vector<double> const & gauss_params, 
+    std::vector<double> & output_values)
 {
 	// Generates a Gaussian 2D function at a set of X and Y coordinates.  The Gaussian is defined by
     // an array of five parameters.
@@ -33,7 +33,7 @@ void generate_gauss_2d(
 	for (size_t i = 0; i < x_coordinates.size(); i++)
 	{
 		
-		float arg = -(   (x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
+		double arg = -(   (x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
 		               + (y_coordinates[i] - gauss_params[2]) * (y_coordinates[i] - gauss_params[2])   ) 
 					 / (2.f * gauss_params[3] * gauss_params[3]);
 					 
@@ -71,17 +71,17 @@ void gauss_fit_2d_example()
 	size_t const n_model_parameters = 5;
 
 	// true parameters (amplitude, center x position, center y position, width, offset)
-	std::vector< float > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; 
+	std::vector< double > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; 
 	
 	std::cout << "generate example data" << std::endl;
 
 	// initialize random number generator
 	std::mt19937 rng;
 	rng.seed(0);
-	std::uniform_real_distribution< float> uniform_dist(0, 1);
+	std::uniform_real_distribution< double> uniform_dist(0, 1);
 
 	// initial parameters (randomized)
-	std::vector< float > initial_parameters(n_fits * n_model_parameters);
+	std::vector< double > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i < n_fits; i++)
 	{
 		for (size_t j = 0; j < n_model_parameters; j++)
@@ -101,32 +101,32 @@ void gauss_fit_2d_example()
 	}
 
 	// generate x and y values
-	std::vector< float > x(n_points_per_fit);
-	std::vector< float > y(n_points_per_fit);
+	std::vector< double > x(n_points_per_fit);
+	std::vector< double > y(n_points_per_fit);
 	for (size_t i = 0; i < size_x; i++)
 	{
 		for (size_t j = 0; j < size_x; j++) {
-			x[i * size_x + j] = static_cast<float>(j);
-			y[i * size_x + j] = static_cast<float>(i);
+			x[i * size_x + j] = static_cast<double>(j);
+			y[i * size_x + j] = static_cast<double>(i);
 		}
 	}
 
 	// generate test data with Poisson noise
-	std::vector< float > temp(n_points_per_fit);
+	std::vector< double > temp(n_points_per_fit);
 	generate_gauss_2d(x, y, true_parameters, temp);
 
-	std::vector< float > data(n_fits * n_points_per_fit);
+	std::vector< double > data(n_fits * n_points_per_fit);
 	for (size_t i = 0; i < n_fits; i++)
 	{
 		for (size_t j = 0; j < n_points_per_fit; j++)
 		{
 			std::poisson_distribution< int > poisson_dist(temp[j]);
-			data[i * n_points_per_fit + j] = static_cast<float>(poisson_dist(rng));
+			data[i * n_points_per_fit + j] = static_cast<double>(poisson_dist(rng));
 		}
 	}
 
 	// tolerance
-	float const tolerance = 0.001f;
+	double const tolerance = 0.001f;
 
 	// maximum number of iterations
 	int const max_number_iterations = 20;
@@ -141,9 +141,9 @@ void gauss_fit_2d_example()
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
 	// output parameters
-	std::vector< float > output_parameters(n_fits * n_model_parameters);
+	std::vector< double > output_parameters(n_fits * n_model_parameters);
 	std::vector< int > output_states(n_fits);
-	std::vector< float > output_chi_square(n_fits);
+	std::vector< double > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
@@ -165,7 +165,8 @@ void gauss_fit_2d_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data()
+            output_number_iterations.data(),
+            0
         );
 	std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
 
@@ -186,14 +187,14 @@ void gauss_fit_2d_example()
 		output_states_histogram[*it]++;
 	}
 
-	std::cout << "ratio converged              " << (float)output_states_histogram[0] / n_fits << "\n";
-	std::cout << "ratio max iteration exceeded " << (float)output_states_histogram[1] / n_fits << "\n";
-	std::cout << "ratio singular hessian       " << (float)output_states_histogram[2] / n_fits << "\n";
-	std::cout << "ratio neg curvature MLE      " << (float)output_states_histogram[3] / n_fits << "\n";
-	std::cout << "ratio gpu not read           " << (float)output_states_histogram[4] / n_fits << "\n";
+	std::cout << "ratio converged              " << (double)output_states_histogram[0] / n_fits << "\n";
+	std::cout << "ratio max iteration exceeded " << (double)output_states_histogram[1] / n_fits << "\n";
+	std::cout << "ratio singular hessian       " << (double)output_states_histogram[2] / n_fits << "\n";
+	std::cout << "ratio neg curvature MLE      " << (double)output_states_histogram[3] / n_fits << "\n";
+	std::cout << "ratio gpu not read           " << (double)output_states_histogram[4] / n_fits << "\n";
 
 	// compute mean of fitted parameters for converged fits
-	std::vector< float > output_parameters_mean(n_model_parameters, 0);
+	std::vector< double > output_parameters_mean(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
@@ -211,7 +212,7 @@ void gauss_fit_2d_example()
 	}
 	
 	// compute std of fitted parameters for converged fits
-	std::vector< float > output_parameters_std(n_model_parameters, 0);
+	std::vector< double > output_parameters_std(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
@@ -241,7 +242,7 @@ void gauss_fit_2d_example()
 	}
 
 	// compute mean chi-square for those converged
-	float  output_chi_square_mean = 0;
+	double  output_chi_square_mean = 0;
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
@@ -249,20 +250,20 @@ void gauss_fit_2d_example()
 			output_chi_square_mean += output_chi_square[i];
 		}
 	}
-	output_chi_square_mean /= static_cast<float>(output_states_histogram[0]);
+	output_chi_square_mean /= static_cast<double>(output_states_histogram[0]);
 	std::cout << "mean chi square " << output_chi_square_mean << std::endl;
 
 	// compute mean number of iterations for those converged
-	float  output_number_iterations_mean = 0;
+	double  output_number_iterations_mean = 0;
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
-			output_number_iterations_mean += static_cast<float>(output_number_iterations[i]);
+			output_number_iterations_mean += static_cast<double>(output_number_iterations[i]);
 		}
 	}
 	// normalize
-	output_number_iterations_mean /= static_cast<float>(output_states_histogram[0]);
+	output_number_iterations_mean /= static_cast<double>(output_states_histogram[0]);
 	std::cout << "mean number of iterations " << output_number_iterations_mean << std::endl;
 
 }

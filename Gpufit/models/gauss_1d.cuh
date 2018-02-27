@@ -9,7 +9,7 @@
 *
 * This function makes use of the user information data to pass in the 
 * independent variables (X values) corresponding to the data.  The X values
-* must be of type float.
+* must be of type double.
 *
 * There are three possibilities regarding the X values:
 *
@@ -26,13 +26,13 @@
 *       If the user_info array contains the X values for one fit, then 
 *       the same X values will be used for all fits.  In this case, the 
 *       size of the user_info array (in bytes) must equal 
-*       sizeof(float) * n_points.
+*       sizeof(double) * n_points.
 *
 *   Unique X values provided for all fits:
 *
 *       In this case, the user_info array must contain X values for each
 *       fit in the dataset.  In this case, the size of the user_info array 
-*       (in bytes) must equal sizeof(float) * n_points * nfits.
+*       (in bytes) must equal sizeof(double) * n_points * nfits.
 *
 * Parameters:
 *
@@ -69,11 +69,11 @@
 */
 
 __device__ void calculate_gauss1d(
-    float const * parameters,
+    double const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    double * value,
+    double * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -82,17 +82,17 @@ __device__ void calculate_gauss1d(
 {
     // indices
 
-    float * user_info_float = (float*)user_info;
-    float x = 0.0f;
+    double * user_info_float = (double*)user_info;
+    double x = 0.0f;
     if (!user_info_float)
     {
         x = point_index;
     }
-    else if (user_info_size / sizeof(float) == n_points)
+    else if (user_info_size / sizeof(double) == n_points)
     {
         x = user_info_float[point_index];
     }
-    else if (user_info_size / sizeof(float) > n_points)
+    else if (user_info_size / sizeof(double) > n_points)
     {
         int const chunk_begin = chunk_index * n_fits * n_points;
         int const fit_begin = fit_index * n_points;
@@ -101,17 +101,17 @@ __device__ void calculate_gauss1d(
 
     // parameters
 
-    float const * p = parameters;
+    double const * p = parameters;
     
     // value
 
-    float const argx = (x - p[1]) * (x - p[1]) / (2 * p[2] * p[2]);
-    float const ex = exp(-argx);
+    double const argx = (x - p[1]) * (x - p[1]) / (2 * p[2] * p[2]);
+    double const ex = exp(-argx);
     value[point_index] = p[0] * ex + p[3];
 
     // derivative
 
-    float * current_derivative = derivative + point_index;
+    double * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points]  = ex;
     current_derivative[1 * n_points]  = p[0] * ex * (x - p[1]) / (p[2] * p[2]);

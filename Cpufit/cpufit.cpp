@@ -10,20 +10,21 @@ int cpufit
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    double * data,
+    double * weights,
     int model_id,
-    float * initial_parameters,
-    float tolerance,
+    double * initial_parameters,
+    double tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    float * output_parameters,
+    double * output_parameters,
     int * output_states,
-    float * output_chi_squares,
-    int * output_n_iterations
+    double * output_chi_squares,
+    int * output_n_iterations,
+    double * lambda_info
 )
 try
 {
@@ -42,7 +43,8 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations);
+        output_n_iterations,
+        lambda_info);
 
     fi.fit(static_cast<ModelID>(model_id));
 

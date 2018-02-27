@@ -7,16 +7,17 @@
 #include <numeric>
 
 LMFit::LMFit(
-    float const * const data,
-    float const * const weights,
+    double const * const data,
+    double const * const weights,
     Info const & info,
-    float const * const initial_parameters,
+    double const * const initial_parameters,
     int const * const parameters_to_fit,
     char * const user_info,
-    float * output_parameters,
+    double * output_parameters,
     int * output_states,
-    float * output_chi_squares,
-    int * output_n_iterations
+    double * output_chi_squares,
+    int * output_n_iterations,
+    double * lambda_info
     ) :
     data_(data),
     weights_(weights),
@@ -27,6 +28,7 @@ LMFit::LMFit(
     output_states_(output_states),
     output_chi_squares_(output_chi_squares),
     output_n_iterations_(output_n_iterations),
+    lambda_info_(lambda_info),
     info_(info)
 {}
 
@@ -34,7 +36,7 @@ LMFit::~LMFit()
 {
 }
 
-void LMFit::run(float const tolerance)
+void LMFit::run(double const tolerance)
 {
     for (std::size_t fit_index = 0; fit_index < info_.n_fits_; fit_index++)
     {
@@ -50,7 +52,8 @@ void LMFit::run(float const tolerance)
             output_parameters_ + fit_index*info_.n_parameters_,
             output_states_ + fit_index,
             output_chi_squares_ + fit_index,
-            output_n_iterations_ + fit_index);
+            output_n_iterations_ + fit_index,
+            lambda_info_ + fit_index * 10 * 1000);
 
         gf_cpp.run();
     }

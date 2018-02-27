@@ -6,31 +6,48 @@
 void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensions);
 
 extern __global__ void convert_pointer(
-    float ** pointer_to_pointer,
-    float * pointer,
+    double ** pointer_to_pointer,
+    double * pointer,
     int const n_pointers,
     int const size,
     int const * skip);
 
+extern __global__ void cuda_calculate_interim_euclidian_norms(
+    double * norms,
+    double const * vectors,
+    int const n_points,
+    int const n_fits,
+    int const n_parameters,
+    int const n_parameters_to_fit,
+    int const * finished,
+    int const n_fits_per_block);
+
+extern __global__ void cuda_complete_euclidian_norms(
+    double * norms,
+    int const n_blocks_per_fit,
+    int const n_fits,
+    int const n_parameters,
+    int const * finished);
+
 extern __global__ void cuda_sum_chi_square_subtotals(
-    float * chi_squares,
+    double * chi_squares,
     int const n_blocks_per_fit,
     int const n_fits,
     int const * finished);
 
 extern __global__ void cuda_check_fit_improvement(
     int * iteration_failed,
-    float const * chi_squares,
-    float const * prev_chi_squares,
+    double const * chi_squares,
+    double const * prev_chi_squares,
     int const n_fits,
     int const * finished);
 
 extern __global__ void cuda_calculate_chi_squares(
-    float * chi_squares,
+    double * chi_squares,
     int * states,
-    float const * data,
-    float const * values,
-    float const * weights,
+    double const * data,
+    double const * values,
+    double const * weights,
     int const n_points,
     int const n_fits,
     int const estimator_id,
@@ -40,7 +57,7 @@ extern __global__ void cuda_calculate_chi_squares(
     std::size_t const user_info_size);
 
 extern __global__ void cuda_sum_gradient_subtotals(
-    float * gradients,
+    double * gradients,
     int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,
@@ -48,11 +65,11 @@ extern __global__ void cuda_sum_gradient_subtotals(
     int const * finished);
 
 extern __global__ void cuda_calculate_gradients(
-    float * gradients,
-    float const * data,
-    float const * values,
-    float const * derivatives,
-    float const * weights,
+    double * gradients,
+    double const * data,
+    double const * values,
+    double const * derivatives,
+    double const * weights,
     int const n_points,
     int const n_fits,
     int const n_parameters,
@@ -66,11 +83,11 @@ extern __global__ void cuda_calculate_gradients(
     std::size_t const user_info_size);
 
 extern __global__ void cuda_calculate_hessians(
-    float * hessians,
-    float const * data,
-    float const * values,
-    float const * derivatives,
-    float const * weights,
+    double * hessians,
+    double const * data,
+    double const * values,
+    double const * derivatives,
+    double const * weights,
     int const n_points,
     int const n_parameters,
     int const n_parameters_to_fit,
@@ -81,23 +98,38 @@ extern __global__ void cuda_calculate_hessians(
     char * user_info,
     std::size_t const user_info_size);
 
-extern __global__ void cuda_modify_step_widths(
-    float * hessians,
-    float const * lambdas,
-    float * scaling_vectors,
-    unsigned int const n_parameters,
-    int const * iteration_failed,
+__global__ void cuda_calc_scaling_vectors(
+    double * scaling_vectors,
+    double const * hessians,
+    int const n_parameters,
     int const * finished,
     int const n_fits_per_block);
 
+extern __global__ void cuda_init_scaled_hessians(
+    double * scaled_hessians,
+    double const * hessians,
+    int const * finished,
+    int const * lambda_accepted,
+    int const * newton_step_accepted);
+
+extern __global__ void cuda_modify_step_widths(
+    double * hessians,
+    double const * lambdas,
+    double * scaling_vectors,
+    unsigned int const n_parameters,
+    int const * finished,
+    int const n_fits_per_block,
+    int const * lambda_accepted,
+    int const * newton_step_accepted);
+
 extern __global__ void cuda_calc_curve_values(
-    float const * parameters,
+    double const * parameters,
     int const n_fits,
     int const n_points,
     int const n_parameters,
     int const * finished,
-    float * values,
-    float * derivatives,
+    double * values,
+    double * derivatives,
     int const n_fits_per_block,
     int const n_blocks_per_fit,
     ModelID const model_id,
@@ -106,9 +138,9 @@ extern __global__ void cuda_calc_curve_values(
     std::size_t const user_info_size);
 
 extern __global__ void cuda_update_parameters(
-    float * parameters,
-    float * prev_parameters,
-    float const * deltas,
+    double * parameters,
+    double * prev_parameters,
+    double const * deltas,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
     int const * finished,
@@ -116,10 +148,10 @@ extern __global__ void cuda_update_parameters(
 
 extern __global__ void cuda_check_for_convergence(
     int * finished,
-    float const tolerance,
+    double const tolerance,
     int * states,
-    float const * chi_squares,
-    float const * prev_chi_squares,
+    double const * chi_squares,
+    double const * prev_chi_squares,
     int const iteration,
     int const max_n_iterations,
     int const n_fits);
@@ -132,13 +164,142 @@ extern __global__ void cuda_evaluate_iteration(
     int const * states,
     int const n_fits);
 
+extern __global__ void cuda_check_all_lambdas(
+    int * all_lambdas_accepted,
+    int const * finished,
+    int const * lambda_accepted,
+    int const * newton_step_accepted,
+    int const n_fits);
+
 extern __global__ void cuda_prepare_next_iteration(
-    float * lambdas,
-    float * chi_squares,
-    float * prev_chi_squares,
-    float * function_parameters,
-    float const * prev_parameters,
+    double * lambdas,
+    double * chi_squares,
+    double * prev_chi_squares,
+    double * function_parameters,
+    double const * prev_parameters,
     int const n_fits,
+    int const n_parameters);
+
+__global__ void cuda_update_temp_derivatives(
+    double * temp_derivatives,
+    double const * derivatives,
+    int const * iteration_failed,
+    int const n_fits_per_block,
+    int const n_blocks_per_fit,
+    int const * finished,
+    int const n_parameters,
+    int const n_points);
+
+__global__ void cuda_multiply(
+    double * products,
+    double const * multiplicands,
+    double const * multipliers,
+    int const * skip,
+    int const n_vectors,
+    int const vector_size,
+    int const * skip_2,
+    int const * not_skip_3);
+
+__global__ void cuda_initialize_step_bounds(
+    double * step_bounds,
+    double * scaled_parameters,
+    int const * finished,
+    int const n_fits,
+    int const n_parameters);
+
+__global__ void cuda_adapt_step_bounds(
+    double * step_bounds,
+    double const * scaled_delta_norms,
+    int const * finished,
+    int const n_fits);
+
+__global__ void cuda_update_step_bounds(
+    double * step_bounds,
+    double * lambdas,
+    double const * approximation_ratios,
+    double const * actual_reductions,
+    double const * directive_derivatives,
+    double const * chi_squares,
+    double const * prev_chi_squares,
+    double const * scaled_delta_norms,
+    int const * finished,
+    int const n_fits);
+
+__global__ void cuda_calc_phis(
+    double * phis,
+    double * phi_derivatives,
+    double * inverted_hessians,
+    double * scaled_deltas,
+    double * scaled_delta_norms,
+    double const * scaling_vectors,
+    double const * step_bounds,
+    int const n_parameters,
+    int const * finished,
+    int const * lambda_accepted,
+    int const * newton_step_accepted);
+
+__global__ void cuda_adapt_phi_derivatives(
+    double * phi_derivatives,
+    double const * step_bounds,
+    double const * scaled_delta_norms,
+    int const * finished);
+
+__global__ void cuda_check_phi(
+    int * newton_step_accepted,
+    double const * phis,
+    double const * step_bounds,
+    int const * finished,
+    int const n_fits);
+
+__global__ void cuda_check_abs_phi(
+    int * lambda_accepted,
+    int const * newton_step_accepted,
+    double const * phis,
+    double const * step_bounds,
+    int const * finished,
+    int const n_fits);
+
+__global__ void cuda_init_lambda_bounds(
+    double * lambdas,
+    double * lambda_lower_bounds,
+    double * lambda_upper_bounds,
+    double const * scaled_delta_norms,
+    double const * phis,
+    double const * phi_derivatives,
+    double const * step_bounds,
+    double const * gradients,
+    double const * scaling_vectors,
+    int const * finished,
+    int const n_fits,
+    int const n_parameters,
+    int const * newton_step_accepted);
+
+__global__ void cuda_update_lambdas(
+    double * lambdas,
+    double * lambda_lower_bounds,
+    double * lambda_upper_bounds,
+    double const * phis,
+    double const * phi_derivatives,
+    double const * step_bounds,
+    int const * finished,
+    int const * lambda_accepted,
+    int const * newton_step_accepted,
+    int const n_fits);
+
+__global__ void cuda_calc_approximation_quality(
+    double * predicted_reductions,
+    double * actual_reductions,
+    double * directive_derivatives,
+    double * approximation_ratios,
+    double const * derivatives,
+    double const * deltas,
+    double const * scaled_delta_norms,
+    double const * chi_squares,
+    double const * prev_chi_squares,
+    double const * lambdas,
+    int const * finished,
+    int const n_fits,
+    int const n_points,
     int const n_parameters);
 
 #endif

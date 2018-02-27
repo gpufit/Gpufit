@@ -40,11 +40,11 @@
 */
 
 __device__ void calculate_fletcher_powell_helix(
-    float const * parameters,
+    double const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    double * value,
+    double * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -53,20 +53,20 @@ __device__ void calculate_fletcher_powell_helix(
 {
     // parameters
 
-    float const * p = parameters;
+    double const * p = parameters;
     
     // arguments
 
-    float const pi = 3.14159f;
+    double const pi = 3.14159f;
 
-    float theta = 0.f;
+    double theta = 0.f;
 
     if (p[0] > 0.f)
         theta = .5f * atanf(p[1] / p[0]) / pi;
     else if (p[0] < 0.f)
         theta = .5f * atanf(p[1] / p[0]) / pi + .5f;
 
-    float const arg = p[0] * p[0] + p[1] * p[1];
+    double const arg = p[0] * p[0] + p[1] * p[1];
 
     // values and derivatives
 

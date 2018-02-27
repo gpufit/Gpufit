@@ -44,7 +44,7 @@ void generate_input_gauss_fit_1d(FitInput & i)
 
 	// data and weights
 	clean_resize(i.data, i.n_fits * i.n_points);
-	std::vector< float > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
+	std::vector< double > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
 	generate_gauss_1d(i.data, true_parameters);
 	i.weights_.clear(); // no weights
 
@@ -73,7 +73,7 @@ void generate_input_gauss_fit_2d(FitInput & i)
 
 	// data and weights
 	clean_resize(i.data, i.n_fits * i.n_points);
-	std::vector< float > const true_parameters{ { 4.f, 1.8f, 2.2f, 0.5f, 1.f } };
+	std::vector< double > const true_parameters{ { 4.f, 1.8f, 2.2f, 0.5f, 1.f } };
 	generate_gauss_2d(i.data, true_parameters);
 	i.weights_.clear(); // no weights
 
@@ -104,8 +104,8 @@ void generate_input_gauss_fit_2d_elliptic(FitInput & i)
     // data and weights
     clean_resize(i.data, i.n_fits * i.n_points);
 
-    float const center_x = (static_cast<float>(size_x) - 1.f) / 2.f;
-    std::vector< float > const true_parameters{ { 4.f, center_x, center_x, 0.4f, 0.6f, 1.f} };
+    double const center_x = (static_cast<double>(size_x) - 1.f) / 2.f;
+    std::vector< double > const true_parameters{ { 4.f, center_x, center_x, 0.4f, 0.6f, 1.f} };
     generate_gauss_2d_elliptic(i.data, true_parameters);
     i.weights_.clear(); // no weights
 
@@ -166,7 +166,8 @@ void perform_cpufit_gpufit_and_check(void (*func)(FitInput &))
 			cpu.parameters.data(),
 			cpu.states.data(),
 			cpu.chi_squares.data(),
-			cpu.n_iterations.data()
+			cpu.n_iterations.data(),
+            0
 		);
 
 	BOOST_CHECK(cpu_status == 0);
@@ -190,7 +191,8 @@ void perform_cpufit_gpufit_and_check(void (*func)(FitInput &))
 			gpu.parameters.data(),
 			gpu.states.data(),
 			gpu.chi_squares.data(),
-			gpu.n_iterations.data()
+            gpu.n_iterations.data(),
+            0
 		);
 
 	BOOST_CHECK(gpu_status == 0);

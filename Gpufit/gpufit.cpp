@@ -9,20 +9,21 @@ int gpufit
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    double * data,
+    double * weights,
     int model_id,
-    float * initial_parameters,
-    float tolerance,
+    double * initial_parameters,
+    double tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    float * output_parameters,
+    double * output_parameters,
     int * output_states,
-    float * output_chi_squares,
-    int * output_n_iterations
+    double * output_chi_squares,
+    int * output_n_iterations,
+    double * lambda_info
 )
 try
 {
@@ -41,7 +42,8 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations);
+        output_n_iterations,
+        lambda_info);
 
     fi.fit(static_cast<ModelID>(model_id));
 
@@ -103,19 +105,20 @@ int gpufit_portable_interface(int argc, void *argv[])
     return gpufit(
         *((size_t *) argv[0]),
         *((size_t *) argv[1]),
-        (float *) argv[2],
-        (float *) argv[3],
+        (double *) argv[2],
+        (double *) argv[3],
         *((int *) argv[4]),
-        (float *) argv[5],
-        *((float *) argv[6]),
+        (double *) argv[5],
+        *((double *) argv[6]),
         *((int *) argv[7]),
         (int *) argv[8],
         *((int *) argv[9]),
         *((size_t *) argv[10]),
         (char *) argv[11],
-        (float *) argv[12],
+        (double *) argv[12],
         (int *) argv[13],
-        (float *) argv[14],
-        (int *) argv[15]);
+        (double *) argv[14],
+        (int *) argv[15],
+        (double *)argv[16]);
 
 }

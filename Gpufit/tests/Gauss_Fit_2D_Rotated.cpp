@@ -10,27 +10,27 @@
 #include <cmath>
 
 template<std::size_t SIZE>
-void generate_gauss_2d_rotated(std::array< float, SIZE>& values, std::array< float, 7 > const & parameters)
+void generate_gauss_2d_rotated(std::array< double, SIZE>& values, std::array< double, 7 > const & parameters)
 {
     int const size_x = int(std::sqrt(SIZE));
     int const size_y = size_x;
 
-    float const a = parameters[0];
-    float const x0 = parameters[1];
-    float const y0 = parameters[2];
-    float const sx = parameters[3];
-    float const sy = parameters[4];
-    float const b = parameters[5];
-    float const r = parameters[6];
+    double const a = parameters[0];
+    double const x0 = parameters[1];
+    double const y0 = parameters[2];
+    double const sx = parameters[3];
+    double const sy = parameters[4];
+    double const b = parameters[5];
+    double const r = parameters[6];
 
     for (int point_index_y = 0; point_index_y < size_y; point_index_y++)
     {
         for (int point_index_x = 0; point_index_x < size_x; point_index_x++)
         {
             int const point_index = point_index_y * size_x + point_index_x;
-            float const arga = ((point_index_x - x0) * cosf(r)) - ((point_index_y - y0) * sinf(r));
-            float const argb = ((point_index_x - x0) * sinf(r)) + ((point_index_y - y0) * cosf(r));
-            float const ex = exp((-0.5f) * (((arga / sx) * (arga / sx)) + ((argb / sy) * (argb / sy))));
+            double const arga = ((point_index_x - x0) * cosf(r)) - ((point_index_y - y0) * sinf(r));
+            double const argb = ((point_index_x - x0) * sinf(r)) + ((point_index_y - y0) * cosf(r));
+            double const ex = exp((-0.5f) * (((arga / sx) * (arga / sx)) + ((argb / sy) * (argb / sy))));
             values[point_index] = a * ex + b;
         }
     }
@@ -41,25 +41,25 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
     std::size_t const n_fits{ 1 } ;
     std::size_t const n_points{ 64 } ;
 
-    std::array< float, 7 > true_parameters{ { 10.f, 3.5f, 3.5f, 0.4f, 0.5f, 1.f, PI / 16.f } };
+    std::array< double, 7 > true_parameters{ { 10.f, 3.5f, 3.5f, 0.4f, 0.5f, 1.f, PI / 16.f } };
 
-    std::array< float, n_points > data{};
+    std::array< double, n_points > data{};
     generate_gauss_2d_rotated(data, true_parameters);
 
-    std::array< float, n_points > weights{};
+    std::array< double, n_points > weights{};
     std::fill(weights.begin(), weights.end(), 1.f);
 
-    std::array< float, 7 > initial_parameters{ { 8.f, 3.4f, 3.6f, 0.4f, 0.5f, 2.f, 0.f } };
+    std::array< double, 7 > initial_parameters{ { 8.f, 3.4f, 3.6f, 0.4f, 0.5f, 2.f, 0.f } };
 
-    float tolerance{ 0.0000001f };
+    double tolerance{ 1e-12f };
 
     int max_n_iterations{ 10 };
 
     std::array< int, 7 > parameters_to_fit{ { 1, 1, 1, 1, 1, 1, 1 } };
 
-    std::array< float, 7 > output_parameters;
+    std::array< double, 7 > output_parameters;
     int output_states;
-    float output_chi_square;
+    double output_chi_square;
     int output_n_iterations;
 
     int const status
@@ -80,7 +80,8 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
                 output_parameters.data(),
                 &output_states,
                 &output_chi_square,
-                &output_n_iterations
+                &output_n_iterations,
+                0
             ) ;
 
     BOOST_CHECK(status == 0);

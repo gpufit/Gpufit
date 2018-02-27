@@ -1,4 +1,4 @@
-function [parameters, states, chi_squares, n_iterations, time]...
+function [parameters, states, chi_squares, n_iterations, time, lambda_info_cminpack]...
     = cpufit(data, weights, model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
 % Wrapper around the Cpufit mex file.
 %
@@ -74,12 +74,12 @@ end
 
 %% type checks
 
-% data, weights (if given), initial_parameters are all single
-assert(isa(data, 'single'), 'Type of data is not single');
+% data, weights (if given), initial_parameters are all double
+assert(isa(data, 'double'), 'Type of data is not double');
 if ~isempty(weights)
-    assert(isa(weights, 'single'), 'Type of weights is not single');
+    assert(isa(weights, 'double'), 'Type of weights is not double');
 end
-assert(isa(initial_parameters, 'single'), 'Type of initial_parameters is not single');
+assert(isa(initial_parameters, 'double'), 'Type of initial_parameters is not double');
 
 % parameters_to_fit is int32 (cast to int32 if incorrect type)
 if ~isa(parameters_to_fit, 'int32')
@@ -91,9 +91,9 @@ if ~isa(max_n_iterations, 'int32')
     max_n_iterations = int32(max_n_iterations);
 end
 
-% tolerance must be single (cast if incorrect type)
-if ~isa(tolerance, 'single')
-    tolerance = single(tolerance);
+% tolerance must be double (cast if incorrect type)
+if ~isa(tolerance, 'double')
+    tolerance = double(tolerance);
 end
 
 % we don't check type of user_info, but we extract the size in bytes of it
@@ -107,7 +107,7 @@ end
              
 %% run Cpufit taking the time
 tic;
-[parameters, states, chi_squares, n_iterations] ...
+[parameters, states, chi_squares, n_iterations, lambda_info_cminpack] ...
     = CpufitMex(data, weights, n_fits, n_points, tolerance, max_n_iterations, estimator_id, initial_parameters, parameters_to_fit, model_id, n_parameters, user_info, user_info_size);
     
 time = toc;

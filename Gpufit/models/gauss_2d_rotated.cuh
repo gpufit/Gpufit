@@ -52,11 +52,11 @@
 */
 
 __device__ void calculate_gauss2drotated(
-    float const * parameters,
+    double const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    double * value,
+    double * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -65,28 +65,28 @@ __device__ void calculate_gauss2drotated(
 {
     // indices
 
-    int const n_points_x = sqrt((float)n_points);
+    int const n_points_x = sqrt((double)n_points);
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - point_index_y * n_points_x;
 
     // parameters
 
-    float const * p = parameters;
+    double const * p = parameters;
 
     // value
 
-    float const cosp6 = cosf(p[6]);
-    float const sinp6 = sinf(p[6]);
+    double const cosp6 = cosf(p[6]);
+    double const sinp6 = sinf(p[6]);
 
-    float const arga = (point_index_x - p[1]) * cosp6 - (point_index_y - p[2]) * sinp6;
-    float const argb = (point_index_x - p[1]) * sinp6 + (point_index_y - p[2]) * cosp6;
-    float const ex = exp(-0.5 * (((arga / p[3]) * (arga / p[3])) + ((argb / p[4]) * (argb / p[4]))));
+    double const arga = (point_index_x - p[1]) * cosp6 - (point_index_y - p[2]) * sinp6;
+    double const argb = (point_index_x - p[1]) * sinp6 + (point_index_y - p[2]) * cosp6;
+    double const ex = exp(-0.5 * (((arga / p[3]) * (arga / p[3])) + ((argb / p[4]) * (argb / p[4]))));
     value[point_index] = p[0] * ex + p[5];
 
     // derivative
 
-    float * current_derivative = derivative + point_index;
+    double * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points] = ex;
     current_derivative[1 * n_points] = (((p[0] * cosp6 * arga) / (p[3] * p[3])) + ((p[0] * sinp6 * argb) / (p[4] * p[4]))) * ex;

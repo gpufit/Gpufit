@@ -5,21 +5,22 @@
 #include "interface.h"
 
 FitInterface::FitInterface(
-    float const * data,
-    float const * weights,
+    double const * data,
+    double const * weights,
     std::size_t n_fits,
     int n_points,
-    float tolerance,
+    double tolerance,
     int max_n_iterations,
     EstimatorID estimator_id,
-    float const * initial_parameters,
+    double const * initial_parameters,
     int const * parameters_to_fit,
     char * user_info,
     std::size_t user_info_size,
-    float * output_parameters,
+    double * output_parameters,
     int * output_states,
-    float * output_chi_squares,
-    int * output_n_iterations) :
+    double * output_chi_squares,
+    int * output_n_iterations,
+    double * lambda_info) :
     data_(data),
     weight_(weights),
     n_fits_(n_fits),
@@ -35,6 +36,7 @@ FitInterface::FitInterface(
     output_states_(output_states),
     output_chi_squares_(output_chi_squares),
     output_n_iterations_(output_n_iterations),
+    lambda_info_(lambda_info),
     n_parameters_(0)
 {}
 
@@ -45,12 +47,12 @@ void FitInterface::check_sizes()
 {
     std::size_t maximum_size = std::numeric_limits< std::size_t >::max();
 
-    if (n_fits_ > maximum_size / n_points_ / sizeof(float))
+    if (n_fits_ > maximum_size / n_points_ / sizeof(double))
     {
         throw std::runtime_error("maximum absolute number of data points exceeded");
     }
 
-    if (n_fits_ > maximum_size / n_parameters_ / sizeof(float))
+    if (n_fits_ > maximum_size / n_parameters_ / sizeof(double))
     {
         throw std::runtime_error("maximum number of fits and/or parameters exceeded");
     }
@@ -97,6 +99,9 @@ void FitInterface::set_number_of_parameters(ModelID const model_id)
     case BROWN_DENNIS:
         n_parameters_ = 4;
         break;
+    case RAMSEY_VAR_P:
+        n_parameters_ = 9;
+        break;
     default:
         break;
     }
@@ -121,7 +126,8 @@ void FitInterface::fit(ModelID const model_id)
         output_parameters_,
         output_states_,
         output_chi_squares_,
-        output_n_iterations_);
+        output_n_iterations_,
+        lambda_info_);
 
     lmfit.run(tolerance_);
 }

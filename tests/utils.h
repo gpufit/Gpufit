@@ -104,11 +104,11 @@ template<typename T> double calculate_mean(std::vector<T> const & a, std::vector
     return s / n;
 }
 
-void generate_gauss_1d(std::vector< float > & v, std::vector< float > const & p);
+void generate_gauss_1d(std::vector< double > & v, std::vector< double > const & p);
 
-void generate_gauss_2d(std::vector< float > & v, std::vector< float > const & p);
+void generate_gauss_2d(std::vector< double > & v, std::vector< double > const & p);
 
-void generate_gauss_2d_elliptic(std::vector< float > & v, std::vector< float > const & p);
+void generate_gauss_2d_elliptic(std::vector< double > & v, std::vector< double > const & p);
 
 struct FitInput
 {
@@ -116,21 +116,21 @@ struct FitInput
 	std::size_t n_points;
 	std::size_t n_parameters;
 
-	std::vector< float > data;
-	std::vector< float > weights_; // size 0 means no weights
+	std::vector< double > data;
+	std::vector< double > weights_; // size 0 means no weights
 
 	int model_id;
 	int estimator_id;
 
-	std::vector< float > initial_parameters;
+	std::vector< double > initial_parameters;
 	std::vector< int > parameters_to_fit;
 
-	float tolerance;
+	double tolerance;
 	int max_n_iterations;
 
-	std::vector< float > user_info_; // user info is float
+	std::vector< double > user_info_; // user info is double
 
-	float * weights()
+	double * weights()
 	{
 		if (!this->weights_.empty())
 		{
@@ -150,7 +150,7 @@ struct FitInput
 
 	std::size_t user_info_size()
 	{
-		return this->user_info_.size() * sizeof(float); // type of user_info is float
+		return this->user_info_.size() * sizeof(double); // type of user_info is double
 	}
 
 	bool sanity_check()
@@ -167,9 +167,9 @@ struct FitInput
 
 struct FitOutput
 {
-	std::vector< float > parameters;
+	std::vector< double > parameters;
 	std::vector< int > states;
-	std::vector< float > chi_squares;
+	std::vector< double > chi_squares;
 	std::vector< int > n_iterations;
 };
 
