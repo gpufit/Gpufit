@@ -54,7 +54,7 @@ __device__ void calculate_brown_dennis(
 {
     // indices
 
-    double const x = (double)point_index / 5.f;
+    double const x = (double)point_index / 5.;
 
     // parameters
 
@@ -71,10 +71,10 @@ __device__ void calculate_brown_dennis(
 
     double * current_derivative = derivative + point_index;
 
-    current_derivative[0 * n_points] = 2.f * arg1;
-    current_derivative[1 * n_points] = 2.f * x * arg1;
-    current_derivative[2 * n_points] = 2.f * arg2;
-    current_derivative[3 * n_points] = 2.f * sinf(x) * arg2;
+    current_derivative[0 * n_points] = 2. * arg1;
+    current_derivative[1 * n_points] = 2. * x * arg1;
+    current_derivative[2 * n_points] = 2. * arg2;
+    current_derivative[3 * n_points] = 2. * sinf(x) * arg2;
 }
 
 #endif

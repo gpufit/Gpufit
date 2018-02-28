@@ -116,7 +116,7 @@ __device__ void calculate_gauss1d(
     current_derivative[0 * n_points]  = ex;
     current_derivative[1 * n_points]  = p[0] * ex * (x - p[1]) / (p[2] * p[2]);
     current_derivative[2 * n_points]  = p[0] * ex * (x - p[1]) * (x - p[1]) / (p[2] * p[2] * p[2]);
-    current_derivative[3 * n_points]  = 1.f;
+    current_derivative[3 * n_points]  = 1.;
 }
 
 #endif

@@ -40,7 +40,7 @@ LMFitCPP::LMFitCPP(
     delta_(info.n_parameters_to_fit_),
     scaling_vector_(info.n_parameters_to_fit_),
     prev_chi_square_(0),
-    lambda_(0.f),
+    lambda_(0.),
     prev_parameters_(info.n_parameters_to_fit_),
     user_info_(user_info),
     parameters_(output_parameters),
@@ -337,7 +337,7 @@ void LMFitCPP::calc_derivatives_gauss1d(
     std::vector<double> & derivatives)
 {
     double * user_info_float = (double*)user_info_;
-    double x = 0.f;
+    double x = 0.;
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
@@ -375,27 +375,27 @@ void LMFitCPP::calc_derivatives_cauchy2delliptic(
         {
             double const argx =
                 ((parameters_[1] - x) / parameters_[3])
-                *((parameters_[1] - x) / parameters_[3]) + 1.f;
+                *((parameters_[1] - x) / parameters_[3]) + 1.;
             double const argy =
                 ((parameters_[2] - y) / parameters_[4])
-                *((parameters_[2] - y) / parameters_[4]) + 1.f;
+                *((parameters_[2] - y) / parameters_[4]) + 1.;
 
             derivatives[0 * info_.n_points_ + y*fit_size_x + x]
-                = 1.f / (argx*argy);
+                = 1. / (argx*argy);
             derivatives[1 * info_.n_points_ + y*fit_size_x + x] =
-                -2.f * parameters_[0] * (parameters_[1] - x)
+                -2. * parameters_[0] * (parameters_[1] - x)
                 / (parameters_[3] * parameters_[3] * argx*argx*argy);
             derivatives[2 * info_.n_points_ + y*fit_size_x + x] =
-                -2.f * parameters_[0] * (parameters_[2] - y)
+                -2. * parameters_[0] * (parameters_[2] - y)
                 / (parameters_[4] * parameters_[4] * argy*argy*argx);
             derivatives[3 * info_.n_points_ + y*fit_size_x + x] =
-                2.f * parameters_[0] * (parameters_[1] - x) * (parameters_[1] - x)
+                2. * parameters_[0] * (parameters_[1] - x) * (parameters_[1] - x)
                 / (parameters_[3] * parameters_[3] * parameters_[3] * argx*argx*argy);
             derivatives[4 * info_.n_points_ + y*fit_size_x + x] =
-                2.f * parameters_[0] * (parameters_[2] - y) * (parameters_[2] - y)
+                2. * parameters_[0] * (parameters_[2] - y) * (parameters_[2] - y)
                 / (parameters_[4] * parameters_[4] * parameters_[4] * argy*argy*argx);
             derivatives[5 * info_.n_points_ + y*fit_size_x + x]
-                = 1.f;
+                = 1.;
         }
 }
 
@@ -403,7 +403,7 @@ void LMFitCPP::calc_derivatives_linear1d(
     std::vector<double> & derivatives)
 {
     double * user_info_float = (double*)user_info_;
-    double x = 0.f;
+    double x = 0.;
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
@@ -421,7 +421,7 @@ void LMFitCPP::calc_derivatives_linear1d(
             x = user_info_float[fit_begin + point_index];
         }
 
-        derivatives[0 * info_.n_points_ + point_index] = 1.f;
+        derivatives[0 * info_.n_points_ + point_index] = 1.;
         derivatives[1 * info_.n_points_ + point_index] = x;
     }
 }
@@ -436,19 +436,19 @@ void LMFitCPP::calc_derivatives_fletcher_powell_helix(
     double const arg = p[0] * p[0] + p[1] * p[1];
 
     // derivatives with respect to p[0]
-    derivatives[0 * info_.n_points_ + 0] = 100.f * 1.f / (2.f*pi) * p[1] / arg;
-    derivatives[0 * info_.n_points_ + 1] = 10.f * p[0] / std::sqrt(arg);
-    derivatives[0 * info_.n_points_ + 2] = 0.f;
+    derivatives[0 * info_.n_points_ + 0] = 100. * 1. / (2.*pi) * p[1] / arg;
+    derivatives[0 * info_.n_points_ + 1] = 10. * p[0] / std::sqrt(arg);
+    derivatives[0 * info_.n_points_ + 2] = 0.;
 
     // derivatives with respect to p[1]
-    derivatives[1 * info_.n_points_ + 0] = -100.f * 1.f / (2.f*pi) * p[0] / (arg);
-    derivatives[1 * info_.n_points_ + 1] = 10.f * p[1] / std::sqrt(arg);
-    derivatives[1 * info_.n_points_ + 2] = 0.f;
+    derivatives[1 * info_.n_points_ + 0] = -100. * 1. / (2.*pi) * p[0] / (arg);
+    derivatives[1 * info_.n_points_ + 1] = 10. * p[1] / std::sqrt(arg);
+    derivatives[1 * info_.n_points_ + 2] = 0.;
 
     // derivatives with respect to p[2]
-    derivatives[2 * info_.n_points_ + 0] = 10.f;
-    derivatives[2 * info_.n_points_ + 1] = 0.f;
-    derivatives[2 * info_.n_points_ + 2] = 1.f;
+    derivatives[2 * info_.n_points_ + 0] = 10.;
+    derivatives[2 * info_.n_points_ + 1] = 0.;
+    derivatives[2 * info_.n_points_ + 2] = 1.;
 }
 
 void LMFitCPP::calc_derivatives_brown_dennis(
@@ -458,15 +458,15 @@ void LMFitCPP::calc_derivatives_brown_dennis(
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
-        double const t = static_cast<double>(point_index) / 5.f;
+        double const t = static_cast<double>(point_index) / 5.;
 
         double const arg1 = p[0] + p[1] * t - std::exp(t);
         double const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
 
-        derivatives[0 * info_.n_points_ + point_index] = 2.f * arg1;
-        derivatives[1 * info_.n_points_ + point_index] = 2.f * t * arg1;
-        derivatives[2 * info_.n_points_ + point_index] = 2.f * arg2;
-        derivatives[3 * info_.n_points_ + point_index] = 2.f * std::sin(t) * arg2;
+        derivatives[0 * info_.n_points_ + point_index] = 2. * arg1;
+        derivatives[1 * info_.n_points_ + point_index] = 2. * t * arg1;
+        derivatives[2 * info_.n_points_ + point_index] = 2. * arg2;
+        derivatives[3 * info_.n_points_ + point_index] = 2. * std::sin(t) * arg2;
     }
 }
 
@@ -498,8 +498,8 @@ void LMFitCPP::calc_derivatives_ramsey_var_p(
         double const pi = 3.14159f;
         double const t2arg = pow(x / p[6], p[5]);
         double const ex = exp(-t2arg);
-        double const phasearg1 = 2.f * pi*p[3] * (x - p[7]);
-        double const phasearg2 = 2.f * pi*p[4] * (x - p[8]);
+        double const phasearg1 = 2. * pi*p[3] * (x - p[7]);
+        double const phasearg2 = 2. * pi*p[4] * (x - p[8]);
         double const cos1 = cos(phasearg1);
         double const sin1 = sin(phasearg1);
         double const cos2 = cos(phasearg2);
@@ -509,13 +509,13 @@ void LMFitCPP::calc_derivatives_ramsey_var_p(
         double * current_derivative = derivatives.data() + point_index;
         current_derivative[0 * info_.n_points_] = ex*cos1;
         current_derivative[1 * info_.n_points_] = ex*cos2;
-        current_derivative[2 * info_.n_points_] = 1.f;
-        current_derivative[3 * info_.n_points_] = -p[0] * 2.f * pi*(x - p[7])*ex*sin1;
-        current_derivative[4 * info_.n_points_] = -p[1] * 2.f * pi*(x - p[8])*ex*sin2;
+        current_derivative[2 * info_.n_points_] = 1.;
+        current_derivative[3 * info_.n_points_] = -p[0] * 2. * pi*(x - p[7])*ex*sin1;
+        current_derivative[4 * info_.n_points_] = -p[1] * 2. * pi*(x - p[8])*ex*sin2;
         current_derivative[5 * info_.n_points_] = -log(x / p[6] + 0.000001f)*ex*t2arg*(p[0] * cos1 + p[1] * cos2);
-        current_derivative[6 * info_.n_points_] = p[5] * 1.f / (p[6] * p[6])*x*ex*pow(x / p[6], p[5] - 1.f)*(p[0] * cos1 + p[1] * cos2);
-        current_derivative[7 * info_.n_points_] = p[0] * 2.f * pi*p[3] * sin1*ex;
-        current_derivative[8 * info_.n_points_] = p[1] * 2.f * pi*p[4] * sin2*ex;
+        current_derivative[6 * info_.n_points_] = p[5] * 1. / (p[6] * p[6])*x*ex*pow(x / p[6], p[5] - 1.)*(p[0] * cos1 + p[1] * cos2);
+        current_derivative[7 * info_.n_points_] = p[0] * 2. * pi*p[3] * sin1*ex;
+        current_derivative[8 * info_.n_points_] = p[1] * 2. * pi*p[4] * sin2*ex;
     }
 }
 
@@ -530,10 +530,10 @@ void LMFitCPP::calc_values_cauchy2delliptic(std::vector<double>& cauchy)
         {
             double const argx =
                 ((parameters_[1] - ix) / parameters_[3])
-                *((parameters_[1] - ix) / parameters_[3]) + 1.f;
+                *((parameters_[1] - ix) / parameters_[3]) + 1.;
             double const argy =
                 ((parameters_[2] - iy) / parameters_[4])
-                *((parameters_[2] - iy) / parameters_[4]) + 1.f;
+                *((parameters_[2] - iy) / parameters_[4]) + 1.;
 
             cauchy[iy*size_x + ix] = parameters_[0] / (argx * argy) + parameters_[5];
         }
@@ -610,7 +610,7 @@ void LMFitCPP::calc_values_gauss2drotated(std::vector<double>& gaussian)
 void LMFitCPP::calc_values_gauss1d(std::vector<double>& gaussian)
 {
     double * user_info_float = (double*)user_info_;
-    double x = 0.f;
+    double x = 0.;
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
@@ -638,7 +638,7 @@ void LMFitCPP::calc_values_gauss1d(std::vector<double>& gaussian)
 void LMFitCPP::calc_values_linear1d(std::vector<double>& line)
 {
     double * user_info_float = (double*)user_info_;
-    double x = 0.f;
+    double x = 0.;
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
@@ -664,21 +664,21 @@ void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<double>& values)
 
     double const pi = 3.14159f;
 
-    double theta = 0.f;
+    double theta = 0.;
 
-    if (0.f < p[0])
+    if (0. < p[0])
         theta = .5f * atan(p[1] / p[0]) / pi;
-    else if (p[0] < 0.f)
+    else if (p[0] < 0.)
         theta = .5f * atan(p[1] / p[0]) / pi + .5f;
-    else if (0.f < p[1])
+    else if (0. < p[1])
         theta = .25f;
-    else if (p[1] < 0.f)
+    else if (p[1] < 0.)
         theta = -.25f;
     else
-        theta = 0.f;
+        theta = 0.;
 
-    values[0] = 10.f * (p[2] - 10.f * theta);
-    values[1] = 10.f * (std::sqrt(p[0] * p[0] + p[1] * p[1]) - 1.f);
+    values[0] = 10. * (p[2] - 10. * theta);
+    values[1] = 10. * (std::sqrt(p[0] * p[0] + p[1] * p[1]) - 1.);
     values[2] = p[2];
 }
 
@@ -688,7 +688,7 @@ void LMFitCPP::calc_values_brown_dennis(std::vector<double>& values)
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
-        double const t = static_cast<double>(point_index) / 5.f;
+        double const t = static_cast<double>(point_index) / 5.;
 
         double const arg1 = p[0] + p[1] * t - std::exp(t);
         double const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
@@ -700,7 +700,7 @@ void LMFitCPP::calc_values_brown_dennis(std::vector<double>& values)
 void LMFitCPP::calc_values_ramsey_var_p(std::vector<double>& values)
 {
     double * user_info_float = (double*)user_info_;
-    double x = 0.f;
+    double x = 0.;
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
@@ -723,8 +723,8 @@ void LMFitCPP::calc_values_ramsey_var_p(std::vector<double>& values)
         double const pi = 3.14159f;
         double const t2arg = pow(x / p[6], p[5]);
         double const ex = exp(-t2arg);
-        double const phasearg1 = 2.f * pi*p[3] * (x - p[7]);
-        double const phasearg2 = 2.f * pi*p[4] * (x - p[8]);
+        double const phasearg1 = 2. * pi*p[3] * (x - p[7]);
+        double const phasearg2 = 2. * pi*p[4] * (x - p[8]);
         double const cos1 = cos(phasearg1);
         double const sin1 = sin(phasearg1);
         double const cos2 = cos(phasearg2);
@@ -908,12 +908,12 @@ void LMFitCPP::calc_chi_square(
         }
         else if (info_.estimator_id_ == MLE)
         {
-            if (values[pixel_index] <= 0.f)
+            if (values[pixel_index] <= 0.)
             {
                 *state_ = FitState::NEG_CURVATURE_MLE;
                 return;
             }
-            if (data_[pixel_index] != 0.f)
+            if (data_[pixel_index] != 0.)
             {
                 sum
                     += 2 * (deviant - data_[pixel_index] * std::log(values[pixel_index] / data_[pixel_index]));
@@ -1018,7 +1018,7 @@ void LMFitCPP::modify_step_width()
         //scaling_vector_[parameter_index] = modified_hessian_[diagonal_index];
 
         // initial scaling
-        //if (scaling_vector_[parameter_index] == 0.f)
+        //if (scaling_vector_[parameter_index] == 0.)
         //    scaling_vector_[parameter_index] = modified_hessian_[diagonal_index];
 
         modified_hessian_[diagonal_index] += scaling_vector_[parameter_index] * lambda_;
@@ -1028,13 +1028,17 @@ void LMFitCPP::modify_step_width()
 void LMFitCPP::initialize_step_bound()
 {
     std::vector<double> scaled_parameters(info_.n_parameters_);
+    std::vector<double> sqrt_scaling_vector(info_.n_parameters_);
 
     for (std::size_t i = 0; i < scaled_parameters.size(); i++)
-        scaled_parameters[i] = parameters_[i] * std::sqrt(scaling_vector_[i]);
+    {
+        sqrt_scaling_vector[i] = std::sqrt(scaling_vector_[i]);
+        scaled_parameters[i] = parameters_[i] * sqrt_scaling_vector[i];
+    }
 
     double const scaled_parameters_norm = calc_euclidian_norm(scaled_parameters);
 
-    double const factor = 100.f;
+    double const factor = 100.;
 
     step_bound_ = factor * scaled_parameters_norm;
 
@@ -1053,9 +1057,9 @@ void LMFitCPP::update_step_bound()
 
     if (approximation_ratio_ <= .25f)
     {
-        double temp = 0.f;
+        double temp = 0.;
 
-        if (actual_reduction_ >= 0.f)
+        if (actual_reduction_ >= 0.)
         {
             temp = .5f;
         }
@@ -1110,7 +1114,7 @@ void LMFitCPP::initialize_lambda_bounds()
     lambda_ = std::max(lambda_, lambda_lower_bound_);
     lambda_ = std::min(lambda_, lambda_upper_bound_);
 
-    if (lambda_ == 0.f)
+    if (lambda_ == 0.)
         lambda_ = gradient_norm / scaled_delta_norm;
 }
 
@@ -1180,7 +1184,7 @@ void LMFitCPP::calc_approximation_quality()
         = derivatives_delta_norm * derivatives_delta_norm / prev_chi_square_;
 
     double summand2
-        = 2.f
+        = 2.
         * lambda_
         * scaled_delta_norm
         * scaled_delta_norm
@@ -1188,7 +1192,7 @@ void LMFitCPP::calc_approximation_quality()
 
     predicted_reduction_ = summand1 + summand2;
 
-    directive_derivative_ = -summand1 - summand2 / 2.f;
+    directive_derivative_ = -summand1 - summand2 / 2.;
 
     actual_reduction_ = -1.;
 
@@ -1210,14 +1214,14 @@ void LMFitCPP::run()
 
     ////////////////////////////////////////////////////////////////////
     /**/ *(output_lambda_++) = lambda_;                             /**/
-    /**/ *(output_lower_bound_++) = 0.f;                            /**/
-    /**/ *(output_upper_bound_++) = 0.f;                            /**/
-    /**/ *(output_step_bound_++) = 0.f;                             /**/
-    /**/ *(output_actual_reduction_++) = 0.f;                       /**/
-    /**/ *(output_predicted_reduction_++) = 0.f;                    /**/
-    /**/ *(output_directive_derivative_++) = 0.f;                   /**/
+    /**/ *(output_lower_bound_++) = 0.;                            /**/
+    /**/ *(output_upper_bound_++) = 0.;                            /**/
+    /**/ *(output_step_bound_++) = 0.;                             /**/
+    /**/ *(output_actual_reduction_++) = 0.;                       /**/
+    /**/ *(output_predicted_reduction_++) = 0.;                    /**/
+    /**/ *(output_directive_derivative_++) = 0.;                   /**/
     /**/ *(output_chi_++) = std::sqrt(*chi_square_);                /**/
-    /**/ *(output_phi_++) = 0.f;                                    /**/
+    /**/ *(output_phi_++) = 0.;                                    /**/
     /**/ *(output_iteration_++) = -1;                               /**/
     ////////////////////////////////////////////////////////////////////
 
@@ -1233,14 +1237,14 @@ void LMFitCPP::run()
 
             ////////////////////////////////////////////////////////
             /**/ *(output_lambda_++) = lambda_;                 /**/
-            /**/ *(output_lower_bound_++) = 0.f;                /**/
-            /**/ *(output_upper_bound_++) = 0.f;                /**/
+            /**/ *(output_lower_bound_++) = 0.;                /**/
+            /**/ *(output_upper_bound_++) = 0.;                /**/
             /**/ *(output_step_bound_++) = step_bound_;         /**/
-            /**/ *(output_actual_reduction_++) = 0.f;           /**/
-            /**/ *(output_predicted_reduction_++) = 0.f;        /**/
-            /**/ *(output_directive_derivative_++) = 0.f;       /**/
+            /**/ *(output_actual_reduction_++) = 0.;           /**/
+            /**/ *(output_predicted_reduction_++) = 0.;        /**/
+            /**/ *(output_directive_derivative_++) = 0.;       /**/
             /**/ *(output_chi_++) = std::sqrt(*chi_square_);    /**/
-            /**/ *(output_phi_++) = 0.f;                        /**/
+            /**/ *(output_phi_++) = 0.;                        /**/
             /**/ *(output_iteration_++) = iteration;            /**/
             ////////////////////////////////////////////////////////
         }
@@ -1264,8 +1268,8 @@ void LMFitCPP::run()
 
         ////////////////////////////////////////////////////////////////////////////////////
         /**/ *(output_lambda_++) = lambda_;                                             /**/
-        /**/ *(output_lower_bound_++) = 0.f;                                            /**/
-        /**/ *(output_upper_bound_++) = 0.f;                                            /**/
+        /**/ *(output_lower_bound_++) = 0.;                                            /**/
+        /**/ *(output_upper_bound_++) = 0.;                                            /**/
         /**/ *(output_step_bound_++) = step_bound_;                                     /**/
         /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
         /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
@@ -1359,7 +1363,7 @@ void LMFitCPP::run()
         }
         else
         {
-            lambda_ = 0.f;
+            lambda_ = 0.;
 
             ////////////////////////////////////////////////////////////////////////////////////
             /**/ *(output_lambda_++) = lambda_;                                             /**/

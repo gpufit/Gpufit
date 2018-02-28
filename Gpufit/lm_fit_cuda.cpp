@@ -46,14 +46,14 @@ void LMFitCUDA::run()
 
     /////////////////////////////////////////////////////////////////////////////////////**/
     /**/ gpu_data_.lambdas_.copy(1, output_lambda_++);                                  /**/
-    /**/ *(output_lower_bound_++) = 0.f;                                                /**/
-    /**/ *(output_upper_bound_++) = 0.f;                                                /**/
-    /**/ *(output_step_bound_++) = 0.f;                                                 /**/
-    /**/ *(output_actual_reduction_++) = 0.f;                                           /**/
-    /**/ *(output_predicted_reduction_++) = 0.f;                                        /**/
-    /**/ *(output_directive_derivative_++) = 0.f;                                       /**/
+    /**/ *(output_lower_bound_++) = 0.;                                                /**/
+    /**/ *(output_upper_bound_++) = 0.;                                                /**/
+    /**/ *(output_step_bound_++) = 0.;                                                 /**/
+    /**/ *(output_actual_reduction_++) = 0.;                                           /**/
+    /**/ *(output_predicted_reduction_++) = 0.;                                        /**/
+    /**/ *(output_directive_derivative_++) = 0.;                                       /**/
     /**/ gpu_data_.chi_squares_.copy(1, output_chi_++);                                 /**/
-    /**/ *(output_phi_++) = 0.f;                                                        /**/
+    /**/ *(output_phi_++) = 0.;                                                        /**/
     /**/ *(output_iteration_++) = -1;                                                   /**/
     /////////////////////////////////////////////////////////////////////////////////////**/
 
@@ -66,14 +66,14 @@ void LMFitCUDA::run()
 
     /////////////////////////////////////////////////////////////////////////////////////**/
     /**/ gpu_data_.lambdas_.copy(1, output_lambda_++);                                  /**/
-    /**/ *(output_lower_bound_++) = 0.f;                                                /**/
-    /**/ *(output_upper_bound_++) = 0.f;                                                /**/
+    /**/ *(output_lower_bound_++) = 0.;                                                /**/
+    /**/ *(output_upper_bound_++) = 0.;                                                /**/
     /**/ gpu_data_.step_bounds_.copy(1, output_step_bound_++);                          /**/
-    /**/ *(output_actual_reduction_++) = 0.f;                                           /**/
-    /**/ *(output_predicted_reduction_++) = 0.f;                                        /**/
-    /**/ *(output_directive_derivative_++) = 0.f;                                       /**/
+    /**/ *(output_actual_reduction_++) = 0.;                                           /**/
+    /**/ *(output_predicted_reduction_++) = 0.;                                        /**/
+    /**/ *(output_directive_derivative_++) = 0.;                                       /**/
     /**/ gpu_data_.chi_squares_.copy(1, output_chi_++);                                 /**/
-    /**/ *(output_phi_++) = 0.f;                                                        /**/
+    /**/ *(output_phi_++) = 0.;                                                        /**/
     /**/ *(output_iteration_++) = 0;                                                    /**/
     /////////////////////////////////////////////////////////////////////////////////////**/
 
@@ -94,8 +94,8 @@ void LMFitCUDA::run()
 
         /////////////////////////////////////////////////////////////////////////////////////**/
         /**/ gpu_data_.lambdas_.copy(1, output_lambda_++);                                  /**/
-        /**/ *(output_lower_bound_++) = 0.f;                                                /**/
-        /**/ *(output_upper_bound_++) = 0.f;                                                /**/
+        /**/ *(output_lower_bound_++) = 0.;                                                /**/
+        /**/ *(output_upper_bound_++) = 0.;                                                /**/
         /**/ gpu_data_.step_bounds_.copy(1, output_step_bound_++);                          /**/
         /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);               /**/
         /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);         /**/

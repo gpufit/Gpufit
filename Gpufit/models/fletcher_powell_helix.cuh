@@ -59,11 +59,11 @@ __device__ void calculate_fletcher_powell_helix(
 
     double const pi = 3.14159f;
 
-    double theta = 0.f;
+    double theta = 0.;
 
-    if (p[0] > 0.f)
+    if (p[0] > 0.)
         theta = .5f * atanf(p[1] / p[0]) / pi;
-    else if (p[0] < 0.f)
+    else if (p[0] < 0.)
         theta = .5f * atanf(p[1] / p[0]) / pi + .5f;
 
     double const arg = p[0] * p[0] + p[1] * p[1];
@@ -74,27 +74,27 @@ __device__ void calculate_fletcher_powell_helix(
     {
     case 0:
         // value
-        value[point_index] = 10.f * (p[2] - 10.f * theta);
+        value[point_index] = 10. * (p[2] - 10. * theta);
         // derivative
-        derivative[0 * n_points + point_index] = 100.f / (2.f*pi) * p[1] / arg;
-        derivative[1 * n_points + point_index] = -100.f / (2.f*pi) * p[0] / arg;
-        derivative[2 * n_points + point_index] = 10.f;
+        derivative[0 * n_points + point_index] = 100. / (2.*pi) * p[1] / arg;
+        derivative[1 * n_points + point_index] = -100. / (2.*pi) * p[0] / arg;
+        derivative[2 * n_points + point_index] = 10.;
         break;
     case 1:
         // value
-        value[point_index] = 10.f * (sqrtf(arg) - 1.f);
+        value[point_index] = 10. * (sqrtf(arg) - 1.);
         // derivative
-        derivative[0 * n_points + point_index] = 10.f * p[0] / sqrtf(arg);
-        derivative[1 * n_points + point_index] = 10.f * p[1] / sqrtf(arg);
-        derivative[2 * n_points + point_index] = 0.f;
+        derivative[0 * n_points + point_index] = 10. * p[0] / sqrtf(arg);
+        derivative[1 * n_points + point_index] = 10. * p[1] / sqrtf(arg);
+        derivative[2 * n_points + point_index] = 0.;
         break;
     case 2:
         // value
         value[point_index] = p[2];
         // derivative
-        derivative[0 * n_points + point_index] = 0.f;
-        derivative[1 * n_points + point_index] = 0.f;
-        derivative[2 * n_points + point_index] = 1.f;
+        derivative[0 * n_points + point_index] = 0.;
+        derivative[1 * n_points + point_index] = 0.;
+        derivative[2 * n_points + point_index] = 1.;
         break;
     default:
         break;

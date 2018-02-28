@@ -76,10 +76,10 @@ void GPUData::init
     chunk_size_ = chunk_size;
     chunk_index_ = chunk_index;
 
-    set(prev_chi_squares_, 0.f, chunk_size_);
+    set(prev_chi_squares_, 0., chunk_size_);
     set(states_, 0, chunk_size_);
     set(finished_, 0, chunk_size_);
-    set(scaling_vectors_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
+    set(scaling_vectors_, 0., chunk_size_ * info_.n_parameters_to_fit_);
 
     write(
         data_,
@@ -97,7 +97,7 @@ void GPUData::init
     
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
-    set(lambdas_, 0.f, chunk_size_);
+    set(lambdas_, 0., chunk_size_);
     set(lambda_accepted_, 0, chunk_size_);
     set(newton_step_accepted_, 1, chunk_size_);
 }

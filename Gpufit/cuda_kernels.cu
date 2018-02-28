@@ -189,7 +189,7 @@ __device__ double calculate_skalar_product(
     double const * vector2,
     int const size)
 {
-    double product = 0.f;
+    double product = 0.;
 
     for (int i = 0; i < size; i++)
         product += vector1[i] * vector2[i];
@@ -227,7 +227,7 @@ __global__ void cuda_calculate_interim_euclidian_norms(
 
     if (point_index >= n_points)
     {
-        shared_vector[point_index] = 0.f;
+        shared_vector[point_index] = 0.;
     }
     else
     {
@@ -382,7 +382,7 @@ __global__ void cuda_check_fit_improvement(
     if (index >= n_fits || finished[index])
         return;
 
-    bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.f;
+    bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.;
     bool const chi_square_increased = (chi_squares[index] >= prev_chi_squares[index]);
     if (prev_chi_squares_initialized && chi_square_increased)
     {
@@ -500,7 +500,7 @@ __global__ void cuda_calculate_chi_squares(
 
     if (point_index >= n_points)
     {
-        shared_chi_square[point_index] = 0.f;
+        shared_chi_square[point_index] = 0.;
     }
 
     if (point_index < n_points)
@@ -712,7 +712,7 @@ __global__ void cuda_calculate_gradients(
 
     if (point_index >= n_points)
     {
-        shared_gradient[point_index] = 0.f;
+        shared_gradient[point_index] = 0.;
     }
 
     for (int parameter_index = 0; parameter_index < n_parameters_to_fit; parameter_index++)
@@ -899,7 +899,7 @@ __global__ void cuda_calc_scaling_vectors(
     //scaling_vector[parameter_index] = hessian[diagonal_index];
 
     // initial scaling
-    //if (scaling_vector[parameter_index] == 0.f)
+    //if (scaling_vector[parameter_index] == 0.)
     //    scaling_vector[parameter_index] = hessian[diagonal_index];
 }
 
@@ -1447,7 +1447,7 @@ __device__ void multiply_matrix_vector(
 {
     for (int row = 0; row < n_rows; row++)
     {
-        product[row] = 0.f;
+        product[row] = 0.;
         for (int col = 0; col < n_cols; col++)
         {
             product[row] += double(matrix[col * n_rows + row] * vector[col]);
@@ -1457,7 +1457,7 @@ __device__ void multiply_matrix_vector(
 
 __device__ double calc_scalar_product(double const * v1, double const * v2, int const size)
 {
-    double product = 0.f;
+    double product = 0.;
 
     for (std::size_t i = 0; i < size; i++)
         product += v1[i] * v2[i];
@@ -1480,11 +1480,11 @@ __global__ void cuda_initialize_step_bounds(
     double const scaled_parameters_norm
         = calc_euclidian_norm(n_parameters, current_scaled_parameters);
 
-    double const factor = 100.f;
+    double const factor = 100.;
 
     step_bound = factor * scaled_parameters_norm;
 
-    if (step_bound == 0.f)
+    if (step_bound == 0.)
         step_bound = factor;
 }
 
@@ -1533,9 +1533,9 @@ __global__ void cuda_update_step_bounds(
 
     if (approximation_ratio <= .25f)
     {
-        double temp = 0.f;
+        double temp = 0.;
 
-        if (actual_reduction >= 0.f)
+        if (actual_reduction >= 0.)
             temp = .5f;
         else
             temp = .5f * directive_derivative / (directive_derivative + .5f * actual_reduction);
@@ -1686,9 +1686,9 @@ __global__ void cuda_init_lambda_bounds(
 
     if (!newton_step_accepted[fit_index])
     {
-        lambdas[fit_index] = 0.f;
-        lambda_lower_bounds[fit_index] = 0.f;
-        lambda_upper_bounds[fit_index] = 0.f;
+        lambdas[fit_index] = 0.;
+        lambda_lower_bounds[fit_index] = 0.;
+        lambda_upper_bounds[fit_index] = 0.;
         return;
     }
 
@@ -1714,7 +1714,7 @@ __global__ void cuda_init_lambda_bounds(
     lambdas[fit_index] = fmaxf(lambdas[fit_index], lambda_lower_bounds[fit_index]);
     lambdas[fit_index] = fminf(lambdas[fit_index], lambda_upper_bounds[fit_index]);
 
-    if (lambdas[fit_index] == 0.f)
+    if (lambdas[fit_index] == 0.)
         lambdas[fit_index] = gradient_norm / scaled_delta_norms[fit_index];
 }
 
@@ -1739,11 +1739,11 @@ __global__ void cuda_update_lambdas(
         return;
 
     // update bounds
-    if (phis[fit_index] > 0.f)
+    if (phis[fit_index] > 0.)
         lambda_lower_bounds[fit_index]
             = fmaxf(lambda_lower_bounds[fit_index], lambdas[fit_index]);
 
-    if (phis[fit_index] < 0.f)
+    if (phis[fit_index] < 0.)
         lambda_upper_bounds[fit_index]
             = fminf(lambda_upper_bounds[fit_index], lambdas[fit_index]);
 
@@ -1802,7 +1802,7 @@ __global__ void cuda_calc_approximation_quality(
         = derivatives_delta_norm * derivatives_delta_norm / prev_chi_square;
 
     double summand2
-        = 2.f
+        = 2.
         * lambda
         * scaled_delta_norm
         * scaled_delta_norm
@@ -1810,7 +1810,7 @@ __global__ void cuda_calc_approximation_quality(
 
     predicted_reduction = summand1 + summand2;
 
-    directive_derivative = -summand1 - summand2 / 2.f;
+    directive_derivative = -summand1 - summand2 / 2.;
 
     actual_reduction = -1.;
 
