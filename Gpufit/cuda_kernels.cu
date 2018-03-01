@@ -1798,6 +1798,8 @@ __global__ void cuda_calc_approximation_quality(
     double const derivatives_delta_norm
         = calc_euclidian_norm(n_points, derivatives_delta);
 
+    delete[] derivatives_delta;
+
     double const summand1
         = derivatives_delta_norm * derivatives_delta_norm / prev_chi_square;
 
