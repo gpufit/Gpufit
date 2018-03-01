@@ -14,7 +14,7 @@ __device__ void calculate_ramsey_var_p(
     std::size_t const user_info_size)
 {
 	double * user_info_double = (double*)user_info;
-    double x = 0.0f;
+    double x = 0.;
     if (!user_info_double)
     {
         x = point_index;
@@ -36,7 +36,7 @@ __device__ void calculate_ramsey_var_p(
 	// parameters: [A1 A2 c f1 f2 p t2star x1 x2] exp(-(x./t2star)^p)*(A1*cos(2*pi*f1*(x - x1)) + A2*cos(2*pi*f2*(x-x2))) + c
 	double const * p = parameters;
 	
-    double const pi = 3.14159f;
+    double const pi = 3.14159;
     double const t2arg = pow(x / p[6], p[5]);
     double const ex = exp(-t2arg);
     double const phasearg1 = 2. * pi*p[3] * (x - p[7]);
@@ -57,7 +57,7 @@ __device__ void calculate_ramsey_var_p(
     current_derivative[2 * n_points] = 1.;
     current_derivative[3 * n_points] = -p[0] * 2. * pi*(x - p[7])*ex*sin1;
     current_derivative[4 * n_points] = -p[1] * 2. * pi*(x - p[8])*ex*sin2;
-    current_derivative[5 * n_points] = -log(x / p[6] + 0.000001f)*ex*t2arg*(p[0] * cos1 + p[1] * cos2);
+    current_derivative[5 * n_points] = -log(x / p[6] + 0.000001)*ex*t2arg*(p[0] * cos1 + p[1] * cos2);
     current_derivative[6 * n_points] = p[5] * 1. / (p[6] * p[6])*x*ex*pow(x / p[6], p[5] - 1.)*(p[0] * cos1 + p[1] * cos2);
     current_derivative[7 * n_points] = p[0] * 2. * pi*p[3] * sin1*ex;
     current_derivative[8 * n_points] = p[1] * 2. * pi*p[4] * sin2*ex;

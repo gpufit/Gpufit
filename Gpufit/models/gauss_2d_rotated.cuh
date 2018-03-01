@@ -76,8 +76,8 @@ __device__ void calculate_gauss2drotated(
 
     // value
 
-    double const cosp6 = cosf(p[6]);
-    double const sinp6 = sinf(p[6]);
+    double const cosp6 = cos(p[6]);
+    double const sinp6 = sin(p[6]);
 
     double const arga = (point_index_x - p[1]) * cosp6 - (point_index_y - p[2]) * sinp6;
     double const argb = (point_index_x - p[1]) * sinp6 + (point_index_y - p[2]) * cosp6;

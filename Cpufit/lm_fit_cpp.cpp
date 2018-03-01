@@ -314,7 +314,7 @@ void LMFitCPP::calc_derivatives_gauss2drotated(
         {
             double const arga = ((x - x0) * rot_cos) - ((y - y0) * rot_sin);
             double const argb = ((x - x0) * rot_sin) + ((y - y0) * rot_cos);
-            double const ex = exp((-0.5f) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
+            double const ex = exp((-0.5) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
 
             derivatives[0 * info_.n_points_ + y*fit_size_x + x]
                 = ex;
@@ -329,7 +329,7 @@ void LMFitCPP::calc_derivatives_gauss2drotated(
             derivatives[5 * info_.n_points_ + y*fit_size_x + x]
                 = 1;
             derivatives[6 * info_.n_points_ + y*fit_size_x + x]
-                = ex * amplitude * arga * argb * (1.0f / (sig_x*sig_x) - 1.0f / (sig_y*sig_y));
+                = ex * amplitude * arga * argb * (1.0 / (sig_x*sig_x) - 1.0 / (sig_y*sig_y));
         }
 }
 
@@ -429,7 +429,7 @@ void LMFitCPP::calc_derivatives_linear1d(
 void LMFitCPP::calc_derivatives_fletcher_powell_helix(
     std::vector<double> & derivatives)
 {
-    double const pi = 3.14159f;
+    double const pi = 3.14159;
 
     double const * p = parameters_;
 
@@ -495,7 +495,7 @@ void LMFitCPP::calc_derivatives_ramsey_var_p(
         // parameters: [A1 A2 c f1 f2 p t2star x1 x2] exp(-(x./t2star)^p)*(A1*cos(2*pi*f1*(x - x1)) + A2*cos(2*pi*f2*(x-x2))) + c
         double const * p = parameters_;
 
-        double const pi = 3.14159f;
+        double const pi = 3.14159;
         double const t2arg = pow(x / p[6], p[5]);
         double const ex = exp(-t2arg);
         double const phasearg1 = 2. * pi*p[3] * (x - p[7]);
@@ -512,7 +512,7 @@ void LMFitCPP::calc_derivatives_ramsey_var_p(
         current_derivative[2 * info_.n_points_] = 1.;
         current_derivative[3 * info_.n_points_] = -p[0] * 2. * pi*(x - p[7])*ex*sin1;
         current_derivative[4 * info_.n_points_] = -p[1] * 2. * pi*(x - p[8])*ex*sin2;
-        current_derivative[5 * info_.n_points_] = -log(x / p[6] + 0.000001f)*ex*t2arg*(p[0] * cos1 + p[1] * cos2);
+        current_derivative[5 * info_.n_points_] = -log(x / p[6] + 0.000001)*ex*t2arg*(p[0] * cos1 + p[1] * cos2);
         current_derivative[6 * info_.n_points_] = p[5] * 1. / (p[6] * p[6])*x*ex*pow(x / p[6], p[5] - 1.)*(p[0] * cos1 + p[1] * cos2);
         current_derivative[7 * info_.n_points_] = p[0] * 2. * pi*p[3] * sin1*ex;
         current_derivative[8 * info_.n_points_] = p[1] * 2. * pi*p[4] * sin2*ex;
@@ -600,7 +600,7 @@ void LMFitCPP::calc_values_gauss2drotated(std::vector<double>& gaussian)
             double argb = ((ix - x0) * rot_sin) + ((iy - y0) * rot_cos);
 
             double ex
-                = exp((-0.5f) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
+                = exp((-0.5) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
 
             gaussian[pixel_index] = amplitude * ex + background;
         }
@@ -662,18 +662,18 @@ void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<double>& values)
 {
     double const * p = parameters_;
 
-    double const pi = 3.14159f;
+    double const pi = 3.14159;
 
     double theta = 0.;
 
     if (0. < p[0])
-        theta = .5f * atan(p[1] / p[0]) / pi;
+        theta = .5 * atan(p[1] / p[0]) / pi;
     else if (p[0] < 0.)
-        theta = .5f * atan(p[1] / p[0]) / pi + .5f;
+        theta = .5 * atan(p[1] / p[0]) / pi + .5;
     else if (0. < p[1])
-        theta = .25f;
+        theta = .25;
     else if (p[1] < 0.)
-        theta = -.25f;
+        theta = -.25;
     else
         theta = 0.;
 
@@ -720,7 +720,7 @@ void LMFitCPP::calc_values_ramsey_var_p(std::vector<double>& values)
         // parameters: [A1 A2 c f1 f2 p t2star x1 x2] exp(-(x./t2star)^p)*(A1*cos(2*pi*f1*(x - x1)) + A2*cos(2*pi*f2*(x-x2))) + c
         double const * p = parameters_;
 
-        double const pi = 3.14159f;
+        double const pi = 3.14159;
         double const t2arg = pow(x / p[6], p[5]);
         double const ex = exp(-t2arg);
         double const phasearg1 = 2. * pi*p[3] * (x - p[7]);
@@ -1055,34 +1055,34 @@ void LMFitCPP::update_step_bound()
 
     double const scaled_delta_norm = calc_euclidian_norm(scaled_delta);
 
-    if (approximation_ratio_ <= .25f)
+    if (approximation_ratio_ <= .25)
     {
         double temp = 0.;
 
         if (actual_reduction_ >= 0.)
         {
-            temp = .5f;
+            temp = .5;
         }
         else
         {
-            temp = .5f * directive_derivative_ / (directive_derivative_ + .5f * actual_reduction_);
+            temp = .5 * directive_derivative_ / (directive_derivative_ + .5 * actual_reduction_);
         }
 
-        if (.1f * std::sqrt(*chi_square_) >= std::sqrt(prev_chi_square_) || temp < .1f)
+        if (.1 * std::sqrt(*chi_square_) >= std::sqrt(prev_chi_square_) || temp < .1)
         {
-            temp = .1f;
+            temp = .1;
         }
 
 
-        step_bound_ = temp * std::min(step_bound_, scaled_delta_norm / .1f);
+        step_bound_ = temp * std::min(step_bound_, scaled_delta_norm / .1);
         lambda_ /= temp;
     }
     else
     {
-        if (lambda_ == 0. || approximation_ratio_ >= .75f)
+        if (lambda_ == 0. || approximation_ratio_ >= .75)
         {
-            step_bound_ = scaled_delta_norm / .5f;
-            lambda_ = .5f * lambda_;
+            step_bound_ = scaled_delta_norm / .5;
+            lambda_ = .5 * lambda_;
         }
     }
 }
@@ -1121,10 +1121,10 @@ void LMFitCPP::initialize_lambda_bounds()
 void LMFitCPP::update_lambda()
 {
     // update bounds
-    if (phi_ > .0f)
+    if (phi_ > .0)
         lambda_lower_bound_ = std::max(lambda_lower_bound_, lambda_);
 
-    if (phi_ < .0f)
+    if (phi_ < .0)
         lambda_upper_bound_ = std::min(lambda_upper_bound_, lambda_);
 
     // update lambda
@@ -1279,7 +1279,7 @@ void LMFitCPP::run()
         /**/ *(output_iteration_++) = iteration;                                        /**/
         ////////////////////////////////////////////////////////////////////////////////////
 
-        if (phi_ > .1f * step_bound_)
+        if (phi_ > .1 * step_bound_)
         {
             initialize_lambda_bounds();
 
@@ -1320,7 +1320,7 @@ void LMFitCPP::run()
 
             int iter_lambda = 0;
 
-            while (std::abs(phi_) > .1f * step_bound_ && iter_lambda < 10)
+            while (std::abs(phi_) > .1 * step_bound_ && iter_lambda < 10)
             {
                 update_lambda();
 

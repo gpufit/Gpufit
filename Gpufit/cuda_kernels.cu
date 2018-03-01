@@ -259,7 +259,7 @@ __global__ void cuda_complete_euclidian_norms(
 
     sum_subtotals(norms, n_blocks_per_fit, index, n_fits * n_parameters);
 
-    norms[index] = sqrtf(norms[index]);
+    norms[index] = std::sqrt(norms[index]);
 }
 
 
@@ -383,8 +383,8 @@ __global__ void cuda_check_fit_improvement(
         return;
 
     bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.;
-    bool const chi_square_increased = (chi_squares[index] >= prev_chi_squares[index]);
-    if (prev_chi_squares_initialized && chi_square_increased)
+    bool const chi_square_decreased = (chi_squares[index] < prev_chi_squares[index]);
+    if (prev_chi_squares_initialized && !chi_square_decreased)
     {
         iteration_failed[index] = 1;
     }
@@ -893,7 +893,7 @@ __global__ void cuda_calc_scaling_vectors(
 
     // adaptive scaling
     scaling_vector[parameter_index]
-        = fmaxf(scaling_vector[parameter_index], sqrt(hessian[diagonal_index]));
+        = max(scaling_vector[parameter_index], sqrt(hessian[diagonal_index]));
 
     // continuous scaling
     //scaling_vector[parameter_index] = hessian[diagonal_index];
@@ -1165,7 +1165,7 @@ __global__ void cuda_check_for_convergence(
 
     int const fit_found
         = abs(chi_squares[fit_index] - prev_chi_squares[fit_index])
-        < tolerance * fmaxf(1, chi_squares[fit_index]);
+        < tolerance * max(1., chi_squares[fit_index]);
 
     int const max_n_iterations_reached = iteration == max_n_iterations - 1;
 
@@ -1502,7 +1502,7 @@ __global__ void cuda_adapt_step_bounds(
     double & step_bound = step_bounds[fit_index];
     double const & scaled_delta_norm = scaled_delta_norms[fit_index];
 
-    step_bound = fminf(step_bound, scaled_delta_norm);
+    step_bound = min(step_bound, scaled_delta_norm);
 }
 
 __global__ void cuda_update_step_bounds(
@@ -1531,27 +1531,27 @@ __global__ void cuda_update_step_bounds(
     double const & prev_chi_square = prev_chi_squares[fit_index];
     double const & scaled_delta_norm = scaled_delta_norms[fit_index];
 
-    if (approximation_ratio <= .25f)
+    if (approximation_ratio <= .25)
     {
         double temp = 0.;
 
         if (actual_reduction >= 0.)
-            temp = .5f;
+            temp = .5;
         else
-            temp = .5f * directive_derivative / (directive_derivative + .5f * actual_reduction);
+            temp = .5 * directive_derivative / (directive_derivative + .5 * actual_reduction);
 
-        if (.1f * sqrtf(chi_square) >= sqrtf(prev_chi_square) || temp < .1f)
-            temp = .1f;
+        if (.1 * std::sqrt(chi_square) >= std::sqrt(prev_chi_square) || temp < .1)
+            temp = .1;
 
-        step_bound = temp * fminf(step_bound, scaled_delta_norm / .1f);
+        step_bound = temp * min(step_bound, scaled_delta_norm / .1);
         lambda /= temp;
     }
     else
     {
-        if (lambda == 0. || approximation_ratio >= .75f)
+        if (lambda == 0. || approximation_ratio >= .75)
         {
-            step_bound = scaled_delta_norm / .5f;
-            lambda = .5f * lambda;
+            step_bound = scaled_delta_norm / .5;
+            lambda = .5 * lambda;
         }
     }
 }
@@ -1635,7 +1635,7 @@ __global__ void cuda_check_phi(
     double const & step_bound = step_bounds[fit_index];
 
     newton_step_accepted[fit_index]
-        = int(phi > .1f * step_bound);
+        = int(phi > .1 * step_bound);
 }
 
 __global__ void cuda_check_abs_phi(
@@ -1658,7 +1658,7 @@ __global__ void cuda_check_abs_phi(
     double const & step_bound = step_bounds[fit_index];
 
     lambda_accepted[fit_index]
-        = int(abs(phi) <= .1f * step_bound);
+        = int(abs(phi) <= .1 * step_bound);
 }
 
 __global__ void cuda_init_lambda_bounds(
@@ -1678,7 +1678,7 @@ __global__ void cuda_init_lambda_bounds(
 {
     int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    //if (phis[fit_index] <= .1f * step_bounds[fit_index])
+    //if (phis[fit_index] <= .1 * step_bounds[fit_index])
     //    return;
 
     if (fit_index >= n_fits || finished[fit_index])
@@ -1711,8 +1711,8 @@ __global__ void cuda_init_lambda_bounds(
     lambda_upper_bounds[fit_index] = gradient_norm / step_bounds[fit_index];
     
     // check lambda bounds
-    lambdas[fit_index] = fmaxf(lambdas[fit_index], lambda_lower_bounds[fit_index]);
-    lambdas[fit_index] = fminf(lambdas[fit_index], lambda_upper_bounds[fit_index]);
+    lambdas[fit_index] = max(lambdas[fit_index], lambda_lower_bounds[fit_index]);
+    lambdas[fit_index] = min(lambdas[fit_index], lambda_upper_bounds[fit_index]);
 
     if (lambdas[fit_index] == 0.)
         lambdas[fit_index] = gradient_norm / scaled_delta_norms[fit_index];
@@ -1741,11 +1741,11 @@ __global__ void cuda_update_lambdas(
     // update bounds
     if (phis[fit_index] > 0.)
         lambda_lower_bounds[fit_index]
-            = fmaxf(lambda_lower_bounds[fit_index], lambdas[fit_index]);
+            = max(lambda_lower_bounds[fit_index], lambdas[fit_index]);
 
     if (phis[fit_index] < 0.)
         lambda_upper_bounds[fit_index]
-            = fminf(lambda_upper_bounds[fit_index], lambdas[fit_index]);
+            = min(lambda_upper_bounds[fit_index], lambdas[fit_index]);
 
     // update lambda
     lambdas[fit_index]
@@ -1756,7 +1756,7 @@ __global__ void cuda_update_lambdas(
 
     // check bounds
     lambdas[fit_index]
-        = fmaxf(lambda_lower_bounds[fit_index], lambdas[fit_index]);
+        = max(lambda_lower_bounds[fit_index], lambdas[fit_index]);
 }
 
 __global__ void cuda_calc_approximation_quality(

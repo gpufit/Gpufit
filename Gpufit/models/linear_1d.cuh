@@ -86,7 +86,7 @@ __device__ void calculate_linear1d(
     // indices
 
     double * user_info_float = (double*) user_info;
-    double x = 0.0f;
+    double x = 0.0;
     if (!user_info_float)
     {
         x = point_index;
