@@ -165,8 +165,7 @@ void gauss_fit_2d_example()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_number_iterations.data(),
-            0
+            output_number_iterations.data()
         );
 	std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
 

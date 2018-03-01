@@ -34,8 +34,7 @@ VISIBLE int gpufit
     double * output_parameters,
     int * output_states,
     double * output_chi_squares,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
 ) ;
 
 VISIBLE char const * gpufit_get_last_error() ;

@@ -77,8 +77,7 @@ void gauss_fit_1d()
             output_parameters.data(),
             &output_states,
             &output_chi_square,
-            &output_n_iterations,
-            0
+            &output_n_iterations
         );
 
     BOOST_CHECK(status == 0);
@@ -170,8 +169,7 @@ void gauss_fit_1d_custom_x()
             output_parameters.data(),
             output_states.data(),
             output_chi_square.data(),
-            output_n_iterations.data(),
-            0
+            output_n_iterations.data()
         );
     // check gpufit status
     BOOST_CHECK(status == 0);

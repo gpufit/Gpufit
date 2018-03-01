@@ -22,8 +22,7 @@ int gpufit
     double * output_parameters,
     int * output_states,
     double * output_chi_squares,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
 )
 try
 {
@@ -42,8 +41,7 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations,
-        lambda_info);
+        output_n_iterations);
 
     fi.fit(static_cast<ModelID>(model_id));
 
@@ -118,7 +116,6 @@ int gpufit_portable_interface(int argc, void *argv[])
         (double *) argv[12],
         (int *) argv[13],
         (double *) argv[14],
-        (int *) argv[15],
-        (double *)argv[16]);
+        (int *) argv[15]);
 
 }

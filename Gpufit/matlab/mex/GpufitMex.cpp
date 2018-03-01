@@ -34,7 +34,7 @@ void mexFunction(
 
     // expects a certain number of input (nrhs) and output (nlhs) arguments
     expected_nrhs = 13;
-    expected_nlhs = 5;
+    expected_nlhs = 4;
 
     if (nrhs != expected_nrhs)
     {
@@ -103,12 +103,6 @@ void mexFunction(
     output_n_iterations = (int*)mxGetData(mx_n_iterations);
     plhs[3] = mx_n_iterations;
 
-    double * lambda_info;
-    mxArray * mx_info;
-    mx_info = mxCreateNumericMatrix(1, n_fits * 10 * 1000, mxDOUBLE_CLASS, mxREAL);
-    lambda_info = (double*)mxGetData(mx_info);
-    plhs[4] = mx_info;
-
 	// call to gpufit
     int const status
             = gpufit
@@ -128,8 +122,7 @@ void mexFunction(
                 output_parameters,
                 output_states,
                 output_chi_squares,
-                output_n_iterations,
-                lambda_info
+                output_n_iterations
             ) ;
 
 	// check status

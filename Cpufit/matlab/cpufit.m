@@ -1,4 +1,4 @@
-function [parameters, states, chi_squares, n_iterations, time, lambda_info_cminpack]...
+function [parameters, states, chi_squares, n_iterations, time]...
     = cpufit(data, weights, model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
 % Wrapper around the Cpufit mex file.
 %
@@ -107,7 +107,7 @@ end
              
 %% run Cpufit taking the time
 tic;
-[parameters, states, chi_squares, n_iterations, lambda_info_cminpack] ...
+[parameters, states, chi_squares, n_iterations] ...
     = CpufitMex(data, weights, n_fits, n_points, tolerance, max_n_iterations, estimator_id, initial_parameters, parameters_to_fit, model_id, n_parameters, user_info, user_info_size);
     
 time = toc;

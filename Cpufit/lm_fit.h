@@ -18,8 +18,7 @@ public:
         double * output_parameters,
         int * output_states,
         double * output_chi_squares,
-        int * output_n_iterations,
-        double * lambda_info);
+        int * output_n_iterations);
 
     virtual ~LMFit();
 
@@ -36,7 +35,6 @@ private:
     int * output_states_;
     double * output_chi_squares_;
     int * output_n_iterations_;
-    double * lambda_info_;
 
     Info const & info_;
 };
@@ -56,8 +54,7 @@ public:
         double * output_parameters,
         int * output_states,
         double * output_chi_squares,
-        int * output_n_iterations,
-        double * lambda_info);
+        int * output_n_iterations);
 
     virtual ~LMFitCPP()
     {};
@@ -138,18 +135,6 @@ private:
     int * state_;
     double * chi_square_;
     int * n_iterations_;
-
-    double * lambda_info_;
-    double * output_lambda_;
-    double * output_lower_bound_;
-    double * output_upper_bound_;
-    double * output_step_bound_;
-    double * output_predicted_reduction_;
-    double * output_actual_reduction_;
-    double * output_directive_derivative_;
-    double * output_phi_;
-    double * output_chi_;
-    double * output_iteration_;
 
     std::vector<double> prev_parameters_;
     Info const & info_;

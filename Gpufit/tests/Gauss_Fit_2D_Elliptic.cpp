@@ -72,8 +72,7 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Elliptic )
                 output_parameters.data(),
                 &output_state,
                 &output_chi_square,
-                &output_n_iterations,
-                0
+                &output_n_iterations
             ) ;
 
     BOOST_CHECK(status == 0);

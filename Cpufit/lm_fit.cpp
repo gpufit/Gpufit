@@ -16,8 +16,7 @@ LMFit::LMFit(
     double * output_parameters,
     int * output_states,
     double * output_chi_squares,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
     ) :
     data_(data),
     weights_(weights),
@@ -28,7 +27,6 @@ LMFit::LMFit(
     output_states_(output_states),
     output_chi_squares_(output_chi_squares),
     output_n_iterations_(output_n_iterations),
-    lambda_info_(lambda_info),
     info_(info)
 {}
 
@@ -52,8 +50,7 @@ void LMFit::run(double const tolerance)
             output_parameters_ + fit_index*info_.n_parameters_,
             output_states_ + fit_index,
             output_chi_squares_ + fit_index,
-            output_n_iterations_ + fit_index,
-            lambda_info_ + fit_index * 10 * 1000);
+            output_n_iterations_ + fit_index);
 
         gf_cpp.run();
     }

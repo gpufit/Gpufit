@@ -59,8 +59,7 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
             output_parameters.data(),
             & output_states,
             & output_chi_squares,
-            & output_n_iterations,
-            0
+            & output_n_iterations
         ) ;
 
     BOOST_CHECK( status == 0 ) ;
@@ -89,8 +88,7 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 			output_parameters.data(),
 			&output_states,
 			&output_chi_squares,
-            &output_n_iterations,
-            0
+            &output_n_iterations
 		);
 
 	BOOST_CHECK(status == 0);

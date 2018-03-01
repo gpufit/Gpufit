@@ -18,8 +18,7 @@ LMFitCPP::LMFitCPP(
     double * output_parameters,
     int * output_state,
     double * output_chi_square,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
     ) :
     fit_index_(fit_index),
     data_(data),
@@ -46,18 +45,7 @@ LMFitCPP::LMFitCPP(
     parameters_(output_parameters),
     state_(output_state),
     chi_square_(output_chi_square),
-    n_iterations_(output_n_iterations),
-    lambda_info_(lambda_info),
-    output_lambda_(lambda_info),
-    output_lower_bound_(lambda_info + 1000),
-    output_upper_bound_(lambda_info + 2000),
-    output_step_bound_(lambda_info + 3000),
-    output_predicted_reduction_(lambda_info + 4000),
-    output_actual_reduction_(lambda_info + 5000),
-    output_directive_derivative_(lambda_info + 6000),
-    output_phi_(lambda_info + 7000),
-    output_chi_(lambda_info + 8000),
-    output_iteration_(lambda_info + 9000)
+    n_iterations_(output_n_iterations)
 {}
 
 template<class T>
@@ -1212,19 +1200,6 @@ void LMFitCPP::run()
     temp_derivatives_ = derivatives_;
     calc_coefficients();
 
-    ////////////////////////////////////////////////////////////////////
-    /**/ *(output_lambda_++) = lambda_;                             /**/
-    /**/ *(output_lower_bound_++) = 0.;                            /**/
-    /**/ *(output_upper_bound_++) = 0.;                            /**/
-    /**/ *(output_step_bound_++) = 0.;                             /**/
-    /**/ *(output_actual_reduction_++) = 0.;                       /**/
-    /**/ *(output_predicted_reduction_++) = 0.;                    /**/
-    /**/ *(output_directive_derivative_++) = 0.;                   /**/
-    /**/ *(output_chi_++) = std::sqrt(*chi_square_);                /**/
-    /**/ *(output_phi_++) = 0.;                                    /**/
-    /**/ *(output_iteration_++) = -1;                               /**/
-    ////////////////////////////////////////////////////////////////////
-
     prev_chi_square_ = (*chi_square_);
         
     for (int iteration = 0; (*state_) == 0; iteration++)
@@ -1234,19 +1209,6 @@ void LMFitCPP::run()
         if (iteration == 0)
         {
             initialize_step_bound();
-
-            ////////////////////////////////////////////////////////
-            /**/ *(output_lambda_++) = lambda_;                 /**/
-            /**/ *(output_lower_bound_++) = 0.;                /**/
-            /**/ *(output_upper_bound_++) = 0.;                /**/
-            /**/ *(output_step_bound_++) = step_bound_;         /**/
-            /**/ *(output_actual_reduction_++) = 0.;           /**/
-            /**/ *(output_predicted_reduction_++) = 0.;        /**/
-            /**/ *(output_directive_derivative_++) = 0.;       /**/
-            /**/ *(output_chi_++) = std::sqrt(*chi_square_);    /**/
-            /**/ *(output_phi_++) = 0.;                        /**/
-            /**/ *(output_iteration_++) = iteration;            /**/
-            ////////////////////////////////////////////////////////
         }
 
         decompose_hessian_LUP(decomposed_hessian_, hessian_);
@@ -1266,35 +1228,9 @@ void LMFitCPP::run()
         double const scaled_delta_norm = calc_euclidian_norm(scaled_delta);
         phi_derivative_ *= step_bound_ / scaled_delta_norm;
 
-        ////////////////////////////////////////////////////////////////////////////////////
-        /**/ *(output_lambda_++) = lambda_;                                             /**/
-        /**/ *(output_lower_bound_++) = 0.;                                            /**/
-        /**/ *(output_upper_bound_++) = 0.;                                            /**/
-        /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-        /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-        /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-        /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-        /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-        /**/ *(output_phi_++) = phi_;                                                   /**/
-        /**/ *(output_iteration_++) = iteration;                                        /**/
-        ////////////////////////////////////////////////////////////////////////////////////
-
         if (phi_ > .1 * step_bound_)
         {
             initialize_lambda_bounds();
-
-            ////////////////////////////////////////////////////////////////////////////////////
-            /**/ *(output_lambda_++) = lambda_;                                             /**/
-            /**/ *(output_lower_bound_++) = lambda_lower_bound_;                            /**/
-            /**/ *(output_upper_bound_++) = lambda_upper_bound_;                            /**/
-            /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-            /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-            /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-            /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-            /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-            /**/ *(output_phi_++) = phi_;                                                   /**/
-            /**/ *(output_iteration_++) = iteration;                                        /**/
-            ////////////////////////////////////////////////////////////////////////////////////
 
             modify_step_width();
 
@@ -1305,37 +1241,11 @@ void LMFitCPP::run()
             
             calc_phi();
 
-            ////////////////////////////////////////////////////////////////////////////////////
-            /**/ *(output_lambda_++) = lambda_;                                             /**/
-            /**/ *(output_lower_bound_++) = lambda_lower_bound_;                            /**/
-            /**/ *(output_upper_bound_++) = lambda_upper_bound_;                            /**/
-            /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-            /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-            /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-            /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-            /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-            /**/ *(output_phi_++) = phi_;                                                   /**/
-            /**/ *(output_iteration_++) = iteration;                                        /**/
-            ////////////////////////////////////////////////////////////////////////////////////
-
             int iter_lambda = 0;
 
             while (std::abs(phi_) > .1 * step_bound_ && iter_lambda < 10)
             {
                 update_lambda();
-
-                ////////////////////////////////////////////////////////////////////////////////////
-                /**/ *(output_lambda_++) = lambda_;                                             /**/
-                /**/ *(output_lower_bound_++) = lambda_lower_bound_;                            /**/
-                /**/ *(output_upper_bound_++) = lambda_upper_bound_;                            /**/
-                /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-                /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-                /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-                /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-                /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-                /**/ *(output_phi_++) = phi_;                                                   /**/
-                /**/ *(output_iteration_++) = iteration;                                        /**/
-                ////////////////////////////////////////////////////////////////////////////////////
 
                 modify_step_width();
 
@@ -1345,38 +1255,12 @@ void LMFitCPP::run()
 
                 calc_phi();
 
-                ////////////////////////////////////////////////////////////////////////////////////
-                /**/ *(output_lambda_++) = lambda_;                                             /**/
-                /**/ *(output_lower_bound_++) = lambda_lower_bound_;                            /**/
-                /**/ *(output_upper_bound_++) = lambda_upper_bound_;                            /**/
-                /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-                /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-                /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-                /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-                /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-                /**/ *(output_phi_++) = phi_;                                                   /**/
-                /**/ *(output_iteration_++) = iteration;                                        /**/
-                ////////////////////////////////////////////////////////////////////////////////////
-
                 iter_lambda++;
             }
         }
         else
         {
             lambda_ = 0.;
-
-            ////////////////////////////////////////////////////////////////////////////////////
-            /**/ *(output_lambda_++) = lambda_;                                             /**/
-            /**/ *(output_lower_bound_++) = *(output_lower_bound_ - 1);                     /**/
-            /**/ *(output_upper_bound_++) = *(output_upper_bound_ - 1);                     /**/
-            /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-            /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-            /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-            /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-            /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-            /**/ *(output_phi_++) = phi_;                                                   /**/
-            /**/ *(output_iteration_++) = iteration;                                        /**/
-            ////////////////////////////////////////////////////////////////////////////////////
         }
 
         if (iteration == 0)
@@ -1386,19 +1270,6 @@ void LMFitCPP::run()
                 scaled_delta[i] = delta_[i] * std::sqrt(scaling_vector_[i]);
             double const delta_norm = calc_euclidian_norm(scaled_delta);
             step_bound_ = std::min(step_bound_, delta_norm);
-
-            ////////////////////////////////////////////////////////////////////////////////////
-            /**/ *(output_lambda_++) = lambda_;                                             /**/
-            /**/ *(output_lower_bound_++) = *(output_lower_bound_ - 1);                     /**/
-            /**/ *(output_upper_bound_++) = *(output_upper_bound_ - 1);                     /**/
-            /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-            /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-            /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-            /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-            /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-            /**/ *(output_phi_++) = phi_;                                                   /**/
-            /**/ *(output_iteration_++) = iteration;                                        /**/
-            ////////////////////////////////////////////////////////////////////////////////////
         }
 
         update_parameters();
@@ -1406,54 +1277,15 @@ void LMFitCPP::run()
 		calc_model();
         calc_coefficients();
 
-        ////////////////////////////////////////////////////////////////////////////////////
-        /**/ *(output_lambda_++) = lambda_;                                             /**/
-        /**/ *(output_lower_bound_++) = *(output_lower_bound_ - 1);                     /**/
-        /**/ *(output_upper_bound_++) = *(output_upper_bound_ - 1);                     /**/
-        /**/ *(output_step_bound_++) = step_bound_;                                     /**/
-        /**/ *(output_actual_reduction_++) = *(output_actual_reduction_ - 1);           /**/
-        /**/ *(output_predicted_reduction_++) = *(output_predicted_reduction_ - 1);     /**/
-        /**/ *(output_directive_derivative_++) = *(output_directive_derivative_ - 1);   /**/
-        /**/ *(output_chi_++) = std::sqrt(*chi_square_);                                /**/
-        /**/ *(output_phi_++) = phi_;                                                   /**/
-        /**/ *(output_iteration_++) = iteration;                                        /**/
-        ////////////////////////////////////////////////////////////////////////////////////
-
         calc_approximation_quality();
 
         update_step_bound();
-
-        ////////////////////////////////////////////////////////////////////
-        /**/ *(output_lambda_++) = lambda_;                             /**/
-        /**/ *(output_lower_bound_++) = *(output_lower_bound_ - 1);     /**/
-        /**/ *(output_upper_bound_++) = *(output_upper_bound_ - 1);     /**/
-        /**/ *(output_step_bound_++) = step_bound_;                     /**/
-        /**/ *(output_actual_reduction_++) = actual_reduction_;         /**/
-        /**/ *(output_predicted_reduction_++) = predicted_reduction_;   /**/
-        /**/ *(output_directive_derivative_++) = directive_derivative_; /**/
-        /**/ *(output_chi_++) = std::sqrt(*chi_square_);                /**/
-        /**/ *(output_phi_++) = phi_;                                   /**/
-        /**/ *(output_iteration_++) = iteration;                        /**/
-        ////////////////////////////////////////////////////////////////////
 
         converged_ = check_for_convergence();
 
         evaluate_iteration(iteration);
 
         prepare_next_iteration();
-
-        ////////////////////////////////////////////////////////////////////
-        /**/ *(output_lambda_++) = lambda_;                             /**/
-        /**/ *(output_lower_bound_++) = *(output_lower_bound_ - 1);     /**/
-        /**/ *(output_upper_bound_++) = *(output_upper_bound_ - 1);     /**/
-        /**/ *(output_step_bound_++) = step_bound_;                     /**/
-        /**/ *(output_actual_reduction_++) = actual_reduction_;         /**/
-        /**/ *(output_predicted_reduction_++) = predicted_reduction_;   /**/
-        /**/ *(output_directive_derivative_++) = directive_derivative_; /**/
-        /**/ *(output_chi_++) = std::sqrt(*chi_square_);                /**/
-        /**/ *(output_phi_++) = phi_;                                   /**/
-        /**/ *(output_iteration_++) = iteration;                        /**/
-        ////////////////////////////////////////////////////////////////////
 
         if (converged_ || *state_ != FitState::CONVERGED)
         {

@@ -166,8 +166,7 @@ void perform_cpufit_gpufit_and_check(void (*func)(FitInput &))
 			cpu.parameters.data(),
 			cpu.states.data(),
 			cpu.chi_squares.data(),
-			cpu.n_iterations.data(),
-            0
+			cpu.n_iterations.data()
 		);
 
 	BOOST_CHECK(cpu_status == 0);
@@ -191,8 +190,7 @@ void perform_cpufit_gpufit_and_check(void (*func)(FitInput &))
 			gpu.parameters.data(),
 			gpu.states.data(),
 			gpu.chi_squares.data(),
-            gpu.n_iterations.data(),
-            0
+            gpu.n_iterations.data()
 		);
 
 	BOOST_CHECK(gpu_status == 0);

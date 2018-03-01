@@ -28,8 +28,8 @@ void generate_gauss_2d_rotated(std::array< double, SIZE>& values, std::array< do
         for (int point_index_x = 0; point_index_x < size_x; point_index_x++)
         {
             int const point_index = point_index_y * size_x + point_index_x;
-            double const arga = ((point_index_x - x0) * cosf(r)) - ((point_index_y - y0) * sinf(r));
-            double const argb = ((point_index_x - x0) * sinf(r)) + ((point_index_y - y0) * cosf(r));
+            double const arga = ((point_index_x - x0) * cos(r)) - ((point_index_y - y0) * sin(r));
+            double const argb = ((point_index_x - x0) * sin(r)) + ((point_index_y - y0) * cos(r));
             double const ex = exp((-0.5f) * (((arga / sx) * (arga / sx)) + ((argb / sy) * (argb / sy))));
             values[point_index] = a * ex + b;
         }
@@ -80,8 +80,7 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
                 output_parameters.data(),
                 &output_states,
                 &output_chi_square,
-                &output_n_iterations,
-                0
+                &output_n_iterations
             ) ;
 
     BOOST_CHECK(status == 0);

@@ -18,8 +18,7 @@ FitInterface::FitInterface
     double * output_parameters,
     int * output_states,
     double * output_chi_squares,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
 ) :
     data_( data ),
     weights_( weights ),
@@ -36,8 +35,7 @@ FitInterface::FitInterface
     output_states_(output_states),
     output_chi_squares_(output_chi_squares),
     output_n_iterations_(output_n_iterations),
-    n_parameters_(0),
-    lambda_info_(lambda_info)
+    n_parameters_(0)
 {}
 
 FitInterface::~FitInterface()
@@ -94,8 +92,7 @@ void FitInterface::fit(ModelID const model_id)
         output_parameters_,
         output_states_,
         output_chi_squares_,
-        output_n_iterations_,
-        lambda_info_
+        output_n_iterations_
     ) ;
     lmfit.run(tolerance_);
 }

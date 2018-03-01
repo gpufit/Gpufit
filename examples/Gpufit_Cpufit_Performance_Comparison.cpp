@@ -367,8 +367,7 @@ int main(int argc, char * argv[])
                 cpufit_parameters.data(),
                 cpufit_states.data(),
                 cpufit_chi_squares.data(),
-                cpufit_n_iterations.data(),
-                0
+                cpufit_n_iterations.data()
             );
         std::chrono::milliseconds::rep const dt_cpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 
@@ -409,8 +408,7 @@ int main(int argc, char * argv[])
                 gpufit_parameters.data(),
                 gpufit_states.data(),
                 gpufit_chi_squares.data(),
-                gpufit_n_iterations.data(),
-                0
+                gpufit_n_iterations.data()
                 );
             dt_gpufit = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t0).count();
 

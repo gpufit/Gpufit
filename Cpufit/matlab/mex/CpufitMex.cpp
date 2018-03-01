@@ -24,7 +24,7 @@ template<class T> inline bool get_scalar(const mxArray *p, T &v, const mxClassID
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
 {
     int const expected_nrhs = 13;
-    int const expected_nlhs = 5;
+    int const expected_nlhs = 4;
 
     if (nrhs != expected_nrhs)
     {
@@ -93,12 +93,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
     output_n_iterations = (int*)mxGetData(mx_n_iterations);
     plhs[3] = mx_n_iterations;
 
-    double * lambda_info;
-    mxArray * mx_info;
-    mx_info = mxCreateNumericMatrix(1, n_fits * 10 * 1000, mxDOUBLE_CLASS, mxREAL);
-    lambda_info = (double*)mxGetData(mx_info);
-    plhs[4] = mx_info;
-
 	// call to gpufit
     int const status
         = cpufit
@@ -118,8 +112,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
                 output_parameters,
                 output_states,
                 output_chi_squares,
-                output_n_iterations,
-                lambda_info
+                output_n_iterations
             ) ;
 
 	// check status

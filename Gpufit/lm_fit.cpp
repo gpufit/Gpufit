@@ -12,8 +12,7 @@ LMFit::LMFit
     double * output_parameters,
     int * output_states,
     double * output_chi_squares,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
 ) :
     data_( data ),
     weights_( weights ),
@@ -28,8 +27,7 @@ LMFit::LMFit
     chunk_size_(0),
     ichunk_(0),
     n_fits_left_(info.n_fits_),
-    parameters_to_fit_indices_(0),
-    lambda_info_(lambda_info)
+    parameters_to_fit_indices_(0)
 {}
 
 LMFit::~LMFit()
@@ -82,8 +80,7 @@ void LMFit::run(double const tolerance)
             tolerance,
             info_,
             gpu_data,
-            chunk_size_,
-            lambda_info_ + ichunk_ * info_.max_chunk_size_ * 10 * 1000);
+            chunk_size_);
 
         lmfit_cuda.run();
 

@@ -23,8 +23,7 @@ int cpufit
     double * output_parameters,
     int * output_states,
     double * output_chi_squares,
-    int * output_n_iterations,
-    double * lambda_info
+    int * output_n_iterations
 )
 try
 {
@@ -43,8 +42,7 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations,
-        lambda_info);
+        output_n_iterations);
 
     fi.fit(static_cast<ModelID>(model_id));
 
