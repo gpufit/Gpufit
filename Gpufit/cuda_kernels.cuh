@@ -108,6 +108,8 @@ __global__ void cuda_calc_scaling_vectors(
 extern __global__ void cuda_init_scaled_hessians(
     double * scaled_hessians,
     double const * hessians,
+    int const n_fits,
+    int const n_parameters,
     int const * finished,
     int const * lambda_accepted,
     int const * newton_step_accepted);
@@ -200,6 +202,16 @@ __global__ void cuda_multiply(
     int const * skip_2,
     int const * not_skip_3);
 
+__global__ void cuda_multiply_matrix_vector(
+    double * products,
+    double const * matrices,
+    double const * vectors,
+    int const n_rows,
+    int const n_cols,
+    int const n_fits_per_block,
+    int const n_blocks_per_fit,
+    int const * skip);
+
 __global__ void cuda_initialize_step_bounds(
     double * step_bounds,
     double * scaled_parameters,
@@ -231,12 +243,14 @@ __global__ void cuda_calc_phis(
     double * inverted_hessians,
     double * scaled_deltas,
     double * scaled_delta_norms,
+    double * temp_vectors,
     double const * scaling_vectors,
     double const * step_bounds,
     int const n_parameters,
     int const * finished,
     int const * lambda_accepted,
-    int const * newton_step_accepted);
+    int const * newton_step_accepted,
+    int const n_fits_per_block);
 
 __global__ void cuda_adapt_phi_derivatives(
     double * phi_derivatives,
@@ -263,6 +277,7 @@ __global__ void cuda_init_lambda_bounds(
     double * lambdas,
     double * lambda_lower_bounds,
     double * lambda_upper_bounds,
+    double * scaled_gradients,
     double const * scaled_delta_norms,
     double const * phis,
     double const * phi_derivatives,
@@ -291,15 +306,13 @@ __global__ void cuda_calc_approximation_quality(
     double * actual_reductions,
     double * directive_derivatives,
     double * approximation_ratios,
-    double const * derivatives,
-    double const * deltas,
+    double * derivatives_deltas,
     double const * scaled_delta_norms,
     double const * chi_squares,
     double const * prev_chi_squares,
     double const * lambdas,
     int const * finished,
     int const n_fits,
-    int const n_points,
-    int const n_parameters);
+    int const n_points);
 
 #endif

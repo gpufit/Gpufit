@@ -38,6 +38,7 @@ GPUData::GPUData(Info const & info) :
     scaled_delta_norms_( info_.max_chunk_size_ ),
     phis_( info_.max_chunk_size_ ),
     phi_derivatives_( info_.max_chunk_size_ ),
+    derivatives_delta_(info_.max_chunk_size_ * info_.n_points_),
 
     states_( info_.max_chunk_size_ ),
     finished_( info_.max_chunk_size_ ),

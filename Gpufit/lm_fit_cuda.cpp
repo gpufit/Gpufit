@@ -57,9 +57,7 @@ void LMFitCUDA::run()
         check_phi();
         initialize_lambda_bounds();
 
-        calc_scaling_vectors();
         scale_hessians();
-
         decompose_hessians_LUP(gpu_data_.scaled_hessians_);
         solve_equation_system();
         invert_hessians();
@@ -71,24 +69,17 @@ void LMFitCUDA::run()
             check_abs_phi();
             check_all_lambdas();
 
-            std::vector<int> lambda_accepted(1);
-            std::vector<double> phi(1);
-            std::vector<double> lambda(1);
-            gpu_data_.phis_.copy(1, phi.data());
-            gpu_data_.lambdas_.copy(1, lambda.data());
-            gpu_data_.lambda_accepted_.copy(1, lambda_accepted.data());
-
             if (all_lambdas_accepted_)
                 break;
 
             update_lambdas();
 
-            calc_scaling_vectors();
             scale_hessians();
 
             decompose_hessians_LUP(gpu_data_.scaled_hessians_);
             solve_equation_system();
             invert_hessians();
+
 
             calc_phi();
         }
@@ -106,8 +97,10 @@ void LMFitCUDA::run()
         calc_chi_squares();
         calc_gradients();
         calc_hessians();
+        calc_scaling_vectors();
 
         calc_approximation_quality();
+
         update_step_bounds();
 
         // check which fits have converged

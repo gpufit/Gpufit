@@ -322,12 +322,16 @@ void LMFitCUDA::scale_hessians()
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
 
-    threads.x = info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_;
-    blocks.x = n_fits_;
+    int const abs_size = info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ * n_fits_;
+
+    threads.x = std::min(abs_size, 256);
+    blocks.x = int(std::ceil(double(abs_size) / double(threads.x)));
 
     cuda_init_scaled_hessians<<< blocks, threads >>>(
         gpu_data_.scaled_hessians_,
         gpu_data_.hessians_,
+        n_fits_,
+        info_.n_parameters_,
         gpu_data_.finished_,
         gpu_data_.lambda_accepted_,
         gpu_data_.newton_step_accepted_);
@@ -501,8 +505,8 @@ void LMFitCUDA::calc_phi()
         gpu_data_.newton_step_accepted_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 
-    threads.x = info_.n_parameters_;
-    blocks.x = n_fits_;
+    threads.x = info_.n_parameters_ * info_.n_fits_per_block_;
+    blocks.x = n_fits_ / info_.n_fits_per_block_;
 
     cuda_calc_phis<<< blocks, threads >>>(
         gpu_data_.phis_,
@@ -510,12 +514,14 @@ void LMFitCUDA::calc_phi()
         gpu_data_.inverted_hessians_,
         gpu_data_.scaled_deltas_,
         gpu_data_.scaled_delta_norms_,
+        gpu_data_.derivatives_delta_,
         gpu_data_.scaling_vectors_,
         gpu_data_.step_bounds_,
         info_.n_parameters_,
         gpu_data_.finished_,
         gpu_data_.lambda_accepted_,
-        gpu_data_.newton_step_accepted_);
+        gpu_data_.newton_step_accepted_,
+        info_.n_fits_per_block_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
@@ -582,6 +588,7 @@ void LMFitCUDA::initialize_lambda_bounds()
         gpu_data_.lambdas_,
         gpu_data_.lambda_lower_bounds_,
         gpu_data_.lambda_upper_bounds_,
+        gpu_data_.derivatives_delta_,
         gpu_data_.scaled_delta_norms_,
         gpu_data_.phis_,
         gpu_data_.phi_derivatives_,
@@ -622,6 +629,22 @@ void LMFitCUDA::calc_approximation_quality()
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
 
+    threads.x = info_.n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
+    if (info_.n_blocks_per_fit_ > 1)
+        threads.x += info_.n_points_ % threads.x;
+    blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
+
+    cuda_multiply_matrix_vector<<< blocks, threads>>>(
+        gpu_data_.derivatives_delta_,
+        gpu_data_.temp_derivatives_,
+        gpu_data_.deltas_,
+        info_.n_points_,
+        info_.n_parameters_,
+        info_.n_fits_per_block_,
+        info_.n_blocks_per_fit_,
+        gpu_data_.finished_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
+
     threads.x = std::min(n_fits_, 256);
     blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
 
@@ -630,15 +653,13 @@ void LMFitCUDA::calc_approximation_quality()
         gpu_data_.actual_reductions_,
         gpu_data_.directive_derivatives_,
         gpu_data_.approximation_ratios_,
-        gpu_data_.temp_derivatives_,
-        gpu_data_.deltas_,
+        gpu_data_.derivatives_delta_,
         gpu_data_.scaled_delta_norms_,
         gpu_data_.chi_squares_,
         gpu_data_.prev_chi_squares_,
         gpu_data_.lambdas_,
         gpu_data_.finished_,
         n_fits_,
-        info_.n_points_,
-        info_.n_parameters_);
+        info_.n_points_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
