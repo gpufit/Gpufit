@@ -41,11 +41,11 @@
 */
 
 __device__ void calculate_brown_dennis(
-    double const * parameters,
+    float const * parameters,
     int const n_fits,
     int const n_points,
-    double * value,
-    double * derivative,
+    float * value,
+    float * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -54,22 +54,22 @@ __device__ void calculate_brown_dennis(
 {
     // indices
 
-    double const x = (double)point_index / 5.;
+    float const x = (float)point_index / 5.;
 
     // parameters
 
-    double const * p = parameters;
+    float const * p = parameters;
     
     // value
 
-    double const arg1 = p[0] + p[1] * x - expf(x);
-    double const arg2 = p[2] + p[3] * sin(x) - cos(x);
+    float const arg1 = p[0] + p[1] * x - expf(x);
+    float const arg2 = p[2] + p[3] * sin(x) - cos(x);
 
     value[point_index] = arg1*arg1 + arg2*arg2;
 
     // derivative
 
-    double * current_derivative = derivative + point_index;
+    float * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points] = 2. * arg1;
     current_derivative[1 * n_points] = 2. * x * arg1;

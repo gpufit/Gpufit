@@ -39,11 +39,11 @@
 */
 
 __device__ void calculate_chi_square_mle(
-    volatile double * chi_square,
+    volatile float * chi_square,
     int const point_index,
-    double const * data,
-    double const * value,
-    double const * weight,
+    float const * data,
+    float const * value,
+    float const * weight,
     int * state,
     char * user_info,
     std::size_t const user_info_size)
@@ -53,7 +53,7 @@ __device__ void calculate_chi_square_mle(
         *state = 3;
     }
 
-    double const deviation = value[point_index] - data[point_index];
+    float const deviation = value[point_index] - data[point_index];
 
     if (data[point_index] != 0)
     {
@@ -110,10 +110,10 @@ __device__ void calculate_hessian_mle(
     int const point_index,
     int const parameter_index_i,
     int const parameter_index_j,
-    double const * data,
-    double const * value,
-    double const * derivative,
-    double const * weight,
+    float const * data,
+    float const * value,
+    float const * derivative,
+    float const * weight,
     char * user_info,
     std::size_t const user_info_size)
 {
@@ -161,13 +161,13 @@ __device__ void calculate_hessian_mle(
 */
 
 __device__ void calculate_gradient_mle(
-    volatile double * gradient,
+    volatile float * gradient,
     int const point_index,
     int const parameter_index,
-    double const * data,
-    double const * value,
-    double const * derivative,
-    double const * weight,
+    float const * data,
+    float const * value,
+    float const * derivative,
+    float const * weight,
     char * user_info,
     std::size_t const user_info_size)
 {

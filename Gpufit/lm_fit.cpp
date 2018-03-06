@@ -3,15 +3,15 @@
 
 LMFit::LMFit
 (
-    double const * const data,
-    double const * const weights,
+    float const * const data,
+    float const * const weights,
     Info & info,
-    double const * const initial_parameters,
+    float const * const initial_parameters,
     int const * const parameters_to_fit,
     char * const user_info,
-    double * output_parameters,
+    float * output_parameters,
     int * output_states,
-    double * output_chi_squares,
+    float * output_chi_squares,
     int * output_n_iterations
 ) :
     data_( data ),
@@ -54,7 +54,7 @@ void LMFit::get_results(GPUData const & gpu_data, int const n_fits)
     output_n_iterations_ = gpu_data.n_iterations_.copy( n_fits, output_n_iterations_ ) ;
 }
 
-void LMFit::run(double const tolerance)
+void LMFit::run(float const tolerance)
 {
     set_parameters_to_fit_indices();
 

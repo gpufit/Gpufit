@@ -4,20 +4,20 @@
 
 FitInterface::FitInterface
 (
-    double const * data,
-    double const * weights,
+    float const * data,
+    float const * weights,
     std::size_t n_fits,
     int n_points,
-    double tolerance,
+    float tolerance,
     int max_n_iterations,
     EstimatorID estimator_id,
-    double const * initial_parameters,
+    float const * initial_parameters,
     int * parameters_to_fit,
     char * user_info,
     std::size_t user_info_size,
-    double * output_parameters,
+    float * output_parameters,
     int * output_states,
-    double * output_chi_squares,
+    float * output_chi_squares,
     int * output_n_iterations
 ) :
     data_( data ),
@@ -45,12 +45,12 @@ void FitInterface::check_sizes()
 {
     std::size_t maximum_size = std::numeric_limits< std::size_t >::max();
     
-    if (n_fits_ > maximum_size / n_points_ / sizeof(double))
+    if (n_fits_ > maximum_size / n_points_ / sizeof(float))
     {
         throw std::runtime_error("maximum absolute number of data points exceeded");
     }
     
-    if (n_fits_ > maximum_size / n_parameters_ / sizeof(double))
+    if (n_fits_ > maximum_size / n_parameters_ / sizeof(float))
     {
         throw std::runtime_error("maximum number of fits and/or parameters exceeded");
     }

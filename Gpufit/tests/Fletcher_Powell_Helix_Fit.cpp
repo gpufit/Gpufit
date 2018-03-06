@@ -19,21 +19,21 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
     std::size_t const n_points{ 3 } ;
     std::size_t const n_parameters{ 3 } ;
 
-    std::array< double, n_parameters > const true_parameters{ { 1.f, 0.f, 0.f } };
+    std::array< float, n_parameters > const true_parameters{ { 1.f, 0.f, 0.f } };
 
-    std::array< double, n_points > data{ { 0.f, 0.f, 0.f } } ;
+    std::array< float, n_points > data{ { 0.f, 0.f, 0.f } } ;
 
-    std::array< double, n_parameters > initial_parameters{ { -1.f, 0.f, 0.f } } ;
+    std::array< float, n_parameters > initial_parameters{ { -1.f, 0.f, 0.f } } ;
 
-    double tolerance{ 1e-8f } ;
+    float tolerance{ 1e-8f } ;
     
     int max_n_iterations{ 1000 } ;
     
     std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1 } } ;
     
-    std::array< double, n_parameters > output_parameters ;
+    std::array< float, n_parameters > output_parameters ;
     int output_state ;
-    double output_chi_square ;
+    float output_chi_square ;
     int output_n_iterations ;
 
     // test initial_parameters * 1.f

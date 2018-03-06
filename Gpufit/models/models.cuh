@@ -13,11 +13,11 @@
 
 __device__ void calculate_model(
     ModelID const model_id,
-    double const * parameters,
+    float const * parameters,
     int const n_fits,
     int const n_points,
-    double * value,
-    double * derivative,
+    float * value,
+    float * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,

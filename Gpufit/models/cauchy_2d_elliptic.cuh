@@ -50,11 +50,11 @@
 */
 
 __device__ void calculate_cauchy2delliptic(
-    double const * parameters,
+    float const * parameters,
     int const n_fits,
     int const n_points,
-    double * value,
-    double * derivative,
+    float * value,
+    float * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -63,24 +63,24 @@ __device__ void calculate_cauchy2delliptic(
 {
     // indices
 
-    int const n_points_x = sqrt((double)n_points);
+    int const n_points_x = std::sqrt((float)n_points);
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - (point_index_y*n_points_x);
 
     // parameters
 
-    double const * p = parameters;
+    float const * p = parameters;
 
     // value
     
-    double const argx  = ((p[1] - point_index_x) / p[3]) *((p[1] - point_index_x) / p[3]) + 1;
-    double const argy = ((p[2] - point_index_y) / p[4]) *((p[2] - point_index_y) / p[4]) + 1;
+    float const argx  = ((p[1] - point_index_x) / p[3]) *((p[1] - point_index_x) / p[3]) + 1;
+    float const argy = ((p[2] - point_index_y) / p[4]) *((p[2] - point_index_y) / p[4]) + 1;
     value[point_index] = p[0] * 1 / argx * 1 / argy + p[5];
 
     // derivative
 
-    double * current_derivative = derivative + point_index;
+    float * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points]
         = 1 / (argx*argy);

@@ -40,11 +40,11 @@
 */
 
 __device__ void calculate_fletcher_powell_helix(
-    double const * parameters,
+    float const * parameters,
     int const n_fits,
     int const n_points,
-    double * value,
-    double * derivative,
+    float * value,
+    float * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -53,20 +53,20 @@ __device__ void calculate_fletcher_powell_helix(
 {
     // parameters
 
-    double const * p = parameters;
+    float const * p = parameters;
     
     // arguments
 
-    double const pi = 3.14159;
+    float const pi = 3.14159;
 
-    double theta = 0.;
+    float theta = 0.f;
 
     if (p[0] > 0.)
-        theta = .5 * atan(p[1] / p[0]) / pi;
+        theta = .5f * atan(p[1] / p[0]) / pi;
     else if (p[0] < 0.)
-        theta = .5 * atan(p[1] / p[0]) / pi + .5;
+        theta = .5f * atan(p[1] / p[0]) / pi + .5f;
 
-    double const arg = p[0] * p[0] + p[1] * p[1];
+    float const arg = p[0] * p[0] + p[1] * p[1];
 
     // values and derivatives
 
@@ -86,15 +86,15 @@ __device__ void calculate_fletcher_powell_helix(
         // derivative
         derivative[0 * n_points + point_index] = 10. * p[0] / std::sqrt(arg);
         derivative[1 * n_points + point_index] = 10. * p[1] / std::sqrt(arg);
-        derivative[2 * n_points + point_index] = 0.;
+        derivative[2 * n_points + point_index] = 0.f;
         break;
     case 2:
         // value
         value[point_index] = p[2];
         // derivative
-        derivative[0 * n_points + point_index] = 0.;
-        derivative[1 * n_points + point_index] = 0.;
-        derivative[2 * n_points + point_index] = 1.;
+        derivative[0 * n_points + point_index] = 0.f;
+        derivative[1 * n_points + point_index] = 0.f;
+        derivative[2 * n_points + point_index] = 1.f;
         break;
     default:
         break;

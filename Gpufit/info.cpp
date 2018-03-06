@@ -68,7 +68,7 @@ void Info::set_blocks_per_fit()
 void Info::set_max_chunk_size()
 {
     int one_fit_memory
-        = sizeof(double)
+        = sizeof(float)
         *(2 * n_points_                                     // data, values
         + 2 * n_parameters_                                 // parameters, prev_parameters
         + 1 * n_blocks_per_fit_                             // chi_square
@@ -84,7 +84,7 @@ void Info::set_max_chunk_size()
                                                             // number of iterations, cublas info
 
     if (use_weights_)
-        one_fit_memory += sizeof(double) * n_points_;
+        one_fit_memory += sizeof(float) * n_points_;
 
     std::size_t tmp_chunk_size = available_gpu_memory_ / one_fit_memory;
     

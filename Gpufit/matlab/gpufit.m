@@ -74,12 +74,12 @@ end
 
 %% type checks
 
-% data, weights (if given), initial_parameters are all double
-assert(isa(data, 'double'), 'Type of data is not double');
+% data, weights (if given), initial_parameters are all single
+assert(isa(data, 'single'), 'Type of data is not single');
 if ~isempty(weights)
-    assert(isa(weights, 'double'), 'Type of weights is not double');
+    assert(isa(weights, 'single'), 'Type of weights is not single');
 end
-assert(isa(initial_parameters, 'double'), 'Type of initial_parameters is not double');
+assert(isa(initial_parameters, 'single'), 'Type of initial_parameters is not single');
 
 % parameters_to_fit is int32 (cast to int32 if incorrect type)
 if ~isa(parameters_to_fit, 'int32')
@@ -91,9 +91,9 @@ if ~isa(max_n_iterations, 'int32')
     max_n_iterations = int32(max_n_iterations);
 end
 
-% tolerance must be double (cast if incorrect type)
-if ~isa(tolerance, 'double')
-    tolerance = double(tolerance);
+% tolerance must be single (cast if incorrect type)
+if ~isa(tolerance, 'single')
+    tolerance = single(tolerance);
 end
 
 % we don't check type of user_info, but we extract the size in bytes of it

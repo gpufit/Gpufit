@@ -44,7 +44,7 @@ void generate_input_gauss_fit_1d(FitInput & i)
 
 	// data and weights
 	clean_resize(i.data, i.n_fits * i.n_points);
-	std::vector< double > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
+	std::vector< float > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
 	generate_gauss_1d(i.data, true_parameters);
 	i.weights_.clear(); // no weights
 
@@ -73,7 +73,7 @@ void generate_input_gauss_fit_2d(FitInput & i)
 
 	// data and weights
 	clean_resize(i.data, i.n_fits * i.n_points);
-	std::vector< double > const true_parameters{ { 4.f, 1.8f, 2.2f, 0.5f, 1.f } };
+	std::vector< float > const true_parameters{ { 4.f, 1.8f, 2.2f, 0.5f, 1.f } };
 	generate_gauss_2d(i.data, true_parameters);
 	i.weights_.clear(); // no weights
 
@@ -104,8 +104,8 @@ void generate_input_gauss_fit_2d_elliptic(FitInput & i)
     // data and weights
     clean_resize(i.data, i.n_fits * i.n_points);
 
-    double const center_x = (static_cast<double>(size_x) - 1.f) / 2.f;
-    std::vector< double > const true_parameters{ { 4.f, center_x, center_x, 0.4f, 0.6f, 1.f} };
+    float const center_x = (static_cast<float>(size_x) - 1.f) / 2.f;
+    std::vector< float > const true_parameters{ { 4.f, center_x, center_x, 0.4f, 0.6f, 1.f} };
     generate_gauss_2d_elliptic(i.data, true_parameters);
     i.weights_.clear(); // no weights
 

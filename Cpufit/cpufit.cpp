@@ -10,19 +10,19 @@ int cpufit
 (
     size_t n_fits,
     size_t n_points,
-    double * data,
-    double * weights,
+    float * data,
+    float * weights,
     int model_id,
-    double * initial_parameters,
-    double tolerance,
+    float * initial_parameters,
+    float tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    double * output_parameters,
+    float * output_parameters,
     int * output_states,
-    double * output_chi_squares,
+    float * output_chi_squares,
     int * output_n_iterations
 )
 try

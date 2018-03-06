@@ -41,14 +41,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
     }
 
 	// input parameters
-	double * data = (double*)mxGetPr(prhs[0]);
-	double * weights = (double*)mxGetPr(prhs[1]);
+	float * data = (float*)mxGetPr(prhs[0]);
+	float * weights = (float*)mxGetPr(prhs[1]);
     std::size_t n_fits = (std::size_t)*mxGetPr(prhs[2]);
     std::size_t n_points = (std::size_t)*mxGetPr(prhs[3]);
 
 	// tolerance
-	double tolerance = 0;
-	if (!get_scalar(prhs[4], tolerance, mxDOUBLE_CLASS))
+	float tolerance = 0;
+	if (!get_scalar(prhs[4], tolerance, mxSINGLE_CLASS))
 	{
 		mexErrMsgIdAndTxt("Cpufit:Mex", "tolerance is not a single");
 	}
@@ -61,7 +61,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
 	}
 
     int estimator_id = (int)*mxGetPr(prhs[6]);
-	double * initial_parameters = (double*)mxGetPr(prhs[7]);
+	float * initial_parameters = (float*)mxGetPr(prhs[7]);
 	int * parameters_to_fit = (int*)mxGetPr(prhs[8]);
     int model_id = (int)*mxGetPr(prhs[9]);
     int n_parameters = (int)*mxGetPr(prhs[10]);
@@ -69,10 +69,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
     std::size_t user_info_size = (std::size_t)*mxGetPr(prhs[12]);
 
 	// output parameters
-    double * output_parameters;
+    float * output_parameters;
 	mxArray * mx_parameters;
-	mx_parameters = mxCreateNumericMatrix(1, n_fits*n_parameters, mxDOUBLE_CLASS, mxREAL);
-	output_parameters = (double*)mxGetData(mx_parameters);
+	mx_parameters = mxCreateNumericMatrix(1, n_fits*n_parameters, mxSINGLE_CLASS, mxREAL);
+	output_parameters = (float*)mxGetData(mx_parameters);
 	plhs[0] = mx_parameters;
 
     int * output_states;
@@ -81,10 +81,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
 	output_states = (int*)mxGetData(mx_states);
 	plhs[1] = mx_states;
 
-    double * output_chi_squares;
+    float * output_chi_squares;
 	mxArray * mx_chi_squares;
-	mx_chi_squares = mxCreateNumericMatrix(1, n_fits, mxDOUBLE_CLASS, mxREAL);
-	output_chi_squares = (double*)mxGetData(mx_chi_squares);
+	mx_chi_squares = mxCreateNumericMatrix(1, n_fits, mxSINGLE_CLASS, mxREAL);
+	output_chi_squares = (float*)mxGetData(mx_chi_squares);
 	plhs[2] = mx_chi_squares;
 
     int * output_n_iterations;

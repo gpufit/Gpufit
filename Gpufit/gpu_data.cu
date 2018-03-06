@@ -69,9 +69,9 @@ void GPUData::init
 (
     int const chunk_size,
     int const chunk_index,
-    double const * const data,
-    double const * const weights,
-    double const * const initial_parameters,
+    float const * const data,
+    float const * const weights,
+    float const * const initial_parameters,
     std::vector<int> const & parameters_to_fit_indices)
 {
     chunk_size_ = chunk_size;
@@ -116,9 +116,9 @@ void GPUData::read(bool * dst, int const * src)
     * dst = (int_dst == 1) ? true : false;
 }
 
-void GPUData::write(double* dst, double const * src, int const count)
+void GPUData::write(float* dst, float const * src, int const count)
 {
-    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(double), cudaMemcpyHostToDevice));
+    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(float), cudaMemcpyHostToDevice));
 }
 
 void GPUData::write(int* dst, std::vector<int> const & src)
@@ -132,9 +132,9 @@ void GPUData::write(char* dst, char const * src, std::size_t const count)
     CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(char), cudaMemcpyHostToDevice));
 }
 
-void GPUData::copy(double * dst, double const * src, std::size_t const count)
+void GPUData::copy(float * dst, float const * src, std::size_t const count)
 {
-    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(double), cudaMemcpyDeviceToDevice));
+    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(float), cudaMemcpyDeviceToDevice));
 }
 
 __global__ void set_kernel(int* dst, int const value, int const count)
@@ -171,7 +171,7 @@ void GPUData::set(int* arr, int const value)
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
-__global__ void set_kernel(double* dst, double const value, std::size_t const count)
+__global__ void set_kernel(float* dst, float const value, std::size_t const count)
 {
 	std::size_t const index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -181,7 +181,7 @@ __global__ void set_kernel(double* dst, double const value, std::size_t const co
     dst[index] = value;
 }
 
-void GPUData::set(double* arr, double const value, int const count)
+void GPUData::set(float* arr, float const value, int const count)
 {
     int const tx = 256;
 	int const bx = (count / tx) + 1;

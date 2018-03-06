@@ -9,19 +9,19 @@ int gpufit
 (
     size_t n_fits,
     size_t n_points,
-    double * data,
-    double * weights,
+    float * data,
+    float * weights,
     int model_id,
-    double * initial_parameters,
-    double tolerance,
+    float * initial_parameters,
+    float tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    double * output_parameters,
+    float * output_parameters,
     int * output_states,
-    double * output_chi_squares,
+    float * output_chi_squares,
     int * output_n_iterations
 )
 try
@@ -103,19 +103,19 @@ int gpufit_portable_interface(int argc, void *argv[])
     return gpufit(
         *((size_t *) argv[0]),
         *((size_t *) argv[1]),
-        (double *) argv[2],
-        (double *) argv[3],
+        (float *) argv[2],
+        (float *) argv[3],
         *((int *) argv[4]),
-        (double *) argv[5],
-        *((double *) argv[6]),
+        (float *) argv[5],
+        *((float *) argv[6]),
         *((int *) argv[7]),
         (int *) argv[8],
         *((int *) argv[9]),
         *((size_t *) argv[10]),
         (char *) argv[11],
-        (double *) argv[12],
+        (float *) argv[12],
         (int *) argv[13],
-        (double *) argv[14],
+        (float *) argv[14],
         (int *) argv[15]);
 
 }

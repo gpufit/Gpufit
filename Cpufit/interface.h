@@ -7,20 +7,20 @@ class FitInterface
 {
 public:
     FitInterface(
-        double const * data,
-        double const * weights,
+        float const * data,
+        float const * weights,
         std::size_t n_fits,
         int n_points,
-        double tolerance,
+        float tolerance,
         int max_n_iterations,
         EstimatorID estimator_id,
-        double const * initial_parameters,
+        float const * initial_parameters,
         int const * parameters_to_fit,
         char * user_info,
         std::size_t user_info_size,
-        double * output_parameters,
+        float * output_parameters,
         int * output_states,
-        double * output_chi_squares,
+        float * output_chi_squares,
         int * output_n_iterations);
 
     virtual ~FitInterface();
@@ -36,21 +36,21 @@ public:
 
 private:
     int n_parameters_;
-    double const * const data_;
-    double const * const weight_;
+    float const * const data_;
+    float const * const weight_;
     std::size_t const n_fits_;
     int const n_points_;
-    double const tolerance_;
+    float const tolerance_;
     int const max_n_iterations_;
     EstimatorID estimator_id_;
-    double const * const initial_parameters_;
+    float const * const initial_parameters_;
     int const * const parameters_to_fit_;
     char * const user_info_;
     std::size_t const user_info_size_;
 
-    double * output_parameters_;
+    float * output_parameters_;
     int * output_states_;
-    double * output_chi_squares_;
+    float * output_chi_squares_;
     int * output_n_iterations_;
 };
 

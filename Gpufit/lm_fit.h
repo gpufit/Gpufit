@@ -12,35 +12,35 @@ class LMFit
 public:
     LMFit
     (
-        double const * data,
-        double const * weights,
+        float const * data,
+        float const * weights,
         Info & info,
-        double const * initial_parameters,
+        float const * initial_parameters,
         int const * parameters_to_fit,
         char * user_info,
-        double * output_parameters,
+        float * output_parameters,
         int * output_states,
-        double * output_chi_squares,
+        float * output_chi_squares,
         int * output_n_iterations
     ) ;
 
     virtual ~LMFit();
 
-    void run(double const tolerance);
+    void run(float const tolerance);
 
 private:
     void set_parameters_to_fit_indices();
     void get_results(GPUData const & gpu_data, int const n_fits);
 
-    double const * const data_ ;
-    double const * const weights_ ;
-    double const * const initial_parameters_ ;
+    float const * const data_ ;
+    float const * const weights_ ;
+    float const * const initial_parameters_ ;
     int const * const parameters_to_fit_;
     char const * const user_info_;
 
-    double * output_parameters_ ;
+    float * output_parameters_ ;
     int * output_states_ ;
-    double * output_chi_squares_ ;
+    float * output_chi_squares_ ;
     int * output_n_iterations_;
 
     int ichunk_;
@@ -56,7 +56,7 @@ class LMFitCUDA
 {
 public:
     LMFitCUDA(
-        double const tolerance,
+        float const tolerance,
         Info const & info,
         GPUData & gpu_data,
         int const n_fits);
@@ -74,7 +74,7 @@ private:
     void evaluate_iteration(int const iteration);
 
     void scale_hessians();
-    void decompose_hessians_LUP(Device_Array<double> const & hessians);
+    void decompose_hessians_LUP(Device_Array<float> const & hessians);
     void solve_equation_system();
     void update_parameters();
     void invert_hessians();
@@ -101,7 +101,7 @@ private:
     bool all_finished_;
     bool all_lambdas_accepted_;
 
-    double tolerance_;
+    float tolerance_;
 };
 
 #endif

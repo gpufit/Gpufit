@@ -5,8 +5,8 @@
 #include "estimators/estimators.cuh"
 
 __global__ void convert_pointer(
-    double ** pointer_to_pointer,
-    double * pointer,
+    float ** pointer_to_pointer,
+    float * pointer,
     int const n_pointers,
     int const size,
     int const * skip)
@@ -89,13 +89,13 @@ __global__ void convert_pointer(
 */
 
 __global__ void cuda_calc_curve_values(
-    double const * parameters,
+    float const * parameters,
     int const n_fits,
     int const n_points,
     int const n_parameters,
     int const * finished,
-    double * values,
-    double * derivatives,
+    float * values,
+    float * derivatives,
     int const n_fits_per_block,
     int const n_blocks_per_fit,
     ModelID const model_id,
@@ -109,9 +109,9 @@ __global__ void cuda_calc_curve_values(
     int const point_index = threadIdx.x - fit_in_block * n_points + fit_piece * blockDim.x;
     int const first_point = fit_index * n_points;
 
-    double * current_values = values + first_point;
-    double * current_derivatives = derivatives + first_point * n_parameters;
-    double const * current_parameters = parameters + fit_index * n_parameters;
+    float * current_values = values + first_point;
+    float * current_derivatives = derivatives + first_point * n_parameters;
+    float const * current_parameters = parameters + fit_index * n_parameters;
 
     if (finished[fit_index])
         return;
@@ -124,12 +124,12 @@ __global__ void cuda_calc_curve_values(
 /* Description of the sum_up_floats function
 * ==========================================
 *
-* This function sums up a vector of double values and stores the result at the
+* This function sums up a vector of float values and stores the result at the
 * first place of the vector.
 *
 * Parameters:
 *
-* shared_array: An input vector of double values. The vector must be stored
+* shared_array: An input vector of float values. The vector must be stored
 *               on the shared memory of the GPU. The size of this vector must be a
 *               power of two. Use zero padding to extend it to the next highest
 *               power of 2 greater than the number of elements.
@@ -154,7 +154,7 @@ __global__ void cuda_calc_curve_values(
 *
 */
 
-__device__ void sum_up_floats(volatile double* shared_array, int const size)
+__device__ void sum_up_floats(volatile float* shared_array, int const size)
 {
     int const fit_in_block = threadIdx.x / size;
     int const point_index = threadIdx.x - (fit_in_block*size);
@@ -172,21 +172,21 @@ __device__ void sum_up_floats(volatile double* shared_array, int const size)
     }
 }
 
-__device__ void sum_subtotals(double * subtotals, int const n_subtotals, int const index, int const distance)
+__device__ void sum_subtotals(float * subtotals, int const n_subtotals, int const index, int const distance)
 {
-    double * current_subtotals = subtotals + index;
+    float * current_subtotals = subtotals + index;
 
-    double sum = 0.0;
+    double sum = 0.;
     for (int i = 0; i < n_subtotals; i++)
         sum += current_subtotals[i * distance];
 
-    current_subtotals[0] = sum;
+    current_subtotals[0] = float(sum);
 }
 
 
-__device__ double calculate_skalar_product(
-    double const * vector1,
-    double const * vector2,
+__device__ float calculate_skalar_product(
+    float const * vector1,
+    float const * vector2,
     int const size)
 {
     double product = 0.;
@@ -194,12 +194,12 @@ __device__ double calculate_skalar_product(
     for (int i = 0; i < size; i++)
         product += vector1[i] * vector2[i];
 
-    return product;
+    return float(product);
 }
 
 __global__ void cuda_calculate_interim_euclidian_norms(
-    double * norms,
-    double const * vectors,
+    float * norms,
+    float const * vectors,
     int const n_points,
     int const n_fits,
     int const n_parameters,
@@ -219,21 +219,21 @@ __global__ void cuda_calculate_interim_euclidian_norms(
         return;
     }
 
-    double const * current_vectors = vectors + first_point * n_parameters;
+    float const * current_vectors = vectors + first_point * n_parameters;
 
-    extern __shared__ double extern_array[];
+    extern __shared__ float extern_array[];
 
-    volatile double * shared_vector = extern_array + (fit_in_block - fit_piece) * shared_size;
+    volatile float * shared_vector = extern_array + (fit_in_block - fit_piece) * shared_size;
 
     if (point_index >= n_points)
     {
-        shared_vector[point_index] = 0.;
+        shared_vector[point_index] = 0.f;
     }
     else
     {
         for (int parameter_index = 0; parameter_index < n_parameters; parameter_index++)
         {
-            double const * vector = current_vectors + parameter_index * n_points;
+            float const * vector = current_vectors + parameter_index * n_points;
 
             shared_vector[point_index] = vector[point_index] * vector[point_index];
 
@@ -245,7 +245,7 @@ __global__ void cuda_calculate_interim_euclidian_norms(
 }
 
 __global__ void cuda_complete_euclidian_norms(
-    double * norms,
+    float * norms,
     int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,
@@ -294,7 +294,7 @@ __global__ void cuda_complete_euclidian_norms(
 *   int const example_value = 256;
 *
 *   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(double(n_fits) / double(threads.x)));
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
 *
 *   cuda_sum_chi_square_subtotals<<< blocks, threads >>>(
 *       chi_squares,
@@ -305,7 +305,7 @@ __global__ void cuda_complete_euclidian_norms(
 */
 
 __global__ void cuda_sum_chi_square_subtotals(
-    double * chi_squares,
+    float * chi_squares,
     int const n_blocks_per_fit,
     int const n_fits,
     int const * finished)
@@ -315,13 +315,13 @@ __global__ void cuda_sum_chi_square_subtotals(
     if (index >= n_fits || finished[index])
         return;
 
-    double * chi_square = chi_squares + index;
+    float * chi_square = chi_squares + index;
 
-    double sum = 0.0;
+    double sum = 0.;
     for (int i = 0; i < n_blocks_per_fit; i++)
         sum += chi_square[i * n_fits];
 
-    chi_square[0] = sum;
+    chi_square[0] = float(sum);
 }
 
 /* Description of the cuda_check_fit_improvement function
@@ -359,7 +359,7 @@ __global__ void cuda_sum_chi_square_subtotals(
 *   int const example_value = 256;
 *
 *   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(double(n_fits) / double(threads.x)));
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
 *
 *   cuda_check_fit_improvement <<< blocks, threads >>>(
 *       iteration_failed,
@@ -372,8 +372,8 @@ __global__ void cuda_sum_chi_square_subtotals(
 
 __global__ void cuda_check_fit_improvement(
     int * iteration_failed,
-    double const * chi_squares,
-    double const * prev_chi_squares,
+    float const * chi_squares,
+    float const * prev_chi_squares,
     int const n_fits,
     int const * finished)
 {
@@ -382,7 +382,7 @@ __global__ void cuda_check_fit_improvement(
     if (index >= n_fits || finished[index])
         return;
 
-    bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.;
+    bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.f;
     bool const chi_square_decreased = (chi_squares[index] < prev_chi_squares[index]);
     if (prev_chi_squares_initialized && !chi_square_decreased)
     {
@@ -444,7 +444,7 @@ __global__ void cuda_check_fit_improvement(
 *   threads.x = power_of_two_n_points * n_fits_per_block / n_blocks_per_fit;
 *   blocks.x = n_fits / n_fits_per_block * n_blocks_per_fit;
 *
-*   int const shared_size = sizeof(double) * threads.x;
+*   int const shared_size = sizeof(float) * threads.x;
 *
 *   cuda_calculate_chi_squares<<< blocks, threads, shared_size >>>(
 *       chi_squares,
@@ -463,11 +463,11 @@ __global__ void cuda_check_fit_improvement(
 */
 
 __global__ void cuda_calculate_chi_squares(
-    double * chi_squares,
+    float * chi_squares,
     int * states,
-    double const * data,
-    double const * values,
-    double const * weights,
+    float const * data,
+    float const * values,
+    float const * weights,
     int const n_points,
     int const n_fits,
     int const estimator_id,
@@ -488,19 +488,19 @@ __global__ void cuda_calculate_chi_squares(
         return;
     }
 
-    double const * current_data = &data[first_point];
-    double const * current_weight = weights ? &weights[first_point] : NULL;
-    double const * current_value = &values[first_point];
+    float const * current_data = &data[first_point];
+    float const * current_weight = weights ? &weights[first_point] : NULL;
+    float const * current_value = &values[first_point];
     int * current_state = &states[fit_index];
 
-    extern __shared__ double extern_array[];
+    extern __shared__ float extern_array[];
 
-    volatile double * shared_chi_square
+    volatile float * shared_chi_square
         = extern_array + (fit_in_block - fit_piece) * shared_size;
 
     if (point_index >= n_points)
     {
-        shared_chi_square[point_index] = 0.;
+        shared_chi_square[point_index] = 0.f;
     }
 
     if (point_index < n_points)
@@ -555,7 +555,7 @@ __global__ void cuda_calculate_chi_squares(
 *   int const example_value = 256;
 *
 *   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(double(n_fits) / double(threads.x)));
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
 *
 *   cuda_sum_gradient_subtotals<<< blocks,threads >>>(
 *       gradients,
@@ -568,7 +568,7 @@ __global__ void cuda_calculate_chi_squares(
 */
 
 __global__ void cuda_sum_gradient_subtotals(
-    double * gradients,
+    float * gradients,
     int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,
@@ -581,13 +581,13 @@ __global__ void cuda_sum_gradient_subtotals(
     if (fit_index >= n_fits || finished[fit_index] || skip[fit_index])
         return;
 
-    double * gradient = gradients + index;
+    float * gradient = gradients + index;
 
-    double sum = 0.0;
+    double sum = 0.;
     for (int i = 0; i < n_blocks_per_fit; i++)
         sum += gradient[i * n_fits * n_parameters];
 
-    gradient[0] = sum;
+    gradient[0] = float(sum);
 }
 
 /* Description of the cuda_calculate_gradients function
@@ -649,7 +649,7 @@ __global__ void cuda_sum_gradient_subtotals(
 *   threads.x = power_of_two_n_points * n_fits_per_block / n_blocks_per_fit;
 *   blocks.x = n_fits / n_fits_per_block * n_blocks_per_fit;
 *
-*   int const shared_size = sizeof(double) * threads.x;
+*   int const shared_size = sizeof(float) * threads.x;
 *
 *   cuda_calculate_gradients<<< blocks, threads, shared_size >>>(
 *       gradients,
@@ -672,11 +672,11 @@ __global__ void cuda_sum_gradient_subtotals(
 */
 
 __global__ void cuda_calculate_gradients(
-    double * gradients,
-    double const * data,
-    double const * values,
-    double const * derivatives,
-    double const * weights,
+    float * gradients,
+    float const * data,
+    float const * values,
+    float const * derivatives,
+    float const * weights,
     int const n_points,
     int const n_fits,
     int const n_parameters,
@@ -701,18 +701,18 @@ __global__ void cuda_calculate_gradients(
         return;
     }
 
-    double const * current_data = &data[first_point];
-    double const * current_weight = weights ? &weights[first_point] : NULL;
-    double const * current_derivative = &derivatives[first_point * n_parameters];
-    double const * current_value = &values[first_point];
+    float const * current_data = &data[first_point];
+    float const * current_weight = weights ? &weights[first_point] : NULL;
+    float const * current_derivative = &derivatives[first_point * n_parameters];
+    float const * current_value = &values[first_point];
 
-    extern __shared__ double extern_array[];
+    extern __shared__ float extern_array[];
 
-    volatile double * shared_gradient = extern_array + (fit_in_block - fit_piece) * shared_size;
+    volatile float * shared_gradient = extern_array + (fit_in_block - fit_piece) * shared_size;
 
     if (point_index >= n_points)
     {
-        shared_gradient[point_index] = 0.;
+        shared_gradient[point_index] = 0.f;
     }
 
     for (int parameter_index = 0; parameter_index < n_parameters_to_fit; parameter_index++)
@@ -814,11 +814,11 @@ __global__ void cuda_calculate_gradients(
 */
 
 __global__ void cuda_calculate_hessians(
-    double * hessians,
-    double const * data,
-    double const * values,
-    double const * derivatives,
-    double const * weights,
+    float * hessians,
+    float const * data,
+    float const * values,
+    float const * derivatives,
+    float const * weights,
     int const n_points,
     int const n_parameters,
     int const n_parameters_to_fit,
@@ -840,17 +840,17 @@ __global__ void cuda_calculate_hessians(
         return;
     }
 
-    double * current_hessian = &hessians[fit_index * n_parameters_to_fit * n_parameters_to_fit];
-    double const * current_data = &data[first_point];
-    double const * current_weight = weights ? &weights[first_point] : NULL;
-    double const * current_derivative = &derivatives[first_point*n_parameters];
-    double const * current_value = &values[first_point];
+    float * current_hessian = &hessians[fit_index * n_parameters_to_fit * n_parameters_to_fit];
+    float const * current_data = &data[first_point];
+    float const * current_weight = weights ? &weights[first_point] : NULL;
+    float const * current_derivative = &derivatives[first_point*n_parameters];
+    float const * current_value = &values[first_point];
 
     int const hessian_index_ij = parameter_index_i * n_parameters_to_fit + parameter_index_j;
     int const derivative_index_i = parameters_to_fit_indices[parameter_index_i] * n_points;
     int const derivative_index_j = parameters_to_fit_indices[parameter_index_j] * n_points;
 
-    double sum = 0.0;
+    double sum = 0.;
     for (int point_index = 0; point_index < n_points; point_index++)
     {
         calculate_hessian(
@@ -866,12 +866,12 @@ __global__ void cuda_calculate_hessians(
             user_info,
             user_info_size);
     }
-    current_hessian[hessian_index_ij] = sum;
+    current_hessian[hessian_index_ij] = float(sum);
 }
 
 __global__ void cuda_calc_scaling_vectors(
-    double * scaling_vectors,
-    double const * hessians,
+    float * scaling_vectors,
+    float const * hessians,
     int const n_parameters,
     int const * finished,
     int const n_fits_per_block)
@@ -886,14 +886,14 @@ __global__ void cuda_calc_scaling_vectors(
         return;
     }
 
-    double * scaling_vector = scaling_vectors + fit_index * n_parameters;
-    double const * hessian = hessians + fit_index * n_parameters * n_parameters;
+    float * scaling_vector = scaling_vectors + fit_index * n_parameters;
+    float const * hessian = hessians + fit_index * n_parameters * n_parameters;
 
     int const diagonal_index = parameter_index * n_parameters + parameter_index;
 
     // adaptive scaling
     scaling_vector[parameter_index]
-        = max(scaling_vector[parameter_index], sqrt(hessian[diagonal_index]));
+        = max(scaling_vector[parameter_index], std::sqrt(hessian[diagonal_index]));
 
     // continuous scaling
     //scaling_vector[parameter_index] = hessian[diagonal_index];
@@ -904,8 +904,8 @@ __global__ void cuda_calc_scaling_vectors(
 }
 
 __global__ void cuda_init_scaled_hessians(
-    double * scaled_hessians,
-    double const * hessians,
+    float * scaled_hessians,
+    float const * hessians,
     int const n_fits,
     int const n_parameters,
     int const * finished,
@@ -970,9 +970,9 @@ __global__ void cuda_init_scaled_hessians(
 */
 
 __global__ void cuda_modify_step_widths(
-    double * hessians,
-    double const * lambdas,
-    double * scaling_vectors,
+    float * hessians,
+    float const * lambdas,
+    float * scaling_vectors,
     unsigned int const n_parameters,
     int const * finished,
     int const n_fits_per_block,
@@ -989,9 +989,9 @@ __global__ void cuda_modify_step_widths(
         return;
     }
 
-    double * hessian = &hessians[fit_index * n_parameters * n_parameters];
-    double * scaling_vector = &scaling_vectors[fit_index * n_parameters];
-    double const & lambda = lambdas[fit_index];
+    float * hessian = &hessians[fit_index * n_parameters * n_parameters];
+    float * scaling_vector = &scaling_vectors[fit_index * n_parameters];
+    float const & lambda = lambdas[fit_index];
 
     int const diagonal_index = parameter_index * n_parameters + parameter_index;
 
@@ -1051,9 +1051,9 @@ __global__ void cuda_modify_step_widths(
 */
 
 __global__ void cuda_update_parameters(
-    double * parameters,
-    double * prev_parameters,
-    double const * deltas,
+    float * parameters,
+    float * prev_parameters,
+    float const * deltas,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
     int const * finished,
@@ -1064,8 +1064,8 @@ __global__ void cuda_update_parameters(
     int const parameter_index = threadIdx.x - fit_in_block * n_parameters;
     int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
 
-    double * current_parameters = &parameters[fit_index * n_parameters];
-    double * current_prev_parameters = &prev_parameters[fit_index * n_parameters];
+    float * current_parameters = &parameters[fit_index * n_parameters];
+    float * current_prev_parameters = &prev_parameters[fit_index * n_parameters];
 
     current_prev_parameters[parameter_index] = current_parameters[parameter_index];
 
@@ -1079,7 +1079,7 @@ __global__ void cuda_update_parameters(
         return;
     }
 
-    double const * current_deltas = &deltas[fit_index * n_parameters_to_fit];
+    float const * current_deltas = &deltas[fit_index * n_parameters_to_fit];
 
     current_parameters[parameters_to_fit_indices[parameter_index]] += current_deltas[parameter_index];
 }
@@ -1127,7 +1127,7 @@ __global__ void cuda_update_parameters(
 *   int const example_value = 256;
 *
 *   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(double(n_fits) / double(threads.x)));
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
 *
 *   cuda_check_for_convergence<<< blocks, threads >>>(
 *       finished,
@@ -1143,10 +1143,10 @@ __global__ void cuda_update_parameters(
 
 __global__ void cuda_check_for_convergence(
     int * finished,
-    double const tolerance,
+    float const tolerance,
     int * states,
-    double const * chi_squares,
-    double const * prev_chi_squares,
+    float const * chi_squares,
+    float const * prev_chi_squares,
     int const iteration,
     int const max_n_iterations,
     int const n_fits)
@@ -1215,7 +1215,7 @@ __global__ void cuda_check_for_convergence(
 *   int const example_value = 256;
 *
 *   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(double(n_fits) / double(threads.x)));
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
 *
 *   cuda_evaluate_iteration<<< blocks, threads >>>(
 *       all_finished,
@@ -1318,7 +1318,7 @@ __global__ void cuda_check_all_lambdas(
 *   int const example_value = 256;
 *
 *   threads.x = min(n_fits, example_value);
-*   blocks.x = int(ceil(double(n_fits) / double(threads.x)));
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
 *
 *   cuda_prepare_next_iteration<<< blocks, threads >>>(
 *       lambdas,
@@ -1332,11 +1332,11 @@ __global__ void cuda_check_all_lambdas(
 */
 
 __global__ void cuda_prepare_next_iteration(
-    double * lambdas,
-    double * chi_squares,
-    double * prev_chi_squares,
-    double * parameters,
-    double const * prev_parameters,
+    float * lambdas,
+    float * chi_squares,
+    float * prev_chi_squares,
+    float * parameters,
+    float const * prev_parameters,
     int const n_fits,
     int const n_parameters)
 {
@@ -1362,8 +1362,8 @@ __global__ void cuda_prepare_next_iteration(
 }
 
 __global__ void cuda_update_temp_derivatives(
-    double * temp_derivatives,
-    double const * derivatives,
+    float * temp_derivatives,
+    float const * derivatives,
     int const * iteration_failed,
     int const n_fits_per_block,
     int const n_blocks_per_fit,
@@ -1387,8 +1387,8 @@ __global__ void cuda_update_temp_derivatives(
 
     int const begin = fit_index * n_points * n_parameters;
 
-    double * temp_derivative = temp_derivatives + begin;
-    double const * derivative = derivatives + begin;
+    float * temp_derivative = temp_derivatives + begin;
+    float const * derivative = derivatives + begin;
 
     for (int parameter_index = 0; parameter_index < n_parameters; parameter_index++)
     {
@@ -1399,9 +1399,9 @@ __global__ void cuda_update_temp_derivatives(
 }
 
 __global__ void cuda_multiply(
-    double * products,
-    double const * multiplicands,
-    double const * multipliers,
+    float * products,
+    float const * multiplicands,
+    float const * multipliers,
     int const * skip,
     int const n_vectors,
     int const vector_size,
@@ -1421,27 +1421,27 @@ __global__ void cuda_multiply(
         return;
     }
 
-    double & product = products[absolute_index];
-    double const & multiplicand = multiplicands[absolute_index];
-    double const & multiplier = multipliers[absolute_index];
+    float & product = products[absolute_index];
+    float const & multiplicand = multiplicands[absolute_index];
+    float const & multiplier = multipliers[absolute_index];
 
     product = multiplicand * multiplier;
 }
 
-__device__ double calc_euclidian_norm(int const size, double const * vector)
+__device__ float calc_euclidian_norm(int const size, float const * vector)
 {
-    double sum = 0.;
+    double sum = 0.f;
     
     for (int i = 0; i < size; i++)
         sum += vector[i]*vector[i];
 
-    return sqrt(sum);
+    return float(sqrt(sum));
 }
 
 __global__ void cuda_multiply_matrix_vector(
-    double * products,
-    double const * matrices,
-    double const * vectors,
+    float * products,
+    float const * matrices,
+    float const * vectors,
     int const n_rows,
     int const n_cols,
     int const n_fits_per_block,
@@ -1456,11 +1456,11 @@ __global__ void cuda_multiply_matrix_vector(
     if (skip[matrix_index])
         return;
 
-    double * product = products + matrix_index * n_rows;
-    double const * matrix = matrices + matrix_index * n_rows * n_cols;
-    double const * vector = vectors + matrix_index * n_cols;
+    float * product = products + matrix_index * n_rows;
+    float const * matrix = matrices + matrix_index * n_rows * n_cols;
+    float const * vector = vectors + matrix_index * n_cols;
 
-    product[row_index] = 0.;
+    product[row_index] = 0.f;
     for (int col_index = 0; col_index < n_cols; col_index++)
     {
         product[row_index] += matrix[col_index * n_rows + row_index] * vector[col_index];
@@ -1468,23 +1468,23 @@ __global__ void cuda_multiply_matrix_vector(
 }
 
 __device__ void multiply_matrix_vector(
-    double * product,
-    double const * matrix,
-    double const * vector,
+    float * product,
+    float const * matrix,
+    float const * vector,
     int const row_index,
     int const n_rows,
     int const n_cols)
 {
-    product[row_index] = 0.;
+    product[row_index] = 0.f;
     for (int col_index = 0; col_index < n_cols; col_index++)
     {
         product[row_index] += matrix[col_index * n_rows + row_index] * vector[col_index];
     }
 }
 
-__device__ double calc_scalar_product(double const * v1, double const * v2, int const size)
+__device__ float calc_scalar_product(float const * v1, float const * v2, int const size)
 {
-    double product = 0.;
+    float product = 0.f;
 
     for (std::size_t i = 0; i < size; i++)
         product += v1[i] * v2[i];
@@ -1493,31 +1493,31 @@ __device__ double calc_scalar_product(double const * v1, double const * v2, int 
 }
 
 __global__ void cuda_initialize_step_bounds(
-    double * step_bounds,
-    double * scaled_parameters,
+    float * step_bounds,
+    float * scaled_parameters,
     int const * finished,
     int const n_fits,
     int const n_parameters)
 {
     int const fit_index = blockIdx.x;
 
-    double & step_bound = step_bounds[fit_index];
-    double * current_scaled_parameters = scaled_parameters + fit_index * n_parameters;
+    float & step_bound = step_bounds[fit_index];
+    float * current_scaled_parameters = scaled_parameters + fit_index * n_parameters;
 
-    double const scaled_parameters_norm
+    float const scaled_parameters_norm
         = calc_euclidian_norm(n_parameters, current_scaled_parameters);
 
-    double const factor = 100.;
+    float const factor = 100.f;
 
     step_bound = factor * scaled_parameters_norm;
 
-    if (step_bound == 0.)
+    if (step_bound == 0.f)
         step_bound = factor;
 }
 
 __global__ void cuda_adapt_step_bounds(
-    double * step_bounds,
-    double const * scaled_delta_norms,
+    float * step_bounds,
+    float const * scaled_delta_norms,
     int const * finished,
     int const n_fits)
 {
@@ -1526,21 +1526,21 @@ __global__ void cuda_adapt_step_bounds(
     if (finished[fit_index] || fit_index >= n_fits)
         return;
 
-    double & step_bound = step_bounds[fit_index];
-    double const & scaled_delta_norm = scaled_delta_norms[fit_index];
+    float & step_bound = step_bounds[fit_index];
+    float const & scaled_delta_norm = scaled_delta_norms[fit_index];
 
     step_bound = min(step_bound, scaled_delta_norm);
 }
 
 __global__ void cuda_update_step_bounds(
-    double * step_bounds,
-    double * lambdas,
-    double const * approximation_ratios,
-    double const * actual_reductions,
-    double const * directive_derivatives,
-    double const * chi_squares,
-    double const * prev_chi_squares,
-    double const * scaled_delta_norms,
+    float * step_bounds,
+    float * lambdas,
+    float const * approximation_ratios,
+    float const * actual_reductions,
+    float const * directive_derivatives,
+    float const * chi_squares,
+    float const * prev_chi_squares,
+    float const * scaled_delta_norms,
     int const * finished,
     int const n_fits)
 {
@@ -1549,49 +1549,49 @@ __global__ void cuda_update_step_bounds(
     if (finished[fit_index] || fit_index >= n_fits)
         return;
 
-    double & step_bound = step_bounds[fit_index];
-    double & lambda = lambdas[fit_index];
-    double const & approximation_ratio = approximation_ratios[fit_index];
-    double const & actual_reduction = actual_reductions[fit_index];
-    double const & directive_derivative = directive_derivatives[fit_index];
-    double const & chi_square = chi_squares[fit_index];
-    double const & prev_chi_square = prev_chi_squares[fit_index];
-    double const & scaled_delta_norm = scaled_delta_norms[fit_index];
+    float & step_bound = step_bounds[fit_index];
+    float & lambda = lambdas[fit_index];
+    float const & approximation_ratio = approximation_ratios[fit_index];
+    float const & actual_reduction = actual_reductions[fit_index];
+    float const & directive_derivative = directive_derivatives[fit_index];
+    float const & chi_square = chi_squares[fit_index];
+    float const & prev_chi_square = prev_chi_squares[fit_index];
+    float const & scaled_delta_norm = scaled_delta_norms[fit_index];
 
-    if (approximation_ratio <= .25)
+    if (approximation_ratio <= .25f)
     {
-        double temp = 0.;
+        float temp = 0.f;
 
-        if (actual_reduction >= 0.)
-            temp = .5;
+        if (actual_reduction >= 0.f)
+            temp = .5f;
         else
-            temp = .5 * directive_derivative / (directive_derivative + .5 * actual_reduction);
+            temp = .5f * directive_derivative / (directive_derivative + .5f * actual_reduction);
 
-        if (.1 * std::sqrt(chi_square) >= std::sqrt(prev_chi_square) || temp < .1)
-            temp = .1;
+        if (.1f * std::sqrt(chi_square) >= std::sqrt(prev_chi_square) || temp < .1f)
+            temp = .1f;
 
-        step_bound = temp * min(step_bound, scaled_delta_norm / .1);
+        step_bound = temp * min(step_bound, scaled_delta_norm / .1f);
         lambda /= temp;
     }
     else
     {
-        if (lambda == 0. || approximation_ratio >= .75)
+        if (lambda == 0.f || approximation_ratio >= .75f)
         {
-            step_bound = scaled_delta_norm / .5;
-            lambda = .5 * lambda;
+            step_bound = scaled_delta_norm / .5f;
+            lambda = .5f * lambda;
         }
     }
 }
 
 __global__ void cuda_calc_phis(
-    double * phis,
-    double * phi_derivatives,
-    double * inverted_hessians,
-    double * scaled_deltas,
-    double * scaled_delta_norms,
-    double * temp_vectors,
-    double const * scaling_vectors,
-    double const * step_bounds,
+    float * phis,
+    float * phi_derivatives,
+    float * inverted_hessians,
+    float * scaled_deltas,
+    float * scaled_delta_norms,
+    float * temp_vectors,
+    float const * scaling_vectors,
+    float const * step_bounds,
     int const n_parameters,
     int const * finished,
     int const * lambda_accepted,
@@ -1605,14 +1605,14 @@ __global__ void cuda_calc_phis(
     if (finished[fit_index] || lambda_accepted[fit_index] || !newton_step_accepted[fit_index])
         return;
 
-    double & phi = phis[fit_index];
-    double & phi_derivative = phi_derivatives[fit_index];
-    double * inverted_hessian = inverted_hessians + fit_index * n_parameters * n_parameters;
-    double * scaled_delta = scaled_deltas + fit_index * n_parameters;
-    double & scaled_delta_norm = scaled_delta_norms[fit_index];
-    double * temp_vector = temp_vectors + fit_index * n_parameters;
-    double const * scaling_vector = scaling_vectors + fit_index * n_parameters;
-    double const & step_bound = step_bounds[fit_index];
+    float & phi = phis[fit_index];
+    float & phi_derivative = phi_derivatives[fit_index];
+    float * inverted_hessian = inverted_hessians + fit_index * n_parameters * n_parameters;
+    float * scaled_delta = scaled_deltas + fit_index * n_parameters;
+    float & scaled_delta_norm = scaled_delta_norms[fit_index];
+    float * temp_vector = temp_vectors + fit_index * n_parameters;
+    float const * scaling_vector = scaling_vectors + fit_index * n_parameters;
+    float const & step_bound = step_bounds[fit_index];
     
     scaled_delta_norm = calc_euclidian_norm(n_parameters, scaled_delta);
 
@@ -1629,9 +1629,9 @@ __global__ void cuda_calc_phis(
 }
 
 __global__ void cuda_adapt_phi_derivatives(
-    double * phi_derivatives,
-    double const * step_bounds,
-    double const * scaled_delta_norms,
+    float * phi_derivatives,
+    float const * step_bounds,
+    float const * scaled_delta_norms,
     int const * finished)
 {
     int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1639,17 +1639,17 @@ __global__ void cuda_adapt_phi_derivatives(
     if (finished[fit_index])
         return;
 
-    double & phi_derivative = phi_derivatives[fit_index];
-    double const & step_bound = step_bounds[fit_index];
-    double const & scaled_delta_norm = scaled_delta_norms[fit_index];
+    float & phi_derivative = phi_derivatives[fit_index];
+    float const & step_bound = step_bounds[fit_index];
+    float const & scaled_delta_norm = scaled_delta_norms[fit_index];
 
     phi_derivative *= step_bound / scaled_delta_norm;
 }
 
 __global__ void cuda_check_phi(
     int * newton_step_accepted,
-    double const * phis,
-    double const * step_bounds,
+    float const * phis,
+    float const * step_bounds,
     int const * finished,
     int const n_fits)
 {
@@ -1658,18 +1658,18 @@ __global__ void cuda_check_phi(
     if (finished[fit_index] || fit_index >= n_fits)
         return;
 
-    double const & phi = phis[fit_index];
-    double const & step_bound = step_bounds[fit_index];
+    float const & phi = phis[fit_index];
+    float const & step_bound = step_bounds[fit_index];
 
     newton_step_accepted[fit_index]
-        = int(phi > .1 * step_bound);
+        = int(phi > .1f * step_bound);
 }
 
 __global__ void cuda_check_abs_phi(
     int * lambda_accepted,
     int const * newton_step_accepted,
-    double const * phis,
-    double const * step_bounds,
+    float const * phis,
+    float const * step_bounds,
     int const * finished,
     int const n_fits)
 {
@@ -1681,24 +1681,24 @@ __global__ void cuda_check_abs_phi(
     if (lambda_accepted[fit_index] || !newton_step_accepted[fit_index])
         return;
 
-    double const & phi = phis[fit_index];
-    double const & step_bound = step_bounds[fit_index];
+    float const & phi = phis[fit_index];
+    float const & step_bound = step_bounds[fit_index];
 
     lambda_accepted[fit_index]
-        = int(abs(phi) <= .1 * step_bound);
+        = int(abs(phi) <= .1f * step_bound);
 }
 
 __global__ void cuda_init_lambda_bounds(
-    double * lambdas,
-    double * lambda_lower_bounds,
-    double * lambda_upper_bounds,
-    double * scaled_gradients,
-    double const * scaled_delta_norms,
-    double const * phis,
-    double const * phi_derivatives,
-    double const * step_bounds,
-    double const * gradients,
-    double const * scaling_vectors,
+    float * lambdas,
+    float * lambda_lower_bounds,
+    float * lambda_upper_bounds,
+    float * scaled_gradients,
+    float const * scaled_delta_norms,
+    float const * phis,
+    float const * phi_derivatives,
+    float const * step_bounds,
+    float const * gradients,
+    float const * scaling_vectors,
     int const * finished,
     int const n_fits,
     int const n_parameters,
@@ -1706,7 +1706,7 @@ __global__ void cuda_init_lambda_bounds(
 {
     int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
 
-    //if (phis[fit_index] <= .1 * step_bounds[fit_index])
+    //if (phis[fit_index] <= .1f * step_bounds[fit_index])
     //    return;
 
     if (fit_index >= n_fits || finished[fit_index])
@@ -1714,15 +1714,15 @@ __global__ void cuda_init_lambda_bounds(
 
     if (!newton_step_accepted[fit_index])
     {
-        lambdas[fit_index] = 0.;
-        lambda_lower_bounds[fit_index] = 0.;
-        lambda_upper_bounds[fit_index] = 0.;
+        lambdas[fit_index] = 0.f;
+        lambda_lower_bounds[fit_index] = 0.f;
+        lambda_upper_bounds[fit_index] = 0.f;
         return;
     }
 
-    double * scaled_gradient = scaled_gradients + fit_index * n_parameters;
-    double const * gradient = gradients + fit_index * n_parameters;
-    double const * scaling_vector = scaling_vectors + fit_index * n_parameters;
+    float * scaled_gradient = scaled_gradients + fit_index * n_parameters;
+    float const * gradient = gradients + fit_index * n_parameters;
+    float const * scaling_vector = scaling_vectors + fit_index * n_parameters;
 
     // lambda lower bound 
     lambda_lower_bounds[fit_index] = phis[fit_index] / phi_derivatives[fit_index];
@@ -1731,7 +1731,7 @@ __global__ void cuda_init_lambda_bounds(
     for (int i = 0; i < n_parameters; i++)
         scaled_gradient[i] = gradient[i] / scaling_vector[i];
 
-    double const gradient_norm = calc_euclidian_norm(n_parameters, scaled_gradient);
+    float const gradient_norm = calc_euclidian_norm(n_parameters, scaled_gradient);
 
     lambda_upper_bounds[fit_index] = gradient_norm / step_bounds[fit_index];
     
@@ -1739,17 +1739,17 @@ __global__ void cuda_init_lambda_bounds(
     lambdas[fit_index] = max(lambdas[fit_index], lambda_lower_bounds[fit_index]);
     lambdas[fit_index] = min(lambdas[fit_index], lambda_upper_bounds[fit_index]);
 
-    if (lambdas[fit_index] == 0.)
+    if (lambdas[fit_index] == 0.f)
         lambdas[fit_index] = gradient_norm / scaled_delta_norms[fit_index];
 }
 
 __global__ void cuda_update_lambdas(
-    double * lambdas,
-    double * lambda_lower_bounds,
-    double * lambda_upper_bounds,
-    double const * phis,
-    double const * phi_derivatives,
-    double const * step_bounds,
+    float * lambdas,
+    float * lambda_lower_bounds,
+    float * lambda_upper_bounds,
+    float const * phis,
+    float const * phi_derivatives,
+    float const * step_bounds,
     int const * finished,
     int const * lambda_accepted,
     int const * newton_step_accepted,
@@ -1764,11 +1764,11 @@ __global__ void cuda_update_lambdas(
         return;
 
     // update bounds
-    if (phis[fit_index] > 0.)
+    if (phis[fit_index] > 0.f)
         lambda_lower_bounds[fit_index]
             = max(lambda_lower_bounds[fit_index], lambdas[fit_index]);
 
-    if (phis[fit_index] < 0.)
+    if (phis[fit_index] < 0.f)
         lambda_upper_bounds[fit_index]
             = min(lambda_upper_bounds[fit_index], lambdas[fit_index]);
 
@@ -1785,15 +1785,15 @@ __global__ void cuda_update_lambdas(
 }
 
 __global__ void cuda_calc_approximation_quality(
-    double * predicted_reductions,
-    double * actual_reductions,
-    double * directive_derivatives,
-    double * approximation_ratios,
-    double * derivatives_deltas,
-    double const * scaled_delta_norms,
-    double const * chi_squares,
-    double const * prev_chi_squares,
-    double const * lambdas,
+    float * predicted_reductions,
+    float * actual_reductions,
+    float * directive_derivatives,
+    float * approximation_ratios,
+    float * derivatives_deltas,
+    float const * scaled_delta_norms,
+    float const * chi_squares,
+    float const * prev_chi_squares,
+    float const * lambdas,
     int const * finished,
     int const n_fits,
     int const n_points)
@@ -1806,24 +1806,24 @@ __global__ void cuda_calc_approximation_quality(
     if (finished[fit_index])
         return;
 
-    double & predicted_reduction = predicted_reductions[fit_index];
-    double & actual_reduction = actual_reductions[fit_index];
-    double & directive_derivative = directive_derivatives[fit_index];
-    double & approximation_ratio = approximation_ratios[fit_index];
-    double * derivatives_delta = derivatives_deltas + fit_index * n_points;
-    double const & scaled_delta_norm = scaled_delta_norms[fit_index];
-    double const & chi_square = chi_squares[fit_index];
-    double const & prev_chi_square = prev_chi_squares[fit_index];
-    double const & lambda = lambdas[fit_index];
+    float & predicted_reduction = predicted_reductions[fit_index];
+    float & actual_reduction = actual_reductions[fit_index];
+    float & directive_derivative = directive_derivatives[fit_index];
+    float & approximation_ratio = approximation_ratios[fit_index];
+    float * derivatives_delta = derivatives_deltas + fit_index * n_points;
+    float const & scaled_delta_norm = scaled_delta_norms[fit_index];
+    float const & chi_square = chi_squares[fit_index];
+    float const & prev_chi_square = prev_chi_squares[fit_index];
+    float const & lambda = lambdas[fit_index];
 
-    double const derivatives_delta_norm
+    float const derivatives_delta_norm
         = calc_euclidian_norm(n_points, derivatives_delta);
 
-    double const summand1
+    float const summand1
         = derivatives_delta_norm * derivatives_delta_norm / prev_chi_square;
 
-    double summand2
-        = 2.
+    float summand2
+        = 2.f
         * lambda
         * scaled_delta_norm
         * scaled_delta_norm
@@ -1831,12 +1831,12 @@ __global__ void cuda_calc_approximation_quality(
 
     predicted_reduction = summand1 + summand2;
 
-    directive_derivative = -summand1 - summand2 / 2.;
+    directive_derivative = -summand1 - summand2 / 2.f;
 
-    actual_reduction = -1.;
+    actual_reduction = -1.f;
 
-    if (.1 * std::sqrt(chi_square) < std::sqrt(prev_chi_square))
-        actual_reduction = 1. - chi_square / prev_chi_square;
+    if (.1f * std::sqrt(chi_square) < std::sqrt(prev_chi_square))
+        actual_reduction = 1.f - chi_square / prev_chi_square;
 
     approximation_ratio = actual_reduction / predicted_reduction;
 }

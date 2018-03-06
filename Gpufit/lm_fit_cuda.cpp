@@ -1,7 +1,7 @@
 #include "lm_fit.h"
 
 LMFitCUDA::LMFitCUDA(
-    double const tolerance,
+    float const tolerance,
     Info const & info,
     GPUData & gpu_data,
     int const n_fits

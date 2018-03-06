@@ -21,24 +21,24 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
     std::size_t const n_points{ 20 };
     std::size_t const n_parameters{ 4 };
 
-    std::array< double, n_parameters > const true_parameters{ { -7.3027296f, 10.800486f, -0.33427560f, 0.13945465f } };
+    std::array< float, n_parameters > const true_parameters{ { -7.3027296f, 10.800486f, -0.33427560f, 0.13945465f } };
     
-    double const expected_chi_square = 38821.5f;
+    float const expected_chi_square = 38821.5f;
     
-    std::array< double, n_points > data;
+    std::array< float, n_points > data;
     data.fill(0.f);
 
-    std::array< double, n_parameters > initial_parameters{ { 25.f, 5.f, -5.f, 1.f } };
+    std::array< float, n_parameters > initial_parameters{ { 25.f, 5.f, -5.f, 1.f } };
 
-    double tolerance{ 1e-8f };
+    float tolerance{ 1e-8f };
 
     int max_n_iterations{ 1000 };
 
     std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1, 1 } };
 
-    std::array< double, n_parameters > output_parameters;
+    std::array< float, n_parameters > output_parameters;
     int output_state;
-    double output_chi_square;
+    float output_chi_square;
     int output_n_iterations;
 
     // test initial_parameters * 1.f

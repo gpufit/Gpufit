@@ -13,7 +13,7 @@ void LMFitCUDA::solve_equation_system()
 
     // configure kernel convert_pointer
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     // convert deltas to array of pointers
     convert_pointer <<< blocks, threads >>> (
@@ -27,12 +27,12 @@ void LMFitCUDA::solve_equation_system()
 
     // solve equation systems
     cublasStatus_t lu_status_solution
-        = cublasDgetrsBatched(
+        = cublasSgetrsBatched(
         gpu_data_.cublas_handle_,
         CUBLAS_OP_N,
         info_.n_parameters_to_fit_,
         1,
-        (double const **)(gpu_data_.pointer_decomposed_hessians_.data()),
+        (float const **)(gpu_data_.pointer_decomposed_hessians_.data()),
         info_.n_parameters_to_fit_,
         gpu_data_.pivot_vectors_,
         gpu_data_.pointer_deltas_,
@@ -95,7 +95,7 @@ void LMFitCUDA::calc_chi_squares()
     threads.x = info_.power_of_two_n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
     blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-    int const shared_size = sizeof(double) * threads.x;
+    int const shared_size = sizeof(float) * threads.x;
 
     cuda_calculate_chi_squares <<< blocks, threads, shared_size >>>(
         gpu_data_.chi_squares_,
@@ -113,7 +113,7 @@ void LMFitCUDA::calc_chi_squares()
     CUDA_CHECK_STATUS(cudaGetLastError());
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     if (info_.n_blocks_per_fit_ > 1)
     {
@@ -142,7 +142,7 @@ void LMFitCUDA::calc_gradients()
     threads.x = info_.power_of_two_n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
     blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-    int const shared_size = sizeof(double) * threads.x;
+    int const shared_size = sizeof(float) * threads.x;
 
     cuda_calculate_gradients <<< blocks, threads, shared_size >>>(
         gpu_data_.gradients_,
@@ -167,7 +167,7 @@ void LMFitCUDA::calc_gradients()
     {
         int const gradients_size = n_fits_ * info_.n_parameters_to_fit_;
         threads.x = std::min(gradients_size, 256);
-        blocks.x = int(std::ceil(double(gradients_size) / double(threads.x)));
+        blocks.x = int(std::ceil(float(gradients_size) / float(threads.x)));
 
         cuda_sum_gradient_subtotals <<< blocks, threads >>> (
             gpu_data_.gradients_,
@@ -232,7 +232,7 @@ void LMFitCUDA::check_all_lambdas()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     gpu_data_.set(gpu_data_.all_lambdas_accepted_, 1);
 
@@ -253,10 +253,10 @@ void LMFitCUDA::evaluate_iteration(int const iteration)
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
-    double chi_square = 0.;
-    double prev_chi_square = 0.;
+    float chi_square = 0.f;
+    float prev_chi_square = 0.f;
     gpu_data_.chi_squares_.copy(1, &chi_square);
     gpu_data_.prev_chi_squares_.copy(1, &prev_chi_square);
 
@@ -325,7 +325,7 @@ void LMFitCUDA::scale_hessians()
     int const abs_size = info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ * n_fits_;
 
     threads.x = std::min(abs_size, 256);
-    blocks.x = int(std::ceil(double(abs_size) / double(threads.x)));
+    blocks.x = int(std::ceil(float(abs_size) / float(threads.x)));
 
     cuda_init_scaled_hessians<<< blocks, threads >>>(
         gpu_data_.scaled_hessians_,
@@ -352,7 +352,7 @@ void LMFitCUDA::scale_hessians()
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
-void LMFitCUDA::decompose_hessians_LUP(Device_Array<double> const & hessians)
+void LMFitCUDA::decompose_hessians_LUP(Device_Array<float> const & hessians)
 {
     // TODO: check output info
 
@@ -364,7 +364,7 @@ void LMFitCUDA::decompose_hessians_LUP(Device_Array<double> const & hessians)
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     // convert hessians to array of pointers
     convert_pointer <<< blocks, threads >>>(
@@ -375,7 +375,7 @@ void LMFitCUDA::decompose_hessians_LUP(Device_Array<double> const & hessians)
         gpu_data_.finished_);
 
     // decompose hessians
-    cublasStatus_t lu_status_decopmposition = cublasDgetrfBatched(
+    cublasStatus_t lu_status_decopmposition = cublasSgetrfBatched(
         gpu_data_.cublas_handle_,
         info_.n_parameters_to_fit_,
         gpu_data_.pointer_decomposed_hessians_,
@@ -395,7 +395,7 @@ void LMFitCUDA::invert_hessians()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     // convert hessians to array of pointers
     convert_pointer <<< blocks, threads >>>(
@@ -405,10 +405,10 @@ void LMFitCUDA::invert_hessians()
         info_.n_parameters_to_fit_*info_.n_parameters_to_fit_,
         gpu_data_.finished_);
 
-    cublasStatus_t status_invert_matrix = cublasDgetriBatched(
+    cublasStatus_t status_invert_matrix = cublasSgetriBatched(
         gpu_data_.cublas_handle_,
         info_.n_parameters_to_fit_,
-        (double const **)gpu_data_.pointer_decomposed_hessians_.data(),
+        (float const **)gpu_data_.pointer_decomposed_hessians_.data(),
         info_.n_parameters_to_fit_,
         gpu_data_.pivot_vectors_,
         gpu_data_.pointer_inverted_hessians_,
@@ -423,7 +423,7 @@ void LMFitCUDA::initialize_step_bounds()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_ * info_.n_parameters_, 256);
-    blocks.x = int(std::ceil(double(n_fits_ * info_.n_parameters_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_ * info_.n_parameters_) / float(threads.x)));
 
     cuda_multiply<<< blocks, threads >>>(
         gpu_data_.scaled_parameters_,
@@ -454,7 +454,7 @@ void LMFitCUDA::adapt_step_bounds()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_adapt_step_bounds<<< blocks, threads >>>(
         gpu_data_.step_bounds_,
@@ -470,7 +470,7 @@ void LMFitCUDA::update_step_bounds()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_update_step_bounds<<< blocks, threads >>>(
         gpu_data_.step_bounds_,
@@ -492,7 +492,7 @@ void LMFitCUDA::calc_phi()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_ * info_.n_parameters_, 256);
-    blocks.x = int(std::ceil(double(n_fits_ * info_.n_parameters_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_ * info_.n_parameters_) / float(threads.x)));
 
     cuda_multiply <<< blocks, threads >>>(
         gpu_data_.scaled_deltas_,
@@ -531,7 +531,7 @@ void LMFitCUDA::check_phi()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_check_phi<<< blocks, threads >>>(
         gpu_data_.newton_step_accepted_,
@@ -548,7 +548,7 @@ void LMFitCUDA::check_abs_phi()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_check_abs_phi<<< blocks, threads >>>(
         gpu_data_.lambda_accepted_,
@@ -566,7 +566,7 @@ void LMFitCUDA::adapt_phi_derivatives()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_adapt_phi_derivatives<<< blocks, threads >>>(
         gpu_data_.phi_derivatives_,
@@ -582,7 +582,7 @@ void LMFitCUDA::initialize_lambda_bounds()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_init_lambda_bounds<<< blocks, threads >>>(
         gpu_data_.lambdas_,
@@ -608,7 +608,7 @@ void LMFitCUDA::update_lambdas()
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_update_lambdas<<< blocks, threads >>>(
         gpu_data_.lambdas_,
@@ -646,7 +646,7 @@ void LMFitCUDA::calc_approximation_quality()
     CUDA_CHECK_STATUS(cudaGetLastError());
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(double(n_fits_) / double(threads.x)));
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
 
     cuda_calc_approximation_quality<<< blocks, threads >>>(
         gpu_data_.predicted_reductions_,

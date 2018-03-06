@@ -32,13 +32,13 @@ void simple_example()
 	size_t const n_model_parameters = 4;
 
 	// initial parameters
-	std::vector< double > initial_parameters(n_fits * n_model_parameters);
+	std::vector< float > initial_parameters(n_fits * n_model_parameters);
 
 	// data
-	std::vector< double > data(n_points_per_fit * n_fits);
+	std::vector< float > data(n_points_per_fit * n_fits);
 
 	// tolerance
-	double const tolerance = 0.001f;
+	float const tolerance = 0.001f;
 
 	// maximum number of iterations
 	int const max_number_iterations = 10;
@@ -50,9 +50,9 @@ void simple_example()
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
 	// output parameters
-	std::vector< double > output_parameters(n_fits * n_model_parameters);
+	std::vector< float > output_parameters(n_fits * n_model_parameters);
 	std::vector< int > output_states(n_fits);
-	std::vector< double > output_chi_square(n_fits);
+	std::vector< float > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
 
     /***************************** call to gpufit  ****************************/
