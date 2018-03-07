@@ -1632,9 +1632,13 @@ __global__ void cuda_adapt_phi_derivatives(
     float * phi_derivatives,
     float const * step_bounds,
     float const * scaled_delta_norms,
-    int const * finished)
+    int const * finished,
+    int const n_fits)
 {
     int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (fit_index >= n_fits)
+        return;
 
     if (finished[fit_index])
         return;

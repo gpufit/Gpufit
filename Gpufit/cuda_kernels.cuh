@@ -256,7 +256,8 @@ __global__ void cuda_adapt_phi_derivatives(
     float * phi_derivatives,
     float const * step_bounds,
     float const * scaled_delta_norms,
-    int const * finished);
+    int const * finished,
+    int const n_fits);
 
 __global__ void cuda_check_phi(
     int * newton_step_accepted,

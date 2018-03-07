@@ -572,7 +572,8 @@ void LMFitCUDA::adapt_phi_derivatives()
         gpu_data_.phi_derivatives_,
         gpu_data_.step_bounds_,
         gpu_data_.scaled_delta_norms_,
-        gpu_data_.finished_);
+        gpu_data_.finished_,
+        n_fits_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
