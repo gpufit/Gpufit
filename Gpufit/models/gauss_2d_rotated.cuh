@@ -65,7 +65,7 @@ __device__ void calculate_gauss2drotated(
 {
     // indices
 
-    int const n_points_x = sqrt((float)n_points);
+    int const n_points_x = std::sqrt((float)n_points);
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - point_index_y * n_points_x;
@@ -76,12 +76,12 @@ __device__ void calculate_gauss2drotated(
 
     // value
 
-    float const cosp6 = cosf(p[6]);
-    float const sinp6 = sinf(p[6]);
+    float const cosp6 = cos(p[6]);
+    float const sinp6 = sin(p[6]);
 
     float const arga = (point_index_x - p[1]) * cosp6 - (point_index_y - p[2]) * sinp6;
     float const argb = (point_index_x - p[1]) * sinp6 + (point_index_y - p[2]) * cosp6;
-    float const ex = exp(-0.5 * (((arga / p[3]) * (arga / p[3])) + ((argb / p[4]) * (argb / p[4]))));
+    float const ex = exp(-0.5f * (((arga / p[3]) * (arga / p[3])) + ((argb / p[4]) * (argb / p[4]))));
     value[point_index] = p[0] * ex + p[5];
 
     // derivative

@@ -100,7 +100,8 @@ private:
     void calc_chi_square(
         std::vector<float> const & curve);
 
-    void decompose_hessian_LUP(std::vector<float> const & hessian);
+    template< class T >
+    void decompose_hessian_LUP(std::vector<T> & decomposed_hessian, std::vector<T> const & hessian);
 
     void modify_step_width();
     void update_parameters();
@@ -108,6 +109,13 @@ private:
     bool check_for_convergence();
     void evaluate_iteration(int const iteration);
     void prepare_next_iteration();
+
+    void calc_approximation_quality();
+    void initialize_step_bound();
+    void initialize_lambda_bounds();
+    void update_step_bound();
+    void calc_phi();
+    void update_lambda();
 
 public:
 
@@ -129,10 +137,22 @@ private:
     Info const & info_;
 
     float lambda_;
+    float lambda_lower_bound_;
+    float lambda_upper_bound_;
+    float step_bound_;
+    float actual_reduction_;
+    float predicted_reduction_;
+    float directive_derivative_;
+    float approximation_ratio_;
+    float phi_;
+    float phi_derivative_;
+
     std::vector<float> curve_;
     std::vector<float> derivatives_;
+    std::vector<float> temp_derivatives_;
     std::vector<float> hessian_;
     std::vector<float> decomposed_hessian_;
+    std::vector<float> inverted_hessian_;
     std::vector<int> pivot_array_;
     std::vector<float> modified_hessian_;
     std::vector<float> gradient_;

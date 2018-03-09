@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
 
     float tolerance{ 1e-8f } ;
     
-    int max_n_iterations{ 30 } ;
+    int max_n_iterations{ 1000 } ;
     
     std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1 } } ;
     
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
 
     BOOST_CHECK( status == 0 ) ;
     BOOST_CHECK( output_state == 0 );
-    BOOST_CHECK( output_n_iterations <= 9 );
+    BOOST_CHECK( output_n_iterations <= 10 );
     BOOST_CHECK( output_chi_square < 1e-26f );
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-13f);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( Fletcher_Powell_Helix )
 
     BOOST_CHECK(status == 0);
     BOOST_CHECK(output_state == 0);
-    BOOST_CHECK(output_n_iterations <= 21);
+    BOOST_CHECK(output_n_iterations <= 33);
     BOOST_CHECK(output_chi_square < 1e-26f);
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-13f);

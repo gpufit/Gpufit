@@ -84,12 +84,12 @@ public:
 
     void read(bool * dst, int const * src);
     void set(int* arr, int const value);
+    void set(int* arr, int const value, int const count);
     void set(float* arr, float const value, int const count);
     void copy(float * dst, float const * src, std::size_t const count);
 
 private:
 
-    void set(int* arr, int const value, int const count);
     void write(float* dst, float const * src, int const count);
     void write(int* dst, std::vector<int> const & src);
     void write(char* dst, char const * src, std::size_t const count);
@@ -114,21 +114,42 @@ public:
     Device_Array< float > prev_chi_squares_;
     Device_Array< float > gradients_;
     Device_Array< float > hessians_;
+    Device_Array< float > scaled_hessians_;
     Device_Array< float > deltas_;
     Device_Array< float > scaling_vectors_;
 
     Device_Array< float > values_;
     Device_Array< float > derivatives_;
+    Device_Array< float > temp_derivatives_;
 
     Device_Array< float > lambdas_;
+    Device_Array< float > lambda_lower_bounds_;
+    Device_Array< float > lambda_upper_bounds_;
+    Device_Array< float > step_bounds_;
+    Device_Array< float > actual_reductions_;
+    Device_Array< float > predicted_reductions_;
+    Device_Array< float > directive_derivatives_;
+    Device_Array< float > approximation_ratios_;
+    Device_Array< float > scaled_parameters_;
+    Device_Array< float > scaled_deltas_;
+    Device_Array< float > scaled_delta_norms_;
+    Device_Array< float > phis_;
+    Device_Array< float > phi_derivatives_;
+    Device_Array< float > derivatives_delta_;
+
     Device_Array< int > states_;
     Device_Array< int > finished_;
     Device_Array< int > iteration_failed_;
+    Device_Array< int > lambda_accepted_;
+    Device_Array< int > newton_step_accepted_;
     Device_Array< int > all_finished_;
+    Device_Array< int > all_lambdas_accepted_;
     Device_Array< int > n_iterations_;
 
     Device_Array< float > decomposed_hessians_;
+    Device_Array< float > inverted_hessians_;
     Device_Array< float * > pointer_decomposed_hessians_;
+    Device_Array< float * > pointer_inverted_hessians_;
     Device_Array< float * > pointer_deltas_;
     Device_Array< int > pivot_vectors_;
     Device_Array< int > cublas_info_;

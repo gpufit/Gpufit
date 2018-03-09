@@ -63,7 +63,7 @@ __device__ void calculate_cauchy2delliptic(
 {
     // indices
 
-    int const n_points_x = sqrt((float)n_points);
+    int const n_points_x = std::sqrt((float)n_points);
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - (point_index_y*n_points_x);

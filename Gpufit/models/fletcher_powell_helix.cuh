@@ -62,9 +62,9 @@ __device__ void calculate_fletcher_powell_helix(
     float theta = 0.f;
 
     if (p[0] > 0.f)
-        theta = .5f * atanf(p[1] / p[0]) / pi;
+        theta = .5f * atan(p[1] / p[0]) / pi;
     else if (p[0] < 0.f)
-        theta = .5f * atanf(p[1] / p[0]) / pi + .5f;
+        theta = .5f * atan(p[1] / p[0]) / pi + .5f;
 
     float const arg = p[0] * p[0] + p[1] * p[1];
 
@@ -82,10 +82,10 @@ __device__ void calculate_fletcher_powell_helix(
         break;
     case 1:
         // value
-        value[point_index] = 10.f * (sqrtf(arg) - 1.f);
+        value[point_index] = 10.f * (std::sqrt(arg) - 1.f);
         // derivative
-        derivative[0 * n_points + point_index] = 10.f * p[0] / sqrtf(arg);
-        derivative[1 * n_points + point_index] = 10.f * p[1] / sqrtf(arg);
+        derivative[0 * n_points + point_index] = 10.f * p[0] / std::sqrt(arg);
+        derivative[1 * n_points + point_index] = 10.f * p[1] / std::sqrt(arg);
         derivative[2 * n_points + point_index] = 0.f;
         break;
     case 2:

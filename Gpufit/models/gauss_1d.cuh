@@ -83,7 +83,7 @@ __device__ void calculate_gauss1d(
     // indices
 
     float * user_info_float = (float*)user_info;
-    float x = 0.0f;
+    float x = 0.f;
     if (!user_info_float)
     {
         x = point_index;
@@ -105,7 +105,7 @@ __device__ void calculate_gauss1d(
     
     // value
 
-    float const argx = (x - p[1]) * (x - p[1]) / (2 * p[2] * p[2]);
+    float const argx = (x - p[1]) * (x - p[1]) / (2.f * p[2] * p[2]);
     float const ex = exp(-argx);
     value[point_index] = p[0] * ex + p[3];
 

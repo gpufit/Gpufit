@@ -17,23 +17,44 @@ GPUData::GPUData(Info const & info) :
     prev_chi_squares_( info_.max_chunk_size_ ),
     gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_),
     hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
-    deltas_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
-    scaling_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
+    scaled_hessians_(info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_),
+    deltas_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ ),
+    scaling_vectors_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ ),
 
     values_( info_.max_chunk_size_ * info_.n_points_ ),
     derivatives_( info_.max_chunk_size_ * info_.n_points_ * info_.n_parameters_ ),
+    temp_derivatives_( info_.max_chunk_size_ * info_.n_points_ * info_.n_parameters_ ),
 
     lambdas_( info_.max_chunk_size_ ),
+    lambda_lower_bounds_( info_.max_chunk_size_ ),
+    lambda_upper_bounds_( info_.max_chunk_size_ ),
+    step_bounds_( info_.max_chunk_size_ ),
+    actual_reductions_( info_.max_chunk_size_ ),
+    predicted_reductions_( info_.max_chunk_size_ ),
+    directive_derivatives_( info_.max_chunk_size_ ),
+    approximation_ratios_( info_.max_chunk_size_ ),
+    scaled_parameters_( info_.max_chunk_size_ * info_.n_parameters_ ),
+    scaled_deltas_( info_.max_chunk_size_ * info_.n_parameters_ ),
+    scaled_delta_norms_( info_.max_chunk_size_ ),
+    phis_( info_.max_chunk_size_ ),
+    phi_derivatives_( info_.max_chunk_size_ ),
+    derivatives_delta_(info_.max_chunk_size_ * info_.n_points_),
+
     states_( info_.max_chunk_size_ ),
     finished_( info_.max_chunk_size_ ),
-    iteration_failed_(info_.max_chunk_size_),
+    iteration_failed_( info_.max_chunk_size_ ),
+    lambda_accepted_( info_.max_chunk_size_ ),
+    newton_step_accepted_( info_.max_chunk_size_ ),
     all_finished_( 1 ),
+    all_lambdas_accepted_(1),
     n_iterations_( info_.max_chunk_size_ ),
 
-    decomposed_hessians_(info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_),
-    pointer_decomposed_hessians_(info_.max_chunk_size_),
-    pointer_deltas_(info_.max_chunk_size_),
-    pivot_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
+    decomposed_hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
+    inverted_hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
+    pointer_decomposed_hessians_( info_.max_chunk_size_ ),
+    pointer_inverted_hessians_( info_.max_chunk_size_ ),
+    pointer_deltas_( info_.max_chunk_size_ ),
+    pivot_vectors_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ ),
     cublas_info_(info_.max_chunk_size_)
 {
     cublasCreate(&cublas_handle_);
@@ -77,7 +98,9 @@ void GPUData::init
     
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
-    set(lambdas_, 0.001f, chunk_size_);
+    set(lambdas_, 0.f, chunk_size_);
+    set(lambda_accepted_, 0, chunk_size_);
+    set(newton_step_accepted_, 1, chunk_size_);
 }
 
 void GPUData::init_user_info(char const * const user_info)

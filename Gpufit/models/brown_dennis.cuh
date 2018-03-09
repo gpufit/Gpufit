@@ -63,7 +63,7 @@ __device__ void calculate_brown_dennis(
     // value
 
     float const arg1 = p[0] + p[1] * x - expf(x);
-    float const arg2 = p[2] + p[3] * sinf(x) - cosf(x);
+    float const arg2 = p[2] + p[3] * sin(x) - cos(x);
 
     value[point_index] = arg1*arg1 + arg2*arg2;
 
@@ -74,7 +74,7 @@ __device__ void calculate_brown_dennis(
     current_derivative[0 * n_points] = 2.f * arg1;
     current_derivative[1 * n_points] = 2.f * x * arg1;
     current_derivative[2 * n_points] = 2.f * arg2;
-    current_derivative[3 * n_points] = 2.f * sinf(x) * arg2;
+    current_derivative[3 * n_points] = 2.f * sin(x) * arg2;
 }
 
 #endif

@@ -48,9 +48,9 @@ void gauss_fit_1d()
 
     std::array< float, n_parameters > initial_parameters{ { 2.f, 1.5f, 0.3f, 0.f } };
 
-    float tolerance{ 0.001f };
+    float tolerance{ 0.00001f };
 
-    int max_n_iterations{ 10 };
+    int max_n_iterations{ 20 };
 
     std::array< int, n_parameters > parameters_to_fit{ { 1, 1, 1, 1 } };
 
