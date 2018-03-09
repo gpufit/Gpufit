@@ -292,8 +292,9 @@ __global__ void cuda_check_fit_improvement(
         return;
 
     bool const prev_chi_squares_initialized = prev_chi_squares[index] != 0.f;
-    bool const chi_square_increased = (chi_squares[index] >= prev_chi_squares[index]);
-    if (prev_chi_squares_initialized && chi_square_increased)
+    // chi_squares[index] can be NaN which compares to false with any other number
+    bool const chi_square_decreased = (chi_squares[index] < prev_chi_squares[index]);
+    if (prev_chi_squares_initialized && !chi_square_decreased)
     {
         iteration_failed[index] = 1;
     }
@@ -1029,7 +1030,7 @@ __global__ void cuda_check_for_convergence(
 
     int const fit_found
         = abs(chi_squares[fit_index] - prev_chi_squares[fit_index])
-        < tolerance * fmaxf(1, chi_squares[fit_index]);
+        < tolerance * fmaxf(1.f, chi_squares[fit_index]);
 
     int const max_n_iterations_reached = iteration == max_n_iterations - 1;
 
