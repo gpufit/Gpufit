@@ -92,7 +92,11 @@ int decompose_LUP(std::vector<T> & matrix, int const N, T const Tol, std::vector
 
             for (int k = i + 1; k < N; k++)
             {
-                matrix[j * N + k] -= matrix[j * N + i] * matrix[i * N + k];
+                matrix[j * N + k]
+                    = float(
+                      double(matrix[j * N + k])
+                    - double(matrix[j * N + i])
+                    * double(matrix[i * N + k]));
             }
         }
     }
