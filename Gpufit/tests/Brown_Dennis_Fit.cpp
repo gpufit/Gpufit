@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
     std::size_t const n_points{ 20 };
     std::size_t const n_parameters{ 4 };
 
-    std::array< float, n_parameters > const true_parameters{ { -7.3027296f, 10.800486f, -0.33427560f, 0.13945465f } };
+    std::array< float, n_parameters > const true_parameters{ { -7.30533123f, 10.8015156f, -0.336674005f, 0.137474522f } };
     
     float const expected_chi_square = 38821.5f;
     
@@ -135,8 +135,8 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
     BOOST_CHECK(output_n_iterations <= 400);
     BOOST_CHECK(output_chi_square < expected_chi_square);
 
-    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-1f);
-    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-1f);
-    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-1f);
-    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-1f);
+    BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-2f);
+    BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-2f);
+    BOOST_CHECK(std::abs(output_parameters[2] - true_parameters[2]) < 1e-2f);
+    BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-2f);
 }
