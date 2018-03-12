@@ -9,25 +9,7 @@ extern __global__ void convert_pointer(
     float ** pointer_to_pointer,
     float * pointer,
     int const n_pointers,
-    int const size,
-    int const * skip);
-
-extern __global__ void cuda_calculate_interim_euclidian_norms(
-    float * norms,
-    float const * vectors,
-    int const n_points,
-    int const n_fits,
-    int const n_parameters,
-    int const n_parameters_to_fit,
-    int const * finished,
-    int const n_fits_per_block);
-
-extern __global__ void cuda_complete_euclidian_norms(
-    float * norms,
-    int const n_blocks_per_fit,
-    int const n_fits,
-    int const n_parameters,
-    int const * finished);
+    int const size);
 
 extern __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
@@ -111,8 +93,7 @@ extern __global__ void cuda_init_scaled_hessians(
     int const n_fits,
     int const n_parameters,
     int const * finished,
-    int const * lambda_accepted,
-    int const * newton_step_accepted);
+    int const * lambda_accepted);
 
 extern __global__ void cuda_modify_step_widths(
     float * hessians,
@@ -174,7 +155,6 @@ extern __global__ void cuda_check_all_lambdas(
     int const n_fits);
 
 extern __global__ void cuda_prepare_next_iteration(
-    float * lambdas,
     float * chi_squares,
     float * prev_chi_squares,
     float * function_parameters,
@@ -196,11 +176,11 @@ __global__ void cuda_multiply(
     float * products,
     float const * multiplicands,
     float const * multipliers,
-    int const * skip,
     int const n_vectors,
     int const vector_size,
+    int const * skip_1,
     int const * skip_2,
-    int const * not_skip_3);
+    int const * not_skip);
 
 __global__ void cuda_multiply_matrix_vector(
     float * products,
@@ -215,14 +195,12 @@ __global__ void cuda_multiply_matrix_vector(
 __global__ void cuda_initialize_step_bounds(
     float * step_bounds,
     float * scaled_parameters,
-    int const * finished,
     int const n_fits,
     int const n_parameters);
 
 __global__ void cuda_adapt_step_bounds(
     float * step_bounds,
     float const * scaled_delta_norms,
-    int const * finished,
     int const n_fits);
 
 __global__ void cuda_update_step_bounds(
