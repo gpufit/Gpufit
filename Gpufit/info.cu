@@ -11,7 +11,7 @@ void Info::get_gpu_properties()
     std::size_t free_bytes;
     std::size_t total_bytes;
     CUDA_CHECK_STATUS(cudaMemGetInfo(&free_bytes, &total_bytes));
-    available_gpu_memory_ = std::size_t(float(free_bytes) * 0.1f);
+    available_gpu_memory_ = std::size_t(float(free_bytes) * 0.2f);
     
     if (available_gpu_memory_ > user_info_size_)
     {

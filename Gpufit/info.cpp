@@ -69,19 +69,24 @@ void Info::set_max_chunk_size()
 {
     int one_fit_memory
         = sizeof(float)
-        *(2 * n_points_                                     // data, values
-        + 2 * n_parameters_                                 // parameters, prev_parameters
+        *(3 * n_points_                                     // data, values, product derivatives*delta
+        + 4 * n_parameters_                                 // parameters, prev_parameters, scaled parameters
+                                                            // scaled delta
         + 1 * n_blocks_per_fit_                             // chi_square
         + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
-        + 2 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian, decomposed hessian
+        + 4 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian, scaled hessian, decomposed hessian
+                                                            // inverted hessian
         + 2 * n_parameters_to_fit_                          // delta, scaling_vector
-        + 1 * n_points_*n_parameters_                       // derivatives
-        + 4)                                                // prev_chi_square, lambda,
-                                                            // pointer to decomposed hessian, pointer to delta
+        + 2 * n_points_*n_parameters_                       // derivatives. temp derivatives
+        + 4                                                 // prev_chi_square, pointer to decomposed hessian,
+                                                            // pointer to delta, pointer to inverted hessian
+        + 11)                                               // lambda
+
         + sizeof(int)
         *(2 * n_parameters_to_fit_                          // pivot vector, indices of fitted parameters
-        + 5);                                               // state, finished, iteration failed flag,
-                                                            // number of iterations, cublas info
+        + 7);                                               // state, finished flag, iteration failed flag,
+                                                            // number of iterations, cublas info, lambda accepted flag,
+                                                            // newton step accepted flag
 
     if (use_weights_)
         one_fit_memory += sizeof(float) * n_points_;
