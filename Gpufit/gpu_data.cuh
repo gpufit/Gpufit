@@ -135,7 +135,7 @@ public:
     Device_Array< float > scaled_delta_norms_;
     Device_Array< float > phis_;
     Device_Array< float > phi_derivatives_;
-    Device_Array< float > derivatives_delta_;
+    Device_Array< float > temp_array_;
 
     Device_Array< int > states_;
     Device_Array< int > finished_;

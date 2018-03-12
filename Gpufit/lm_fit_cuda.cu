@@ -514,7 +514,7 @@ void LMFitCUDA::calc_phi()
         gpu_data_.inverted_hessians_,
         gpu_data_.scaled_deltas_,
         gpu_data_.scaled_delta_norms_,
-        gpu_data_.derivatives_delta_,
+        gpu_data_.temp_array_,
         gpu_data_.scaling_vectors_,
         gpu_data_.step_bounds_,
         info_.n_parameters_,
@@ -589,7 +589,7 @@ void LMFitCUDA::initialize_lambda_bounds()
         gpu_data_.lambdas_,
         gpu_data_.lambda_lower_bounds_,
         gpu_data_.lambda_upper_bounds_,
-        gpu_data_.derivatives_delta_,
+        gpu_data_.temp_array_,
         gpu_data_.scaled_delta_norms_,
         gpu_data_.phis_,
         gpu_data_.phi_derivatives_,
@@ -636,7 +636,7 @@ void LMFitCUDA::calc_approximation_quality()
     blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
     cuda_multiply_matrix_vector<<< blocks, threads>>>(
-        gpu_data_.derivatives_delta_,
+        gpu_data_.temp_array_,
         gpu_data_.temp_derivatives_,
         gpu_data_.deltas_,
         info_.n_points_,
@@ -654,7 +654,7 @@ void LMFitCUDA::calc_approximation_quality()
         gpu_data_.actual_reductions_,
         gpu_data_.directive_derivatives_,
         gpu_data_.approximation_ratios_,
-        gpu_data_.derivatives_delta_,
+        gpu_data_.temp_array_,
         gpu_data_.scaled_delta_norms_,
         gpu_data_.chi_squares_,
         gpu_data_.prev_chi_squares_,
