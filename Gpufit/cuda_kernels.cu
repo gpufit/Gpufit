@@ -932,6 +932,61 @@ __global__ void cuda_update_parameters(
     current_parameters[parameters_to_fit_indices[parameter_index]] += current_deltas[parameter_index];
 }
 
+/* Description of the cuda_update_state_after_lup function
+ * =======================================================
+ *
+ * This function interprets the cuBLAS flag vector of the LUP deomposition
+ * function according to this LM implementation.
+ *
+ * Parameters:
+ *
+ * n_fits: The number of fits.
+ *
+ * cublas_info: An input vector used to report whether a fit is singular.
+ *
+ * states: An output vector of values which indicate whether the fitting process
+ *         was carreid out correctly or which problem occurred. If a hessian
+ *         matrix of a fit is singular, it is set to 2.
+ *
+ * Calling the cuda_update_state_after_lup function
+ * ================================================
+ *
+ * When calling the function, the blocks and threads must be set up correctly,
+ * as shown in the following example code.
+ *
+ *   dim3  threads(1, 1, 1);
+ *   dim3  blocks(1, 1, 1);
+ *
+ *   int const example_value = 256;
+ *
+ *   threads.x = min(n_fits, example_value);
+ *   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+ *
+ *   cuda_update_state_after_lup<<< blocks, threads >>>(
+ *       n_fits,
+ *       cublas_info,
+ *       states);
+ *
+ */
+    
+__global__ void cuda_update_state_after_lup(
+    int const n_fits,
+    int const * cublas_info,
+    int const * finished,
+    int * states)
+{
+    int const fit_index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (fit_index >= n_fits)
+        return;
+
+    if (finished[fit_index])
+        return;
+
+    if (cublas_info[fit_index] != 0)
+        states[fit_index] = SINGULAR_HESSIAN;
+}
+
 /* Description of the cuda_check_for_convergence function
 * =======================================================
 *

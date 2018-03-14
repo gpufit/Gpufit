@@ -21,8 +21,6 @@ void LMFitCUDA::solve_equation_system()
         info_.n_fits_per_block_);
     CUDA_CHECK_STATUS(cudaGetLastError());
 
-    // TODO: check output info
-
     // initialize components of equation systems
     gpu_data_.copy(gpu_data_.decomposed_hessians_, gpu_data_.hessians_, n_fits_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
 
@@ -35,6 +33,18 @@ void LMFitCUDA::solve_equation_system()
         gpu_data_.pivot_vectors_,
         gpu_data_.cublas_info_,
         n_fits_);
+
+    //set up to update the lm_state_gpu_ variable with the Gauss Jordan results
+    threads.x = std::min(n_fits_, 256);
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+
+    //update the gpu_data_.states_ variable
+    cuda_update_state_after_lup<<< blocks, threads >>>(
+        n_fits_,
+        gpu_data_.cublas_info_,
+        gpu_data_.finished_,
+        gpu_data_.states_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
 
     // initialize deltas with values of gradients
     gpu_data_.copy(gpu_data_.deltas_, gpu_data_.gradients_, n_fits_ * info_.n_parameters_to_fit_);
