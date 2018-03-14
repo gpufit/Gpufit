@@ -4,23 +4,6 @@
 #include "models/models.cuh"
 #include "estimators/estimators.cuh"
 
-__global__ void convert_pointer(
-    float ** pointer_to_pointer,
-    float * pointer,
-    int const n_pointers,
-    int const size,
-    int const * skip)
-{
-    int const index = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (index >= n_pointers)
-        return;
-
-    int const begin = index * size;
-
-    pointer_to_pointer[index] = pointer + begin;
-}
-
 /* Description of the cuda_calc_curve_values function
 * ===================================================
 *

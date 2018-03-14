@@ -1,4 +1,5 @@
 #include "gpu_data.cuh"
+#include <algorithm>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 
@@ -37,6 +38,8 @@ GPUData::GPUData(Info const & info) :
     cublas_info_(info_.max_chunk_size_)
 {
     cublasCreate(&cublas_handle_);
+
+    point_to_data_sets();
 }
 
 GPUData::~GPUData()
@@ -65,16 +68,16 @@ void GPUData::init
         data_,
         &data[chunk_index_*info_.max_chunk_size_*info_.n_points_],
         chunk_size_*info_.n_points_);
-    
+
     if (info_.use_weights_)
         write(weights_, &weights[chunk_index_*info_.max_chunk_size_*info_.n_points_],
-                chunk_size_*info_.n_points_);
-    
+            chunk_size_*info_.n_points_);
+
     write(
         parameters_,
         &initial_parameters[chunk_index_*info_.max_chunk_size_*info_.n_parameters_],
         chunk_size_ * info_.n_parameters_);
-    
+
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
     set(lambdas_, 0.001f, chunk_size_);
@@ -167,4 +170,47 @@ void GPUData::set(float* arr, float const value, int const count)
     dim3  blocks(bx, 1, 1);
     set_kernel<<< blocks, threads >>>(arr, value, count);
     CUDA_CHECK_STATUS(cudaGetLastError());
+}
+
+__global__ void cuda_point_to_data_sets(
+    float ** pointer_to_pointers,
+    float * pointer,
+    std::size_t const n_pointers,
+    std::size_t const size)
+{
+    std::size_t const index = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (index >= n_pointers)
+        return;
+
+    int const begin = index * size;
+
+    pointer_to_pointers[index] = pointer + begin;
+}
+
+void GPUData::point_to_data_sets()
+{
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
+
+    std::size_t max_threads = 256;
+
+    threads.x
+        = static_cast<unsigned int>
+          (std::min(info_.max_chunk_size_, max_threads));
+    blocks.x
+        = static_cast<unsigned int>
+          (std::ceil(float(info_.max_chunk_size_) / float(threads.x)));
+
+    cuda_point_to_data_sets <<< blocks, threads >>>(
+        pointer_decomposed_hessians_,
+        decomposed_hessians_,
+        info_.max_chunk_size_,
+        info_.n_parameters_to_fit_*info_.n_parameters_to_fit_);
+
+    cuda_point_to_data_sets <<< blocks, threads >>> (
+        pointer_deltas_,
+        deltas_,
+        info_.max_chunk_size_,
+        info_.n_parameters_to_fit_);
 }

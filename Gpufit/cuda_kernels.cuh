@@ -5,13 +5,6 @@
 
 void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensions);
 
-extern __global__ void convert_pointer(
-    float ** pointer_to_pointer,
-    float * pointer,
-    int const n_pointers,
-    int const size,
-    int const * skip);
-
 extern __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
     int const n_blocks_per_fit,

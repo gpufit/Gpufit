@@ -93,6 +93,7 @@ private:
     void write(float* dst, float const * src, int const count);
     void write(int* dst, std::vector<int> const & src);
     void write(char* dst, char const * src, std::size_t const count);
+    void point_to_data_sets();
 
 private:
     int chunk_size_;

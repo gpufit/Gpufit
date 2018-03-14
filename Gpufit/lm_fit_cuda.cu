@@ -26,18 +26,6 @@ void LMFitCUDA::solve_equation_system()
     // initialize components of equation systems
     gpu_data_.copy(gpu_data_.decomposed_hessians_, gpu_data_.hessians_, n_fits_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
 
-    // configure kernels
-    threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
-
-    // convert hessians to array of pointers
-    convert_pointer <<< blocks, threads >>>(
-        gpu_data_.pointer_decomposed_hessians_,
-        gpu_data_.decomposed_hessians_,
-        n_fits_,
-        info_.n_parameters_to_fit_*info_.n_parameters_to_fit_,
-        gpu_data_.finished_);
-
     // decompose hessians
     cublasStatus_t lu_status_decopmposition = cublasSgetrfBatched(
         gpu_data_.cublas_handle_,
@@ -50,17 +38,6 @@ void LMFitCUDA::solve_equation_system()
 
     // initialize deltas with values of gradients
     gpu_data_.copy(gpu_data_.deltas_, gpu_data_.gradients_, n_fits_ * info_.n_parameters_to_fit_);
-
-    // configure kernel convert_pointer
-    threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
-
-    // convert deltas to array of pointers
-    convert_pointer <<< blocks, threads >>> (
-        gpu_data_.pointer_deltas_,
-        gpu_data_.deltas_,
-        n_fits_,
-        info_.n_parameters_to_fit_, gpu_data_.finished_);
 
     // TODO: check solution_info
     int solution_info;
@@ -81,7 +58,6 @@ void LMFitCUDA::solve_equation_system()
         n_fits_);
 
     threads.x = info_.n_parameters_*info_.n_fits_per_block_;
-    threads.y = 1;
     blocks.x = n_fits_ / info_.n_fits_per_block_;
 
     cuda_update_parameters<<< blocks, threads >>>(
