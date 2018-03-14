@@ -128,7 +128,7 @@ public:
     Device_Array< float > step_bounds_;
     Device_Array< float > actual_reductions_;
     Device_Array< float > predicted_reductions_;
-    Device_Array< float > directive_derivatives_;
+    Device_Array< float > directional_derivatives_;
     Device_Array< float > approximation_ratios_;
     Device_Array< float > scaled_parameters_;
     Device_Array< float > scaled_deltas_;

@@ -142,7 +142,7 @@ private:
     float step_bound_;
     float actual_reduction_;
     float predicted_reduction_;
-    float directive_derivative_;
+    float directional_derivative_;
     float approximation_ratio_;
     float phi_;
     float phi_derivative_;

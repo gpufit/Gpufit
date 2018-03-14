@@ -31,7 +31,7 @@ GPUData::GPUData(Info const & info) :
     step_bounds_( info_.max_chunk_size_ ),
     actual_reductions_( info_.max_chunk_size_ ),
     predicted_reductions_( info_.max_chunk_size_ ),
-    directive_derivatives_( info_.max_chunk_size_ ),
+    directional_derivatives_( info_.max_chunk_size_ ),
     approximation_ratios_( info_.max_chunk_size_ ),
     scaled_parameters_( info_.max_chunk_size_ * info_.n_parameters_ ),
     scaled_deltas_( info_.max_chunk_size_ * info_.n_parameters_ ),

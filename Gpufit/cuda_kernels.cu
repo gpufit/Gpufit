@@ -4,6 +4,44 @@
 #include "models/models.cuh"
 #include "estimators/estimators.cuh"
 
+/* Description of the convert_pointer function
+* ============================================
+*
+* This function organizes a data set to n_pointers data sets with the size size.
+* That kind of organization is necessary for the cuBLAS routines used in Gpufit.
+*
+* Parameters:
+*
+* pointer_to_pointer: An output pointer array of pointers pointing to data sets.
+*
+* pointer: An input pointer array pointing to a data set
+*
+* n_pointers: The number of pointers.
+*
+* size: The size of the data sets.
+*
+* Calling the convert_pointer function
+* ====================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int const example_value = 256;
+*
+*   threads.x = min(n_pointers, example_value);
+*   blocks.x = int(ceil(float(n_pointers) / float(threads.x)));
+*
+*   cuda_sum_chi_square_subtotals<<< blocks, threads >>>(
+*       pointer_to_pointer,
+*       pointer,
+*       n_pointers,
+*       size);
+*
+*/
+
 __global__ void convert_pointer(
     float ** pointer_to_pointer,
     float * pointer,
@@ -778,6 +816,47 @@ __global__ void cuda_calculate_hessians(
     current_hessian[hessian_index_ij] = float(sum);
 }
 
+/* Description of the cuda_calc_scaling_vectors function
+* ======================================================
+*
+* In the first call this function initializes the scaling vectors and adjusts
+* them in further calls. The scaling values are obtained from the square root
+* of the diagonal elements of the hessian matrices.
+*
+* Parameters:
+*
+* scaling_vectors: An output pointer to scaling vectors.
+*
+* hessians: An input pointer to hessian matrices
+*
+* n_parameters: The number of fit parameters determining the size of the hessian
+*               matrices.
+*
+* finished: An input vector which allows the calculation to be skipped for single fits.
+*
+* n_fits_per_block: The number of fits calculated by each thread block.
+*
+* Calling the cuda_calc_scaling_vectors function
+* ==============================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   threads.x = n_parameters * n_fits_per_block;
+*   blocks.x = n_fits / n_fits_per_block;
+*
+*   cuda_calc_scaling_vectors<<< blocks, threads >>>(
+*       scaling_vectors,
+*       hessians,
+*       n_parameters,
+*       finished,
+*       n_fits_per_block);
+*
+*/
+
 __global__ void cuda_calc_scaling_vectors(
     float * scaling_vectors,
     float const * hessians,
@@ -812,6 +891,51 @@ __global__ void cuda_calc_scaling_vectors(
     //    scaling_vector[parameter_index] = hessian[diagonal_index];
 }
 
+/* Description of the cuda_init_scaled_hessians function
+* ======================================================
+*
+* In the first call this function initializes the scaling vectors and adjusts
+* them in further calls. The scaling values are obtained from the square root
+* of the diagonal elements of the hessian matrices.
+*
+* Parameters:
+*
+* scaling_vectors: An output pointer to scaling vectors.
+*
+* hessians: An input pointer to hessian matrices
+*
+* n_parameters: The number of fit parameters determining the size of the hessian
+*               matrices.
+*
+* finished: An input vector which allows the calculation to be skipped for single fits.
+*
+* n_fits_per_block: The number of fits calculated by each thread block.
+*
+* Calling the cuda_init_scaled_hessians function
+* ==============================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int abs_size = n_parameters * n_parameters * n_fits;
+*   example_value = 256;
+*
+*   threads.x = min(abs_size, example_value);
+*   blocks.x = int(ceil(float(abs_size) / float(threads.x)));
+*
+*   cuda_init_scaled_hessians<<< blocks, threads >>>(
+*       scaled_hessians,
+*       hessians,
+*       n_fits,
+*       n_parameters,
+*       finished,
+*       lambda_accepted);
+*
+*/
+
 __global__ void cuda_init_scaled_hessians(
     float * scaled_hessians,
     float const * hessians,
@@ -836,24 +960,29 @@ __global__ void cuda_init_scaled_hessians(
 /* Description of the cuda_modify_step_widths function
 * ====================================================
 *
-* This function midifies the diagonal elements of the hessian matrices by multiplying
-* them by the factor (1+ lambda). This operation controls the step widths of the
-* iteration. If the last iteration failed, befor modifying the hessian, the diagonal
-* elements of the hessian are calculated back to represent unmodified values.
+* This function modifies the diagonal elements of the hessian matrices by adding
+* to them the value scaling_vector^2 * lambda. This operation controls the step
+* widths of the iteration and scales the change to the parameters.
 *
 * hessians: An input and output vector of hessian matrices, which are modified by
 *           the lambda values.
 *
 * lambdas: An input vector of values for modifying the hessians.
 *
+* scaling_vectors: An input vector of values for scaling the hessians.
+*
 * n_parameters: The number of fitting curve parameters.
 *
-* iteration_failed: An input vector which indicates whether the previous iteration
-*                   failed.
-*
-* finished: An input vector which allows the calculation to be skipped for single fits.
+* finished: An input vector which allows the calculation to be skipped for
+*           single fits.
 *
 * n_fits_per_block: The number of fits calculated by each thread block.
+*
+* lambda_accepted: An input vector which allows the calculation to be skipped
+*                  for single fits.
+*
+* newton_step_accepted: An input vector which allows the calculation to be
+*                       skipped for single fits, if an entry is negative.
 *
 * Calling the cuda_modify_step_widths function
 * ============================================
@@ -870,10 +999,12 @@ __global__ void cuda_init_scaled_hessians(
 *   cuda_modify_step_width<<< blocks, threads >>>(
 *       hessians,
 *       lambdas,
+*       scaling_vectors,
 *       n_parameters,
-*       iteration_failed,
 *       finished,
-*       n_fits_per_block);
+*       n_fits_per_block,
+*       lambda_accepted,
+*       newton_step_accepted);
 *
 */
 
@@ -1166,6 +1297,55 @@ __global__ void cuda_evaluate_iteration(
     }
 }
 
+/* Description of the cuda_check_all_lambdas function
+* ===================================================
+*
+* This function checks the flags of the array lambda_accepted and allows to
+* terminate the iterative loop for updating lammda, if all of the flags are
+* equal to 1. Before calling this function all_lambdas_accepted must be set
+* to 1. If all of the flags in lambda_accepted are equal to 1,
+* all_lambdas_accepted is not changed. If at least one of the flags is equal to
+* 0, all_lambdas_accepted is set to 0.
+*
+* Parameters:
+*
+* all_lambdas_accepted: An output flag indicating if all lambda values are
+*                       accepted.
+*
+* finished: An input vector which allows the calculation to be skipped for single fits.
+*
+* lambda_accepted: An input pointer to flags indicating if single lambda values
+*                  are accepted.
+*
+* newton_step_accepted: An input vector which allows the calculation to be
+*                       skipped for single fits.
+*
+* n_fits: The number of fits and respectively the number of lambda values.
+*
+* Calling the cuda_check_all_lambdas function
+* ===========================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int abs_size = n_parameters * n_parameters * n_fits;
+*   example_value = 256;
+*
+*   threads.x = std::min(n_fits_, 256);
+*   blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+*
+*   cuda_check_all_lambdas<<< blocks, threads >>>(
+*       all_lambdas_accepted,
+*       finished,
+*       lambda_accepted,
+*       newton_step_accepted,
+*       n_fits);
+*
+*/
+
 __global__ void cuda_check_all_lambdas(
     int * all_lambdas_accepted,
     int const * finished,
@@ -1186,6 +1366,7 @@ __global__ void cuda_check_all_lambdas(
         *all_lambdas_accepted = 0;
     }
 }
+
 /* Description of the cuda_prepare_next_iteration function
 * ========================================================
 *
@@ -1267,6 +1448,57 @@ __global__ void cuda_prepare_next_iteration(
     }
 }
 
+/* Description of the cuda_update_temp_derivatives function
+* =========================================================
+*
+* This function updates temp_derivatives, by copying the recently calculated
+* derivatives, if the current iteration was successful.
+*
+* Parameters:
+*
+* temp_derivatives: An output vector containing derivative values caluclated
+*                   by the last sussesful iteration.
+*
+* derivatives: An input vector of recently calculated derivative values.
+*
+* iteration_failed: An input vector of flags indicating if the current
+*                   iteration was successful.
+*
+* n_fits_per_block: The number of fits calculated by each thread block.
+*
+* n_blocks_per_fit: The number of thread blocks used to calculate one fit.
+*
+* finished: An input vector which allows the calculation to be skipped for
+*           single fits.
+*
+* n_parameters: The number of fitting curve parameters.
+*
+* n_points: The number of data points.
+*
+* Calling the cuda_update_temp_derivatives function
+* =================================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   threads.x = n_points * n_fits_per_block / n_blocks_per_fit;
+*   blocks.x = n_fits / n_fits_per_block * n_blocks_per_fit;
+*
+*   cuda_update_temp_derivatives<<< blocks, threads >>>(
+*       temp_derivatives,
+*       derivatives,
+*       iteration_failed,
+*       n_fits_per_block,
+*       n_blocks_per_fit,
+*       finished,
+*       n_parameters,
+*       n_points);
+*
+*/
+
 __global__ void cuda_update_temp_derivatives(
     float * temp_derivatives,
     float const * derivatives,
@@ -1304,6 +1536,58 @@ __global__ void cuda_update_temp_derivatives(
     }
 }
 
+/* Description of the cuda_multiply function
+* ==========================================
+*
+* This function performs an element wise multiplication of two sets of vectors.
+*
+* Parameters:
+*
+* products: An output vector of calculated products.
+*
+* multiplicands: An input vector of multiplicands.
+*
+* multipliers: An input vector of multipliers.
+*
+* n_vectors: The number of vectors to be multiplied.
+*
+* vector_size: The size of the vectors.
+*
+* skip_1: An input vector which allows the calculation to be skipped for
+*         single fits.
+*
+* skip_2: A further input vector which allows the calculation to be skipped for
+*         single fits.
+*
+* not_skip: An input vector which allows the calculation to be skipped for
+*           single fits, if the entry is equal to 0.
+*
+* Calling the cuda_multiply function
+* ==================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = std::min(n_vectors * vector_size, example_value);
+*   blocks.x = int(std::ceil(float(n_vectors * vector_size) / float(threads.x)));
+*
+*   cuda_multiply<<< blocks, threads >>>(
+*       products,
+*       multiplicands,
+*       multipliers,
+*       n_vectors,
+*       vector_size,
+*       skip_1,
+*       skip_2,
+*       not_skip);
+*
+*/
+
 __global__ void cuda_multiply(
     float * products,
     float const * multiplicands,
@@ -1334,6 +1618,27 @@ __global__ void cuda_multiply(
     product = multiplicand * multiplier;
 }
 
+/* Description of the calc_euclidian_norm function
+* ================================================
+*
+* This function the euclidian norm of a vector.
+*
+* Parameters:
+*
+* size: The number of elements in the input vector.
+*
+* vector: An input vector of float values.
+*
+* Return value: The euclidian norm of the input vector.
+*
+* Calling the calc_euclidian_norm function
+* ========================================
+*
+* This __device__ function can be only called from a __global__ function or
+* an other __device__ function.
+*
+*/
+
 __device__ float calc_euclidian_norm(int const size, float const * vector)
 {
     double sum = 0.f;
@@ -1343,6 +1648,54 @@ __device__ float calc_euclidian_norm(int const size, float const * vector)
 
     return float(sqrt(sum));
 }
+
+/* Description of the cuda_multiply_matrix_vector function
+* ========================================================
+*
+* This function performs a matrix vector multiplication.
+*
+* Parameters:
+*
+* products: Output vectors containing the resulting products.
+*
+* matrices: Input matrices.
+*
+* vectors: Input vectors.
+*
+* n_rows: The number of rows of the matrices.
+*
+* n_cols: The number of columns of the matrices.
+*
+* n_fits_per_block: The number of fits calculated by each thread block.
+*
+* n_blocks_per_fit: The number of thread blocks used to calculate one fit.
+*
+* skip: An input vector which allows the calculation to be skipped for
+*       single fits.
+*
+* Calling the cuda_multiply_matrix_vector function
+* ================================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   threads.x = n_rows * n_fits_per_block / n_blocks_per_fit;
+*   blocks.x = n_matrices / n_fits_per_block * n_blocks_per_fit;
+*
+*   cuda_multiply_matrix_vector<<< blocks, threads >>>(
+*       products,
+*       matrices,
+*       vectors,
+*       n_rows,
+*       n_cols,
+*       n_fits_per_block,
+*       n_blocks_per_fit,
+*       skip);
+*
+*/
 
 __global__ void cuda_multiply_matrix_vector(
     float * products,
@@ -1373,6 +1726,34 @@ __global__ void cuda_multiply_matrix_vector(
     }
 }
 
+/* Description of the multiply_matrix_vector function
+* ===================================================
+*
+* This function calculates the euclidian norm of a vector.
+*
+* Parameters:
+*
+* product: Output vector representing  the resulting product.
+*
+* matrix: Input matrix.
+*
+* vector: Input vector.
+*
+* row_index: Row index of the matrix and vector. Passing in the row index 
+*            allows a partial inner parallelization of the calulations.
+*
+* n_rows: Number of rows of the matrix and vector.
+*
+* n_cols: Number of columns of the matrix.
+*
+* Calling the multiply_matrix_vector function
+* ===========================================
+*
+* This __device__ function can be only called from a __global__ function or
+* an other __device__ function.
+*
+*/
+
 __device__ void multiply_matrix_vector(
     float * product,
     float const * matrix,
@@ -1388,6 +1769,29 @@ __device__ void multiply_matrix_vector(
     }
 }
 
+/* Description of the calc_scalar_product function
+* ================================================
+*
+* This function calculates the scaler product of two vectors.
+*
+* Parameters:
+*
+* v1: First input vector.
+*
+* v2: Second input vector.
+*
+* size: Size of the vectors.
+*
+* Return value: Scalar product of the two input vectors.
+*
+* Calling the calc_scalar_product function
+* ========================================
+*
+* This __device__ function can be only called from a __global__ function or
+* an other __device__ function.
+*
+*/
+
 __device__ float calc_scalar_product(float const * v1, float const * v2, int const size)
 {
     float product = 0.f;
@@ -1397,6 +1801,44 @@ __device__ float calc_scalar_product(float const * v1, float const * v2, int con
 
     return product;
 }
+
+/* Description of the cuda_initialize_step_bounds function
+* ========================================================
+*
+* This function calculates the initial value for the step bound, which limits
+* the step width of the interation.
+*
+* Parameters:
+*
+* step_bounds: Output vectors of calculated step bounds.
+*
+* scaled_parameters: Input vector of scaled parameters.
+*
+* n_bounds: The number of step bounds and respectively the number of fits.
+*
+* n_parameters: The number of fit parameters.
+*
+* Calling the cuda_initialize_step_bounds function
+* ================================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*   
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits_, example_value);
+*   blocks.x = int(ceil(float(n_fits_) / float(threads.x)));
+*
+*   cuda_initialize_step_bounds<<< blocks, threads >>>(
+*       step_bounds,
+*       scaled_parameters,
+*       n_bounds,
+*       n_parameters);
+*
+*/
 
 __global__ void cuda_initialize_step_bounds(
     float * step_bounds,
@@ -1423,6 +1865,43 @@ __global__ void cuda_initialize_step_bounds(
         step_bound = factor;
 }
 
+/* Description of the cuda_adapt_step_bounds function
+* ===================================================
+*
+* This function adjusts the initial value of the step bounds at the first
+* iteration.
+*
+* Parameters:
+*
+* step_bounds: Output vectors of adjusted step bounds.
+*
+* scaled_delta_norms: Input vector of euclidian norms of scaled values of delta.
+*                     delta is the change to the fit parameters.
+*
+* n_fits: The number of step bounds and respectively the number of fits.
+*
+* Calling the cuda_adapt_step_bounds function
+* ===========================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits_, example_value);
+*   blocks.x = int(ceil(float(n_fits_) / float(threads.x)));
+*
+*   cuda_adapt_step_bounds<<< blocks, threads >>>(
+*       step_bounds,
+*       scaled_parameters,
+*       n_bounds,
+*       n_parameters);
+*
+*/
+
 __global__ void cuda_adapt_step_bounds(
     float * step_bounds,
     float const * scaled_delta_norms,
@@ -1439,12 +1918,74 @@ __global__ void cuda_adapt_step_bounds(
     step_bound = min(step_bound, scaled_delta_norm);
 }
 
+/* Description of the cuda_adapt_step_bounds function
+* ===================================================
+*
+* This function updates the step bounds and lambda parameters at each iteration
+* using an if-else sequence. The values of actual_reductions,
+* predicted_reductions, approximation_ratios and directional_derivatives are
+* calculated by the function cuda_calc_approximation_quality. 
+*
+* Parameters:
+*
+* step_bounds: Output vectors of updated step bounds.
+*
+* lambdas: An output vector of lambda parameter values.
+*
+* approximation_ratios: An input vector of approximation ratio values.
+*
+* actual_reductions: An input vector of actual reduction values. This values
+*                    are obtained from the current and previous chi square
+*                    values.
+*
+* directional_derivatives: An input vector of directional derivatives.
+*
+* chi_squares: An input vector of chi-square values.
+*
+* prev_chi_squares: An input vector of chi-square values obtained by the 
+*                   previous iteration.
+*
+* scaled_delta_norms: An input vector of euclidian norms of scaled delta values.
+*
+* finished: An input vector that allows the calculation to be skiped for single
+*           fits.
+*
+* n_fits: The number of fits.
+*
+* Calling the cuda_adapt_step_bounds function
+* ===========================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits_, example_value);
+*   blocks.x = int(ceil(float(n_fits_) / float(threads.x)));
+*
+*   cuda_adapt_step_bounds<<< blocks, threads >>>(
+*       step_bounds,
+*       lambdas,
+*       approximation_ratios,
+*       actual_reductions,
+*       directional_derivatives,
+*       chi_squares,
+*       prev_chi_squares,
+*       scaled_delta_norms,
+*       finished,
+*       n_fits);
+*
+*/
+
 __global__ void cuda_update_step_bounds(
     float * step_bounds,
     float * lambdas,
     float const * approximation_ratios,
     float const * actual_reductions,
-    float const * directive_derivatives,
+    float const * directional_derivatives,
     float const * chi_squares,
     float const * prev_chi_squares,
     float const * scaled_delta_norms,
@@ -1463,7 +2004,7 @@ __global__ void cuda_update_step_bounds(
     float & lambda = lambdas[fit_index];
     float const & approximation_ratio = approximation_ratios[fit_index];
     float const & actual_reduction = actual_reductions[fit_index];
-    float const & directive_derivative = directive_derivatives[fit_index];
+    float const & directional_derivative = directional_derivatives[fit_index];
     float const & chi_square = chi_squares[fit_index];
     float const & prev_chi_square = prev_chi_squares[fit_index];
     float const & scaled_delta_norm = scaled_delta_norms[fit_index];
@@ -1475,7 +2016,7 @@ __global__ void cuda_update_step_bounds(
         if (actual_reduction >= 0.f)
             temp = .5f;
         else
-            temp = .5f * directive_derivative / (directive_derivative + .5f * actual_reduction);
+            temp = .5f * directional_derivative / (directional_derivative + .5f * actual_reduction);
 
         if (.1f * std::sqrt(chi_square) >= std::sqrt(prev_chi_square) || temp < .1f)
             temp = .1f;
@@ -1492,6 +2033,77 @@ __global__ void cuda_update_step_bounds(
         }
     }
 }
+
+/* Description of the cuda_calc_phis function
+* ===========================================
+*
+* This function calculates the values of phi and its derivatives. The formulas
+* to calculate these values are described in [Jorge J. More, The
+* Levenberg-Marquardt Algorithm: Implementation and Theory]. In addition it
+* calculates the euclidian norms of scaled delta vectors.
+*
+* Parameters:
+*
+* phis: An output vaector of phi values.
+*
+* phi_derivatives: An output vector of derivative of phi values.
+*
+* inverted_hessians: An input vector of inverted hessian matrices.
+*
+* scaled_deltas: An input and output vector of scaled delta values.
+*                in:  scaled_delta = scaling_vector * delta (single scaled)
+*                out: scaled_delta = scaling_vector^2 * delta (double scaled)
+*
+* scaled_delta_norms: An output vector of euclidian norms of single scaled
+*                     delta values.
+*
+* temp_vectors: A vector used for interim results.
+*
+* scaling_vectors: An input vector of scaling vectors.
+*
+* step_bounds: An input vector of step bound values.
+*
+* n_parameters: The number of fit parameters.
+*
+* finished: An input vector which allows calculations to be skipped for single
+*           fits.
+*
+* lambda_accepted: An input vector which allows calculations to be skipped for
+*                  single fits.
+*
+* newton_step_accepted: An input vector which allows calculations to be skipped
+*                       for single fits, if the entry is equal to 0.
+*
+* n_fits_per_block: The number of fits calculated by one thread block.
+*
+* Calling the cuda_calc_phis function
+* ===================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*  threads.x = n_parameters * n_fits_per_block;
+*  blocks.x = n_fits / n_fits_per_block;
+*
+*   cuda_calc_phis<<< blocks, threads >>>(
+*       phis,
+*       phi_derivatives,
+*       inverted_hessians,
+*       scaled_deltas,
+*       scaled_delta_norms,
+*       temp_vectors,
+*       scaling_vectors,
+*       step_bounds,
+*       n_parameters,
+*       finished,
+*       lambda_accepted,
+*       newton_step_accepted,
+*       n_fits_per_block);
+*
+*/
 
 __global__ void cuda_calc_phis(
     float * phis,
@@ -1538,6 +2150,49 @@ __global__ void cuda_calc_phis(
         = calc_scalar_product(temp_vector, scaled_delta, n_parameters) / scaled_delta_norm;
 }
 
+/* Description of the cuda_adapt_phi_derivatives function
+* =======================================================
+*
+* After the first calculation of the derivative values of phi at each iteration
+* this function scales the values by the factor: step_bound / scaled_delta_norm.
+*
+* Parameters:
+*
+* phi_derivatives: An output vector of scaled derivative of phi values.
+*
+* step_bounds: An input vector of step bound values.
+*
+* scaled_delta_norms: An input vector of euclidian norms of scaled delta
+*                     values.
+*
+* finished: An input vector which allows calculations to be skipped for single
+*           fits.
+*
+* n_fits: The number of fits.
+*
+* Calling the cuda_adapt_phi_derivatives function
+* ===============================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_adapt_phi_derivatives<<< blocks, threads >>>(
+*       phi_derivatives,
+*       step_bounds,
+*       scaled_delta_norms,
+*       finished,
+*       n_fits);
+*
+*/
+
 __global__ void cuda_adapt_phi_derivatives(
     float * phi_derivatives,
     float const * step_bounds,
@@ -1559,6 +2214,50 @@ __global__ void cuda_adapt_phi_derivatives(
 
     phi_derivative *= step_bound / scaled_delta_norm;
 }
+
+/* Description of the cuda_check_phi function
+* ===========================================
+*
+* This function tests the unscaled Gauss-Newton step (lambda = 0) for
+* acceptance. If the step is accepted, lambda is not changed. Otherwise
+* the iteration process for updating lambda begins after the call to this
+* finction.
+*
+* Parameters:
+*
+* newton_step_accepted: An output vector of scaled derivative of phi values.
+*
+* phis: An input vector of phi values.
+*
+* step_bounds: An input vector of step bound values.
+*
+* finished: An input vector which allows the check to be skipped for single
+*           fits.
+*
+* n_fits: The number of fits.
+*
+* Calling the cuda_check_phi function
+* ===================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_check_phi<<< blocks, threads >>>(
+*       newton_step_accepted,
+*       phis,
+*       step_bounds,
+*       finished,
+*       n_fits);
+*
+*/
 
 __global__ void cuda_check_phi(
     int * newton_step_accepted,
@@ -1582,6 +2281,54 @@ __global__ void cuda_check_phi(
         = int(phi > .1f * step_bound);
 }
 
+/* Description of the cuda_check_abs_phi function
+* ===============================================
+*
+* This function checks the absolute values of phi. If
+* (abs(phi) <= .1f * step_bound) the value of lambda is considered as 
+* accepted.
+*
+* Parameters:
+*
+* lambda_accepted: An output vector of flags indicating if the value of lambda
+*                  is accepted.
+*
+* newton_step_accepted: An input vector which allows the check to be skipped
+*                       for single fits.
+*
+* phis: An input vector of phi values.
+*
+* step_bounds: An input vector of step bound values.
+*
+* finished: An input vector which allows the check to be skipped for single
+*           fits.
+*
+* n_fits: The number of fits.
+*
+* Calling the cuda_check_abs_phi function
+* =======================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_check_abs_phi<<< blocks, threads >>>(
+*       lambda_accepted,
+*       newton_step_accepted,
+*       phis,
+*       step_bounds,
+*       finished,
+*       n_fits);
+*
+*/
+
 __global__ void cuda_check_abs_phi(
     int * lambda_accepted,
     int const * newton_step_accepted,
@@ -1604,6 +2351,81 @@ __global__ void cuda_check_abs_phi(
     lambda_accepted[fit_index]
         = int(abs(phi) <= .1f * step_bound);
 }
+
+/* Description of the cuda_init_lambda_bounds function
+* ====================================================
+*
+* This function calculates the initial values of the lower and upper bounds for
+* the lambda parameter values and adjusts the lambda values if they are outside 
+* of the bounds.
+*
+* Parameters:
+*
+* lambdas: An output vector of lambda values. They are modified, if they are 
+*          out of bounds.
+*
+* lambda_lower_bounds: An output vector of lower bounds for the lambda
+*                      parameter.
+*
+* lambda_upper_bounds: An output vector of upper bounds for the lambda
+*                      parameter.
+*
+* scaled_gradients: A internally used vector for the calculation of scaled 
+*                   gradients.
+*
+* scaled_delta_norms: An input vector of euclidian norms of scaled delta values.
+*
+* phis: An input vector of phi values.
+*
+* phi_derivatives: An input vector of derivative values of phi.
+*
+* step_bounds: An input vector of step bound values.
+*
+* gradients: An input vector of gradient values of chi-squares.
+*
+* scaling_vectors: An input vector of scaling vectors.
+*
+* finished: An input vector which allows the calculation to be skipped for
+*           single fits.
+*
+* n_fits: The number of fits.
+*
+* n_parameters: The number of fit parameters per fit.
+*
+* newton_step_accepted: An input vector which allows the calculation to be
+*                       skipped for single fits.
+*
+* Calling the cuda_init_lambda_bounds function
+* ============================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_init_lambda_bounds<<< blocks, threads >>>(
+*       lambdas,
+*       lambda_lower_bounds,
+*       lambda_upper_bounds,
+*       scaled_gradients,
+*       scaled_delta_norms,
+*       phis,
+*       phi_derivatives,
+*       step_bounds,
+*       gradients,
+*       scaling_vectors,
+*       finished,
+*       n_fits,
+*       n_parameters,
+*       newton_step_accepted);
+*
+*/
 
 __global__ void cuda_init_lambda_bounds(
     float * lambdas,
@@ -1660,6 +2482,66 @@ __global__ void cuda_init_lambda_bounds(
         lambdas[fit_index] = gradient_norm / scaled_delta_norms[fit_index];
 }
 
+/* Description of the cuda_update_lambdas function
+* ================================================
+*
+* This function updates the values of the lambda parameter and its bounds.
+*
+* Parameters:
+*
+* lambdas: An input and output vector of lambda values.
+*
+* lambda_lower_bounds: An input and output vector of lower bounds for the
+*                      lambda parameter.
+*
+* lambda_upper_bounds: An input and output vector of upper bounds for the
+*                      lambda parameter.
+*
+* phis: An input vector of phi values.
+*
+* phi_derivatives: An input vector of derivative values of phi.
+*
+* step_bounds: An input vector of step bound values.
+*
+* finished: An input vector which allows the calculation to be skipped for
+*           single fits.
+*
+* lambda_accepted: An input vector which allows the calculation to be skipped
+*                  for single fits.
+*
+* newton_step_accepted: An input vector which allows the calculation to be
+*                       skipped for single fits.
+*
+* n_fits: The number of fits.
+*
+* Calling the cuda_update_lambdas function
+* ========================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_update_lambdas<<< blocks, threads >>>(
+*       lambdas,
+*       lambda_lower_bounds,
+*       lambda_upper_bounds,
+*       phis,
+*       phi_derivatives,
+*       step_bounds,
+*       finished,
+*       lambda_accepted,
+*       newton_step_accepted,
+*       n_fits);
+*
+*/
+
 __global__ void cuda_update_lambdas(
     float * lambdas,
     float * lambda_lower_bounds,
@@ -1701,10 +2583,79 @@ __global__ void cuda_update_lambdas(
         = max(lambda_lower_bounds[fit_index], lambdas[fit_index]);
 }
 
+/* Description of the cuda_calc_approximation_quality function
+* ============================================================
+*
+* This function calculates the values of the actual reduction, predicted
+* reduction, directional derivatives and ratios
+* (actual reduction / predicted reduction)for details of the calculations
+* see [Jorge J. More, The Levenberg-Marquardt Algorithm: Implementation and
+* Theory]
+*
+* Parameters:
+*
+* predicted_reductions: An output vector of predicted reduction values.
+*
+* actual_reductions: An output vector of actual reduction values.
+*
+* directional_derivatives: An output vector of directional derivatives.
+*
+* approximation_ratios: An output vector of approximation ratios
+*                       (actual_reduction / predicted_reduction)
+*
+* derivatives_deltas: An internally used vector, used for the product of
+*                     derivative and delta values.
+*
+* scaled_delta_norms: An input vector of euclidian norms of scaled delta values.
+*
+* chi_squares: An input vector of chi-square values.
+*
+* prev_chi_squares: An input vector of chi-square values calculated at the 
+*                   previous iteration.
+*
+* lambdas: An input vector of lambda values.
+*
+* finished: An input vector which allows the calculation to be skipped for 
+*           single fits.
+*
+* n_fits: The number of fits.
+*
+* n_points: The number of pointes per fit.
+*
+* Calling the cuda_calc_approximation_quality function
+* ====================================================
+*
+* When calling the function, the blocks and threads must be set up correctly,
+* as shown in the following example code.
+*
+*   dim3  threads(1, 1, 1);
+*   dim3  blocks(1, 1, 1);
+*
+*   int example_value = 256;
+*
+*   threads.x = min(n_fits, example_value);
+*   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
+*
+*   cuda_calc_approximation_quality<<< blocks, threads >>>(
+*       predicted_reductions,
+*       actual_reductions,
+*       directional_derivatives,
+*       approximation_ratios,
+*       derivatives_deltas,
+*       scaled_delta_norms,
+*       chi_squares,
+*       prev_chi_squares,
+*       lambdas,
+*       finished,
+*       n_fits,
+*       n_points);
+*
+*/
+
 __global__ void cuda_calc_approximation_quality(
     float * predicted_reductions,
     float * actual_reductions,
-    float * directive_derivatives,
+    float * directional_derivatives,
     float * approximation_ratios,
     float * derivatives_deltas,
     float const * scaled_delta_norms,
@@ -1725,7 +2676,7 @@ __global__ void cuda_calc_approximation_quality(
 
     float & predicted_reduction = predicted_reductions[fit_index];
     float & actual_reduction = actual_reductions[fit_index];
-    float & directive_derivative = directive_derivatives[fit_index];
+    float & directional_derivative = directional_derivatives[fit_index];
     float & approximation_ratio = approximation_ratios[fit_index];
     float * derivatives_delta = derivatives_deltas + fit_index * n_points;
     float const & scaled_delta_norm = scaled_delta_norms[fit_index];
@@ -1748,7 +2699,7 @@ __global__ void cuda_calc_approximation_quality(
 
     predicted_reduction = summand1 + summand2;
 
-    directive_derivative = -summand1 - summand2 / 2.f;
+    directional_derivative = -summand1 - summand2 / 2.f;
 
     actual_reduction = -1.f;
 

@@ -468,7 +468,7 @@ void LMFitCUDA::update_step_bounds()
         gpu_data_.lambdas_,
         gpu_data_.approximation_ratios_,
         gpu_data_.actual_reductions_,
-        gpu_data_.directive_derivatives_,
+        gpu_data_.directional_derivatives_,
         gpu_data_.chi_squares_,
         gpu_data_.prev_chi_squares_,
         gpu_data_.scaled_delta_norms_,
@@ -643,7 +643,7 @@ void LMFitCUDA::calc_approximation_quality()
     cuda_calc_approximation_quality<<< blocks, threads >>>(
         gpu_data_.predicted_reductions_,
         gpu_data_.actual_reductions_,
-        gpu_data_.directive_derivatives_,
+        gpu_data_.directional_derivatives_,
         gpu_data_.approximation_ratios_,
         gpu_data_.temp_array_,
         gpu_data_.scaled_delta_norms_,

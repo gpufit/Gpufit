@@ -208,7 +208,7 @@ __global__ void cuda_update_step_bounds(
     float * lambdas,
     float const * approximation_ratios,
     float const * actual_reductions,
-    float const * directive_derivatives,
+    float const * directional_derivatives,
     float const * chi_squares,
     float const * prev_chi_squares,
     float const * scaled_delta_norms,
@@ -283,7 +283,7 @@ __global__ void cuda_update_lambdas(
 __global__ void cuda_calc_approximation_quality(
     float * predicted_reductions,
     float * actual_reductions,
-    float * directive_derivatives,
+    float * directional_derivatives,
     float * approximation_ratios,
     float * derivatives_deltas,
     float const * scaled_delta_norms,

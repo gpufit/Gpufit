@@ -962,7 +962,7 @@ void LMFitCPP::update_step_bound()
         }
         else
         {
-            temp = .5f * directive_derivative_ / (directive_derivative_ + .5f * actual_reduction_);
+            temp = .5f * directional_derivative_ / (directional_derivative_ + .5f * actual_reduction_);
         }
 
         if (.1f * std::sqrt(*chi_square_) >= std::sqrt(prev_chi_square_) || temp < .1f)
@@ -1089,7 +1089,7 @@ void LMFitCPP::calc_approximation_quality()
 
     predicted_reduction_ = summand1 + summand2;
 
-    directive_derivative_ = -summand1 - summand2 / 2.f;
+    directional_derivative_ = -summand1 - summand2 / 2.f;
 
     actual_reduction_ = -1.f;
 
