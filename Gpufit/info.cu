@@ -13,11 +13,7 @@ void Info::get_gpu_properties()
     CUDA_CHECK_STATUS(cudaMemGetInfo(&free_bytes, &total_bytes));
     available_gpu_memory_ = std::size_t(double(free_bytes) * 0.1);
     
-    if (available_gpu_memory_ > user_info_size_)
-    {
-        available_gpu_memory_ -= user_info_size_;
-    }
-    else
+    if (double(user_info_size_) > double(free_bytes) * 0.9)
     {
         throw std::runtime_error("maximum user info size exceeded");
     }
