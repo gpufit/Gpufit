@@ -654,6 +654,8 @@ __global__ void cuda_calculate_gradients(
 * weights: An input vector of values for weighting chi-square, gradient and hessian,
 *          while using LSE
 *
+* n_fits: The number of fits.
+*
 * n_points: The number of data points per fit.
 *
 * n_parameters: The number of fitting curve parameters.
@@ -684,9 +686,18 @@ __global__ void cuda_calculate_gradients(
 *   dim3  threads(1, 1, 1);
 *   dim3  blocks(1, 1, 1);
 *
-*   threads.x = n_parameters_to_fit;
-*   threads.y = n_parameters_to_fit;
-*   blocks.x = n_fits;
+*   int n_unique_values = n_parameters_to_fit * (n_parameters_to_fit + 1) / 2;
+*
+*   threads.x
+*       = min(n_unique_values * n_fits_per_block, max_threads_per_block);
+*
+*   blocks.y
+*       = threads.x / max_threads_per_block
+*       + int((threads.x % max_threads_per_block) > 0);
+*
+*   blocks.x
+*       = n_fits / n_fits_per_block
+*       + int((n_fits % n_fits_per_block) > 0);
 *
 *   cuda_calculate_hessians<<< blocks, threads >>>(
 *       hessians,
@@ -694,6 +705,7 @@ __global__ void cuda_calculate_gradients(
 *       values,
 *       derivatives,
 *       weight,
+*       n_fits,
 *       n_points,
 *       n_parameters,
 *       n_parameters_to_fit,
@@ -712,6 +724,7 @@ __global__ void cuda_calculate_hessians(
     float const * values,
     float const * derivatives,
     float const * weights,
+    int const n_fits,
     int const n_points,
     int const n_parameters,
     int const n_parameters_to_fit,
@@ -722,16 +735,46 @@ __global__ void cuda_calculate_hessians(
     char * user_info,
     std::size_t const user_info_size)
 {
-    int const fit_index = blockIdx.x;
-    int const first_point = fit_index * n_points;
+    int const n_unique_values = n_parameters_to_fit * (n_parameters_to_fit + 1) / 2;
+    int const n_fits_per_block = blockDim.x * gridDim.y / n_unique_values;
+    
+    int const fit_in_block
+        = (gridDim.y == 1)
+        ? (blockIdx.y * blockDim.x + threadIdx.x) / n_unique_values
+        : 0;
 
-    int const parameter_index_i = threadIdx.x;
-    int const parameter_index_j = threadIdx.y;
+    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
 
-    if (finished[fit_index] || skip[fit_index])
+    if (fit_index >= n_fits || finished[fit_index] || skip[fit_index])
     {
         return;
     }
+
+    int const first_point = fit_index * n_points;
+    int const parameter_index = (blockIdx.y * blockDim.x + threadIdx.x) - fit_in_block * n_unique_values;
+
+    if (parameter_index >= n_unique_values)
+    {
+        return;
+    }
+
+    int const parameter_index_i
+        = n_parameters_to_fit
+        - 1.f
+        - std::floor(
+            .5f*(
+                std::sqrt(
+                    - 8.f * (parameter_index - n_parameters_to_fit)
+                    + 4.f * n_parameters_to_fit * (n_parameters_to_fit - 1.f)
+                    - 7.f
+                ) - 1.f
+            )
+        );
+
+    int const parameter_index_j
+        = parameter_index
+        + parameter_index_i
+        - parameter_index_i*(n_parameters_to_fit - (parameter_index_i - 1) / 2.f);
 
     float * current_hessian = &hessians[fit_index * n_parameters_to_fit * n_parameters_to_fit];
     float const * current_data = &data[first_point];
@@ -740,6 +783,7 @@ __global__ void cuda_calculate_hessians(
     float const * current_value = &values[first_point];
 
     int const hessian_index_ij = parameter_index_i * n_parameters_to_fit + parameter_index_j;
+    int const hessian_index_ji = parameter_index_j * n_parameters_to_fit + parameter_index_i;
     int const derivative_index_i = parameters_to_fit_indices[parameter_index_i] * n_points;
     int const derivative_index_j = parameters_to_fit_indices[parameter_index_j] * n_points;
 
@@ -760,6 +804,7 @@ __global__ void cuda_calculate_hessians(
             user_info_size);
     }
     current_hessian[hessian_index_ij] = sum;
+    current_hessian[hessian_index_ji] = sum;
 }
 
 /* Description of the cuda_modify_step_widths function

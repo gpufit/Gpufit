@@ -14,6 +14,7 @@ Info::Info() :
     n_blocks_per_fit_(0),
     max_threads_(0),
     max_blocks_(0),
+    warp_size_(0),
     available_gpu_memory_(0)
 {
 }

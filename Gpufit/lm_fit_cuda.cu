@@ -206,9 +206,28 @@ void LMFitCUDA::calc_hessians()
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
 
-    threads.x = info_.n_parameters_to_fit_;
-    threads.y = info_.n_parameters_to_fit_;
-    blocks.x = n_fits_;
+    int const n_unique_values
+        = info_.n_parameters_to_fit_ * (info_.n_parameters_to_fit_ + 1) / 2;
+
+    int n_hessians_per_block = 1;
+
+    if (info_.n_parameters_to_fit_)
+    {
+        while ((n_hessians_per_block + 1) * n_unique_values < info_.warp_size_)
+        {
+            n_hessians_per_block++;
+        }
+    }
+
+    threads.x = std::min(n_unique_values * n_hessians_per_block, info_.max_threads_);
+    
+    blocks.y
+        = threads.x / info_.max_threads_
+        + int((threads.x % info_.max_threads_) > 0);
+    
+    blocks.x
+        = n_fits_ / n_hessians_per_block
+        + int((n_fits_ % n_hessians_per_block) > 0);
 
     cuda_calculate_hessians <<< blocks, threads >>>(
         gpu_data_.hessians_,
@@ -216,6 +235,7 @@ void LMFitCUDA::calc_hessians()
         gpu_data_.values_,
         gpu_data_.derivatives_,
         gpu_data_.weights_,
+        n_fits_,
         info_.n_points_,
         info_.n_parameters_,
         info_.n_parameters_to_fit_,

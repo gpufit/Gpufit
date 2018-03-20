@@ -41,8 +41,10 @@ public:
 
     bool use_weights_;
 
-private:
     int max_threads_;
+    int warp_size_;
+
+private:
     std::size_t max_blocks_;
     std::size_t available_gpu_memory_;
 };
