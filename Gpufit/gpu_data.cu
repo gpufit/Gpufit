@@ -30,21 +30,27 @@ GPUData::GPUData(Info const & info) :
     iteration_failed_(info_.max_chunk_size_),
     all_finished_( 1 ),
     n_iterations_( info_.max_chunk_size_ ),
+    solution_info_(info_.max_chunk_size_)
 
+#ifdef ARCH_64
+    ,
     decomposed_hessians_(info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_),
     pointer_decomposed_hessians_(info_.max_chunk_size_),
     pointer_deltas_(info_.max_chunk_size_),
-    pivot_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
-    cublas_info_(info_.max_chunk_size_)
+    pivot_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_)
+#endif // ARCH_64
 {
+#ifdef ARCH_64
     cublasCreate(&cublas_handle_);
-
     point_to_data_sets();
+#endif // ARCH_64
 }
 
 GPUData::~GPUData()
 {
+#ifdef ARCH_64
     cublasDestroy(cublas_handle_);
+#endif ARCH_64
 }
 
 void GPUData::init
@@ -187,6 +193,7 @@ __global__ void cuda_point_to_data_sets(
 
     pointer_to_pointers[index] = pointer + begin;
 }
+#ifdef ARCH_64
 
 void GPUData::point_to_data_sets()
 {
@@ -214,3 +221,5 @@ void GPUData::point_to_data_sets()
         info_.max_chunk_size_,
         info_.n_parameters_to_fit_);
 }
+
+#endif // ARCH_64

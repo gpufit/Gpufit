@@ -135,7 +135,7 @@ extern __global__ void cuda_prepare_next_iteration(
     int const n_fits,
     int const n_parameters);
 
-extern __global__ void cuda_update_state_after_lup(
+extern __global__ void cuda_update_state_after_solving(
     int const n_fits,
     int const * singular_checks,
     int const * finished,

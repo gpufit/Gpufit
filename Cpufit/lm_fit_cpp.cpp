@@ -749,6 +749,90 @@ void LMFitCPP::calc_coefficients()
     }
 }
 
+void LMFitCPP::solve_equation_system_gj()
+{
+    delta_ = gradient_;
+
+    std::vector<float> & alpha = modified_hessian_;
+    std::vector<float> & beta = delta_;
+
+    int icol, irow;
+    float big, dum, pivinv;
+
+    std::vector<int> indxc(info_.n_parameters_to_fit_, 0);
+    std::vector<int> indxr(info_.n_parameters_to_fit_, 0);
+    std::vector<int> ipiv(info_.n_parameters_to_fit_, 0);
+
+    for (int kp = 0; kp < info_.n_parameters_to_fit_; kp++)
+    {
+        big = 0.0;
+        for (int jp = 0; jp < info_.n_parameters_to_fit_; jp++)
+        {
+            if (ipiv[jp] != 1)
+            {
+                for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
+                {
+                    if (ipiv[ip] == 0)
+                    {
+                        if (fabs(alpha[jp*info_.n_parameters_to_fit_ + ip]) >= big)
+                        {
+                            big = fabs(alpha[jp*info_.n_parameters_to_fit_ + ip]);
+                            irow = jp;
+                            icol = ip;
+                        }
+                    }
+                }
+            }
+        }
+        ++(ipiv[icol]);
+
+
+        if (irow != icol)
+        {
+            for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
+            {
+                std::swap(alpha[irow*info_.n_parameters_to_fit_ + ip], alpha[icol*info_.n_parameters_to_fit_ + ip]);
+            }
+            std::swap(beta[irow], beta[icol]);
+        }
+        indxr[kp] = irow;
+        indxc[kp] = icol;
+        if (alpha[icol*info_.n_parameters_to_fit_ + icol] == 0.0)
+        {
+            *state_ = FitState::SINGULAR_HESSIAN;
+            break;
+        }
+        pivinv = 1.0f / alpha[icol*info_.n_parameters_to_fit_ + icol];
+        alpha[icol*info_.n_parameters_to_fit_ + icol] = 1.0;
+        for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
+        {
+            alpha[icol*info_.n_parameters_to_fit_ + ip] *= pivinv;
+        }
+        beta[icol] *= pivinv;
+
+        for (int jp = 0; jp < info_.n_parameters_to_fit_; jp++)
+        {
+            if (jp != icol)
+            {
+                dum = alpha[jp*info_.n_parameters_to_fit_ + icol];
+                alpha[jp*info_.n_parameters_to_fit_ + icol] = 0.0;
+                for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
+                {
+                    alpha[jp*info_.n_parameters_to_fit_ + ip] -= alpha[icol*info_.n_parameters_to_fit_ + ip] * dum;
+                }
+                beta[jp] -= beta[icol] * dum;
+            }
+        }
+    }
+}
+
+void LMFitCPP::solve_equation_system_lup()
+{
+    decompose_hessian_LUP(modified_hessian_);
+
+    solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
+}
+
 void LMFitCPP::update_parameters()
 {
     for (int parameter_index = 0, delta_index = 0; parameter_index < info_.n_parameters_; parameter_index++)
@@ -840,9 +924,7 @@ void LMFitCPP::run()
     {
         modify_step_width();
         
-        decompose_hessian_LUP(modified_hessian_);
-
-        solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
+        SOLVE_EQUATION_SYSTEM();
 
         update_parameters();
 

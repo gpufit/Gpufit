@@ -71,7 +71,11 @@ private:
     void calc_gradients();
     void calc_hessians();
     void evaluate_iteration(int const iteration);
-    void solve_equation_system();
+    void scale_hessians();
+    void solve_equation_systems_gj();
+    void solve_equation_systems_lup();
+    void update_states();
+    void update_parameters();
 
 public:
 

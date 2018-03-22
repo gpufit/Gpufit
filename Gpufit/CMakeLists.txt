@@ -117,6 +117,7 @@ set( GpuSources
 set( GpuCudaHeaders
 	cuda_kernels.cuh
 	gpu_data.cuh
+	cuda_gaussjordan.cuh
 )
 
 set( GpuCudaSources
@@ -124,6 +125,7 @@ set( GpuCudaSources
 	cuda_kernels.cu
 	info.cu
 	gpu_data.cu
+	cuda_gaussjordan.cu
 )
 
 file( GLOB GpuCudaModels
@@ -156,7 +158,9 @@ set_target_properties( Gpufit
 		CXX_VISIBILITY_PRESET hidden
 )
 
-target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
+if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+	target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
+endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 

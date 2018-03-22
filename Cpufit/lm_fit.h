@@ -1,6 +1,12 @@
 #ifndef CPUFIT_GAUSS_FIT_H_INCLUDED
 #define CPUFIT_GAUSS_FIT_H_INCLUDED
 
+#ifdef _WIN64
+#define SOLVE_EQUATION_SYSTEM() solve_equation_system_lup()
+#else
+#define SOLVE_EQUATION_SYSTEM() solve_equation_system_gj()
+#endif // _WIN64
+
 #include "info.h"
 
 class LMFitCPP;
@@ -103,6 +109,8 @@ private:
     void decompose_hessian_LUP(std::vector<float> const & hessian);
 
     void modify_step_width();
+    void solve_equation_system_gj();
+    void solve_equation_system_lup();
     void update_parameters();
 
     bool check_for_convergence();

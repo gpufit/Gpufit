@@ -1,25 +1,13 @@
 #include "lm_fit.h"
 #include <algorithm>
 #include "cuda_kernels.cuh"
-#include "cublas_v2.h"
 
-void LMFitCUDA::solve_equation_system()
+#ifdef ARCH_64
+
+void LMFitCUDA::solve_equation_systems_lup()
 {
     dim3  threads(1, 1, 1);
     dim3  blocks(1, 1, 1);
-
-    threads.x = info_.n_parameters_to_fit_*info_.n_fits_per_block_;
-    blocks.x = n_fits_ / info_.n_fits_per_block_;
-
-    cuda_modify_step_widths<<< blocks, threads >>>(
-        gpu_data_.hessians_,
-        gpu_data_.lambdas_,
-        gpu_data_.scaling_vectors_,
-        info_.n_parameters_to_fit_,
-        gpu_data_.iteration_failed_,
-        gpu_data_.finished_,
-        info_.n_fits_per_block_);
-    CUDA_CHECK_STATUS(cudaGetLastError());
 
     // initialize components of equation systems
     gpu_data_.copy(gpu_data_.decomposed_hessians_, gpu_data_.hessians_, n_fits_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
@@ -31,20 +19,8 @@ void LMFitCUDA::solve_equation_system()
         gpu_data_.pointer_decomposed_hessians_,
         info_.n_parameters_to_fit_,
         gpu_data_.pivot_vectors_,
-        gpu_data_.cublas_info_,
+        gpu_data_.solution_info_,
         n_fits_);
-
-    //set up to update the lm_state_gpu_ variable with the Gauss Jordan results
-    threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
-
-    //update the gpu_data_.states_ variable
-    cuda_update_state_after_lup<<< blocks, threads >>>(
-        n_fits_,
-        gpu_data_.cublas_info_,
-        gpu_data_.finished_,
-        gpu_data_.states_);
-    CUDA_CHECK_STATUS(cudaGetLastError());
 
     // initialize deltas with values of gradients
     gpu_data_.copy(gpu_data_.deltas_, gpu_data_.gradients_, n_fits_ * info_.n_parameters_to_fit_);
@@ -66,11 +42,95 @@ void LMFitCUDA::solve_equation_system()
         info_.n_parameters_to_fit_,
         &solution_info,
         n_fits_);
+}
+
+#else //ARCH_64
+
+void LMFitCUDA::solve_equation_systems_gj()
+{
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
+
+    int n_parameters_pow2 = 1;
+
+    while (n_parameters_pow2 < info_.n_parameters_to_fit_)
+    {
+        n_parameters_pow2 *= 2;
+    }
+
+    //set up to run the Gauss Jordan elimination
+    int const n_equations = info_.n_parameters_to_fit_;
+    int const n_solutions = n_fits_;
+
+    threads.x = n_equations + 1;
+    threads.y = n_equations;
+    blocks.x = n_solutions;
+
+    //set the size of the shared memory area for each block
+    int const shared_size
+        = sizeof(float) * ((threads.x * threads.y)
+            + n_parameters_pow2 + n_parameters_pow2);
+
+    //run the Gauss Jordan elimination
+    cuda_gaussjordan <<< blocks, threads, shared_size >>>(
+        gpu_data_.deltas_,
+        gpu_data_.gradients_,
+        gpu_data_.hessians_,
+        gpu_data_.finished_,
+        gpu_data_.solution_info_,
+        info_.n_parameters_to_fit_,
+        n_parameters_pow2);
+    CUDA_CHECK_STATUS(cudaGetLastError());
+}
+
+#endif // ARCH_64
+
+void LMFitCUDA::update_states()
+{
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
+
+    //set up to update the lm_state_gpu_ variable with the Gauss Jordan results
+    threads.x = std::min(n_fits_, 256);
+    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+
+    //update the gpu_data_.states_ variable
+    cuda_update_state_after_solving <<< blocks, threads >>>(
+        n_fits_,
+        gpu_data_.solution_info_,
+        gpu_data_.finished_,
+        gpu_data_.states_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
+}
+
+void LMFitCUDA::scale_hessians()
+{
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
+
+    threads.x = info_.n_parameters_to_fit_*info_.n_fits_per_block_;
+    blocks.x = n_fits_ / info_.n_fits_per_block_;
+
+    cuda_modify_step_widths <<< blocks, threads >>>(
+        gpu_data_.hessians_,
+        gpu_data_.lambdas_,
+        gpu_data_.scaling_vectors_,
+        info_.n_parameters_to_fit_,
+        gpu_data_.iteration_failed_,
+        gpu_data_.finished_,
+        info_.n_fits_per_block_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
+}
+
+void LMFitCUDA::update_parameters()
+{
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
 
     threads.x = info_.n_parameters_*info_.n_fits_per_block_;
     blocks.x = n_fits_ / info_.n_fits_per_block_;
 
-    cuda_update_parameters<<< blocks, threads >>>(
+    cuda_update_parameters <<< blocks, threads >>>(
         gpu_data_.parameters_,
         gpu_data_.prev_parameters_,
         gpu_data_.deltas_,
@@ -91,7 +151,7 @@ void LMFitCUDA::calc_curve_values()
         threads.x += info_.n_points_ % threads.x;
 	blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-	cuda_calc_curve_values << < blocks, threads >> >(
+	cuda_calc_curve_values <<< blocks, threads >>>(
 		gpu_data_.parameters_,
 		n_fits_,
 		info_.n_points_,

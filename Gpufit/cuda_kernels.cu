@@ -977,24 +977,27 @@ __global__ void cuda_update_parameters(
     current_parameters[parameters_to_fit_indices[parameter_index]] += current_deltas[parameter_index];
 }
 
-/* Description of the cuda_update_state_after_lup function
- * =======================================================
+/* Description of the cuda_update_state_after_solving function
+ * ===========================================================
  *
- * This function interprets the cuBLAS flag vector of the LUP deomposition
- * function according to this LM implementation.
+ * This function interprets the singular flag vector of the equation system
+ * solving function according to this LM implementation.
  *
  * Parameters:
  *
  * n_fits: The number of fits.
  *
- * cublas_info: An input vector used to report whether a fit is singular.
+ * solution_info: An input vector used to report whether a fit is singular.
  *
- * states: An output vector of values which indicate whether the fitting process
- *         was carreid out correctly or which problem occurred. If a hessian
- *         matrix of a fit is singular, it is set to 2.
+ * finished: An input vector which allows the calculation to by skipped for
+ *           single fits.
  *
- * Calling the cuda_update_state_after_lup function
- * ================================================
+ * gpufit_states: An output vector of values which indicate whether the fitting
+ *                process was carreid out correctly or which problem occurred.
+ *                If a hessian matrix of a fit is singular, it is set to 2.
+ *
+ * Calling the cuda_update_state_after_solving function
+ * ====================================================
  *
  * When calling the function, the blocks and threads must be set up correctly,
  * as shown in the following example code.
@@ -1007,14 +1010,15 @@ __global__ void cuda_update_parameters(
  *   threads.x = min(n_fits, example_value);
  *   blocks.x = int(ceil(float(n_fits) / float(threads.x)));
  *
- *   cuda_update_state_after_lup<<< blocks, threads >>>(
+ *   cuda_update_state_after_solving<<< blocks, threads >>>(
  *       n_fits,
- *       cublas_info,
- *       states);
+ *       solution_info,
+ *       finished,
+ *       gpufit_states);
  *
  */
     
-__global__ void cuda_update_state_after_lup(
+__global__ void cuda_update_state_after_solving(
     int const n_fits,
     int const * cublas_info,
     int const * finished,
@@ -1031,7 +1035,7 @@ __global__ void cuda_update_state_after_lup(
     if (cublas_info[fit_index] != 0)
         states[fit_index] = SINGULAR_HESSIAN;
 }
-
+    
 /* Description of the cuda_check_for_convergence function
 * =======================================================
 *

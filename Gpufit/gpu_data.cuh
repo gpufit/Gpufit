@@ -4,7 +4,6 @@
 #include "info.h"
 
 #include <cuda_runtime.h>
-#include "cublas_v2.h"
 #include <stdexcept>
 #include <vector>
 #include <limits>
@@ -127,12 +126,14 @@ public:
     Device_Array< int > iteration_failed_;
     Device_Array< int > all_finished_;
     Device_Array< int > n_iterations_;
+    Device_Array< int > solution_info_;
 
+#ifdef ARCH_64
     Device_Array< float > decomposed_hessians_;
     Device_Array< float * > pointer_decomposed_hessians_;
     Device_Array< float * > pointer_deltas_;
     Device_Array< int > pivot_vectors_;
-    Device_Array< int > cublas_info_;
+#endif // ARCH_64
 };
 
 #endif

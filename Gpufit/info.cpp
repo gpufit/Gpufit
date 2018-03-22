@@ -74,15 +74,24 @@ void Info::set_max_chunk_size()
         + 2 * n_parameters_                                 // parameters, prev_parameters
         + 1 * n_blocks_per_fit_                             // chi_square
         + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
-        + 2 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian, decomposed hessian
+        + 1 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian
         + 2 * n_parameters_to_fit_                          // delta, scaling_vector
         + 1 * n_points_*n_parameters_                       // derivatives
-        + 4)                                                // prev_chi_square, lambda,
-                                                            // pointer to decomposed hessian, pointer to delta
+        + 2)                                                // prev_chi_square, lambda,
+                                                            
         + sizeof(int)
-        *(2 * n_parameters_to_fit_                          // pivot vector, indices of fitted parameters
+        *(1 * n_parameters_to_fit_                          // indices of fitted parameters
         + 5);                                               // state, finished, iteration failed flag,
-                                                            // number of iterations, cublas info
+                                                            // number of iterations, solution info
+#ifdef ARCH_64
+    one_fit_memory
+        += sizeof(float)
+        *(2                                                 // pointer to decomposed hessian, pointer to delta
+        + 1 * n_parameters_to_fit_ * n_parameters_to_fit_)  // decomposed hessian
+        + sizeof(int)
+        * (1 * n_parameters_to_fit_);                       // pivot vector
+#endif // ARCH_64
+        
 
     if (use_weights_)
         one_fit_memory += sizeof(float) * n_points_;

@@ -37,7 +37,10 @@ void LMFitCUDA::run()
         // modify step width
         // LUP decomposition
         // update fitting parameters
-        solve_equation_system();
+        scale_hessians();
+        SOLVE_EQUATION_SYSTEMS();
+        update_states();
+        update_parameters();
 
         // calculate fitting curve values and its derivatives
         // calculate chi-squares, gradients and hessians
