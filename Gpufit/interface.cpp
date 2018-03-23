@@ -18,7 +18,8 @@ FitInterface::FitInterface
     float * output_parameters,
     int * output_states,
     float * output_chi_squares,
-    int * output_n_iterations
+    int * output_n_iterations,
+    DataLocation data_location
 ) :
     data_( data ),
     weights_( weights ),
@@ -35,7 +36,8 @@ FitInterface::FitInterface
     output_states_(output_states),
     output_chi_squares_(output_chi_squares),
     output_n_iterations_(output_n_iterations),
-    n_parameters_(0)
+    n_parameters_(0),
+    data_location_(data_location)
 {}
 
 FitInterface::~FitInterface()
@@ -71,6 +73,28 @@ void FitInterface::configure_info(Info & info, ModelID const model_id)
     info.configure();
 }
 
+void FitInterface::identify_input_locations(Info & info)
+{
+    if (data_location_ == HOST)
+    {
+        info.data_location_ = HOST;
+        info.parameter_location_ = HOST;
+        if (weights_)
+            info.weight_location_ = HOST;
+        if (user_info_size_ > 0)
+            info.user_info_location_ = HOST;
+    }
+    else if (data_location_ == DEVICE)
+    {
+        info.data_location_ = DEVICE;
+        info.parameter_location_ = DEVICE;
+        if (weights_)
+            info.weight_location_ = DEVICE;
+        if (user_info_size_ > 0)
+            info.user_info_location_ = DEVICE;
+    }
+}
+
 void FitInterface::fit(ModelID const model_id)
 {
     int n_dimensions = 0;
@@ -79,6 +103,7 @@ void FitInterface::fit(ModelID const model_id)
     check_sizes();
 
     Info info;
+    identify_input_locations(info);
     configure_info(info, model_id);
 
     LMFit lmfit

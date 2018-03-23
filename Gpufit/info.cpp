@@ -70,8 +70,8 @@ void Info::set_max_chunk_size()
 {
     int one_fit_memory
         = sizeof(float)
-        *(2 * n_points_                                     // data, values
-        + 2 * n_parameters_                                 // parameters, prev_parameters
+        *(1 * n_points_                                     // values
+        + 1 * n_parameters_                                 // prev_parameters
         + 1 * n_blocks_per_fit_                             // chi_square
         + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
         + 1 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian
@@ -83,6 +83,13 @@ void Info::set_max_chunk_size()
         *(1 * n_parameters_to_fit_                          // indices of fitted parameters
         + 5);                                               // state, finished, iteration failed flag,
                                                             // number of iterations, solution info
+    if (data_location_ == HOST)
+        one_fit_memory += sizeof(float) * n_points_;        // data
+    if (parameter_location_ == HOST)
+        one_fit_memory += sizeof(float) * n_parameters_;    // parameters
+    if (use_weights_ && weight_location_ == HOST)
+        one_fit_memory += sizeof(float) * n_points_;        // weights
+
 #ifdef ARCH_64
     one_fit_memory
         += sizeof(float)
@@ -91,11 +98,7 @@ void Info::set_max_chunk_size()
         + sizeof(int)
         * (1 * n_parameters_to_fit_);                       // pivot vector
 #endif // ARCH_64
-        
-
-    if (use_weights_)
-        one_fit_memory += sizeof(float) * n_points_;
-
+    
     std::size_t tmp_chunk_size = available_gpu_memory_ / one_fit_memory;
     
     if (tmp_chunk_size == 0)

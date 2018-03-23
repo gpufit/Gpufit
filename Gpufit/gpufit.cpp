@@ -41,7 +41,8 @@ try
         output_parameters,
         output_states,
         output_chi_squares,
-        output_n_iterations);
+        output_n_iterations,
+        HOST);
 
     fi.fit(static_cast<ModelID>(model_id));
 
@@ -56,6 +57,62 @@ catch( std::exception & exception )
 catch( ... )
 {
     last_error = "unknown error" ;
+
+    return ReturnState::ERROR;
+}
+
+int gpufit_cuda_interface
+(
+    size_t n_fits,
+    size_t n_points,
+    float * data,
+    float * weights,
+    int model_id,
+    float * initial_parameters,
+    float tolerance,
+    int max_n_iterations,
+    int * parameters_to_fit,
+    int estimator_id,
+    size_t user_info_size,
+    char * user_info,
+    float * output_parameters,
+    int * output_states,
+    float * output_chi_squares,
+    int * output_n_iterations
+)
+try
+{
+    FitInterface fi(
+        data,
+        weights,
+        n_fits,
+        static_cast<int>(n_points),
+        tolerance,
+        max_n_iterations,
+        static_cast<EstimatorID>(estimator_id),
+        initial_parameters,
+        parameters_to_fit,
+        user_info,
+        user_info_size,
+        output_parameters,
+        output_states,
+        output_chi_squares,
+        output_n_iterations,
+        DEVICE);
+
+    fi.fit(static_cast<ModelID>(model_id));
+
+    return ReturnState::OK;
+}
+catch (std::exception & exception)
+{
+    last_error = exception.what();
+
+    return ReturnState::ERROR;
+}
+catch (...)
+{
+    last_error = "unknown error";
 
     return ReturnState::ERROR;
 }

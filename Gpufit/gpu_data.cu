@@ -7,12 +7,20 @@ GPUData::GPUData(Info const & info) :
     chunk_size_(0),
     info_(info),
 
-    data_( info_.max_chunk_size_*info_.n_points_ ),
-    weights_( info_.use_weights_ ? info_.n_points_ * info_.max_chunk_size_ : 0 ),
-    parameters_( info_.max_chunk_size_*info_.n_parameters_ ),
+    data_(
+        (info_.data_location_ == HOST)
+        ? info_.max_chunk_size_*info_.n_points_ : 0),
+    weights_( 
+        (info_.use_weights_ && info_.weight_location_ == HOST)
+        ? info_.n_points_ * info_.max_chunk_size_ : 0 ),
+    parameters_(
+        (info_.parameter_location_ == HOST)
+        ? info_.max_chunk_size_*info_.n_parameters_ : 0 ),
+    user_info_((info_.user_info_location_ == HOST)
+        ? info_.user_info_size_ : 0),
+
     prev_parameters_( info_.max_chunk_size_*info_.n_parameters_ ),
     parameters_to_fit_indices_( info_.n_parameters_to_fit_ ),
-    user_info_( info_.user_info_size_ ),
 
     chi_squares_( info_.max_chunk_size_ * info_.n_blocks_per_fit_),
     prev_chi_squares_( info_.max_chunk_size_ ),
@@ -70,19 +78,44 @@ void GPUData::init
     set(finished_, 0, chunk_size_);
     set(scaling_vectors_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
 
-    write(
-        data_,
-        &data[chunk_index_*info_.max_chunk_size_*info_.n_points_],
-        chunk_size_*info_.n_points_);
-
-    if (info_.use_weights_)
-        write(weights_, &weights[chunk_index_*info_.max_chunk_size_*info_.n_points_],
+    if (info_.data_location_ == HOST)
+    {
+        write(
+            data_,
+            &data[chunk_index_*info_.max_chunk_size_*info_.n_points_],
             chunk_size_*info_.n_points_);
+    }
+    else if (info_.data_location_ == DEVICE)
+    {
+        data_.assign(data + chunk_index_*info_.max_chunk_size_*info_.n_points_);
+    }
+    
+    if (info_.use_weights_)
+    {
+        if (info_.weight_location_ == HOST)
+        {
+            write(weights_, &weights[chunk_index_*info_.max_chunk_size_*info_.n_points_],
+                chunk_size_*info_.n_points_);
+        }
+        else if (info_.weight_location_ == DEVICE)
+        {
+            weights_.assign(weights + chunk_index_*info_.max_chunk_size_*info_.n_points_);
+        }
+    }
 
-    write(
-        parameters_,
-        &initial_parameters[chunk_index_*info_.max_chunk_size_*info_.n_parameters_],
-        chunk_size_ * info_.n_parameters_);
+    if (info_.parameter_location_ == HOST)
+    {
+        write(
+            parameters_,
+            &initial_parameters[chunk_index_*info_.max_chunk_size_*info_.n_parameters_],
+            chunk_size_ * info_.n_parameters_);
+    }
+    else if (info_.parameter_location_ == DEVICE)
+    {
+        parameters_.assign(
+            initial_parameters
+            + chunk_index_*info_.max_chunk_size_*info_.n_parameters_);
+    }
 
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
@@ -92,7 +125,16 @@ void GPUData::init
 void GPUData::init_user_info(char const * const user_info)
 {
     if (info_.user_info_size_ > 0)
-        write(user_info_, user_info, info_.user_info_size_);
+    {
+        if (info_.user_info_location_ == HOST)
+        {
+            write(user_info_, user_info, info_.user_info_size_);
+        }
+        else if (info_.user_info_location_ == DEVICE)
+        {
+            user_info_.assign(user_info);
+        }
+    }
 }
 
 void GPUData::read(bool * dst, int const * src)

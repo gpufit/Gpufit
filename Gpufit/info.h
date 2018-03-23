@@ -44,6 +44,11 @@ public:
     int max_threads_;
     int warp_size_;
 
+    DataLocation data_location_;
+    DataLocation weight_location_;
+    DataLocation parameter_location_;
+    DataLocation user_info_location_;
+
 private:
     std::size_t max_blocks_;
     std::size_t available_gpu_memory_;

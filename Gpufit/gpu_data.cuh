@@ -33,7 +33,7 @@ struct Device_Array
         }
     }
 
-    ~Device_Array() { cudaFree(data_); }
+    ~Device_Array() { if (data_location_ == HOST) cudaFree(data_); }
 
     operator Type * () { return static_cast<Type *>(data_); }
     operator Type const * () const { return static_cast<Type *>(data_); }
@@ -41,6 +41,12 @@ struct Device_Array
     Type const * data() const
     {
         return static_cast<Type *>(data_);
+    }
+
+    void assign(Type const * data)
+    {
+        data_ = const_cast<Type *>(data);
+        data_location_ = DEVICE;
     }
 
     Type * copy(std::size_t const size, Type * const to) const
@@ -62,6 +68,7 @@ struct Device_Array
 
 private:
     void * data_;
+    DataLocation data_location_;
 };
 
 class GPUData

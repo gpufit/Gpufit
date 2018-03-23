@@ -24,7 +24,8 @@ public:
         float * output_parameters,
         int * output_states,
         float * output_chi_squares,
-        int * output_n_iterations
+        int * output_n_iterations,
+        DataLocation data_location
     ) ;
     
     virtual ~FitInterface();
@@ -33,6 +34,7 @@ public:
 private:
     void check_sizes();
     void configure_info(Info & info, ModelID const model_id);
+    void identify_input_locations(Info & info);
 
 public:
 
@@ -51,6 +53,8 @@ private:
     int const max_n_iterations_;
     EstimatorID estimator_id_;
     std::size_t const user_info_size_;
+
+    DataLocation data_location_;
 
     //output
     float * output_parameters_;
