@@ -1,7 +1,7 @@
 #include "com_github_gpufit_Gpufit.h"
 #include "Gpufit/gpufit.h"
 
-void * buffer_adress(JNIEnv * env, jobject buffer)
+void * buffer_address(JNIEnv * env, jobject buffer)
 {
     if (buffer == 0)
     {
@@ -23,15 +23,15 @@ void * buffer_adress(JNIEnv * env, jobject buffer)
 jint Java_com_github_gpufit_Gpufit_fit(JNIEnv * env, jclass cls, jint number_fits, jint number_points, jobject data_buffer, jobject weights_buffer, jint model_id, jobject initial_parameter_buffer, jfloat tolerance, jint max_number_iterations, jobject paramters_to_fit_buffer, jint estimator_id, jint user_info_size, jobject user_info_buffer, jobject output_parameters_buffer, jobject output_states_buffer, jobject output_chi_squares_buffer, jobject output_number_iterations_buffer)
 {
     // get pointer to buffers
-    float * data = (float *)buffer_adress(env, data_buffer);
-    float * weights = (float *)buffer_adress(env, weights_buffer);
-    float * initial_parameters = (float *)buffer_adress(env, initial_parameter_buffer);
-    int * parameters_to_fit = (int *)buffer_adress(env, paramters_to_fit_buffer);
-    char * user_info = (char *)buffer_adress(env, user_info_buffer);
-    float * output_parameters = (float *)buffer_adress(env, output_parameters_buffer);
-    int * output_states = (int *)buffer_adress(env, output_states_buffer);
-    float * output_chi_squares = (float *)buffer_adress(env, output_chi_squares_buffer);
-    int * output_number_iterations = (int *)buffer_adress(env, output_number_iterations_buffer);
+    float * data = (float *)buffer_address(env, data_buffer);
+    float * weights = (float *)buffer_address(env, weights_buffer);
+    float * initial_parameters = (float *)buffer_address(env, initial_parameter_buffer);
+    int * parameters_to_fit = (int *)buffer_address(env, paramters_to_fit_buffer);
+    char * user_info = (char *)buffer_address(env, user_info_buffer);
+    float * output_parameters = (float *)buffer_address(env, output_parameters_buffer);
+    int * output_states = (int *)buffer_address(env, output_states_buffer);
+    float * output_chi_squares = (float *)buffer_address(env, output_chi_squares_buffer);
+    int * output_number_iterations = (int *)buffer_address(env, output_number_iterations_buffer);
 
     // call to gpufit
     int status = gpufit(number_fits, number_points, data, weights, model_id, initial_parameters, tolerance, max_number_iterations, parameters_to_fit, estimator_id, user_info_size, user_info, output_parameters, output_states, output_chi_squares, output_number_iterations);
