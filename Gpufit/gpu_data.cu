@@ -11,33 +11,49 @@ GPUData::GPUData(Info const & info) :
         (info_.data_location_ == HOST)
         ? info_.max_chunk_size_*info_.n_points_ : 0),
     weights_( 
-        (info_.use_weights_ && info_.weight_location_ == HOST)
+        (info_.use_weights_ && info_.data_location_ == HOST)
         ? info_.n_points_ * info_.max_chunk_size_ : 0 ),
     parameters_(
-        (info_.parameter_location_ == HOST)
+        (info_.data_location_ == HOST)
         ? info_.max_chunk_size_*info_.n_parameters_ : 0 ),
-    user_info_((info_.user_info_location_ == HOST)
+    user_info_(
+        (info_.data_location_ == HOST)
         ? info_.user_info_size_ : 0),
 
     prev_parameters_( info_.max_chunk_size_*info_.n_parameters_ ),
     parameters_to_fit_indices_( info_.n_parameters_to_fit_ ),
 
-    chi_squares_( info_.max_chunk_size_ * info_.n_blocks_per_fit_),
+    chi_squares_(
+        (info_.data_location_ == HOST)
+        ? info_.max_chunk_size_ : 0),
+
     prev_chi_squares_( info_.max_chunk_size_ ),
-    gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_),
+    gradients_( info_.max_chunk_size_ * info_.n_parameters_to_fit_),
     hessians_( info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_ ),
     deltas_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
     scaling_vectors_(info_.max_chunk_size_ * info_.n_parameters_to_fit_),
+
+    subtotals_(
+        (info_.n_blocks_per_fit_ > 1)
+        ? info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_ : 0),
 
     values_( info_.max_chunk_size_ * info_.n_points_ ),
     derivatives_( info_.max_chunk_size_ * info_.n_points_ * info_.n_parameters_ ),
 
     lambdas_( info_.max_chunk_size_ ),
-    states_( info_.max_chunk_size_ ),
+
+    states_(
+        (info_.data_location_ == HOST)
+        ? info_.max_chunk_size_ : 0),
+    
     finished_( info_.max_chunk_size_ ),
     iteration_failed_(info_.max_chunk_size_),
     all_finished_( 1 ),
-    n_iterations_( info_.max_chunk_size_ ),
+
+    n_iterations_(
+        (info_.data_location_ == HOST)
+        ? info_.max_chunk_size_ : 0),
+    
     solution_info_(info_.max_chunk_size_)
 
 #ifdef ARCH_64
@@ -68,57 +84,53 @@ void GPUData::init
     float const * const data,
     float const * const weights,
     float const * const initial_parameters,
-    std::vector<int> const & parameters_to_fit_indices)
+    std::vector<int> const & parameters_to_fit_indices,
+    int * states,
+    float * chi_squares,
+    int * n_iterations)
 {
     chunk_size_ = chunk_size;
     chunk_index_ = chunk_index;
-
-    set(prev_chi_squares_, 0.f, chunk_size_);
-    set(states_, 0, chunk_size_);
-    set(finished_, 0, chunk_size_);
-    set(scaling_vectors_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
 
     if (info_.data_location_ == HOST)
     {
         write(
             data_,
-            &data[chunk_index_*info_.max_chunk_size_*info_.n_points_],
-            chunk_size_*info_.n_points_);
+            data + chunk_index_*info_.max_chunk_size_*info_.n_points_,
+            chunk_size_ * info_.n_points_);
+        write(
+            parameters_,
+            initial_parameters + chunk_index_*info_.max_chunk_size_*info_.n_parameters_,
+            chunk_size_ * info_.n_parameters_);
+        if (info_.use_weights_)
+            write(
+                weights_,
+                weights + chunk_index_*info_.max_chunk_size_*info_.n_points_,
+                chunk_size_ * info_.n_points_);
     }
     else if (info_.data_location_ == DEVICE)
     {
-        data_.assign(data + chunk_index_*info_.max_chunk_size_*info_.n_points_);
-    }
-    
-    if (info_.use_weights_)
-    {
-        if (info_.weight_location_ == HOST)
-        {
-            write(weights_, &weights[chunk_index_*info_.max_chunk_size_*info_.n_points_],
-                chunk_size_*info_.n_points_);
-        }
-        else if (info_.weight_location_ == DEVICE)
-        {
-            weights_.assign(weights + chunk_index_*info_.max_chunk_size_*info_.n_points_);
-        }
-    }
-
-    if (info_.parameter_location_ == HOST)
-    {
-        write(
-            parameters_,
-            &initial_parameters[chunk_index_*info_.max_chunk_size_*info_.n_parameters_],
-            chunk_size_ * info_.n_parameters_);
-    }
-    else if (info_.parameter_location_ == DEVICE)
-    {
+        data_.assign(
+            data + chunk_index_*info_.max_chunk_size_*info_.n_points_);
         parameters_.assign(
-            initial_parameters
-            + chunk_index_*info_.max_chunk_size_*info_.n_parameters_);
+            initial_parameters + chunk_index_*info_.max_chunk_size_*info_.n_parameters_);
+        if (info_.use_weights_)
+            weights_.assign(
+                weights + chunk_index_*info_.max_chunk_size_*info_.n_points_);
+        states_.assign(
+            states + chunk_index_ * info_.max_chunk_size_);
+        chi_squares_.assign(
+            chi_squares + chunk_index_ * info_.max_chunk_size_);
+        n_iterations_.assign(
+            n_iterations + chunk_index_ * info_.max_chunk_size_);
     }
 
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
+    set(prev_chi_squares_, 0.f, chunk_size_);
+    set(finished_, 0, chunk_size_);
+    set(scaling_vectors_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
+    set(states_, 0, chunk_size_);
     set(lambdas_, 0.001f, chunk_size_);
 }
 
@@ -126,11 +138,11 @@ void GPUData::init_user_info(char const * const user_info)
 {
     if (info_.user_info_size_ > 0)
     {
-        if (info_.user_info_location_ == HOST)
+        if (info_.data_location_ == HOST)
         {
             write(user_info_, user_info, info_.user_info_size_);
         }
-        else if (info_.user_info_location_ == DEVICE)
+        else if (info_.data_location_ == DEVICE)
         {
             user_info_.assign(user_info);
         }

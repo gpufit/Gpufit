@@ -7,6 +7,7 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
 
 extern __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
+    float const * subtotals,
     int const n_blocks_per_fit,
     int const n_fits,
     int const * finished);
@@ -34,6 +35,7 @@ extern __global__ void cuda_calculate_chi_squares(
 
 extern __global__ void cuda_sum_gradient_subtotals(
     float * gradients,
+    float const * subtotals,
     int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,

@@ -72,8 +72,7 @@ void Info::set_max_chunk_size()
         = sizeof(float)
         *(1 * n_points_                                     // values
         + 1 * n_parameters_                                 // prev_parameters
-        + 1 * n_blocks_per_fit_                             // chi_square
-        + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
+        + 1 * n_parameters_to_fit_                          // gradient
         + 1 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian
         + 2 * n_parameters_to_fit_                          // delta, scaling_vector
         + 1 * n_points_*n_parameters_                       // derivatives
@@ -81,14 +80,24 @@ void Info::set_max_chunk_size()
                                                             
         + sizeof(int)
         *(1 * n_parameters_to_fit_                          // indices of fitted parameters
-        + 5);                                               // state, finished, iteration failed flag,
-                                                            // number of iterations, solution info
+        + 3);                                               // finished, iteration failed flag,
+                                                            // solution info
+    if (n_blocks_per_fit_ > 1)
+    {
+        one_fit_memory
+            += sizeof(float)
+             * n_parameters_to_fit_ * n_blocks_per_fit_;    // subtotals
+    }
+
     if (data_location_ == HOST)
+    {
         one_fit_memory += sizeof(float) * n_points_;        // data
-    if (parameter_location_ == HOST)
         one_fit_memory += sizeof(float) * n_parameters_;    // parameters
-    if (use_weights_ && weight_location_ == HOST)
-        one_fit_memory += sizeof(float) * n_points_;        // weights
+        one_fit_memory += sizeof(float);                    // chi-square
+        one_fit_memory += sizeof(int) * 2;                  // state, number of iterations
+        if (use_weights_)
+            one_fit_memory += sizeof(float) * n_points_;    // weights
+    }
 
 #ifdef ARCH_64
     one_fit_memory

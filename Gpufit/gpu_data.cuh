@@ -11,7 +11,7 @@
 template< typename Type >
 struct Device_Array
 {
-    explicit Device_Array(std::size_t const size)
+    explicit Device_Array(std::size_t const size) : allocated_size_(size)
     {
         std::size_t const maximum_size = std::numeric_limits< std::size_t >::max();
         std::size_t const type_size = sizeof(Type);
@@ -33,7 +33,7 @@ struct Device_Array
         }
     }
 
-    ~Device_Array() { if (data_location_ == HOST) cudaFree(data_); }
+    ~Device_Array() { if (allocated_size_ > 0) cudaFree(data_); }
 
     operator Type * () { return static_cast<Type *>(data_); }
     operator Type const * () const { return static_cast<Type *>(data_); }
@@ -46,7 +46,6 @@ struct Device_Array
     void assign(Type const * data)
     {
         data_ = const_cast<Type *>(data);
-        data_location_ = DEVICE;
     }
 
     Type * copy(std::size_t const size, Type * const to) const
@@ -68,7 +67,7 @@ struct Device_Array
 
 private:
     void * data_;
-    DataLocation data_location_;
+    std::size_t allocated_size_;
 };
 
 class GPUData
@@ -84,7 +83,10 @@ public:
         float const * data,
         float const * weights,
         float const * initial_parameters,
-        std::vector<int> const & parameters_to_fit_indices
+        std::vector<int> const & parameters_to_fit_indices,
+        int * states,
+        float * chi_squares,
+        int * n_iterations
     );
     void init_user_info(char const * user_info);
 
@@ -123,6 +125,7 @@ public:
     Device_Array< float > hessians_;
     Device_Array< float > deltas_;
     Device_Array< float > scaling_vectors_;
+    Device_Array< float > subtotals_;
 
     Device_Array< float > values_;
     Device_Array< float > derivatives_;

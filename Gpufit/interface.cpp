@@ -68,31 +68,10 @@ void FitInterface::configure_info(Info & info, ModelID const model_id)
     info.user_info_size_ = user_info_size_;
     info.n_parameters_ = n_parameters_;
     info.use_weights_ = weights_ ? true : false;
+    info.data_location_ = data_location_;
 
     info.set_number_of_parameters_to_fit(parameters_to_fit_);
     info.configure();
-}
-
-void FitInterface::identify_input_locations(Info & info)
-{
-    if (data_location_ == HOST)
-    {
-        info.data_location_ = HOST;
-        info.parameter_location_ = HOST;
-        if (weights_)
-            info.weight_location_ = HOST;
-        if (user_info_size_ > 0)
-            info.user_info_location_ = HOST;
-    }
-    else if (data_location_ == DEVICE)
-    {
-        info.data_location_ = DEVICE;
-        info.parameter_location_ = DEVICE;
-        if (weights_)
-            info.weight_location_ = DEVICE;
-        if (user_info_size_ > 0)
-            info.user_info_location_ = DEVICE;
-    }
 }
 
 void FitInterface::fit(ModelID const model_id)
@@ -103,7 +82,6 @@ void FitInterface::fit(ModelID const model_id)
     check_sizes();
 
     Info info;
-    identify_input_locations(info);
     configure_info(info, model_id);
 
     LMFit lmfit

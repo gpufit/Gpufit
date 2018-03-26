@@ -65,39 +65,38 @@ int gpufit_cuda_interface
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    float * gpu_data,
+    float * gpu_weights,
     int model_id,
-    float * initial_parameters,
     float tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
-    char * user_info,
-    float * output_parameters,
-    int * output_states,
-    float * output_chi_squares,
-    int * output_n_iterations
+    char * gpu_user_info,
+    float * gpu_fit_parameters,
+    int * gpu_output_states,
+    float * gpu_output_chi_squares,
+    int * gpu_output_n_iterations
 )
 try
 {
     FitInterface fi(
-        data,
-        weights,
+        gpu_data,
+        gpu_weights,
         n_fits,
         static_cast<int>(n_points),
         tolerance,
         max_n_iterations,
         static_cast<EstimatorID>(estimator_id),
-        initial_parameters,
+        gpu_fit_parameters,
         parameters_to_fit,
-        user_info,
+        gpu_user_info,
         user_info_size,
-        output_parameters,
-        output_states,
-        output_chi_squares,
-        output_n_iterations,
+        gpu_fit_parameters,
+        gpu_output_states,
+        gpu_output_chi_squares,
+        gpu_output_n_iterations,
         DEVICE);
 
     fi.fit(static_cast<ModelID>(model_id));

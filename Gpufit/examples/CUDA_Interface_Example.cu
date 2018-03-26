@@ -73,7 +73,7 @@ void gauss_fit_2d_example()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 10;
+	size_t const n_fits = 100000;
 	size_t const size_x = 50;
 	size_t const n_points_per_fit = size_x * size_x;
 	size_t const n_model_parameters = 5;
@@ -185,6 +185,21 @@ void gauss_fit_2d_example()
         &gpu_user_info,
         data.size() * sizeof(float)));
 
+    int * gpu_states;
+    CUDA_CHECK_STATUS(cudaMalloc(
+        &gpu_states,
+        output_states.size() * sizeof(int)));
+
+    float * gpu_chi_squares;
+    CUDA_CHECK_STATUS(cudaMalloc(
+        &gpu_chi_squares,
+        output_chi_square.size() * sizeof(float)));
+
+    int * gpu_n_iterations;
+    CUDA_CHECK_STATUS(cudaMalloc(
+        &gpu_n_iterations,
+        output_number_iterations.size() * sizeof(int)));
+
 	// call to gpufit (C interface)
 	std::chrono::high_resolution_clock::time_point time_0 = std::chrono::high_resolution_clock::now();
 	int const status = gpufit_cuda_interface
@@ -194,28 +209,53 @@ void gauss_fit_2d_example()
             gpu_data,
             gpu_weights,
             model_id,
-            gpu_initial_parameters,
             tolerance,
             max_number_iterations,
             parameters_to_fit.data(),
             estimator_id,
             data.size() * sizeof(float),
             gpu_user_info,
-            output_parameters.data(),
-            output_states.data(),
-            output_chi_square.data(),
-            output_number_iterations.data()
+            gpu_initial_parameters,
+            gpu_states,
+            gpu_chi_squares,
+            gpu_n_iterations
         );
 	std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
 
-    CUDA_CHECK_STATUS(cudaFree(gpu_data));
-    CUDA_CHECK_STATUS(cudaFree(gpu_initial_parameters));
+    // check status
+    if (status != ReturnState::OK)
+    {
+        throw std::runtime_error(gpufit_get_last_error());
+    }
 
-	// check status
-	if (status != ReturnState::OK)
-	{
-		throw std::runtime_error(gpufit_get_last_error());
-	}
+    CUDA_CHECK_STATUS(cudaMemcpy(
+        output_parameters.data(),
+        gpu_initial_parameters,
+        output_parameters.size() * sizeof(float),
+        cudaMemcpyDeviceToHost));
+    CUDA_CHECK_STATUS(cudaMemcpy(
+        output_states.data(),
+        gpu_states,
+        output_states.size() * sizeof(int),
+        cudaMemcpyDeviceToHost));
+    CUDA_CHECK_STATUS(cudaMemcpy(
+        output_chi_square.data(),
+        gpu_chi_squares,
+        output_chi_square.size() * sizeof(float),
+        cudaMemcpyDeviceToHost));
+    CUDA_CHECK_STATUS(cudaMemcpy(
+        output_number_iterations.data(),
+        gpu_n_iterations,
+        output_number_iterations.size() * sizeof(int),
+        cudaMemcpyDeviceToHost));
+
+    CUDA_CHECK_STATUS(cudaFree(gpu_data));
+    CUDA_CHECK_STATUS(cudaFree(gpu_weights));
+    CUDA_CHECK_STATUS(cudaFree(gpu_user_info));
+    CUDA_CHECK_STATUS(cudaFree(gpu_initial_parameters));
+    CUDA_CHECK_STATUS(cudaFree(gpu_states));
+    CUDA_CHECK_STATUS(cudaFree(gpu_chi_squares));
+    CUDA_CHECK_STATUS(cudaFree(gpu_n_iterations));
 
 	// print execution time
 	std::cout << "execution time "

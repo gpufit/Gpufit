@@ -198,6 +198,7 @@ __device__ void sum_up_floats(volatile float* shared_array, int const size)
 
 __global__ void cuda_sum_chi_square_subtotals(
     float * chi_squares,
+    float const * subtotals,
     int const n_blocks_per_fit,
     int const n_fits,
     int const * finished)
@@ -208,10 +209,11 @@ __global__ void cuda_sum_chi_square_subtotals(
         return;
 
     float * chi_square = chi_squares + index;
+    float const * subtotal = subtotals + index;
 
     double sum = 0.0;
     for (int i = 0; i < n_blocks_per_fit; i++)
-        sum += chi_square[i * n_fits];
+        sum += subtotal[i * n_fits];
 
     chi_square[0] = sum;
 }
@@ -462,6 +464,7 @@ __global__ void cuda_calculate_chi_squares(
 
 __global__ void cuda_sum_gradient_subtotals(
     float * gradients,
+    float const * subtotals,
     int const n_blocks_per_fit,
     int const n_fits,
     int const n_parameters,
@@ -475,10 +478,11 @@ __global__ void cuda_sum_gradient_subtotals(
         return;
 
     float * gradient = gradients + index;
+    float const * subtotal = subtotals + index;
 
     double sum = 0.0;
     for (int i = 0; i < n_blocks_per_fit; i++)
-        sum += gradient[i * n_fits * n_parameters];
+        sum += subtotal[i * n_fits * n_parameters];
 
     gradient[0] = sum;
 }

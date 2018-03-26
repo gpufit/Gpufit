@@ -178,8 +178,11 @@ void LMFitCUDA::calc_chi_squares()
 
     int const shared_size = sizeof(float) * threads.x;
 
+    float * chi_squares = 
+        info_.n_blocks_per_fit_ > 1 ? gpu_data_.subtotals_ : gpu_data_.chi_squares_;
+
     cuda_calculate_chi_squares <<< blocks, threads, shared_size >>>(
-        gpu_data_.chi_squares_,
+        chi_squares,
         gpu_data_.states_,
         gpu_data_.data_,
         gpu_data_.values_,
@@ -200,6 +203,7 @@ void LMFitCUDA::calc_chi_squares()
     {
         cuda_sum_chi_square_subtotals <<< blocks, threads >>> (
             gpu_data_.chi_squares_,
+            gpu_data_.subtotals_,
             info_.n_blocks_per_fit_,
             n_fits_,
             gpu_data_.finished_);
@@ -225,8 +229,11 @@ void LMFitCUDA::calc_gradients()
 
     int const shared_size = sizeof(float) * threads.x;
 
+    float * gradients
+        = info_.n_blocks_per_fit_ > 1 ? gpu_data_.subtotals_ : gpu_data_.gradients_;
+
     cuda_calculate_gradients <<< blocks, threads, shared_size >>>(
-        gpu_data_.gradients_,
+        gradients,
         gpu_data_.data_,
         gpu_data_.values_,
         gpu_data_.derivatives_,
@@ -252,6 +259,7 @@ void LMFitCUDA::calc_gradients()
 
         cuda_sum_gradient_subtotals <<< blocks, threads >>> (
             gpu_data_.gradients_,
+            gpu_data_.subtotals_,
             info_.n_blocks_per_fit_,
             n_fits_,
             info_.n_parameters_to_fit_,

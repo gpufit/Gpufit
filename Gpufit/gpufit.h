@@ -41,20 +41,19 @@ VISIBLE int gpufit_cuda_interface
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    float * gpu_data,
+    float * gpu_weights,
     int model_id,
-    float * initial_parameters,
     float tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
-    char * user_info,
-    float * output_parameters,
-    int * output_states,
-    float * output_chi_squares,
-    int * output_n_iterations
+    char * gpu_user_info,
+    float * gpu_fit_parameters,
+    int * gpu_output_states,
+    float * gpu_output_chi_squares,
+    int * gpu_output_n_iterations
 );
 
 VISIBLE char const * gpufit_get_last_error() ;

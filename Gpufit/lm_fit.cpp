@@ -47,11 +47,17 @@ void LMFit::set_parameters_to_fit_indices()
 
 void LMFit::get_results(GPUData const & gpu_data, int const n_fits)
 {
-    output_parameters_
-        = gpu_data.parameters_.copy( n_fits*info_.n_parameters_, output_parameters_ ) ;
-    output_states_ = gpu_data.states_.copy( n_fits, output_states_ ) ;
-    output_chi_squares_ = gpu_data.chi_squares_.copy( n_fits, output_chi_squares_ ) ;
-    output_n_iterations_ = gpu_data.n_iterations_.copy( n_fits, output_n_iterations_ ) ;
+    if (info_.data_location_ == HOST)
+    {
+        output_parameters_
+            = gpu_data.parameters_.copy(n_fits*info_.n_parameters_, output_parameters_);
+        output_states_
+            = gpu_data.states_.copy(n_fits, output_states_);
+        output_chi_squares_
+            = gpu_data.chi_squares_.copy(n_fits, output_chi_squares_);
+        output_n_iterations_
+            = gpu_data.n_iterations_.copy(n_fits, output_n_iterations_);
+    }
 }
 
 void LMFit::run(float const tolerance)
@@ -74,7 +80,10 @@ void LMFit::run(float const tolerance)
             data_,
             weights_,
             initial_parameters_,
-            parameters_to_fit_indices_);
+            parameters_to_fit_indices_,
+            output_states_,
+            output_chi_squares_,
+            output_n_iterations_);
 
         LMFitCUDA lmfit_cuda(
             tolerance,

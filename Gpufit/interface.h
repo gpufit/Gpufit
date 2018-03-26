@@ -34,7 +34,6 @@ public:
 private:
     void check_sizes();
     void configure_info(Info & info, ModelID const model_id);
-    void identify_input_locations(Info & info);
 
 public:
 
