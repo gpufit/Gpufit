@@ -74,7 +74,7 @@ GPUData::~GPUData()
 {
 #ifdef ARCH_64
     cublasDestroy(cublas_handle_);
-#endif ARCH_64
+#endif // ARCH_64
 }
 
 void GPUData::init

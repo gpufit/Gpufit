@@ -94,6 +94,10 @@ CUDA_SELECT_NVCC_ARCH_FLAGS( code_generation_flags "${CUDA_ARCHITECTURES}" )
 list( APPEND CUDA_NVCC_FLAGS ${code_generation_flags} )
 message( STATUS "CUDA_NVCC_FLAGS=${code_generation_flags}" )
 
+if( NOT WIN32 )
+	list( APPEND CUDA_NVCC_FLAGS --std=c++11)
+endif()
+
 # Gpufit
 
 set( GpuHeaders
