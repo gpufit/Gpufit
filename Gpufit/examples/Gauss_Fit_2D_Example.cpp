@@ -46,7 +46,7 @@ void gauss_fit_2d_example()
 {
 	/*
         This example generates test data in form of 10000 two dimensional Gaussian
-        peaks with the size of 5x5 data points per peak. It is noised by Poisson
+        peaks with the size of 50x50 data points per peak. It is noised by Poisson
         distributed noise. The initial guesses were randomized, within a specified
         range of the true value. The GAUSS_2D model is fitted to the test data sets
         using the MLE estimator.
