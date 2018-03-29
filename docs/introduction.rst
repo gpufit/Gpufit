@@ -56,7 +56,7 @@ How to cite Gpufit
 
 Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Keller-Findeisen at the Max Planck Institute for Biophysical Chemistry, in Göttingen, Germany.
 
-The development of open-source software projects, such as Gpufit, requires significant time and resources from the project team.  **If you use Gpufit in your research, please cite our publication.**  A paper describing the development of the Gpufit software was published in the journal Scientific Reports.  This open-access manuscript is available from the Scientific Reports website, [here](https://www.nature.com/articles/s41598-017-15313-9).
+The development and maintenance of open-source software projects, such as Gpufit, requires significant time and resources from the project team.  If you use Gpufit in your research, **please cite our publication**.  A paper describing the Gpufit software was published in the journal Scientific Reports, and is available from the Scientific Reports website (open-access), [here](https://www.nature.com/articles/s41598-017-15313-9).
 
 The citation for the Gpufit paper is as follows::
 
