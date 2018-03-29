@@ -58,9 +58,9 @@ If you use Gpufit in your research, please cite our publication describing the s
 
 The citation for the Gpufit paper is as follows:
 
-  *  Gpufit: An open-source toolkit for GPU-accelerated curve fitting  
-     Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates  
-     Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9 
+    Gpufit: An open-source toolkit for GPU-accelerated curve fitting  
+    Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates  
+    Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9 
 
 Hardware requirements
 ---------------------
