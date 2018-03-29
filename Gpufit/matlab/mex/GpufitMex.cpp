@@ -5,6 +5,12 @@
 #include <cstring>
 #include <string>
 
+#if (defined _MSC_VER && _MSC_VER <= 1800)
+#define PRINT_MSG _snprintf_s
+#else
+#define PRINT_MSG std::snprintf
+#endif
+
 /*
 	Get a arbitrary scalar (non complex) and check for class id.
 	https://www.mathworks.com/help/matlab/apiref/mxclassid.html
@@ -39,14 +45,14 @@ void mexFunction(
     if (nrhs != expected_nrhs)
     {
         char msg[50];
-        std::snprintf(msg, 50, "%d input arguments required.", expected_nrhs);
+        PRINT_MSG(msg, 50, "%d input arguments required.", expected_nrhs);
         mexErrMsgIdAndTxt("Gpufit:Mex", msg);
     }
 
     if (nlhs != expected_nlhs)
     {
         char msg[50];
-        std::snprintf(msg, 50, "%d output arguments required.", expected_nlhs);
+        PRINT_MSG(msg, 50, "%d output arguments required.", expected_nlhs);
         mexErrMsgIdAndTxt("Gpufit:Mex", msg);
 	}
 
