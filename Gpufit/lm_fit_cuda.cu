@@ -143,29 +143,31 @@ void LMFitCUDA::update_parameters()
 
 void LMFitCUDA::calc_curve_values()
 {
-	dim3  threads(1, 1, 1);
-	dim3  blocks(1, 1, 1);
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
 
-	threads.x = info_.n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
+    threads.x = info_.n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
+
     if (info_.n_blocks_per_fit_ > 1)
         threads.x += info_.n_points_ % threads.x;
-	blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-	cuda_calc_curve_values <<< blocks, threads >>>(
-		gpu_data_.parameters_,
-		n_fits_,
-		info_.n_points_,
-		info_.n_parameters_,
-		gpu_data_.finished_,
-		gpu_data_.values_,
-		gpu_data_.derivatives_,
-		info_.n_fits_per_block_,
+    blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
+
+    cuda_calc_curve_values <<< blocks, threads >>>(
+        gpu_data_.parameters_,
+        n_fits_,
+        info_.n_points_,
+        info_.n_parameters_,
+        gpu_data_.finished_,
+        gpu_data_.values_,
+        gpu_data_.derivatives_,
+        info_.n_fits_per_block_,
         info_.n_blocks_per_fit_,
-		info_.model_id_,
-		gpu_data_.chunk_index_,
-		gpu_data_.user_info_,
-		info_.user_info_size_);
-	CUDA_CHECK_STATUS(cudaGetLastError());
+        info_.model_id_,
+        gpu_data_.chunk_index_,
+        gpu_data_.user_info_,
+        info_.user_info_size_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
 void LMFitCUDA::calc_chi_squares()
