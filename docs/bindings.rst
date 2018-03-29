@@ -522,19 +522,32 @@ the number of fits and the number of parameters of the model didn't change. It m
     public FitModel(int numberFits, int numberPoints, boolean withWeights, Model model, Float tolerance, Integer maxNumberIterations, Boolean[] parametersToFit, Estimator estimator, int userInfoSize)
 
 :numberFits: Number of fits
+
 :numberPoints: Number of data points per fit
+
 :widthWeights: If true, a buffer for giving weights is pre-allocated, otherwise not
+
 :model: An enum describing the model. See class Model for more information. Naming and id is equivalent to the C code.
+
 :tolerance: Fit tolerance
+
     :special: If null, the default value will be used.
+
 :maxNumberIterations: Maximal number of iterations
+
     :special: If null, the default value will be used.
+
 :parametersToFit: Boolean array indicating which parameters should be fitted
+
     :special: If null, the default value will be used.
+
 :estimator: Enum describing the estimator function. See class Estimator for more information. Naming and id is equivalent
-            to the C code.
+    to the C code.
+
     :special: If None, the default value is used.
+
 :userInfoSize: The size of the user info (in bytes).
+
     :special: Must be positive, otherwise the buffer for user info is not pre-allocated.
 
 Afterwards the buffers for data, weights (if desired), initial parameters and user info (if desired) must be filled with
@@ -550,13 +563,13 @@ recreation.
 
 .. code-block:: java
 
-public class FitResult {
+    public class FitResult {
 
-    public final FloatBuffer parameters;
-    public final IntBuffer states;
-    public final FloatBuffer chiSquares;
-    public final IntBuffer numberIterations;
-    public float fitDuration;
+        public final FloatBuffer parameters;
+        public final IntBuffer states;
+        public final FloatBuffer chiSquares;
+        public final IntBuffer numberIterations;
+        public float fitDuration;
 
 :parameters: Fitted parameters for each fit
 :states: Fit result states for each fit
