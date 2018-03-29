@@ -1,3 +1,4 @@
+.. highlight:: text
 ============
 Introduction
 ============
@@ -56,7 +57,7 @@ Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Kelle
 
 If you use Gpufit in your research, please cite our publication describing the software.  A research study describing the development of the software was published in the journal Scientific Reports.  This open-access manuscript is available from the Scientific Reports website, [here](https://www.nature.com/articles/s41598-017-15313-9).
 
-The citation for the Gpufit paper is as follows:: text
+The citation for the Gpufit paper is as follows::
 
     Gpufit: An open-source toolkit for GPU-accelerated curve fitting  
     Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates  
