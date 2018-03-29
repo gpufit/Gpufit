@@ -7,7 +7,7 @@ External bindings
 This sections describes the Gpufit bindings to other programming languages. The bindings (to Python, Matlab or Java) aim to
 emulate the :ref:`c-interface` as closely as possible.
 
-Most high level languages feature multidimensional numerical arrays. In the bindings implemented for Matlab and Python,
+Most high level languages feature multidimensional numeric arrays. In the bindings implemented for Matlab and Python,
 we adopt the convention that the input data should be organized as a 2D array, with one dimension corresponding to the
 number of data points per fit, and the other corresponding to the number of fits. Internally, in memory, these arrays should
 always be ordered such that the data values for each fit are kept together. In Matlab, for example, this means storing the
@@ -16,9 +16,9 @@ same way that is expected by the Gpufit C interface, and there is no need to cop
 before passing it to the GPU. The same convention is used for the weights, the initial model parameters, and the output parameters.
 
 In Java we pre-allocate one dimensional FloatBuffers or IntBuffers for the data and the fit results. The user is responsible
-for himself to copy, convert his data into these buffers.
+for copying data into these buffers.
 
-Unlike the C interface, the external bindings to not require the number of fits and the number of data points per fit to be 
+Unlike the C interface, the external bindings do not require the number of fits and the number of data points per fit to be 
 specified explicitly. Instead, these numbers are inferred from the dimensions of the 2D input arrays.
 
 Optional parameters with default values
