@@ -1,7 +1,7 @@
 Software development kit for the Gpufit library (https://github.com/gpufit/Gpufit)
 which implements Levenberg Marquardt curve fitting in CUDA.
 
-Gpufit 1.0.2
+Gpufit 1.1.0
 
 Compiled with the Microsoft Visual Studio 2015 C++ compiler and CUDA toolkit 8.0.
 
