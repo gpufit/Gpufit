@@ -54,6 +54,8 @@ set PERFORMANCE_TEST_INSTALL=%ROOT_INSTALL%\gpufit_performance_test
 set PYTHON_INSTALL=%ROOT_INSTALL%\python
 set x32_MATLAB_INSTALL=%ROOT_INSTALL%\matlab32
 set x64_MATLAB_INSTALL=%ROOT_INSTALL%\matlab64
+set x32_JAVA_INSTALL=%ROOT_INSTALL%\java32
+set x64_JAVA_INSTALL=%ROOT_INSTALL%\java64
 set SDK_INSTALL_ROOT=%ROOT_INSTALL%\gpufit_sdk
 
 set x64_BUILD=%BUILD_BASE%\VC14x64-8.0\RelWithDebInfo
@@ -66,6 +68,9 @@ set x32_PYTHON_BUILD=%x32_BUILD%\pyGpufit\dist
 
 set x64_MATLAB_BUILD=%x64_BUILD%\matlab
 set x32_MATLAB_BUILD=%x32_BUILD%\matlab
+
+set x64_JAVA_BUILD=%x64_BUILD%\java
+set x32_JAVA_BUILD=%x32_BUILD%\java
 
 set EXAMPLES_SOURCE=%SOURCE_BASE%\examples
 set PYTHON_SOURCE=%SOURCE_BASE%\Gpufit\python
@@ -136,6 +141,18 @@ echo collect matlab64
 mkdir "%x64_MATLAB_INSTALL%"
 xcopy "%x64_MATLAB_BUILD%" "%x64_MATLAB_INSTALL%" /q
 xcopy "%MATLAB_SOURCE%\examples" "%x64_MATLAB_INSTALL%\examples" /i /q
+
+REM copy Java 32 bit
+
+echo collect java32
+mkdir "%x32_JAVA_INSTALL%"
+xcopy "%x32_JAVA_BUILD%" "%x32_JAVA_INSTALL%" /q
+
+REM copy Java 64 bit
+
+echo collect java64
+mkdir "%x64_JAVA_INSTALL%"
+xcopy "%x64_JAVA_BUILD%" "%x64_JAVA_INSTALL%" /q
 
 REM copy SDK_INSTALL_ROOT
 
