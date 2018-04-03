@@ -20,7 +20,7 @@ void * buffer_address(JNIEnv * env, jobject buffer)
 * Method:    fit
 * Signature: (IILjava/nio/FloatBuffer;Ljava/nio/FloatBuffer;ILjava/nio/FloatBuffer;FILjava/nio/IntBuffer;IILjava/nio/ByteBuffer;Ljava/nio/FloatBuffer;Ljava/nio/IntBuffer;Ljava/nio/FloatBuffer;Ljava/nio/IntBuffer;)I
 */
-jint Java_com_github_gpufit_Gpufit_fit(JNIEnv * env, jclass cls, jint number_fits, jint number_points, jobject data_buffer, jobject weights_buffer, jint model_id, jobject initial_parameter_buffer, jfloat tolerance, jint max_number_iterations, jobject paramters_to_fit_buffer, jint estimator_id, jint user_info_size, jobject user_info_buffer, jobject output_parameters_buffer, jobject output_states_buffer, jobject output_chi_squares_buffer, jobject output_number_iterations_buffer)
+jint JNICALL Java_com_github_gpufit_Gpufit_fit(JNIEnv * env, jclass cls, jint number_fits, jint number_points, jobject data_buffer, jobject weights_buffer, jint model_id, jobject initial_parameter_buffer, jfloat tolerance, jint max_number_iterations, jobject paramters_to_fit_buffer, jint estimator_id, jint user_info_size, jobject user_info_buffer, jobject output_parameters_buffer, jobject output_states_buffer, jobject output_chi_squares_buffer, jobject output_number_iterations_buffer)
 {
     // get pointer to buffers
     float * data = (float *)buffer_address(env, data_buffer);
@@ -45,7 +45,7 @@ jint Java_com_github_gpufit_Gpufit_fit(JNIEnv * env, jclass cls, jint number_fit
 * Method:    getLastError
 * Signature: ()Ljava/lang/String;
 */
-jstring Java_com_github_gpufit_Gpufit_getLastError(JNIEnv * env, jclass cls)
+jstring JNICALL Java_com_github_gpufit_Gpufit_getLastError(JNIEnv * env, jclass cls)
 {
     char const * error = gpufit_get_last_error();
     return env->NewStringUTF(error);
@@ -58,7 +58,7 @@ jstring Java_com_github_gpufit_Gpufit_getLastError(JNIEnv * env, jclass cls)
 * Method:    isCudaAvailable
 * Signature: ()Z
 */
-jboolean Java_com_github_gpufit_Gpufit_isCudaAvailable(JNIEnv * env, jclass cls)
+jboolean JNICALL Java_com_github_gpufit_Gpufit_isCudaAvailable(JNIEnv * env, jclass cls)
 {
     return gpufit_cuda_available() == 1 ? JNI_TRUE : JNI_FALSE;
 }
@@ -70,7 +70,7 @@ jboolean Java_com_github_gpufit_Gpufit_isCudaAvailable(JNIEnv * env, jclass cls)
 * Method:    getCudaVersionAsArray
 * Signature: ()[I
 */
-jintArray Java_com_github_gpufit_Gpufit_getCudaVersionAsArray(JNIEnv * env, jclass cls)
+jintArray JNICALL Java_com_github_gpufit_Gpufit_getCudaVersionAsArray(JNIEnv * env, jclass cls)
 {
     int runtime_version, driver_version;
     if (gpufit_get_cuda_version(&runtime_version, &driver_version) == ReturnState::OK)
