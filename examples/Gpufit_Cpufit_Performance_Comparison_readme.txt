@@ -42,9 +42,9 @@ EXAMPLE:
 								
 The results of the performance comparison between Gpufit and Cpufit are shown
 in a table. The results demonstrate the performance benefit of Gpufit compared
-to Cpufit executing the fitting process vor various number of fits in a range
+to Cpufit executing the fitting process for various number of fits in a range
 of 10 - 10000000. The execution speed is expressed in fits per second. If the
-execution time was not measureable, the speed is expressed as infinite.
+execution time was not measurable, the speed is expressed as infinite.
 
 EXAMPLE:
 

@@ -146,13 +146,13 @@ REM copy Java 32 bit
 
 echo collect java32
 mkdir "%x32_JAVA_INSTALL%"
-xcopy "%x32_JAVA_BUILD%" "%x32_JAVA_INSTALL%" /q
+xcopy "%x32_JAVA_BUILD%" "%x32_JAVA_INSTALL%" /q /s
 
 REM copy Java 64 bit
 
 echo collect java64
 mkdir "%x64_JAVA_INSTALL%"
-xcopy "%x64_JAVA_BUILD%" "%x64_JAVA_INSTALL%" /q
+xcopy "%x64_JAVA_BUILD%" "%x64_JAVA_INSTALL%" /q /s
 
 REM copy SDK_INSTALL_ROOT
 

@@ -27,11 +27,11 @@ Instructions for building Gpufit are found in the documentation: [Building from 
 
 ## Using the Gpufit binary distribution
 
-Instructions for using the bindary distribution may be found in the documentation.  The binary package contains:
+Instructions for using the binary distribution may be found in the documentation.  The binary package contains:
 
 - The Gpufit SDK, which consists of the 32-bit and 64-bit DLL files, and 
   the Gpufit header file which contains the function definitions.  The Gpufit
-  SDK is intented to be used when calling Gpufit from an external application
+  SDK is intended to be used when calling Gpufit from an external application
   written in e.g. C code.
 - Gpufit Performance test: A simple console application comparing the execution speed of curve fitting on the GPU and CPU.  This program also serves as a test to ensure the correct functioning of Gpufit.
 - Matlab 32 bit and 64 bit bindings, with Matlab examples.
