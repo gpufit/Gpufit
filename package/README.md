@@ -40,9 +40,9 @@ See also [Build from sources](http://Gpufit.readthedocs.io/en/latest/installatio
 Everything should run through and the tests should execute successfully. Also run the Gpufit_Cpufit_Performance_Comparison.
 
 - Configuration RelWithDebInfo is used for all builds!
-- With MSVC14 Win64 build target PYTHON_WHEEL, MATLAB_GPUFIT_PACKAGE and the Gpufit_Cpufit_Performance_Comparison example
-- With MSVC14 Win32 build target PYTHON_WHEEL, MATLAB_GPUFIT_PACKAGE and the Gpufit_Cpufit_Performance_Comparison example
-- SOURCE_BASE_PATH\docs\_build\latex\Gpufit.pdf will be created from Gpufit.tex at the same location
+- With MSVC14 Win64 build target PYTHON_WHEEL, MATLAB_GPUFIT_PACKAGE, JAVA_PACKAGE, Gpufit_Cpufit_Performance_Comparison, Tests
+- With MSVC14 Win32 build target PYTHON_WHEEL, MATLAB_GPUFIT_PACKAGE, JAVA_PACKAGE, Gpufit_Cpufit_Performance_Comparison, Tests
+- On one of them also build target DOCUMENTATION_PDFLATEX (SOURCE_BASE_PATH\docs\_build\latex\Gpufit.pdf will be created from Gpufit.tex at the same location)
 
 ## Run the examples for the Bindings
 

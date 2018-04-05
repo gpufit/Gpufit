@@ -101,7 +101,7 @@ find_package( LATEX COMPONENTS PDFLATEX )
 if( LATEX_PDFLATEX_FOUND )
   set( latex_manual_directory "${CMAKE_SOURCE_DIR}/docs/_build/latex" )
   # run latex two times to get the references right
-  add_custom_target( DOCUMENTATION_PDFLATEX ALL
+  add_custom_target( DOCUMENTATION_PDFLATEX
     COMMAND ${CMAKE_COMMAND} -E
       chdir ${latex_manual_directory} "${PDFLATEX_COMPILER}" -interaction=nonstopmode Gpufit.tex
     COMMAND ${CMAKE_COMMAND} -E
