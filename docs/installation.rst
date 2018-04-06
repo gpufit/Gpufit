@@ -232,6 +232,27 @@ CUDA capable graphics card. However, satisfying the Prerequisites_ and using
 CMake, we estimate that the library should build in principle and one
 should also be able to run the examples on MacOS.
 
+Using cuBLAS
+++++++++++++
+
+Optionally, Gpufit may be configured to make use of the cuBLAS library.  This
+library is used for solving the equation system during the fit process.  
+
+Several benefits are obtained by using cuBLAS:
+
+- Moderately faster fitting performance.
+- Improved numerical stability.
+- The number of fit model parameters may be as high as the number of threads per
+  GPU thread block (1024).  Without cuBLAS, the maximum number of model parameters
+  is limited to 31.
+  
+To include cuBLAS functionality in Gpufit, the USE_CUBLAS flag may be set during 
+the CMAKE configuration step.  Note that the Gpufit cuBLAS feature is only available 
+for 64-bit architectures, and for code built with CUDA toolkit version >= 7.0.  Finally, 
+it is important to note that cuBLAS is not statically linked in the Gpufit DLL, but rather
+it is dynamically linked.  Hence, when distributing applications, the cuBLAS DLL (e.g. cublas64_80.dll 
+for CUDA toolkit version 8) must be packaged along with Gpufit.dll.
+
 Running the performance test
 ++++++++++++++++++++++++++++
 
