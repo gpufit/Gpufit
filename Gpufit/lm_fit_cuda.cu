@@ -289,11 +289,13 @@ void LMFitCUDA::calc_hessians()
         }
     }
 
-    threads.x = std::min(n_unique_values * n_hessians_per_block, info_.max_threads_);
+    int const temp_threads_x = n_unique_values * n_hessians_per_block;
+
+    threads.x = std::min(temp_threads_x, info_.max_threads_);
     
     blocks.y
-        = threads.x / info_.max_threads_
-        + int((threads.x % info_.max_threads_) > 0);
+        = temp_threads_x / info_.max_threads_
+        + int((temp_threads_x % info_.max_threads_) > 0);
     
     blocks.x
         = n_fits_ / n_hessians_per_block
