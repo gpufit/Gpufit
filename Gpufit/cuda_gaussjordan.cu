@@ -150,7 +150,7 @@ __global__ void cuda_gaussjordan(
     float * abs_row = extern_array + n_equations * (n_equations + 1);     //abs_row is located after the calculation_matrix
     //within the shared memory
 
-    int * abs_row_index = (int *)abs_row + n_equations_pow2;            //abs_row_index is located after abs_row
+    int * abs_row_index = (int *)(abs_row + n_equations_pow2);            //abs_row_index is located after abs_row
     //
     //note that although the shared memory is defined as
     //float, we are storing data of type int in this
