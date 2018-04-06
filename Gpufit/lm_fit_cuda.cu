@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "cuda_kernels.cuh"
 
-#ifdef ARCH_64
+#ifdef USE_CUBLAS
 
 void LMFitCUDA::solve_equation_systems_lup()
 {
@@ -44,7 +44,7 @@ void LMFitCUDA::solve_equation_systems_lup()
         n_fits_);
 }
 
-#else //ARCH_64
+#else //USE_CUBLAS
 
 void LMFitCUDA::solve_equation_systems_gj()
 {
@@ -83,7 +83,7 @@ void LMFitCUDA::solve_equation_systems_gj()
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
-#endif // ARCH_64
+#endif // USE_CUBLAS
 
 void LMFitCUDA::update_states()
 {

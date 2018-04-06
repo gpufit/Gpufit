@@ -99,14 +99,14 @@ void Info::set_max_chunk_size()
             one_fit_memory += sizeof(float) * n_points_;    // weights
     }
 
-#ifdef ARCH_64
+#ifdef USE_CUBLAS
     one_fit_memory
         += sizeof(float)
         *(2                                                 // pointer to decomposed hessian, pointer to delta
         + 1 * n_parameters_to_fit_ * n_parameters_to_fit_)  // decomposed hessian
         + sizeof(int)
         * (1 * n_parameters_to_fit_);                       // pivot vector
-#endif // ARCH_64
+#endif // USE_CUBLAS
     
     std::size_t tmp_chunk_size = available_gpu_memory_ / one_fit_memory;
     

@@ -138,12 +138,12 @@ public:
     Device_Array< int > n_iterations_;
     Device_Array< int > solution_info_;
 
-#ifdef ARCH_64
+#ifdef USE_CUBLAS
     Device_Array< float > decomposed_hessians_;
     Device_Array< float * > pointer_decomposed_hessians_;
     Device_Array< float * > pointer_deltas_;
     Device_Array< int > pivot_vectors_;
-#endif // ARCH_64
+#endif // USE_CUBLAS
 };
 
 #endif

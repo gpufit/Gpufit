@@ -162,7 +162,12 @@ set_target_properties( Gpufit
 		CXX_VISIBILITY_PRESET hidden
 )
 
+# USE_CUBLAS
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+	set( USE_CUBLAS OFF CACHE BOOL "ON | OFF")
+	if( USE_CUBLAS )
+		add_definitions( -DUSE_CUBLAS )
+	endif()
 	target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
 endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 

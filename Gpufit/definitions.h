@@ -9,18 +9,17 @@
         throw std::runtime_error( cudaGetErrorString( status ) ) ; \
     }
 
-#if defined(_WIN64) || defined(__x86_64__) || defined(__LP64__)
+#if defined(USE_CUBLAS) && (defined(_WIN64) || defined(__x86_64__) || defined(__LP64__))
 
-#define ARCH_64
 #include "cublas_v2.h"
 #define SOLVE_EQUATION_SYSTEMS() solve_equation_systems_lup()
 
-#else // defined(_WIN64) || defined(__x86_64__) || defined(__LP64__)
+#else // defined(USE_CUBLAS) && (defined(_WIN64) || defined(__x86_64__) || defined(__LP64__))
 
 #define cublasHandle_t int
 #include "cuda_gaussjordan.cuh"
 #define SOLVE_EQUATION_SYSTEMS() solve_equation_systems_gj()
 
-#endif // defined(_WIN64) || defined(__x86_64__) || defined(__LP64__)
+#endif // defined(USE_CUBLAS) && (defined(_WIN64) || defined(__x86_64__) || defined(__LP64__))
 
 #endif // GPUFIT_DEFINITIONS_H_INCLUDED
