@@ -34,9 +34,15 @@
 #      Set CUDA_BIN_PATH before running CMake or CUDA_TOOLKIT_ROOT_DIR after first configuration
 #      to installation folder of desired CUDA version
 
+#   Set the default value for the CUDA architecture flag 
+set( DEFAULT_CUDA_ARCH All )
+
+#   Set the default value for the USE_CUBLAS flag.  Valid values are "ON" or "OFF".
+set( DEFAULT_USE_CUBLAS OFF )
+
 find_package( CUDA 6.5 REQUIRED )
 
-set( CUDA_ARCHITECTURES All CACHE STRING
+set( CUDA_ARCHITECTURES ${DEFAULT_CUDA_ARCH} CACHE STRING
   "Auto | Common | All | ... see CUDA_SELECT_NVCC_ARCH_FLAGS(...)" )
 
 if( CUDA_ARCHITECTURES STREQUAL Auto )
@@ -164,7 +170,7 @@ set_target_properties( Gpufit
 
 # USE_CUBLAS
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	set( USE_CUBLAS OFF CACHE BOOL "ON | OFF")
+	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
 		add_definitions( -DUSE_CUBLAS )
 	endif()
