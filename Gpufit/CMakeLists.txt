@@ -175,7 +175,9 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 		add_definitions( -DUSE_CUBLAS )
 	endif()
 	target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
-endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 AND USE_CUBLAS )
+	message( STATUS "USE CUBLAS setting ignored: 32-bit architecture detected." )
+endif()
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 
