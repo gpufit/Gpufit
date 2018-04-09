@@ -1,5 +1,6 @@
 # Java
 
+# Find Java
 find_package( Java 1.8 COMPONENTS Development )
 
 # Set the current process environment variable JAVA_HOME to ensure that only one version 
@@ -9,15 +10,24 @@ get_filename_component(JAVA_HOME ${JAVA_BIN_DIR} PATH)
 set( ENV{JAVA_HOME} ${JAVA_HOME} )
 
 if( NOT Java_FOUND )
-  message( STATUS "JAVA JDK NOT found - skipping Gpufit Java binding!" )
+  message( "JAVA JDK NOT found - skipping Gpufit Java binding!" )
   return()
 endif()
 
+# Find JNI
 find_package( JNI )
 
 if( NOT JNI_FOUND )
-  message( STATUS "JAVA JNI NOT found - skipping Gpufit Java binding!" )
+  message( "JAVA JNI NOT found - skipping Gpufit Java binding!" )
   return()
+endif()
+
+# Try java.exe
+execute_process( COMMAND java.exe -version ERROR_VARIABLE java_exe_version )
+
+if( java_exe_version STREQUAL "" )
+    message( "java.exe NOT found by environment - skipping Gpufit Java binding!" )
+    return()
 endif()
 
 # Adapter library
