@@ -15,7 +15,12 @@ set( module_files
   "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/gpufit.py"
   "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/version.py"
 )
-set( binary $<TARGET_FILE:Gpufit> )
+
+if (NOT USE_CUBLAS)
+	set( binary $<TARGET_FILE:Gpufit> )
+else()
+	set( binary $<TARGET_FILE:Gpufit> "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll")
+endif()
 
 add_custom_target( PYTHON_PACKAGE
   COMMAND ${CMAKE_COMMAND} -E
@@ -31,6 +36,7 @@ add_custom_target( PYTHON_PACKAGE
   COMMAND ${CMAKE_COMMAND} -E
     copy_if_different ${binary} ${module_directory}
 )
+
 set_property( TARGET PYTHON_PACKAGE PROPERTY FOLDER CMakePredefinedTargets )
 add_dependencies( PYTHON_PACKAGE Gpufit )
 

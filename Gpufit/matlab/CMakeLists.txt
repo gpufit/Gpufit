@@ -92,7 +92,13 @@ set( package_files
   "${CMAKE_CURRENT_SOURCE_DIR}/ModelID.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
 )
-set( binary_gpufit $<TARGET_FILE:Gpufit> )
+
+if(NOT USE_CUBLAS)
+	set( binary_gpufit $<TARGET_FILE:Gpufit> )
+else()
+	set( binary_gpufit $<TARGET_FILE:Gpufit> "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll")
+endif()
+
 set( binary_mex $<TARGET_FILE:GpufitMex> )
 set( binary_mex2 $<TARGET_FILE:GpufitCudaAvailableMex> )
 

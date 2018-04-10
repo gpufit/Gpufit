@@ -46,6 +46,10 @@ set( binary_files
   "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
 )
 
+if(USE_CUBLAS)
+	set(binary_files ${binary_files} "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll")
+endif()
+
 add_custom_target( JAVA_PACKAGE ALL
   COMMAND ${CMAKE_COMMAND} -E
     remove_directory ${build_directory}
