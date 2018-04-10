@@ -19,7 +19,7 @@ set( module_files
 if (NOT USE_CUBLAS)
 	set( binary $<TARGET_FILE:Gpufit> )
 else()
-	set( binary $<TARGET_FILE:Gpufit> "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll")
+	set( binary $<TARGET_FILE:Gpufit> ${CUBLAS_DLL} )
 endif()
 
 add_custom_target( PYTHON_PACKAGE

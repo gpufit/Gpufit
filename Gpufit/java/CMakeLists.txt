@@ -47,7 +47,7 @@ set( binary_files
 )
 
 if(USE_CUBLAS)
-	set(binary_files ${binary_files} "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll")
+	set( binary_files ${binary_files} ${CUBLAS_DLL} )
 endif()
 
 add_custom_target( JAVA_PACKAGE ALL

@@ -96,7 +96,7 @@ set( package_files
 if(NOT USE_CUBLAS)
 	set( binary_gpufit $<TARGET_FILE:Gpufit> )
 else()
-	set( binary_gpufit $<TARGET_FILE:Gpufit> "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll")
+	set( binary_gpufit $<TARGET_FILE:Gpufit> ${CUBLAS_DLL})
 endif()
 
 set( binary_mex $<TARGET_FILE:GpufitMex> )

@@ -172,9 +172,17 @@ set_target_properties( Gpufit
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
 	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
+        set ( CUBLAS_DLL
+            "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+            
 		add_definitions( -DUSE_CUBLAS )
+        
+        add_custom_command( TARGET Gpufit POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E
+                copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
+                
+        target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
 	endif()
-	target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
 elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
 	message( STATUS "CUBLAS: 32-bit architecture detected; USE_CUBLAS flag ignored." )
 elseif( CUDA_VERSION VERSION_LESS "7.0" )
