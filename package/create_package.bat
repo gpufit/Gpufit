@@ -80,6 +80,11 @@ set SDK_README_SOURCE=%SOURCE_BASE%\package\sdk_readme.txt
 set MANUAL_SOURCE=%SOURCE_BASE%\docs\_build\latex\Gpufit.pdf
 set MANUAL_INSTALL=%ROOT_INSTALL%\Gpufit_%VERSION%_Manual.pdf
 
+for /r %x64_BUILD% %%a in (*cublas*) do set CUBLAS_DLL=%%~dpnxa
+if not defined CUBLAS_DLL (
+echo cuBLAS DLL not existent
+)
+
 REM clean up (if necessary)
 
 if exist "%ROOT_INSTALL%" rmdir /s /q "%ROOT_INSTALL%"
@@ -113,6 +118,9 @@ mkdir "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Gpufit_Cpufit_Performance_Comparison.exe" "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Gpufit.dll" "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Cpufit.dll" "%PERFORMANCE_TEST_INSTALL%\win64"
+if defined CUBLAS_DLL (
+copy "%CUBLAS_DLL%" "%PERFORMANCE_TEST_INSTALL%\win64"
+)
 
 mkdir "%PERFORMANCE_TEST_INSTALL%\win32"
 copy "%x32_BUILD%\Gpufit_Cpufit_Performance_Comparison.exe" "%PERFORMANCE_TEST_INSTALL%\win32"
@@ -170,6 +178,9 @@ copy "%x32_BUILD_LIB%\Gpufit.lib" "%SDK_INSTALL_ROOT%\win32"
 mkdir "%SDK_INSTALL_ROOT%\win64"
 copy "%x64_BUILD%\Gpufit.dll" "%SDK_INSTALL_ROOT%\win64"
 copy "%x64_BUILD_LIB%\Gpufit.lib" "%SDK_INSTALL_ROOT%\win64"
+if defined CUBLAS_DLL (
+copy "%CUBLAS_DLL%" "%SDK_INSTALL_ROOT%\win64"
+)
 
 REM zip content of temp folder with 7-Zip if availabe
 
