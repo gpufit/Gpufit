@@ -15,6 +15,15 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#ifdef USE_CUBLAS
+#define PRINT_IF_USE_CUBLAS() \
+        std::cout << "cuBLAS is used." << std::endl << std::endl
+#else
+#define PRINT_IF_USE_CUBLAS() \
+        std::cout << "cuBLAS is not used." << std::endl << std::endl
+#endif // USE_CUBLAS
+
+
 
 /*
     Names of parameters for the 2D Gaussian peak model
@@ -275,6 +284,10 @@ int main(int argc, char * argv[])
     if (!do_gpufits)
     {
         std::cout << "Skipping Gpufit computations." << std::endl << std::endl;
+    }
+    else
+    {
+        PRINT_IF_USE_CUBLAS();
     }
 
     // all numbers of fits
