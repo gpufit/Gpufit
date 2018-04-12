@@ -172,7 +172,7 @@ set_target_properties( Gpufit
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
 	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
-        if ( WIN_32 )
+        if ( WIN32 )
             set( CUBLAS_DLL
                 "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
             add_custom_command( TARGET Gpufit POST_BUILD
