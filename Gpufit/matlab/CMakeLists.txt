@@ -1,20 +1,14 @@
 
 # MATLAB Gpufit binding
 
-find_package( Matlab COMPONENTS MX_LIBRARY )
-
 if( NOT Matlab_FOUND )
-  message( STATUS "Matlab and/or MX_Library NOT found - skipping Gpufit Matlab binding!" )
+  message( STATUS "No suitable Matlab and/or MX_Library version found - skipping Gpufit Matlab binding!" )
   return()
 endif()
 
 # set C++ ABI version on Linux to work with Matlab (see documentation)
 
 if( CMAKE_CXX_COMPILER_ID STREQUAL GNU )
-  if( Matlab VERSION_LESS 9.1 )
-    message( STATUS "Matlab ${Matlab} is not supported - skipping Gpufit Matlab binding!" )
-    return()
-  endif()
   set( abi_version 8 ) # g++ 4.9 (most likely)
   string( APPEND CMAKE_CXX_FLAGS " -fabi-version=${abi_version}" )
 endif()
