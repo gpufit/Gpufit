@@ -172,14 +172,19 @@ set_target_properties( Gpufit
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
 	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
-        set ( CUBLAS_DLL
-            "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+        if ( WIN_32 )
+            set( CUBLAS_DLL
+                "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+            add_custom_command( TARGET Gpufit POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E
+                    copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
+        else()
+            set( CUDA_CUBLAS_LIBRARIES 
+                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcublas_static.a
+                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libculibos.a )
+        endif()
             
 		add_definitions( -DUSE_CUBLAS )
-        
-        add_custom_command( TARGET Gpufit POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E
-                copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
                 
         target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
 	endif()

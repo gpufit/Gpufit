@@ -93,10 +93,10 @@ set( package_files
   "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
 )
 
-if(NOT USE_CUBLAS)
-	set( binary_gpufit $<TARGET_FILE:Gpufit> )
-else()
+if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
 	set( binary_gpufit $<TARGET_FILE:Gpufit> ${CUBLAS_DLL})
+else()
+	set( binary_gpufit $<TARGET_FILE:Gpufit> )
 endif()
 
 set( binary_mex $<TARGET_FILE:GpufitMex> )

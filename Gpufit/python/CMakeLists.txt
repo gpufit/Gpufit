@@ -16,10 +16,10 @@ set( module_files
   "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/version.py"
 )
 
-if (NOT USE_CUBLAS)
-	set( binary $<TARGET_FILE:Gpufit> )
-else()
+if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
 	set( binary $<TARGET_FILE:Gpufit> ${CUBLAS_DLL} )
+else()
+	set( binary $<TARGET_FILE:Gpufit> )
 endif()
 
 add_custom_target( PYTHON_PACKAGE

@@ -46,7 +46,7 @@ set( binary_files
   "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
 )
 
-if(USE_CUBLAS)
+if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
 	set( binary_files ${binary_files} ${CUBLAS_DLL} )
 endif()
 
