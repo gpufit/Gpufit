@@ -69,7 +69,7 @@ endif()
 
 # MATLAB
 
-find_package( Matlab 9.1 COMPONENTS MX_LIBRARY )
+find_package( Matlab COMPONENTS MX_LIBRARY )
 if( Matlab_FOUND )
   find_program( Matlab_EXECUTABLE matlab
     PATHS "${Matlab_ROOT_DIR}/bin" PATH_SUFFIXES win32 win64 NO_DEFAULT_PATH )
