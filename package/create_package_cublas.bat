@@ -46,31 +46,21 @@ set BUILD_BASE=%1
 set VERSION=%2
 set SOURCE_BASE=%3
 
-set OUTPUT_NAME=Gpufit_%VERSION%_win32_win64_build%DATECODE%
+set OUTPUT_NAME=Gpufit_%VERSION%_win64_cublas_build%DATECODE%
 set ROOT_INSTALL=%BUILD_BASE%\%OUTPUT_NAME%
 set OUTPUT_ZIP=%BUILD_BASE%\%OUTPUT_NAME%.zip
 
 set PERFORMANCE_TEST_INSTALL=%ROOT_INSTALL%\gpufit_performance_test
 set PYTHON_INSTALL=%ROOT_INSTALL%\python
-set x32_MATLAB_INSTALL=%ROOT_INSTALL%\matlab32
 set x64_MATLAB_INSTALL=%ROOT_INSTALL%\matlab64
-set x32_JAVA_INSTALL=%ROOT_INSTALL%\java32
 set x64_JAVA_INSTALL=%ROOT_INSTALL%\java64
 set SDK_INSTALL_ROOT=%ROOT_INSTALL%\gpufit_sdk
 
-set x64_BUILD=%BUILD_BASE%\VC14x64-8.0\RelWithDebInfo
-set x64_BUILD_LIB=%BUILD_BASE%\VC14x64-8.0\Gpufit\RelWithDebInfo
-set x32_BUILD=%BUILD_BASE%\VC14x32-8.0\RelWithDebInfo
-set x32_BUILD_LIB=%BUILD_BASE%\VC14x32-8.0\Gpufit\RelWithDebInfo
-
+set x64_BUILD=%BUILD_BASE%\VC14x64-8.0_cublas\RelWithDebInfo
+set x64_BUILD_LIB=%BUILD_BASE%\VC14x64-8.0_cublas\Gpufit\RelWithDebInfo
 set x64_PYTHON_BUILD=%x64_BUILD%\pyGpufit\dist
-set x32_PYTHON_BUILD=%x32_BUILD%\pyGpufit\dist
-
 set x64_MATLAB_BUILD=%x64_BUILD%\matlab
-set x32_MATLAB_BUILD=%x32_BUILD%\matlab
-
 set x64_JAVA_BUILD=%x64_BUILD%\java
-set x32_JAVA_BUILD=%x32_BUILD%\java
 
 set EXAMPLES_SOURCE=%SOURCE_BASE%\examples
 set PYTHON_SOURCE=%SOURCE_BASE%\Gpufit\python
@@ -79,6 +69,11 @@ set SDK_README_SOURCE=%SOURCE_BASE%\package\sdk_readme.txt
 
 set MANUAL_SOURCE=%SOURCE_BASE%\docs\_build\latex\Gpufit.pdf
 set MANUAL_INSTALL=%ROOT_INSTALL%\Gpufit_%VERSION%_Manual.pdf
+
+for /r %x64_BUILD% %%a in (*cublas*) do set CUBLAS_DLL=%%~dpnxa
+if not defined CUBLAS_DLL (
+echo cuBLAS DLL not existent
+)
 
 REM clean up (if necessary)
 
@@ -113,27 +108,17 @@ mkdir "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Gpufit_Cpufit_Performance_Comparison.exe" "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Gpufit.dll" "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Cpufit.dll" "%PERFORMANCE_TEST_INSTALL%\win64"
-
-mkdir "%PERFORMANCE_TEST_INSTALL%\win32"
-copy "%x32_BUILD%\Gpufit_Cpufit_Performance_Comparison.exe" "%PERFORMANCE_TEST_INSTALL%\win32"
-copy "%x32_BUILD%\Gpufit.dll" "%PERFORMANCE_TEST_INSTALL%\win32"
-copy "%x32_BUILD%\Cpufit.dll" "%PERFORMANCE_TEST_INSTALL%\win32"
+if defined CUBLAS_DLL (
+copy "%CUBLAS_DLL%" "%PERFORMANCE_TEST_INSTALL%\win64"
+)
 
 REM copy Python packages
 
 echo collect python
 mkdir "%PYTHON_INSTALL%"
 copy "%x64_PYTHON_BUILD%\pyGpufit-%VERSION%-py2.py3-none-any.whl" "%PYTHON_INSTALL%\pyGpufit-%VERSION%-py2.py3-none-win_amd64.whl"
-copy "%x32_PYTHON_BUILD%\pyGpufit-%VERSION%-py2.py3-none-any.whl" "%PYTHON_INSTALL%\pyGpufit-%VERSION%-py2.py3-none-win32.whl"
 copy "%PYTHON_SOURCE%\README.txt" "%PYTHON_INSTALL%"
 xcopy "%PYTHON_SOURCE%\examples" "%PYTHON_INSTALL%\examples" /i /q
-
-REM copy Matlab 32 bit
-
-echo collect matlab32
-mkdir "%x32_MATLAB_INSTALL%"
-xcopy "%x32_MATLAB_BUILD%" "%x32_MATLAB_INSTALL%" /q
-xcopy "%MATLAB_SOURCE%\examples" "%x32_MATLAB_INSTALL%\examples" /i /q
 
 REM copy Matlab 64 bit
 
@@ -141,12 +126,6 @@ echo collect matlab64
 mkdir "%x64_MATLAB_INSTALL%"
 xcopy "%x64_MATLAB_BUILD%" "%x64_MATLAB_INSTALL%" /q
 xcopy "%MATLAB_SOURCE%\examples" "%x64_MATLAB_INSTALL%\examples" /i /q
-
-REM copy Java 32 bit
-
-echo collect java32
-mkdir "%x32_JAVA_INSTALL%"
-xcopy "%x32_JAVA_BUILD%" "%x32_JAVA_INSTALL%" /q /s
 
 REM copy Java 64 bit
 
@@ -163,13 +142,12 @@ copy "%SDK_README_SOURCE%" "%SDK_INSTALL_ROOT%\README.txt"
 mkdir "%SDK_INSTALL_ROOT%\include"
 copy "%SOURCE_BASE%\Gpufit\gpufit.h" "%SDK_INSTALL_ROOT%\include"
 
-mkdir "%SDK_INSTALL_ROOT%\win32"
-copy "%x32_BUILD%\Gpufit.dll" "%SDK_INSTALL_ROOT%\win32"
-copy "%x32_BUILD_LIB%\Gpufit.lib" "%SDK_INSTALL_ROOT%\win32"
-
 mkdir "%SDK_INSTALL_ROOT%\win64"
 copy "%x64_BUILD%\Gpufit.dll" "%SDK_INSTALL_ROOT%\win64"
 copy "%x64_BUILD_LIB%\Gpufit.lib" "%SDK_INSTALL_ROOT%\win64"
+if defined CUBLAS_DLL (
+copy "%CUBLAS_DLL%" "%SDK_INSTALL_ROOT%\win64"
+)
 
 REM zip content of temp folder with 7-Zip if availabe
 
