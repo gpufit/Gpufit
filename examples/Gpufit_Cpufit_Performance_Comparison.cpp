@@ -17,10 +17,10 @@
 
 #ifdef USE_CUBLAS
 #define PRINT_IF_USE_CUBLAS() \
-        std::cout << "cuBLAS is used." << std::endl << std::endl
+        std::cout << "CUBLAS enabled: Yes" << std::endl << std::endl
 #else
 #define PRINT_IF_USE_CUBLAS() \
-        std::cout << "cuBLAS is not used." << std::endl << std::endl
+        std::cout << "CUBLAS enabled: No" << std::endl << std::endl
 #endif // USE_CUBLAS
 
 
