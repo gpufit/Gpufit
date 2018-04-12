@@ -50,13 +50,21 @@ if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
 	set( binary_files ${binary_files} ${CUBLAS_DLL} )
 endif()
 
+if ( WIN32 )
+    set( gradle_command "gradlew.bat build \"-Dorg.gradle.java.home=${JAVA_HOME}\"" )
+else()
+    set( gradle_command "./gradlew" "build" )
+endif()
+
+message( STATUS gradle\ command:\ ${gradle_command} )
+
 add_custom_target( JAVA_PACKAGE ALL
   COMMAND ${CMAKE_COMMAND} -E
     remove_directory ${build_directory}
   COMMAND ${CMAKE_COMMAND} -E
     make_directory ${build_directory}
   COMMAND ${CMAKE_COMMAND} -E
-    chdir ${java_directory} gradlew.bat build "-Dorg.gradle.java.home=${JAVA_HOME}"
+    chdir ${java_directory} ${gradle_command}
   COMMAND ${CMAKE_COMMAND} -E
     copy_if_different ${binary_files} ${build_directory}
   COMMAND ${CMAKE_COMMAND} -E
