@@ -37,6 +37,7 @@ Instructions for using the binary distribution may be found in the documentation
 - Matlab 32 bit and 64 bit bindings, with Matlab examples.
 - Python version 2.x and version 3.x bindings (compiled as wheel files) and
   Python examples.
+- Java binding, with Java examples.
 - The Gpufit manual in PDF format
 
 ## Authors
