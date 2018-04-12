@@ -56,8 +56,6 @@ else()
     set( gradle_command "./gradlew" "build" )
 endif()
 
-message( STATUS gradle\ command:\ ${gradle_command} )
-
 add_custom_target( JAVA_PACKAGE ALL
   COMMAND ${CMAKE_COMMAND} -E
     remove_directory ${build_directory}
