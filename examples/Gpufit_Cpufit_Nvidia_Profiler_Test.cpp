@@ -212,7 +212,15 @@ int main(int argc, char * argv[])
 	}
 
 	// all numbers of fits
-	std::size_t const n_fits_gpu = 2000000;
+    std::size_t n_fits_gpu;
+    if (sizeof(void*) < 8)
+    {
+        n_fits_gpu = 1000000;
+    }
+    else
+    {
+        n_fits_gpu = 2000000;
+    }
     std::size_t const n_fits_cpu = 100000;
 	std::size_t const size_x = 15;
 	std::size_t const n_points = size_x * size_x;
