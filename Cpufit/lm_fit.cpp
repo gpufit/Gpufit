@@ -8,15 +8,15 @@
 #include "../Cpufit/profile.h"
 
 LMFit::LMFit(
-    float const * const data,
-    float const * const weights,
+    REAL const * const data,
+    REAL const * const weights,
     Info const & info,
-    float const * const initial_parameters,
+    REAL const * const initial_parameters,
     int const * const parameters_to_fit,
     char * const user_info,
-    float * output_parameters,
+    REAL * output_parameters,
     int * output_states,
-    float * output_chi_squares,
+    REAL * output_chi_squares,
     int * output_n_iterations
     ) :
     data_(data),
@@ -35,7 +35,7 @@ LMFit::~LMFit()
 {
 }
 
-void LMFit::run(float const tolerance)
+void LMFit::run(REAL const tolerance)
 {
     std::chrono::high_resolution_clock::time_point t1, t2;
 

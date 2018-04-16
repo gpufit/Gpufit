@@ -41,11 +41,11 @@
 */
 
 __device__ void calculate_brown_dennis(
-    float const * parameters,
+    REAL const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    REAL * value,
+    REAL * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -54,27 +54,27 @@ __device__ void calculate_brown_dennis(
 {
     // indices
 
-    float const x = (float)point_index / 5.f;
+    REAL const x = (REAL)point_index / 5.f;
 
     // parameters
 
-    float const * p = parameters;
+    REAL const * p = parameters;
     
     // value
 
-    float const arg1 = p[0] + p[1] * x - expf(x);
-    float const arg2 = p[2] + p[3] * sinf(x) - cosf(x);
+    REAL const arg1 = p[0] + p[1] * x - exp(x);
+    REAL const arg2 = p[2] + p[3] * sin(x) - cos(x);
 
     value[point_index] = arg1*arg1 + arg2*arg2;
 
     // derivative
 
-    float * current_derivative = derivative + point_index;
+    REAL * current_derivative = derivative + point_index;
 
-    current_derivative[0 * n_points] = 2.f * arg1;
-    current_derivative[1 * n_points] = 2.f * x * arg1;
-    current_derivative[2 * n_points] = 2.f * arg2;
-    current_derivative[3 * n_points] = 2.f * sinf(x) * arg2;
+    current_derivative[0 * n_points] = 2 * arg1;
+    current_derivative[1 * n_points] = 2 * x * arg1;
+    current_derivative[2 * n_points] = 2 * arg2;
+    current_derivative[3 * n_points] = 2 * sin(x) * arg2;
 }
 
 #endif

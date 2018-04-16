@@ -36,7 +36,7 @@
 
 find_package( CUDA 6.5 REQUIRED )
 
-set( CUDA_ARCHITECTURES All CACHE STRING
+set( CUDA_ARCHITECTURES ${DEFAULT_CUDA_ARCH} CACHE STRING
   "Auto | Common | All | ... see CUDA_SELECT_NVCC_ARCH_FLAGS(...)" )
 
 if( CUDA_ARCHITECTURES STREQUAL Auto )
@@ -94,6 +94,10 @@ CUDA_SELECT_NVCC_ARCH_FLAGS( code_generation_flags "${CUDA_ARCHITECTURES}" )
 list( APPEND CUDA_NVCC_FLAGS ${code_generation_flags} )
 message( STATUS "CUDA_NVCC_FLAGS=${code_generation_flags}" )
 
+if( NOT WIN32 )
+	list( APPEND CUDA_NVCC_FLAGS --std=c++11)
+endif()
+
 # Gpufit
 
 set( GpuHeaders
@@ -115,17 +119,17 @@ set( GpuSources
 	Gpufit.def	../Cpufit/profile.cpp)
 
 set( GpuCudaHeaders
-	cuda_gaussjordan.cuh
 	cuda_kernels.cuh
 	gpu_data.cuh
+	cuda_gaussjordan.cuh
 )
 
 set( GpuCudaSources
 	lm_fit_cuda.cu
-	cuda_gaussjordan.cu
 	cuda_kernels.cu
 	info.cu
 	gpu_data.cu
+	cuda_gaussjordan.cu
 )
 
 file( GLOB GpuCudaModels
@@ -158,6 +162,32 @@ set_target_properties( Gpufit
 		CXX_VISIBILITY_PRESET hidden
 )
 
+# USE_CUBLAS
+if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
+	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
+	if( USE_CUBLAS )
+        if ( WIN32 )
+            set( CUBLAS_DLL
+                "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+            add_custom_command( TARGET Gpufit POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E
+                    copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
+        else()
+            set( CUDA_CUBLAS_LIBRARIES 
+                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcublas_static.a
+                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libculibos.a )
+        endif()
+            
+		add_definitions( -DUSE_CUBLAS )
+                
+        target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
+	endif()
+elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+	message( STATUS "CUBLAS: 32-bit architecture detected; USE_CUBLAS flag ignored." )
+elseif( CUDA_VERSION VERSION_LESS "7.0" )
+	message( STATUS "CUBLAS: CUDA Version < 7.0 detected; USE_CUBLAS flag ignored." )
+endif()
+
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 
 # Examples
@@ -174,4 +204,5 @@ endif()
 
 add_subdirectory( matlab )
 add_subdirectory( python )
+add_subdirectory( java )
 

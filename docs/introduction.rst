@@ -1,3 +1,5 @@
+.. highlight:: text
+
 ============
 Introduction
 ============
@@ -48,6 +50,19 @@ The documentation includes:
 The current version of the Gpufit library is |GF_version| 
 (`see homepage <http://github.com/gpufit/Gpufit>`_). This manual was compiled 
 on |today|.
+
+How to cite Gpufit
+------------------
+
+Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Keller-Findeisen at the Max Planck Institute for Biophysical Chemistry, in Göttingen, Germany.
+
+The development and maintenance of open-source software projects, such as Gpufit, requires significant time and resources from the project team.  If you use Gpufit in your research, **please cite our publication**.  A paper describing the Gpufit software was published in the journal Scientific Reports, and is available from the Scientific Reports website (open-access), [here](https://www.nature.com/articles/s41598-017-15313-9).
+
+The citation for the Gpufit paper is as follows::
+
+    Gpufit: An open-source toolkit for GPU-accelerated curve fitting  
+    Adrian Przybylski, Björn Thiel, Jan Keller-Findeisen, Bernd Stock, and Mark Bates  
+    Scientific Reports, vol. 7, 15722 (2017); doi: https://doi.org/10.1038/s41598-017-15313-9 
 
 Hardware requirements
 ---------------------

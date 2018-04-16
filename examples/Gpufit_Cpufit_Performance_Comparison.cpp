@@ -15,30 +15,39 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#ifdef USE_CUBLAS
+#define PRINT_IF_USE_CUBLAS() \
+        std::cout << "CUBLAS enabled: Yes" << std::endl << std::endl
+#else
+#define PRINT_IF_USE_CUBLAS() \
+        std::cout << "CUBLAS enabled: No" << std::endl << std::endl
+#endif // USE_CUBLAS
+
+
 
 /*
     Names of parameters for the 2D Gaussian peak model
 */
 struct Parameters
 {
-    float amplitude;
-    float center_x;
-    float center_y;
-    float width;
-    float background;
+    REAL amplitude;
+    REAL center_x;
+    REAL center_y;
+    REAL width;
+    REAL background;
 };
 
 /*
     Randomize parameters, slightly differently
 */
-void generate_initial_parameters(std::vector<float> & parameters_set, std::vector<Parameters> const & parameters)
+void generate_initial_parameters(std::vector<REAL> & parameters_set, std::vector<Parameters> const & parameters)
 {
-    std::uniform_real_distribution< float> uniform_dist(0, 1);
+    std::uniform_real_distribution< REAL> uniform_dist(0, 1);
 
-    float const a = 0.9f;
-    float const b = 0.2f;
+    REAL const a = 0.9f;
+    REAL const b = 0.2f;
 
-    int const n_parameters = sizeof(Parameters) / sizeof(float);
+    int const n_parameters = sizeof(Parameters) / sizeof(REAL);
     for (std::size_t i = 0; i < parameters_set.size() / n_parameters; i++)
     {
         parameters_set[0 + i * n_parameters] = parameters[i].amplitude * (a + b * uniform_dist(rng));
@@ -56,10 +65,10 @@ void generate_test_parameters(std::vector<Parameters> & target,    Parameters co
 {
     std::size_t const n_fits = target.size();
 
-    std::uniform_real_distribution< float> uniform_dist(0, 1);
+    std::uniform_real_distribution< REAL> uniform_dist(0, 1);
 
-    float const a = 0.9f;
-    float const b = 0.2f;
+    REAL const a = 0.9f;
+    REAL const b = 0.2f;
 
     int const text_width = 30;
     int const progress_width = 25;
@@ -98,16 +107,16 @@ void generate_test_parameters(std::vector<Parameters> & target,    Parameters co
 /*
 
 */
-void add_gauss_noise(std::vector<float> & vec, Parameters const & parameters, float const snr)
+void add_gauss_noise(std::vector<REAL> & vec, Parameters const & parameters, REAL const snr)
 {
-    float const gauss_fwtm = 4.292f * parameters.width; //only valid for circular gaussian
-    float const fit_area = gauss_fwtm*gauss_fwtm;
+    REAL const gauss_fwtm = 4.292f * parameters.width; //only valid for circular gaussian
+    REAL const fit_area = gauss_fwtm*gauss_fwtm;
 
-    float const mean_amplitude = 2.f * float(M_PI) * parameters.amplitude * parameters.width * parameters.width / fit_area;
+    REAL const mean_amplitude = 2 * REAL(M_PI) * parameters.amplitude * parameters.width * parameters.width / fit_area;
 
-    float const std_dev = mean_amplitude / snr;
+    REAL const std_dev = mean_amplitude / snr;
 
-    std::normal_distribution<float> distribution(0.0, std_dev);
+    std::normal_distribution<REAL> distribution(0, std_dev);
 
     int const text_width = 30;
     int const progress_width = 25;
@@ -145,7 +154,7 @@ void add_gauss_noise(std::vector<float> & vec, Parameters const & parameters, fl
 void generate_gauss2d(
     std::size_t const n_fits,
     std::size_t const n_points,
-    std::vector<float> & data,
+    std::vector<REAL> & data,
     std::vector<Parameters> const & parameters)
 {
     int const text_width = 30;
@@ -161,11 +170,11 @@ void generate_gauss2d(
 
     for (std::size_t i = 0; i < n_fits; i++)
     {
-        float const amplitude = parameters[i].amplitude;
-        float const x00 = parameters[i].center_x;
-        float const y00 = parameters[i].center_y;
-        float const width = parameters[i].width;
-        float const background = parameters[i].background;
+        REAL const amplitude = parameters[i].amplitude;
+        REAL const x00 = parameters[i].center_x;
+        REAL const y00 = parameters[i].center_y;
+        REAL const width = parameters[i].width;
+        REAL const background = parameters[i].background;
 
         std::size_t const fit_index = i * n_points;
 
@@ -176,9 +185,9 @@ void generate_gauss2d(
                 std::size_t const point_index = iy * std::size_t(sqrt(n_points)) + ix;
                 std::size_t const absolute_index = fit_index + point_index;
 
-                float const argx
+                REAL const argx
                     = exp(-0.5f * ((ix - x00) / width) * ((ix - x00) / width));
-                float const argy
+                REAL const argy
                     = exp(-0.5f * ((iy - y00) / width) * ((iy - y00) / width));
 
                 data[absolute_index] = amplitude * argx * argy + background;
@@ -276,6 +285,10 @@ int main(int argc, char * argv[])
     {
         std::cout << "Skipping Gpufit computations." << std::endl << std::endl;
     }
+    else
+    {
+        PRINT_IF_USE_CUBLAS();
+    }
 
     // all numbers of fits
     std::vector<std::size_t> n_fits_all;
@@ -295,28 +308,28 @@ int main(int argc, char * argv[])
     std::size_t const n_points = size_x * size_x;
     std::size_t const n_parameters = 5;
     std::vector<int> parameters_to_fit(n_parameters, 1);
-    float const tolerance = 0.0001f;
+    REAL const tolerance = 0.0001f;
     int const max_n_iterations = 10;
 
     // initial parameters
     Parameters true_parameters;
-    true_parameters.amplitude = 500.f;
-    true_parameters.center_x = static_cast<float>(size_x) / 2.f - 0.5f;
-    true_parameters.center_y = static_cast<float>(size_x) / 2.f - 0.5f;
-    true_parameters.width = 1.f;
-    true_parameters.background = 10.f;
+    true_parameters.amplitude = 500.;
+    true_parameters.center_x = static_cast<REAL>(size_x) / 2 - 0.5f;
+    true_parameters.center_y = static_cast<REAL>(size_x) / 2 - 0.5f;
+    true_parameters.width = 1;
+    true_parameters.background = 10.;
 
     // test parameters
     std::vector<Parameters> test_parameters(max_n_fits);
     generate_test_parameters(test_parameters, true_parameters);
 
     //  test data
-    std::vector<float> data(max_n_fits * n_points);
+    std::vector<REAL> data(max_n_fits * n_points);
     generate_gauss2d(max_n_fits, n_points, data, test_parameters);
-    add_gauss_noise(data, true_parameters, 10.f);
+    add_gauss_noise(data, true_parameters, 10);
 
     // initial parameter set
-    std::vector<float> initial_parameters(n_parameters * max_n_fits);
+    std::vector<REAL> initial_parameters(n_parameters * max_n_fits);
     generate_initial_parameters(initial_parameters, test_parameters);
 
     // print collumn identifiers
@@ -342,9 +355,9 @@ int main(int argc, char * argv[])
         std::cout << std::setw(8) << n_fits << std::setw(3) << "|";
 
         // Cpufit output
-        std::vector<float> cpufit_parameters(n_fits * n_parameters);
+        std::vector<REAL> cpufit_parameters(n_fits * n_parameters);
         std::vector<int> cpufit_states(n_fits);
-        std::vector<float> cpufit_chi_squares(n_fits);
+        std::vector<REAL> cpufit_chi_squares(n_fits);
         std::vector<int> cpufit_n_iterations(n_fits);
 
         // run Cpufit and measure time
@@ -383,9 +396,9 @@ int main(int argc, char * argv[])
         if (do_gpufits)
         {
             // Gpufit output parameters
-            std::vector<float> gpufit_parameters(n_fits * n_parameters);
+            std::vector<REAL> gpufit_parameters(n_fits * n_parameters);
             std::vector<int> gpufit_states(n_fits);
-            std::vector<float> gpufit_chi_squares(n_fits);
+            std::vector<REAL> gpufit_chi_squares(n_fits);
             std::vector<int> gpufit_n_iterations(n_fits);
 
             // run Gpufit and measure time

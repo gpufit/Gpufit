@@ -84,7 +84,7 @@
 *   blocks.x = n_solutions;
 *   blocks.y = 1;
 *
-*   int const shared_size = sizeof(float) * 
+*   int const shared_size = sizeof(REAL) * 
 *       ( (threads.x * threads.y) + n_parameters_pow2 + n_parameters_pow2 );
 *
 *   int * singular;
@@ -103,15 +103,15 @@
 #include "cuda_gaussjordan.cuh"
 
 __global__ void cuda_gaussjordan(
-    float * delta,
-    float const * beta,
-    float const * alpha,
+    REAL * delta,
+    REAL const * beta,
+    REAL const * alpha,
     int const * skip_calculation,
     int * singular,
     std::size_t const n_equations,
     std::size_t const n_equations_pow2)
 {
-    extern __shared__ float extern_array[];     //shared memory between threads of a single block, 
+    extern __shared__ REAL extern_array[];     //shared memory between threads of a single block, 
     //used for storing the calculation_matrix, the 
     //abs_row vector, and the abs_row_index vector
 
@@ -143,17 +143,17 @@ __global__ void cuda_gaussjordan(
     if (skip_calculation[solution_index])
         return;
 
-    float p;                                            //local variable used in pivot calculation
+    REAL p;                                            //local variable used in pivot calculation
 
-    float * calculation_matrix = extern_array;                          //point to the shared memory
+    REAL * calculation_matrix = extern_array;                          //point to the shared memory
 
-    float * abs_row = extern_array + n_equations * (n_equations + 1);     //abs_row is located after the calculation_matrix
+    REAL * abs_row = extern_array + n_equations * (n_equations + 1);     //abs_row is located after the calculation_matrix
     //within the shared memory
 
-    int * abs_row_index = (int *)abs_row + n_equations_pow2;            //abs_row_index is located after abs_row
+    int * abs_row_index = (int *)(abs_row + n_equations_pow2);            //abs_row_index is located after abs_row
     //
     //note that although the shared memory is defined as
-    //float, we are storing data of type int in this
+    //REAL, we are storing data of type int in this
     //part of the shared memory
 
     //initialize the singular vector
@@ -165,7 +165,7 @@ __global__ void cuda_gaussjordan(
     //initialize abs_row and abs_row_index, using only the threads on the diagonal
     if (col_index == row_index)
     {
-        abs_row[col_index + (n_equations_pow2 - n_equations)] = 0.0f;
+        abs_row[col_index + (n_equations_pow2 - n_equations)] = 0.0;
         abs_row_index[col_index + (n_equations_pow2 - n_equations)] = col_index + (n_equations_pow2 - n_equations);
     }
 
@@ -214,7 +214,7 @@ __global__ void cuda_gaussjordan(
         //singularity check - if all values in the row are zero, no solution exists
         if (row_index == current_row && col_index != n_equations)
         {
-            if (abs_row[abs_row_index[0]] == 0.0f)
+            if (abs_row[abs_row_index[0]] == 0.0)
             {
                 singular[solution_index] = 1;
             }

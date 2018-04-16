@@ -7,24 +7,24 @@
 #include <array>
 
 template<std::size_t SIZE>
-void generate_gauss_2d(std::array< float , SIZE>& values, float const s = 0.5f)
+void generate_gauss_2d(std::array< REAL , SIZE>& values, REAL const s = .5f)
 {
     int const size_x = int(std::sqrt(SIZE));
     int const size_y = size_x;
 
-    float const a = 4.f;
-    float const x0 = (float(size_x) - 1.f) / 2.f;
-    float const y0 = (float(size_y) - 1.f) / 2.f;
-    float const b = 1.f;
+    REAL const a = 4;
+    REAL const x0 = (REAL(size_x) - 1) / 2;
+    REAL const y0 = (REAL(size_y) - 1) / 2;
+    REAL const b = 1;
 
     for (int point_index_y = 0; point_index_y < size_y; point_index_y++)
     {
         for (int point_index_x = 0; point_index_x < size_x; point_index_x++)
         {
             int const point_index = point_index_y * size_x + point_index_x;
-            float const argx = ((point_index_x - x0)*(point_index_x - x0)) / (2.f * s * s);
-            float const argy = ((point_index_y - y0)*(point_index_y - y0)) / (2.f * s * s);
-            float const ex = exp(-argx) * exp(-argy);
+            REAL const argx = ((point_index_x - x0)*(point_index_x - x0)) / (2 * s * s);
+            REAL const argy = ((point_index_y - y0)*(point_index_y - y0)) / (2 * s * s);
+            REAL const ex = exp(-argx) * exp(-argy);
             values[point_index] = a * ex + b;
         }
     }
@@ -34,17 +34,17 @@ void gauss_fit_2d()
 {
     std::size_t const n_fits{ 1 };
     std::size_t const n_points{ 25 };
-    std::array< float, n_points > data{};
+    std::array< REAL, n_points > data{};
     generate_gauss_2d(data);
-    std::array< float, n_points > weights{};
+    std::array< REAL, n_points > weights{};
     std::fill(weights.begin(), weights.end(), 1.f);
-    std::array< float, 5 > initial_parameters{ { 3.f, 1.8f, 2.2f, 0.4f, 0.f } };
-    float tolerance{ 0.001f };
+    std::array< REAL, 5 > initial_parameters{ { 3, 1.8f, 2.2f, .4f, 0 } };
+    REAL tolerance{ .001f };
     int max_n_iterations{ 10 };
     std::array< int, 5 > parameters_to_fit{ { 1, 1, 1, 1, 1 } };
-    std::array< float, 5 > output_parameters;
+    std::array< REAL, 5 > output_parameters;
     int output_states;
-    float output_chi_square;
+    REAL output_chi_square;
     int output_n_iterations;
 
     int const status
@@ -104,17 +104,17 @@ void gauss_fit_2d_large_dataset()
 {
     std::size_t const n_fits{ 1 };
     std::size_t const n_points{ 2500 };
-    std::array< float, n_points > data{};
-    generate_gauss_2d(data, 5.f);
-    std::array< float, n_points > weights{};
+    std::array< REAL, n_points > data{};
+    generate_gauss_2d(data, 5);
+    std::array< REAL, n_points > weights{};
     std::fill(weights.begin(), weights.end(), 1.f);
-    std::array< float, 5 > initial_parameters{ { 3.f, 24.f, 25.f, 4.f, 0.f } };
-    float tolerance{ 0.001f };
+    std::array< REAL, 5 > initial_parameters{ { 3, 24, 25, 4, 0 } };
+    REAL tolerance{ .001f };
     int max_n_iterations{ 10 };
     std::array< int, 5 > parameters_to_fit{ { 1, 1, 1, 1, 1 } };
-    std::array< float, 5 > output_parameters;
+    std::array< REAL, 5 > output_parameters;
     int output_states;
-    float output_chi_square;
+    REAL output_chi_square;
     int output_n_iterations;
 
     int const status

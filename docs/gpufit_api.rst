@@ -244,6 +244,125 @@ Description of output parameters
     :0: No error
     :-1: Error
 
+gpufit_cuda_interface()
++++++++++++++++++++++++
+
+This function performs the fitting without transferring the input and output data between CPU and GPU memory. The
+allocation of GPU memory for input and output data is skipped, as well. The structures of input and output arrays are
+equal to the main interface function :code:`gpufit()`. There are no separate arrays for initial and best-fit parameter
+values. The argument :code:`gpu_fit_parameters` points to initial parameter values at start of the routine and to
+best-fit parameter values at the end.
+
+.. code-block:: cpp
+
+    int gpufit_cuda_interface
+    (
+        size_t n_fits,
+        size_t n_points,
+        float * gpu_data,
+        float * gpu_weights,
+        int model_id,
+        float tolerance,
+        int max_n_iterations,
+        int * parameters_to_fit,
+        int estimator_id,
+        size_t user_info_size,
+        char * gpu_user_info,
+        float * gpu_fit_parameters,
+        int * gpu_output_states,
+        float * gpu_output_chi_squares,
+        int * gpu_output_n_iterations
+    ) ;
+
+Description of input parameters
+...............................
+
+:n_fits: Number of fits to be performed
+
+    :type: size_t
+
+:n_points: Number of data points per fit
+
+    :type: size_t
+
+:gpu_data: Pointer to data values stored on GPU
+
+    :type: float *
+    :length: n_points * n_fits
+
+:gpu_weights: Pointer to weights stored on GPU
+
+    :type: float *
+    :length: n_points * n_fits
+    :special: Use a NULL pointer to indicate that no weights are provided.
+        In this case all data values will be weighted equally.
+
+:model_id: Model ID
+
+    :type: int
+
+:tolerance: Fit tolerance threshold
+
+    :type: float
+
+:max_n_iterations: Maximum number of iterations
+
+    :type: int
+
+:parameters_to_fit: Pointer to array indicating which model parameters should be held constant during the fit
+
+    :type: int *
+    :length: n_parameters
+
+:estimator_id: Estimator ID
+
+    :type: int
+
+:user_info_size: Size of user information data
+
+    :type: size_t
+
+:gpu_user_info: Pointer to user information data stored on GPU
+
+    :type: char *
+    :length: user_info_size
+    :special: Use a NULL pointer to indicate that no user information is available.
+
+Description of input/output parameters
+......................................
+
+:gpu_fit_parameters: Pointer to array of model parameters stored on GPU
+
+    input: initial parameter values
+
+    output: best-fit parameter values
+
+    :type: float *
+    :length: n_fits * n_parameters
+
+Description of output parameters
+................................
+
+:gpu_output_states: Pointer to array of fit result state IDs stored on GPU
+
+    :type: int *
+    :length: n_fits
+
+:gpu_output_chi_squares: Pointer to array of :math:`\chi^2` values stored on GPU
+
+    :type: float *
+    :length: n_fits
+
+:gpu_output_n_iterations: Pointer to array of iteration counts stored on GPU
+
+    :type: int *
+    :length: n_fits
+
+:return value: Status code
+
+    :0: No error
+    :-1: Error
+
 gpufit_portable_interface()
 +++++++++++++++++++++++++++
 

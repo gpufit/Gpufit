@@ -1,6 +1,6 @@
 function version = gpufit_version()
 % Returns the version of Gpufit
 
-version = '1.0.2';
+version = '1.1.0';
 
 end

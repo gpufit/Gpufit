@@ -2,7 +2,7 @@
 #include "../Cpufit/profile.h"
 
 LMFitCUDA::LMFitCUDA(
-    float const tolerance,
+    REAL const tolerance,
     Info const & info,
     GPUData & gpu_data,
     int const n_fits
@@ -57,11 +57,13 @@ void LMFitCUDA::run()
     for (int iteration = 0; !all_finished_; iteration++)
     {
         // modify step width
-        // Gauss Jordan
+        // LUP decomposition
         // update fitting parameters
 		t1 = std::chrono::high_resolution_clock::now();
-
-        solve_equation_system();
+        scale_hessians();
+        SOLVE_EQUATION_SYSTEMS();
+        update_states();
+        update_parameters();
 
 		t2 = std::chrono::high_resolution_clock::now();
 		

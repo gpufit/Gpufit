@@ -49,11 +49,11 @@
 */
 
 __device__ void calculate_gauss2d(
-    float const * parameters,
+    REAL const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    REAL * value,
+    REAL * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -62,24 +62,24 @@ __device__ void calculate_gauss2d(
 {
     // indices
 
-    int const n_points_x = sqrt((float)n_points);
+    int const n_points_x = sqrt((REAL)n_points);
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - point_index_y * n_points_x;
 
     // parameters
 
-    float const * p = parameters;
+    REAL const * p = parameters;
 
     // value
 
-    float const argx = (point_index_x - p[1]) * (point_index_x - p[1]) / (2 * p[3] * p[3]);
-    float const argy = (point_index_y - p[2]) * (point_index_y - p[2]) / (2 * p[3] * p[3]);
-    float const ex = exp(-(argx + argy));
+    REAL const argx = (point_index_x - p[1]) * (point_index_x - p[1]) / (2 * p[3] * p[3]);
+    REAL const argy = (point_index_y - p[2]) * (point_index_y - p[2]) / (2 * p[3] * p[3]);
+    REAL const ex = exp(-(argx + argy));
     value[point_index] = p[0] * ex + p[4];
 
     // derivatives
 
-    float * current_derivative = derivative + point_index;
+    REAL * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points] = ex;
     current_derivative[1 * n_points] = p[0] * ex * (point_index_x - p[1]) / (p[3] * p[3]);

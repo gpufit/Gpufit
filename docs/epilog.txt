@@ -2,7 +2,7 @@
 ..
    The content of this file will be appended to every documentation file. Put common substitutions and links here.
 
-.. |GF_version| replace:: 1.0.2
+.. |GF_version| replace:: 1.1.0
 
 .. _CUDA: http://developer.nvidia.com/cuda-zone
 .. _CUDA_SELECT_NVCC_ARCH_FLAGS: http://cmake.org/cmake/help/v3.7/module/FindCUDA.html
@@ -48,3 +48,5 @@
 .. _`Python simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/simple.py
 .. _`Python Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d.py
 .. _`Python Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d_plot.py
+
+.. _`Java Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/java/gpufit/src/test/java/com/github/gpufit/examples/Gauss2DExample.java
