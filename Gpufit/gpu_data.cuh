@@ -2,6 +2,9 @@
 #define GPUFIT_GPU_DATA_CUH_INCLUDED
 
 #include "info.h"
+#ifdef USE_CUBLAS
+#include "cublas_v2.h"
+#endif
 
 #include <cuda_runtime.h>
 #include <stdexcept>
@@ -80,25 +83,25 @@ public:
     (
         int const chuk_size,
         int const chunk_index,
-        float const * data,
-        float const * weights,
-        float const * initial_parameters,
+        REAL const * data,
+        REAL const * weights,
+        REAL const * initial_parameters,
         std::vector<int> const & parameters_to_fit_indices,
         int * states,
-        float * chi_squares,
+        REAL * chi_squares,
         int * n_iterations
     );
     void init_user_info(char const * user_info);
 
     void read(bool * dst, int const * src);
     void set(int* arr, int const value);
-    void set(float* arr, float const value, int const count);
-    void copy(float * dst, float const * src, std::size_t const count);
+    void set(REAL* arr, REAL const value, int const count);
+    void copy(REAL * dst, REAL const * src, std::size_t const count);
 
 private:
 
     void set(int* arr, int const value, int const count);
-    void write(float* dst, float const * src, int const count);
+    void write(REAL* dst, REAL const * src, int const count);
     void write(int* dst, std::vector<int> const & src);
     void write(char* dst, char const * src, std::size_t const count);
     void point_to_data_sets();
@@ -112,25 +115,25 @@ public:
 
     cublasHandle_t cublas_handle_;
 
-    Device_Array< float > data_;
-    Device_Array< float > weights_;
-    Device_Array< float > parameters_;
-    Device_Array< float > prev_parameters_;
+    Device_Array< REAL > data_;
+    Device_Array< REAL > weights_;
+    Device_Array< REAL > parameters_;
+    Device_Array< REAL > prev_parameters_;
     Device_Array< int > parameters_to_fit_indices_;
     Device_Array< char > user_info_;
 
-    Device_Array< float > chi_squares_;
-    Device_Array< float > prev_chi_squares_;
-    Device_Array< float > gradients_;
-    Device_Array< float > hessians_;
-    Device_Array< float > deltas_;
-    Device_Array< float > scaling_vectors_;
-    Device_Array< float > subtotals_;
+    Device_Array< REAL > chi_squares_;
+    Device_Array< REAL > prev_chi_squares_;
+    Device_Array< REAL > gradients_;
+    Device_Array< REAL > hessians_;
+    Device_Array< REAL > deltas_;
+    Device_Array< REAL > scaling_vectors_;
+    Device_Array< REAL > subtotals_;
 
-    Device_Array< float > values_;
-    Device_Array< float > derivatives_;
+    Device_Array< REAL > values_;
+    Device_Array< REAL > derivatives_;
 
-    Device_Array< float > lambdas_;
+    Device_Array< REAL > lambdas_;
     Device_Array< int > states_;
     Device_Array< int > finished_;
     Device_Array< int > iteration_failed_;
@@ -139,9 +142,9 @@ public:
     Device_Array< int > solution_info_;
 
 #ifdef USE_CUBLAS
-    Device_Array< float > decomposed_hessians_;
-    Device_Array< float * > pointer_decomposed_hessians_;
-    Device_Array< float * > pointer_deltas_;
+    Device_Array< REAL > decomposed_hessians_;
+    Device_Array< REAL * > pointer_decomposed_hessians_;
+    Device_Array< REAL * > pointer_deltas_;
     Device_Array< int > pivot_vectors_;
 #endif // USE_CUBLAS
 };

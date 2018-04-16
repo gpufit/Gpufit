@@ -34,12 +34,6 @@
 #      Set CUDA_BIN_PATH before running CMake or CUDA_TOOLKIT_ROOT_DIR after first configuration
 #      to installation folder of desired CUDA version
 
-#   Set the default value for the CUDA architecture flag 
-set( DEFAULT_CUDA_ARCH All )
-
-#   Set the default value for the USE_CUBLAS flag.  Valid values are "ON" or "OFF".
-set( DEFAULT_USE_CUBLAS OFF )
-
 find_package( CUDA 6.5 REQUIRED )
 
 set( CUDA_ARCHITECTURES ${DEFAULT_CUDA_ARCH} CACHE STRING

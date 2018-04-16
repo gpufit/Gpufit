@@ -40,11 +40,11 @@
 */
 
 __device__ void calculate_fletcher_powell_helix(
-    float const * parameters,
+    REAL const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    REAL * value,
+    REAL * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -53,20 +53,20 @@ __device__ void calculate_fletcher_powell_helix(
 {
     // parameters
 
-    float const * p = parameters;
+    REAL const * p = parameters;
     
     // arguments
 
-    float const pi = 3.14159f;
+    REAL const pi = 3.14159f;
 
-    float theta = 0.f;
+    REAL theta = 0;
 
-    if (p[0] > 0.f)
-        theta = .5f * atanf(p[1] / p[0]) / pi;
-    else if (p[0] < 0.f)
-        theta = .5f * atanf(p[1] / p[0]) / pi + .5f;
+    if (p[0] > 0)
+        theta = .5f * atan(p[1] / p[0]) / pi;
+    else if (p[0] < 0)
+        theta = .5f * atan(p[1] / p[0]) / pi + .5f;
 
-    float const arg = p[0] * p[0] + p[1] * p[1];
+    REAL const arg = p[0] * p[0] + p[1] * p[1];
 
     // values and derivatives
 
@@ -74,27 +74,27 @@ __device__ void calculate_fletcher_powell_helix(
     {
     case 0:
         // value
-        value[point_index] = 10.f * (p[2] - 10.f * theta);
+        value[point_index] = 10 * (p[2] - 10 * theta);
         // derivative
-        derivative[0 * n_points + point_index] = 100.f / (2.f*pi) * p[1] / arg;
-        derivative[1 * n_points + point_index] = -100.f / (2.f*pi) * p[0] / arg;
-        derivative[2 * n_points + point_index] = 10.f;
+        derivative[0 * n_points + point_index] = 100 / (2*pi) * p[1] / arg;
+        derivative[1 * n_points + point_index] = -100 / (2*pi) * p[0] / arg;
+        derivative[2 * n_points + point_index] = 10;
         break;
     case 1:
         // value
-        value[point_index] = 10.f * (sqrtf(arg) - 1.f);
+        value[point_index] = 10 * (std::sqrt(arg) - 1);
         // derivative
-        derivative[0 * n_points + point_index] = 10.f * p[0] / sqrtf(arg);
-        derivative[1 * n_points + point_index] = 10.f * p[1] / sqrtf(arg);
-        derivative[2 * n_points + point_index] = 0.f;
+        derivative[0 * n_points + point_index] = 10 * p[0] / std::sqrt(arg);
+        derivative[1 * n_points + point_index] = 10 * p[1] / std::sqrt(arg);
+        derivative[2 * n_points + point_index] = 0;
         break;
     case 2:
         // value
         value[point_index] = p[2];
         // derivative
-        derivative[0 * n_points + point_index] = 0.f;
-        derivative[1 * n_points + point_index] = 0.f;
-        derivative[2 * n_points + point_index] = 1.f;
+        derivative[0 * n_points + point_index] = 0;
+        derivative[1 * n_points + point_index] = 0;
+        derivative[2 * n_points + point_index] = 1;
         break;
     default:
         break;

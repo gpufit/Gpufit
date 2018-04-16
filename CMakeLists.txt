@@ -42,6 +42,24 @@ function( add_launcher target executable arguments working_directory )
   endif()
 endfunction()
 
+# Default values
+
+# Set the default value for the CUDA architecture flag 
+set( DEFAULT_CUDA_ARCH All )
+
+# Set the default value for the USE_CUBLAS flag.  Valid values are "ON" or "OFF".
+set( DEFAULT_USE_CUBLAS OFF )
+
+# Set the default value for the precision
+set( DEFAULT_PRECISION Single )
+
+# Precision
+
+set( PRECISION ${DEFAULT_PRECISION} CACHE STRING "Single | Double" )
+if( PRECISION STREQUAL Double )
+    add_definitions( -DGPUFIT_DOUBLE )
+endif()
+
 # Boost
 
 find_package( Boost 1.58.0 )

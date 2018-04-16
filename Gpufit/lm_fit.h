@@ -1,9 +1,14 @@
 #ifndef GPUFIT_LM_FIT_H_INCLUDED
 #define GPUFIT_LM_FIT_H_INCLUDED
 
-#include "definitions.h"
 #include "info.h"
 #include "gpu_data.cuh"
+
+#ifdef USE_CUBLAS
+#include "cublas_v2.h"
+#else
+#include "cuda_gaussjordan.cuh"
+#endif // USE_CUBLAS
 
 class LMFitCUDA;
 
@@ -12,35 +17,35 @@ class LMFit
 public:
     LMFit
     (
-        float const * data,
-        float const * weights,
+        REAL const * data,
+        REAL const * weights,
         Info & info,
-        float const * initial_parameters,
+        REAL const * initial_parameters,
         int const * parameters_to_fit,
         char * user_info,
-        float * output_parameters,
+        REAL * output_parameters,
         int * output_states,
-        float * output_chi_squares,
+        REAL * output_chi_squares,
         int * output_n_iterations
     ) ;
 
     virtual ~LMFit();
 
-    void run(float const tolerance);
+    void run(REAL const tolerance);
 
 private:
     void set_parameters_to_fit_indices();
     void get_results(GPUData const & gpu_data, int const n_fits);
 
-    float const * const data_ ;
-    float const * const weights_ ;
-    float const * const initial_parameters_ ;
+    REAL const * const data_ ;
+    REAL const * const weights_ ;
+    REAL const * const initial_parameters_ ;
     int const * const parameters_to_fit_;
     char const * const user_info_;
 
-    float * output_parameters_ ;
+    REAL * output_parameters_ ;
     int * output_states_ ;
-    float * output_chi_squares_ ;
+    REAL * output_chi_squares_ ;
     int * output_n_iterations_ ;
 
     int ichunk_;
@@ -56,7 +61,7 @@ class LMFitCUDA
 {
 public:
     LMFitCUDA(
-        float const tolerance,
+        REAL const tolerance,
         Info const & info,
         GPUData & gpu_data,
         int const n_fits);
@@ -86,7 +91,7 @@ private:
 
     bool all_finished_;
 
-    float tolerance_;
+    REAL tolerance_;
 };
 
 #endif

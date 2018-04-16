@@ -11,6 +11,7 @@
 
 #include <cstddef>
 #include "../Gpufit/constants.h"
+#include "../Gpufit/definitions.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,19 +21,19 @@ VISIBLE int cpufit
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    REAL * data,
+    REAL * weights,
     int model_id,
-    float * initial_parameters,
-    float tolerance,
+    REAL * initial_parameters,
+    REAL tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    float * output_parameters,
+    REAL * output_parameters,
     int * output_states,
-    float * output_chi_squares,
+    REAL * output_chi_squares,
     int * output_n_iterations
 ) ;
 

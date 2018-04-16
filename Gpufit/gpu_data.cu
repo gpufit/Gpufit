@@ -81,12 +81,12 @@ void GPUData::init
 (
     int const chunk_size,
     int const chunk_index,
-    float const * const data,
-    float const * const weights,
-    float const * const initial_parameters,
+    REAL const * const data,
+    REAL const * const weights,
+    REAL const * const initial_parameters,
     std::vector<int> const & parameters_to_fit_indices,
     int * states,
-    float * chi_squares,
+    REAL * chi_squares,
     int * n_iterations)
 {
     chunk_size_ = chunk_size;
@@ -127,9 +127,9 @@ void GPUData::init
 
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
-    set(prev_chi_squares_, 0.f, chunk_size_);
+    set(prev_chi_squares_, 0., chunk_size_);
     set(finished_, 0, chunk_size_);
-    set(scaling_vectors_, 0.f, chunk_size_ * info_.n_parameters_to_fit_);
+    set(scaling_vectors_, 0., chunk_size_ * info_.n_parameters_to_fit_);
     set(states_, 0, chunk_size_);
     set(lambdas_, 0.001f, chunk_size_);
 }
@@ -156,9 +156,9 @@ void GPUData::read(bool * dst, int const * src)
     * dst = (int_dst == 1) ? true : false;
 }
 
-void GPUData::write(float* dst, float const * src, int const count)
+void GPUData::write(REAL* dst, REAL const * src, int const count)
 {
-    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(float), cudaMemcpyHostToDevice));
+    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(REAL), cudaMemcpyHostToDevice));
 }
 
 void GPUData::write(int* dst, std::vector<int> const & src)
@@ -172,9 +172,9 @@ void GPUData::write(char* dst, char const * src, std::size_t const count)
     CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(char), cudaMemcpyHostToDevice));
 }
 
-void GPUData::copy(float * dst, float const * src, std::size_t const count)
+void GPUData::copy(REAL * dst, REAL const * src, std::size_t const count)
 {
-    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(float), cudaMemcpyDeviceToDevice));
+    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(REAL), cudaMemcpyDeviceToDevice));
 }
 
 __global__ void set_kernel(int* dst, int const value, int const count)
@@ -211,7 +211,7 @@ void GPUData::set(int* arr, int const value)
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
-__global__ void set_kernel(float* dst, float const value, std::size_t const count)
+__global__ void set_kernel(REAL* dst, REAL const value, std::size_t const count)
 {
 	std::size_t const index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -221,7 +221,7 @@ __global__ void set_kernel(float* dst, float const value, std::size_t const coun
     dst[index] = value;
 }
 
-void GPUData::set(float* arr, float const value, int const count)
+void GPUData::set(REAL* arr, REAL const value, int const count)
 {
     int const tx = 256;
 	int const bx = (count / tx) + 1;
@@ -233,8 +233,8 @@ void GPUData::set(float* arr, float const value, int const count)
 }
 
 __global__ void cuda_point_to_data_sets(
-    float ** pointer_to_pointers,
-    float * pointer,
+    REAL ** pointer_to_pointers,
+    REAL * pointer,
     std::size_t const n_pointers,
     std::size_t const size)
 {
@@ -261,7 +261,7 @@ void GPUData::point_to_data_sets()
           (std::min(info_.max_chunk_size_, max_threads));
     blocks.x
         = static_cast<unsigned int>
-          (std::ceil(float(info_.max_chunk_size_) / float(threads.x)));
+          (std::ceil(REAL(info_.max_chunk_size_) / REAL(threads.x)));
 
     cuda_point_to_data_sets <<< blocks, threads >>>(
         pointer_decomposed_hessians_,

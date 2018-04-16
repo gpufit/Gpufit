@@ -69,7 +69,7 @@ void Info::set_blocks_per_fit()
 void Info::set_max_chunk_size()
 {
     int one_fit_memory
-        = sizeof(float)
+        = sizeof(REAL)
         *(1 * n_points_                                     // values
         + 1 * n_parameters_                                 // prev_parameters
         + 1 * n_parameters_to_fit_                          // gradient
@@ -85,23 +85,23 @@ void Info::set_max_chunk_size()
     if (n_blocks_per_fit_ > 1)
     {
         one_fit_memory
-            += sizeof(float)
+            += sizeof(REAL)
              * n_parameters_to_fit_ * n_blocks_per_fit_;    // subtotals
     }
 
     if (data_location_ == HOST)
     {
-        one_fit_memory += sizeof(float) * n_points_;        // data
-        one_fit_memory += sizeof(float) * n_parameters_;    // parameters
-        one_fit_memory += sizeof(float);                    // chi-square
+        one_fit_memory += sizeof(REAL) * n_points_;        // data
+        one_fit_memory += sizeof(REAL) * n_parameters_;    // parameters
+        one_fit_memory += sizeof(REAL);                    // chi-square
         one_fit_memory += sizeof(int) * 2;                  // state, number of iterations
         if (use_weights_)
-            one_fit_memory += sizeof(float) * n_points_;    // weights
+            one_fit_memory += sizeof(REAL) * n_points_;    // weights
     }
 
 #ifdef USE_CUBLAS
     one_fit_memory
-        += sizeof(float)
+        += sizeof(REAL)
         *(2                                                 // pointer to decomposed hessian, pointer to delta
         + 1 * n_parameters_to_fit_ * n_parameters_to_fit_)  // decomposed hessian
         + sizeof(int)

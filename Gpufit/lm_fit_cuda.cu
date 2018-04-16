@@ -13,7 +13,7 @@ void LMFitCUDA::solve_equation_systems_lup()
     gpu_data_.copy(gpu_data_.decomposed_hessians_, gpu_data_.hessians_, n_fits_ * info_.n_parameters_to_fit_ * info_.n_parameters_to_fit_);
 
     // decompose hessians
-    cublasStatus_t lu_status_decopmposition = cublasSgetrfBatched(
+    cublasStatus_t lu_status_decopmposition = DECOMPOSE_LUP(
         gpu_data_.cublas_handle_,
         info_.n_parameters_to_fit_,
         gpu_data_.pointer_decomposed_hessians_,
@@ -30,12 +30,12 @@ void LMFitCUDA::solve_equation_systems_lup()
 
     // solve equation systems
     cublasStatus_t lu_status_solution
-        = cublasSgetrsBatched(
+        = SOLVE_LUP(
         gpu_data_.cublas_handle_,
         CUBLAS_OP_N,
         info_.n_parameters_to_fit_,
         1,
-        (float const **)(gpu_data_.pointer_decomposed_hessians_.data()),
+        (REAL const **)(gpu_data_.pointer_decomposed_hessians_.data()),
         info_.n_parameters_to_fit_,
         gpu_data_.pivot_vectors_,
         gpu_data_.pointer_deltas_,
@@ -68,7 +68,7 @@ void LMFitCUDA::solve_equation_systems_gj()
 
     //set the size of the shared memory area for each block
     int const shared_size
-        = sizeof(float) * ((threads.x * threads.y)
+        = sizeof(REAL) * ((threads.x * threads.y)
             + n_parameters_pow2 + n_parameters_pow2);
 
     //run the Gauss Jordan elimination
@@ -92,7 +92,7 @@ void LMFitCUDA::update_states()
 
     //set up to update the lm_state_gpu_ variable with the Gauss Jordan results
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+    blocks.x = int(std::ceil(REAL(n_fits_) / REAL(threads.x)));
 
     //update the gpu_data_.states_ variable
     cuda_update_state_after_solving <<< blocks, threads >>>(
@@ -178,9 +178,9 @@ void LMFitCUDA::calc_chi_squares()
     threads.x = info_.power_of_two_n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
     blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-    int const shared_size = sizeof(float) * threads.x;
+    int const shared_size = sizeof(REAL) * threads.x;
 
-    float * chi_squares = 
+    REAL * chi_squares = 
         info_.n_blocks_per_fit_ > 1 ? gpu_data_.subtotals_ : gpu_data_.chi_squares_;
 
     cuda_calculate_chi_squares <<< blocks, threads, shared_size >>>(
@@ -199,7 +199,7 @@ void LMFitCUDA::calc_chi_squares()
     CUDA_CHECK_STATUS(cudaGetLastError());
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+    blocks.x = int(std::ceil(REAL(n_fits_) / REAL(threads.x)));
 
     if (info_.n_blocks_per_fit_ > 1)
     {
@@ -229,9 +229,9 @@ void LMFitCUDA::calc_gradients()
     threads.x = info_.power_of_two_n_points_ * info_.n_fits_per_block_ / info_.n_blocks_per_fit_;
     blocks.x = n_fits_ / info_.n_fits_per_block_ * info_.n_blocks_per_fit_;
 
-    int const shared_size = sizeof(float) * threads.x;
+    int const shared_size = sizeof(REAL) * threads.x;
 
-    float * gradients
+    REAL * gradients
         = info_.n_blocks_per_fit_ > 1 ? gpu_data_.subtotals_ : gpu_data_.gradients_;
 
     cuda_calculate_gradients <<< blocks, threads, shared_size >>>(
@@ -257,7 +257,7 @@ void LMFitCUDA::calc_gradients()
     {
         int const gradients_size = n_fits_ * info_.n_parameters_to_fit_;
         threads.x = std::min(gradients_size, 256);
-        blocks.x = int(std::ceil(float(gradients_size) / float(threads.x)));
+        blocks.x = int(std::ceil(REAL(gradients_size) / REAL(threads.x)));
 
         cuda_sum_gradient_subtotals <<< blocks, threads >>> (
             gpu_data_.gradients_,
@@ -326,7 +326,7 @@ void LMFitCUDA::evaluate_iteration(int const iteration)
     dim3  blocks(1, 1, 1);
 
     threads.x = std::min(n_fits_, 256);
-    blocks.x = int(std::ceil(float(n_fits_) / float(threads.x)));
+    blocks.x = int(std::ceil(REAL(n_fits_) / REAL(threads.x)));
 
     cuda_check_for_convergence<<< blocks, threads >>>(
         gpu_data_.finished_,

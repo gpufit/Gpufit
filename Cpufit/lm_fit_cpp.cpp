@@ -7,17 +7,17 @@
 #include <algorithm>
 
 LMFitCPP::LMFitCPP(
-    float const tolerance,
+    REAL const tolerance,
     std::size_t const fit_index,
-    float const * data,
-    float const * weight,
+    REAL const * data,
+    REAL const * weight,
     Info const & info,
-    float const * initial_parameters,
+    REAL const * initial_parameters,
     int const * parameters_to_fit,
     char * user_info,
-    float * output_parameters,
+    REAL * output_parameters,
     int * output_state,
-    float * output_chi_square,
+    REAL * output_chi_square,
     int * output_n_iterations
     ) :
     fit_index_(fit_index),
@@ -55,7 +55,7 @@ int decompose_LUP(std::vector<T> & matrix, int const N, double const Tol, std::v
 
     for (int i = 0; i < N; i++)
     {
-        T max_value = 0.;
+        T max_value = 0;
         int max_index = i;
 
         for (int k = i; k < N; k++)
@@ -122,28 +122,28 @@ void solve_LUP(
     }
 }
 
-void LMFitCPP::decompose_hessian_LUP(std::vector<float> const & hessian)
+void LMFitCPP::decompose_hessian_LUP(std::vector<REAL> const & hessian)
 {
     decomposed_hessian_ = hessian;
 
     int const N = int(gradient_.size());
 
-    int const singular = decompose_LUP(decomposed_hessian_, info_.n_parameters_to_fit_, 0.0000f, pivot_array_);
+    int const singular = decompose_LUP(decomposed_hessian_, info_.n_parameters_to_fit_, 0.0, pivot_array_);
     if (singular == 0)
         *state_ = FitState::SINGULAR_HESSIAN;
 }
 
 void LMFitCPP::calc_derivatives_gauss2d(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
     std::size_t const  fit_size_x = std::size_t(std::sqrt(info_.n_points_));
 
     for (std::size_t y = 0; y < fit_size_x; y++)
         for (std::size_t x = 0; x < fit_size_x; x++)
         {
-            float const argx = (x - parameters_[1]) * (x - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
-            float const argy = (y - parameters_[2]) * (y - parameters_[2]) / (2 * parameters_[3] * parameters_[3]);
-            float const ex = exp(-(argx + argy));
+            REAL const argx = (x - parameters_[1]) * (x - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
+            REAL const argy = (y - parameters_[2]) * (y - parameters_[2]) / (2 * parameters_[3] * parameters_[3]);
+            REAL const ex = exp(-(argx + argy));
 
             derivatives[0 * info_.n_points_ + y*fit_size_x + x]
                 = ex;
@@ -162,16 +162,16 @@ void LMFitCPP::calc_derivatives_gauss2d(
 }
 
 void LMFitCPP::calc_derivatives_gauss2delliptic(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
     std::size_t const  fit_size_x = std::size_t(std::sqrt(info_.n_points_));
 
     for (std::size_t y = 0; y < fit_size_x; y++)
         for (std::size_t x = 0; x < fit_size_x; x++)
         {
-            float const argx = (x - parameters_[1]) * (x - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
-            float const argy = (y - parameters_[2]) * (y - parameters_[2]) / (2 * parameters_[4] * parameters_[4]);
-            float const ex = exp(-(argx +argy));
+            REAL const argx = (x - parameters_[1]) * (x - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
+            REAL const argy = (y - parameters_[2]) * (y - parameters_[2]) / (2 * parameters_[4] * parameters_[4]);
+            REAL const ex = exp(-(argx +argy));
 
             derivatives[0 * info_.n_points_ + y*fit_size_x + x]
                 = ex;
@@ -189,25 +189,25 @@ void LMFitCPP::calc_derivatives_gauss2delliptic(
 }
 
 void LMFitCPP::calc_derivatives_gauss2drotated(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
     std::size_t const  fit_size_x = std::size_t(std::sqrt(info_.n_points_));
 
-    float const amplitude = parameters_[0];
-    float const x0 = parameters_[1];
-    float const y0 = parameters_[2];
-    float const sig_x = parameters_[3];
-    float const sig_y = parameters_[4];
-    float const background = parameters_[5];
-    float const rot_sin = sin(parameters_[6]);
-    float const rot_cos = cos(parameters_[6]);
+    REAL const amplitude = parameters_[0];
+    REAL const x0 = parameters_[1];
+    REAL const y0 = parameters_[2];
+    REAL const sig_x = parameters_[3];
+    REAL const sig_y = parameters_[4];
+    REAL const background = parameters_[5];
+    REAL const rot_sin = sin(parameters_[6]);
+    REAL const rot_cos = cos(parameters_[6]);
 
     for (std::size_t y = 0; y < fit_size_x; y++)
         for (std::size_t x = 0; x < fit_size_x; x++)
         {
-            float const arga = ((x - x0) * rot_cos) - ((y - y0) * rot_sin);
-            float const argb = ((x - x0) * rot_sin) + ((y - y0) * rot_cos);
-            float const ex = exp((-0.5f) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
+            REAL const arga = ((x - x0) * rot_cos) - ((y - y0) * rot_sin);
+            REAL const argb = ((x - x0) * rot_sin) + ((y - y0) * rot_cos);
+            REAL const ex = exp((-0.5f) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
 
             derivatives[0 * info_.n_points_ + y*fit_size_x + x]
                 = ex;
@@ -220,36 +220,36 @@ void LMFitCPP::calc_derivatives_gauss2drotated(
             derivatives[4 * info_.n_points_ + y*fit_size_x + x]
                 = ex * amplitude * argb * argb / (sig_y*sig_y*sig_y);
             derivatives[5 * info_.n_points_ + y*fit_size_x + x]
-                = 1;
+                = 1.f;
             derivatives[6 * info_.n_points_ + y*fit_size_x + x]
-                = ex * amplitude * arga * argb * (1.0f / (sig_x*sig_x) - 1.0f / (sig_y*sig_y));
+                = ex * amplitude * arga * argb * (1.f / (sig_x*sig_x) - 1.f / (sig_y*sig_y));
         }
 }
 
 void LMFitCPP::calc_derivatives_gauss1d(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
-    float * user_info_float = (float*)user_info_;
-    float x = 0.f;
+    REAL * user_info_float = (REAL*)user_info_;
+    REAL x = 0.;
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
         {
-            x = float(point_index);
+            x = REAL(point_index);
         }
-        else if (info_.user_info_size_ / sizeof(float) == info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
         {
             x = user_info_float[point_index];
         }
-        else if (info_.user_info_size_ / sizeof(float) > info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
         {
             std::size_t const fit_begin = fit_index_ * info_.n_points_;
             x = user_info_float[fit_begin + point_index];
         }
 
-        float argx = ((x - parameters_[1])*(x - parameters_[1])) / (2 * parameters_[2] * parameters_[2]);
-        float ex = exp(-argx);
+        REAL argx = ((x - parameters_[1])*(x - parameters_[1])) / (2 * parameters_[2] * parameters_[2]);
+        REAL ex = exp(-argx);
 
         derivatives[0 * info_.n_points_ + point_index] = ex;
         derivatives[1 * info_.n_points_ + point_index] = (parameters_[0] * (x - parameters_[1])*ex) / (parameters_[2] * parameters_[2]);
@@ -259,17 +259,17 @@ void LMFitCPP::calc_derivatives_gauss1d(
 }
 
 void LMFitCPP::calc_derivatives_cauchy2delliptic(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
     std::size_t const  fit_size_x = std::size_t(std::sqrt(info_.n_points_));
 
     for (std::size_t y = 0; y < fit_size_x; y++)
         for (std::size_t x = 0; x < fit_size_x; x++)
         {
-            float const argx =
+            REAL const argx =
                 ((parameters_[1] - x) / parameters_[3])
                 *((parameters_[1] - x) / parameters_[3]) + 1.f;
-            float const argy =
+            REAL const argy =
                 ((parameters_[2] - y) / parameters_[4])
                 *((parameters_[2] - y) / parameters_[4]) + 1.f;
 
@@ -293,40 +293,40 @@ void LMFitCPP::calc_derivatives_cauchy2delliptic(
 }
 
 void LMFitCPP::calc_derivatives_linear1d(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
-    float * user_info_float = (float*)user_info_;
-    float x = 0.f;
+    REAL * user_info_float = (REAL*)user_info_;
+    REAL x = 0.;
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
         {
-            x = float(point_index);
+            x = REAL(point_index);
         }
-        else if (info_.user_info_size_ / sizeof(float) == info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
         {
             x = user_info_float[point_index];
         }
-        else if (info_.user_info_size_ / sizeof(float) > info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
         {
             std::size_t const fit_begin = fit_index_ * info_.n_points_;
             x = user_info_float[fit_begin + point_index];
         }
 
-        derivatives[0 * info_.n_points_ + point_index] = 1.f;
+        derivatives[0 * info_.n_points_ + point_index] = 1.;
         derivatives[1 * info_.n_points_ + point_index] = x;
     }
 }
 
 void LMFitCPP::calc_derivatives_fletcher_powell_helix(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
-    float const pi = 3.14159f;
+    REAL const pi = 3.14159f;
 
-    float const * p = parameters_;
+    REAL const * p = parameters_;
 
-    float const arg = p[0] * p[0] + p[1] * p[1];
+    REAL const arg = p[0] * p[0] + p[1] * p[1];
 
     // derivatives with respect to p[0]
     derivatives[0 * info_.n_points_ + 0] = 100.f * 1.f / (2.f*pi) * p[1] / arg;
@@ -345,16 +345,16 @@ void LMFitCPP::calc_derivatives_fletcher_powell_helix(
 }
 
 void LMFitCPP::calc_derivatives_brown_dennis(
-    std::vector<float> & derivatives)
+    std::vector<REAL> & derivatives)
 {
-    float const * p = parameters_;
+    REAL const * p = parameters_;
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
-        float const t = static_cast<float>(point_index) / 5.f;
+        REAL const t = static_cast<REAL>(point_index) / 5.f;
 
-        float const arg1 = p[0] + p[1] * t - std::exp(t);
-        float const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
+        REAL const arg1 = p[0] + p[1] * t - std::exp(t);
+        REAL const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
 
         derivatives[0 * info_.n_points_ + point_index] = 2.f * arg1;
         derivatives[1 * info_.n_points_ + point_index] = 2.f * t * arg1;
@@ -363,19 +363,19 @@ void LMFitCPP::calc_derivatives_brown_dennis(
     }
 }
 
-void LMFitCPP::calc_values_cauchy2delliptic(std::vector<float>& cauchy)
+void LMFitCPP::calc_values_cauchy2delliptic(std::vector<REAL>& cauchy)
 {
-    int const size_x = int(std::sqrt(float(info_.n_points_)));
+    int const size_x = int(std::sqrt(REAL(info_.n_points_)));
     int const size_y = size_x;
 
     for (int iy = 0; iy < size_y; iy++)
     {
         for (int ix = 0; ix < size_x; ix++)
         {
-            float const argx =
+            REAL const argx =
                 ((parameters_[1] - ix) / parameters_[3])
                 *((parameters_[1] - ix) / parameters_[3]) + 1.f;
-            float const argy =
+            REAL const argy =
                 ((parameters_[2] - iy) / parameters_[4])
                 *((parameters_[2] - iy) / parameters_[4]) + 1.f;
 
@@ -384,35 +384,35 @@ void LMFitCPP::calc_values_cauchy2delliptic(std::vector<float>& cauchy)
     }
 }
 
-void LMFitCPP::calc_values_gauss2d(std::vector<float>& gaussian)
+void LMFitCPP::calc_values_gauss2d(std::vector<REAL>& gaussian)
 {
-    int const size_x = int(std::sqrt(float(info_.n_points_)));
+    int const size_x = int(std::sqrt(REAL(info_.n_points_)));
     int const size_y = size_x;
 
     for (int iy = 0; iy < size_y; iy++)
     {
         for (int ix = 0; ix < size_x; ix++)
         {
-            float argx = (ix - parameters_[1]) * (ix - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
-            float argy = (iy - parameters_[2]) * (iy - parameters_[2]) / (2 * parameters_[3] * parameters_[3]);
-            float ex = exp(-(argx +argy));
+            REAL argx = (ix - parameters_[1]) * (ix - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
+            REAL argy = (iy - parameters_[2]) * (iy - parameters_[2]) / (2 * parameters_[3] * parameters_[3]);
+            REAL ex = exp(-(argx +argy));
 
             gaussian[iy*size_x + ix] = parameters_[0] * ex + parameters_[4];
         }
     }
 }
 
-void LMFitCPP::calc_values_gauss2delliptic(std::vector<float>& gaussian)
+void LMFitCPP::calc_values_gauss2delliptic(std::vector<REAL>& gaussian)
 {
-    int const size_x = int(std::sqrt(float(info_.n_points_)));
+    int const size_x = int(std::sqrt(REAL(info_.n_points_)));
     int const size_y = size_x;
     for (int iy = 0; iy < size_y; iy++)
     {
         for (int ix = 0; ix < size_x; ix++)
         {
-            float argx = (ix - parameters_[1]) * (ix - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
-            float argy = (iy - parameters_[2]) * (iy - parameters_[2]) / (2 * parameters_[4] * parameters_[4]);
-            float ex = exp(-(argx + argy));
+            REAL argx = (ix - parameters_[1]) * (ix - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
+            REAL argy = (iy - parameters_[2]) * (iy - parameters_[2]) / (2 * parameters_[4] * parameters_[4]);
+            REAL ex = exp(-(argx + argy));
 
             gaussian[iy*size_x + ix]
                 = parameters_[0] * ex + parameters_[5];
@@ -420,19 +420,19 @@ void LMFitCPP::calc_values_gauss2delliptic(std::vector<float>& gaussian)
     }
 }
     
-void LMFitCPP::calc_values_gauss2drotated(std::vector<float>& gaussian)
+void LMFitCPP::calc_values_gauss2drotated(std::vector<REAL>& gaussian)
 {
-    int const size_x = int(std::sqrt(float(info_.n_points_)));
+    int const size_x = int(std::sqrt(REAL(info_.n_points_)));
     int const size_y = size_x;
 
-    float amplitude = parameters_[0];
-    float background = parameters_[5];
-    float x0 = parameters_[1];
-    float y0 = parameters_[2];
-    float sig_x = parameters_[3];
-    float sig_y = parameters_[4];
-    float rot_sin = sin(parameters_[6]);
-    float rot_cos = cos(parameters_[6]);
+    REAL amplitude = parameters_[0];
+    REAL background = parameters_[5];
+    REAL x0 = parameters_[1];
+    REAL y0 = parameters_[2];
+    REAL sig_x = parameters_[3];
+    REAL sig_y = parameters_[4];
+    REAL rot_sin = sin(parameters_[6]);
+    REAL rot_cos = cos(parameters_[6]);
 
     for (int iy = 0; iy < size_y; iy++)
     {
@@ -440,10 +440,10 @@ void LMFitCPP::calc_values_gauss2drotated(std::vector<float>& gaussian)
         {
             int const pixel_index = iy*size_x + ix;
 
-            float arga = ((ix - x0) * rot_cos) - ((iy - y0) * rot_sin);
-            float argb = ((ix - x0) * rot_sin) + ((iy - y0) * rot_cos);
+            REAL arga = ((ix - x0) * rot_cos) - ((iy - y0) * rot_sin);
+            REAL argb = ((ix - x0) * rot_sin) + ((iy - y0) * rot_cos);
 
-            float ex
+            REAL ex
                 = exp((-0.5f) * (((arga / sig_x) * (arga / sig_x)) + ((argb / sig_y) * (argb / sig_y))));
 
             gaussian[pixel_index] = amplitude * ex + background;
@@ -451,49 +451,49 @@ void LMFitCPP::calc_values_gauss2drotated(std::vector<float>& gaussian)
     }
 }
 
-void LMFitCPP::calc_values_gauss1d(std::vector<float>& gaussian)
+void LMFitCPP::calc_values_gauss1d(std::vector<REAL>& gaussian)
 {
-    float * user_info_float = (float*)user_info_;
-    float x = 0.f;
+    REAL * user_info_float = (REAL*)user_info_;
+    REAL x = 0.f;
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
         {
-            x = float(point_index);
+            x = REAL(point_index);
         }
-        else if (info_.user_info_size_ / sizeof(float) == info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
         {
             x = user_info_float[point_index];
         }
-        else if (info_.user_info_size_ / sizeof(float) > info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
         {
             std::size_t const fit_begin = fit_index_ * info_.n_points_;
             x = user_info_float[fit_begin + point_index];
         }
 
-        float argx
+        REAL argx
             = ((x - parameters_[1])*(x - parameters_[1]))
-            / (2 * parameters_[2] * parameters_[2]);
-        float ex = exp(-argx);
+            / (2.f * parameters_[2] * parameters_[2]);
+        REAL ex = exp(-argx);
         gaussian[point_index] = parameters_[0] * ex + parameters_[3];
     }
 }
 
-void LMFitCPP::calc_values_linear1d(std::vector<float>& line)
+void LMFitCPP::calc_values_linear1d(std::vector<REAL>& line)
 {
-    float * user_info_float = (float*)user_info_;
-    float x = 0.f;
+    REAL * user_info_float = (REAL*)user_info_;
+    REAL x = 0.f;
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
         if (!user_info_float)
         {
-            x = float(point_index);
+            x = REAL(point_index);
         }
-        else if (info_.user_info_size_ / sizeof(float) == info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
         {
             x = user_info_float[point_index];
         }
-        else if (info_.user_info_size_ / sizeof(float) > info_.n_points_)
+        else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
         {
             std::size_t const fit_begin = fit_index_ * info_.n_points_;
             x = user_info_float[fit_begin + point_index];
@@ -502,21 +502,21 @@ void LMFitCPP::calc_values_linear1d(std::vector<float>& line)
     }
 }
 
-void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<float>& values)
+void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<REAL>& values)
 {
-    float const * p = parameters_;
+    REAL const * p = parameters_;
 
-    float const pi = 3.14159f;
+    REAL const pi = 3.14159f;
 
-    float theta = 0.f;
+    REAL theta = 0.f;
 
-    if (0.f < p[0])
+    if (0. < p[0])
         theta = .5f * atan(p[1] / p[0]) / pi;
-    else if (p[0] < 0.f)
+    else if (p[0] < 0.)
         theta = .5f * atan(p[1] / p[0]) / pi + .5f;
-    else if (0.f < p[1])
+    else if (0. < p[1])
         theta = .25f;
-    else if (p[1] < 0.f)
+    else if (p[1] < 0.)
         theta = -.25f;
     else
         theta = 0.f;
@@ -526,22 +526,22 @@ void LMFitCPP::calc_values_fletcher_powell_helix(std::vector<float>& values)
     values[2] = p[2];
 }
 
-void LMFitCPP::calc_values_brown_dennis(std::vector<float>& values)
+void LMFitCPP::calc_values_brown_dennis(std::vector<REAL>& values)
 {
-    float const * p = parameters_;
+    REAL const * p = parameters_;
 
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
-        float const t = static_cast<float>(point_index) / 5.f;
+        REAL const t = static_cast<REAL>(point_index) / 5.f;
 
-        float const arg1 = p[0] + p[1] * t - std::exp(t);
-        float const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
+        REAL const arg1 = p[0] + p[1] * t - std::exp(t);
+        REAL const arg2 = p[2] + p[3] * std::sin(t) - std::cos(t);
 
         values[point_index] = arg1*arg1 + arg2*arg2;
     }
 }
 
-void LMFitCPP::calc_curve_values(std::vector<float>& curve, std::vector<float>& derivatives)
+void LMFitCPP::calc_curve_values(std::vector<REAL>& curve, std::vector<REAL>& derivatives)
 {           
     if (info_.model_id_ == GAUSS_1D)
     {
@@ -586,8 +586,8 @@ void LMFitCPP::calc_curve_values(std::vector<float>& curve, std::vector<float>& 
 }
 
 void LMFitCPP::calculate_hessian(
-    std::vector<float> const & derivatives,
-    std::vector<float> const & curve)
+    std::vector<REAL> const & derivatives,
+    std::vector<REAL> const & curve)
 {
     for (int jp = 0, jhessian = 0; jp < info_.n_parameters_; jp++)
     {
@@ -631,7 +631,7 @@ void LMFitCPP::calculate_hessian(
                                 * derivatives[derivatives_index_j + pixel_index];
                         }
                     }
-                    hessian_[ijhessian] = float(sum);
+                    hessian_[ijhessian] = REAL(sum);
                     if (ijhessian != jihessian)
                     {
                         hessian_[jihessian]
@@ -647,8 +647,8 @@ void LMFitCPP::calculate_hessian(
 }
 
 void LMFitCPP::calc_gradient(
-    std::vector<float> const & derivatives,
-    std::vector<float> const & curve)
+    std::vector<REAL> const & derivatives,
+    std::vector<REAL> const & curve)
 {
 
     for (int ip = 0, gradient_index = 0; ip < info_.n_parameters_; ip++)
@@ -656,10 +656,10 @@ void LMFitCPP::calc_gradient(
         if (parameters_to_fit_[ip])
         {
             std::size_t const derivatives_index = ip*info_.n_points_;
-            double sum = 0.0;
+            double sum = 0.;
             for (std::size_t pixel_index = 0; pixel_index < info_.n_points_; pixel_index++)
             {
-                float deviant = data_[pixel_index] - curve[pixel_index];
+                REAL deviant = data_[pixel_index] - curve[pixel_index];
 
                 if (info_.estimator_id_ == LSE)
                 {
@@ -681,7 +681,7 @@ void LMFitCPP::calc_gradient(
                         += -derivatives[derivatives_index + pixel_index] * (1 - data_[pixel_index] / curve[pixel_index]);
                 }
             }
-            gradient_[gradient_index] = float(sum);
+            gradient_[gradient_index] = REAL(sum);
             gradient_index++;
         }
     }
@@ -689,12 +689,12 @@ void LMFitCPP::calc_gradient(
 }
 
 void LMFitCPP::calc_chi_square(
-    std::vector<float> const & values)
+    std::vector<REAL> const & values)
 {
     double sum = 0.0;
     for (size_t pixel_index = 0; pixel_index < values.size(); pixel_index++)
     {
-        float deviant = values[pixel_index] - data_[pixel_index];
+        REAL deviant = values[pixel_index] - data_[pixel_index];
         if (info_.estimator_id_ == LSE)
         {
             if (!weight_)
@@ -716,7 +716,7 @@ void LMFitCPP::calc_chi_square(
             if (data_[pixel_index] != 0.f)
             {
                 sum
-                    += 2 * (deviant - data_[pixel_index] * logf(values[pixel_index] / data_[pixel_index]));
+                    += 2 * (deviant - data_[pixel_index] * std::log(values[pixel_index] / data_[pixel_index]));
             }
             else
             {
@@ -724,21 +724,21 @@ void LMFitCPP::calc_chi_square(
             }
         }
     }
-    *chi_square_ = float(sum);
+    *chi_square_ = REAL(sum);
 }
 
 void LMFitCPP::calc_model()
 {
-	std::vector<float> & curve = curve_;
-	std::vector<float> & derivatives = derivatives_;
+	std::vector<REAL> & curve = curve_;
+	std::vector<REAL> & derivatives = derivatives_;
 
 	calc_curve_values(curve, derivatives);
 }
     
 void LMFitCPP::calc_coefficients()
 {
-    std::vector<float> & curve = curve_;
-    std::vector<float> & derivatives = derivatives_;
+    std::vector<REAL> & curve = curve_;
+    std::vector<REAL> & derivatives = derivatives_;
 
     calc_chi_square(curve);
 
@@ -753,11 +753,11 @@ void LMFitCPP::solve_equation_system_gj()
 {
     delta_ = gradient_;
 
-    std::vector<float> & alpha = modified_hessian_;
-    std::vector<float> & beta = delta_;
+    std::vector<REAL> & alpha = modified_hessian_;
+    std::vector<REAL> & beta = delta_;
 
     int icol, irow;
-    float big, dum, pivinv;
+    REAL big, dum, pivinv;
 
     std::vector<int> indxc(info_.n_parameters_to_fit_, 0);
     std::vector<int> indxr(info_.n_parameters_to_fit_, 0);
@@ -797,12 +797,12 @@ void LMFitCPP::solve_equation_system_gj()
         }
         indxr[kp] = irow;
         indxc[kp] = icol;
-        if (alpha[icol*info_.n_parameters_to_fit_ + icol] == 0.0)
+        if (alpha[icol*info_.n_parameters_to_fit_ + icol] == 0)
         {
             *state_ = FitState::SINGULAR_HESSIAN;
             break;
         }
-        pivinv = 1.0f / alpha[icol*info_.n_parameters_to_fit_ + icol];
+        pivinv = 1.f / alpha[icol*info_.n_parameters_to_fit_ + icol];
         alpha[icol*info_.n_parameters_to_fit_ + icol] = 1.0;
         for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
         {
@@ -815,7 +815,7 @@ void LMFitCPP::solve_equation_system_gj()
             if (jp != icol)
             {
                 dum = alpha[jp*info_.n_parameters_to_fit_ + icol];
-                alpha[jp*info_.n_parameters_to_fit_ + icol] = 0.0;
+                alpha[jp*info_.n_parameters_to_fit_ + icol] = 0;
                 for (int ip = 0; ip < info_.n_parameters_to_fit_; ip++)
                 {
                     alpha[jp*info_.n_parameters_to_fit_ + ip] -= alpha[icol*info_.n_parameters_to_fit_ + ip] * dum;
@@ -875,7 +875,7 @@ void LMFitCPP::prepare_next_iteration()
     }
     else
     {
-        lambda_ *= 10.f;
+        lambda_ *= 10.;
         (*chi_square_) = prev_chi_square_;
         for (int parameter_index = 0, delta_index = 0; parameter_index < info_.n_parameters_; parameter_index++)
         {
@@ -890,20 +890,20 @@ void LMFitCPP::prepare_next_iteration()
 void LMFitCPP::modify_step_width()
 {
     modified_hessian_ = hessian_;
-    size_t const n_parameters = (size_t)(sqrt((float)(hessian_.size())));
+    size_t const n_parameters = (size_t)(sqrt((REAL)(hessian_.size())));
     for (size_t parameter_index = 0; parameter_index < n_parameters; parameter_index++)
     {
         size_t const diagonal_index = parameter_index * n_parameters + parameter_index;
 
         // adaptive scaling
         scaling_vector_[parameter_index]
-            = std::fmaxf(scaling_vector_[parameter_index], modified_hessian_[diagonal_index]);
+            = std::max(scaling_vector_[parameter_index], modified_hessian_[diagonal_index]);
 
         // continuous scaling
         //scaling_vector_[parameter_index] = modified_hessian_[diagonal_index];
 
         // initial scaling
-        //if (scaling_vector_[parameter_index] == 0.f)
+        //if (scaling_vector_[parameter_index] == 0.)
         //    scaling_vector_[parameter_index] = modified_hessian_[diagonal_index];
 
         modified_hessian_[diagonal_index] += scaling_vector_[parameter_index] * lambda_;

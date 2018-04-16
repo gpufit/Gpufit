@@ -9,19 +9,19 @@ int gpufit
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    REAL * data,
+    REAL * weights,
     int model_id,
-    float * initial_parameters,
-    float tolerance,
+    REAL * initial_parameters,
+    REAL tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    float * output_parameters,
+    REAL * output_parameters,
     int * output_states,
-    float * output_chi_squares,
+    REAL * output_chi_squares,
     int * output_n_iterations
 )
 try
@@ -65,18 +65,18 @@ int gpufit_cuda_interface
 (
     size_t n_fits,
     size_t n_points,
-    float * gpu_data,
-    float * gpu_weights,
+    REAL * gpu_data,
+    REAL * gpu_weights,
     int model_id,
-    float tolerance,
+    REAL tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * gpu_user_info,
-    float * gpu_fit_parameters,
+    REAL * gpu_fit_parameters,
     int * gpu_output_states,
-    float * gpu_output_chi_squares,
+    REAL * gpu_output_chi_squares,
     int * gpu_output_n_iterations
 )
 try
@@ -159,19 +159,19 @@ int gpufit_portable_interface(int argc, void *argv[])
     return gpufit(
         *((size_t *) argv[0]),
         *((size_t *) argv[1]),
-        (float *) argv[2],
-        (float *) argv[3],
+        (REAL *) argv[2],
+        (REAL *) argv[3],
         *((int *) argv[4]),
-        (float *) argv[5],
-        *((float *) argv[6]),
+        (REAL *) argv[5],
+        *((REAL *) argv[6]),
         *((int *) argv[7]),
         (int *) argv[8],
         *((int *) argv[9]),
         *((size_t *) argv[10]),
         (char *) argv[11],
-        (float *) argv[12],
+        (REAL *) argv[12],
         (int *) argv[13],
-        (float *) argv[14],
+        (REAL *) argv[14],
         (int *) argv[15]);
 
 }

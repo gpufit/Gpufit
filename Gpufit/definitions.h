@@ -2,6 +2,18 @@
 
     #define GPUFIT_DEFINITIONS_H_INCLUDED
 
+    // Precision
+    #ifdef GPUFIT_DOUBLE
+        #define REAL double
+        #define DECOMPOSE_LUP cublasDgetrfBatched
+        #define SOLVE_LUP cublasDgetrsBatched
+    #else
+        #define REAL float
+        #define DECOMPOSE_LUP cublasSgetrfBatched
+        #define SOLVE_LUP cublasSgetrsBatched
+    #endif // GPUFIT_DOUBLE
+
+
     // Status
     #include <stdexcept>
 
@@ -21,13 +33,11 @@
 
     #if defined(USE_CUBLAS)
 
-        #include "cublas_v2.h"
         #define SOLVE_EQUATION_SYSTEMS() solve_equation_systems_lup()
 
     #else // defined(USE_CUBLAS)
 
         #define cublasHandle_t int
-        #include "cuda_gaussjordan.cuh"
         #define SOLVE_EQUATION_SYSTEMS() solve_equation_systems_gj()
 
     #endif // defined(USE_CUBLAS) 
