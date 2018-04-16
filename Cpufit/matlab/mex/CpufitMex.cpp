@@ -13,8 +13,12 @@
 
 #ifdef GPUFIT_DOUBLE
 #define MX_REAL mxDOUBLE_CLASS
+#define TOLERANCE_PRECISION_MESSAGE()\
+    mexErrMsgIdAndTxt("Cpufit:Mex", "tolerance is not a double");
 #else
 #define MX_REAL mxSINGLE_CLASS
+#define TOLERANCE_PRECISION_MESSAGE()\
+    mexErrMsgIdAndTxt("Cpufit:Mex", "tolerance is not a single");
 #endif // GPUFIT_DOUBLE
 
 /*
@@ -62,10 +66,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs,  mxArray const *prhs[])
 	REAL tolerance = 0;
 	if (!get_scalar(prhs[4], tolerance, MX_REAL))
 	{
-        if (GPUFIT_DOUBLE)
-            mexErrMsgIdAndTxt("Gpufit:Mex", "tolerance is not a double");
-        else
-            mexErrMsgIdAndTxt("Gpufit:Mex", "tolerance is not a single");
+        TOLERANCE_PRECISION_MESSAGE();
 	}
 
 	// max_n_iterations

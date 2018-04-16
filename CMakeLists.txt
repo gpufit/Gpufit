@@ -51,14 +51,17 @@ set( DEFAULT_CUDA_ARCH All )
 set( DEFAULT_USE_CUBLAS OFF )
 
 # Set the default value for the precision
-set( DEFAULT_PRECISION Single )
+set( DEFAULT_DOUBLE_PRECISION OFF )
 
 # Precision
 
-set( PRECISION ${DEFAULT_PRECISION} CACHE STRING "Single | Double" )
-if( PRECISION STREQUAL Double )
+#set( DOUBLE_PRECISION ${DEFAULT_DOUBLE_PRECISION} )
+
+if( DEFINED DOUBLE_PRECISION AND DOUBLE_PRECISION)
     add_definitions( -DGPUFIT_DOUBLE )
 endif()
+
+message( STATUS DOUBLE_PRECISION\ ${DOUBLE_PRECISION} )
 
 # Boost
 
