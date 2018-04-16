@@ -228,7 +228,8 @@ void cuda_interface_example()
             gpu_initial_parameters,
             gpu_states,
             gpu_chi_squares,
-            gpu_n_iterations
+            gpu_n_iterations,
+            0
         );
     std::chrono::high_resolution_clock::time_point time_1 = std::chrono::high_resolution_clock::now();
 

@@ -55,7 +55,8 @@ VISIBLE int gpufit_cuda_interface
     REAL * gpu_fit_parameters,
     int * gpu_output_states,
     REAL * gpu_output_chi_squares,
-    int * gpu_output_n_iterations
+    int * gpu_output_n_iterations,
+    int * otput_info
 );
 
 VISIBLE char const * gpufit_get_last_error() ;

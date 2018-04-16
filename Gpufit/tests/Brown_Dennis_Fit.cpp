@@ -59,7 +59,8 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
         output_parameters.data(),
         &output_state,
         &output_chi_square,
-        &output_n_iterations
+        &output_n_iterations,
+        0
     );
 
     BOOST_CHECK(status == 0);
@@ -93,7 +94,8 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
         output_parameters.data(),
         &output_state,
         &output_chi_square,
-        &output_n_iterations
+        &output_n_iterations,
+        0
     );
 
     BOOST_CHECK(status == 0);
@@ -127,7 +129,8 @@ BOOST_AUTO_TEST_CASE( Brown_Dennis )
         output_parameters.data(),
         &output_state,
         &output_chi_square,
-        &output_n_iterations
+        &output_n_iterations,
+        0
     );
 
     BOOST_CHECK(status == 0);

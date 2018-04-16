@@ -34,7 +34,7 @@ jint JNICALL Java_com_github_gpufit_Gpufit_fit(JNIEnv * env, jclass cls, jint nu
     int * output_number_iterations = (int *)buffer_address(env, output_number_iterations_buffer);
 
     // call to gpufit
-    int status = gpufit(number_fits, number_points, data, weights, model_id, initial_parameters, tolerance, max_number_iterations, parameters_to_fit, estimator_id, user_info_size, user_info, output_parameters, output_states, output_chi_squares, output_number_iterations);
+    int status = gpufit(number_fits, number_points, data, weights, model_id, initial_parameters, tolerance, max_number_iterations, parameters_to_fit, estimator_id, user_info_size, user_info, output_parameters, output_states, output_chi_squares, output_number_iterations,0);
     return status;
 }
 

@@ -79,7 +79,8 @@ int gpufit_cuda_interface
     REAL * gpu_fit_parameters,
     int * gpu_output_states,
     REAL * gpu_output_chi_squares,
-    int * gpu_output_n_iterations
+    int * gpu_output_n_iterations,
+    int * output_info
 )
 try
 {
@@ -99,7 +100,8 @@ try
         gpu_output_states,
         gpu_output_chi_squares,
         gpu_output_n_iterations,
-        DEVICE);
+        DEVICE,
+        output_info);
 
     fi.fit(static_cast<ModelID>(model_id));
 
