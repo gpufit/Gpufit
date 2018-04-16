@@ -61,8 +61,6 @@ if( DEFINED DOUBLE_PRECISION AND DOUBLE_PRECISION)
     add_definitions( -DGPUFIT_DOUBLE )
 endif()
 
-message( STATUS DOUBLE_PRECISION\ ${DOUBLE_PRECISION} )
-
 # Boost
 
 find_package( Boost 1.58.0 )
