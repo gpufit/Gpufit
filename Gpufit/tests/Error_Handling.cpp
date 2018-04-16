@@ -10,16 +10,16 @@ BOOST_AUTO_TEST_CASE( Error_Handling )
 {
     std::size_t const n_fits{ 1 } ;
     std::size_t const n_points{ 2 } ;
-    std::array< float, n_points > data{ { 0, 1 } } ;
-    std::array< float, n_points > weights{ { 1, 1 } } ;
-    std::array< float, 2 > initial_parameters{ { 0, 0 } } ;
-    float tolerance{ 0.001f } ;
+    std::array< REAL, n_points > data{ { 0, 1 } } ;
+    std::array< REAL, n_points > weights{ { 1, 1 } } ;
+    std::array< REAL, 2 > initial_parameters{ { 0, 0 } } ;
+    REAL tolerance{ 0.001f } ;
     int max_n_iterations{ 10 } ;
     std::array< int, 2 > parameters_to_fit{ { 0, 0 } } ;
     std::array< int, 2 > user_info{ { 0, 1 } } ;
-    std::array< float, 2 > output_parameters ;
+    std::array< REAL, 2 > output_parameters ;
     int output_states ;
-    float output_chi_square ;
+    REAL output_chi_square ;
     int output_n_iterations ;
 
     int const status

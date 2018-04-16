@@ -14,6 +14,7 @@ Info::Info() :
     n_blocks_per_fit_(0),
     max_threads_(0),
     max_blocks_(0),
+    warp_size_(0),
     available_gpu_memory_(0)
 {
 }
@@ -68,21 +69,45 @@ void Info::set_blocks_per_fit()
 void Info::set_max_chunk_size()
 {
     int one_fit_memory
-        = sizeof(float)
-        *(2 * n_points_                                     // data, values
-        + 2 * n_parameters_                                 // parameters, prev_parameters
-        + 1 * n_blocks_per_fit_                             // chi_square
-        + 1 * n_parameters_to_fit_ * n_blocks_per_fit_      // gradient
+        = sizeof(REAL)
+        *(1 * n_points_                                     // values
+        + 1 * n_parameters_                                 // prev_parameters
+        + 1 * n_parameters_to_fit_                          // gradient
         + 1 * n_parameters_to_fit_ * n_parameters_to_fit_   // hessian
         + 2 * n_parameters_to_fit_                          // delta, scaling_vector
         + 1 * n_points_*n_parameters_                       // derivatives
-        + 2)                                                // prev_chi_square, lambda
+        + 2)                                                // prev_chi_square, lambda,
+                                                            
         + sizeof(int)
-        * 4;                                                // state, finished, iteration_failed, n_iterations
+        *(1 * n_parameters_to_fit_                          // indices of fitted parameters
+        + 3);                                               // finished, iteration failed flag,
+                                                            // solution info
+    if (n_blocks_per_fit_ > 1)
+    {
+        one_fit_memory
+            += sizeof(REAL)
+             * n_parameters_to_fit_ * n_blocks_per_fit_;    // subtotals
+    }
 
-    if (use_weights_)
-        one_fit_memory += sizeof(float) * n_points_;
+    if (data_location_ == HOST)
+    {
+        one_fit_memory += sizeof(REAL) * n_points_;        // data
+        one_fit_memory += sizeof(REAL) * n_parameters_;    // parameters
+        one_fit_memory += sizeof(REAL);                    // chi-square
+        one_fit_memory += sizeof(int) * 2;                  // state, number of iterations
+        if (use_weights_)
+            one_fit_memory += sizeof(REAL) * n_points_;    // weights
+    }
 
+#ifdef USE_CUBLAS
+    one_fit_memory
+        += sizeof(REAL)
+        *(2                                                 // pointer to decomposed hessian, pointer to delta
+        + 1 * n_parameters_to_fit_ * n_parameters_to_fit_)  // decomposed hessian
+        + sizeof(int)
+        * (1 * n_parameters_to_fit_);                       // pivot vector
+#endif // USE_CUBLAS
+    
     std::size_t tmp_chunk_size = available_gpu_memory_ / one_fit_memory;
     
     if (tmp_chunk_size == 0)

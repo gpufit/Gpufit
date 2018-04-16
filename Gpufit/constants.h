@@ -23,4 +23,6 @@ enum FitState { CONVERGED = 0, MAX_ITERATION = 1, SINGULAR_HESSIAN = 2, NEG_CURV
 // return state
 enum ReturnState { OK = 0, ERROR = -1 };
 
+enum DataLocation { HOST = 0, DEVICE = 1 };
+
 #endif

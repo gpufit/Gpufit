@@ -4,11 +4,11 @@
 
 # CMake
 
-cmake_minimum_required( VERSION 3.7 )
+cmake_minimum_required( VERSION 3.11 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 if( NOT PROJECT_NAME )
-  project( Gpufit VERSION 1.0.2 )
+  project( Gpufit VERSION 1.1.0 )
   include( CTest )
 endif()
 
@@ -42,6 +42,25 @@ function( add_launcher target executable arguments working_directory )
   endif()
 endfunction()
 
+# Default values
+
+# Set the default value for the CUDA architecture flag 
+set( DEFAULT_CUDA_ARCH All )
+
+# Set the default value for the USE_CUBLAS flag.  Valid values are "ON" or "OFF".
+set( DEFAULT_USE_CUBLAS OFF )
+
+# Set the default value for the precision
+set( DEFAULT_DOUBLE_PRECISION OFF )
+
+# Precision
+
+#set( DOUBLE_PRECISION ${DEFAULT_DOUBLE_PRECISION} )
+
+if( DEFINED DOUBLE_PRECISION AND DOUBLE_PRECISION)
+    add_definitions( -DGPUFIT_DOUBLE )
+endif()
+
 # Boost
 
 find_package( Boost 1.58.0 )
@@ -69,7 +88,7 @@ endif()
 
 # MATLAB
 
-find_package( Matlab )
+find_package( Matlab COMPONENTS MX_LIBRARY )
 if( Matlab_FOUND )
   find_program( Matlab_EXECUTABLE matlab
     PATHS "${Matlab_ROOT_DIR}/bin" PATH_SUFFIXES win32 win64 NO_DEFAULT_PATH )
@@ -93,6 +112,24 @@ if( PYTHONINTERP_FOUND )
     set( arguments "-i -c \"import sys\nsys.path.append('${paths}')\"" )
     add_launcher( ${target} "${PYTHON_EXECUTABLE}" "${arguments}" "${working_directory}" )
   endfunction()
+endif()
+
+# Documentation (Latex->PDF)
+
+find_package( LATEX COMPONENTS PDFLATEX )
+if( LATEX_PDFLATEX_FOUND )
+  set( latex_manual_directory "${CMAKE_SOURCE_DIR}/docs/_build/latex" )
+  # run latex two times to get the references right
+  add_custom_target( DOCUMENTATION_PDFLATEX
+    COMMAND ${CMAKE_COMMAND} -E
+      chdir ${latex_manual_directory} "${PDFLATEX_COMPILER}" -interaction=nonstopmode Gpufit.tex
+    COMMAND ${CMAKE_COMMAND} -E
+      chdir ${latex_manual_directory} "${PDFLATEX_COMPILER}" -interaction=nonstopmode Gpufit.tex
+    COMMENT "Converting documentation to PDF"
+  )
+  set_property( TARGET DOCUMENTATION_PDFLATEX PROPERTY FOLDER CMakePredefinedTargets )
+else()
+  message( WARNING "PDFLatex NOT found - cannot convert documentation to PDF!" )
 endif()
 
 # Cpufit

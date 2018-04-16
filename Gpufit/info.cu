@@ -7,17 +7,14 @@ void Info::get_gpu_properties()
     CUDA_CHECK_STATUS(cudaGetDeviceProperties(&devProp, 0));
     max_threads_ = devProp.maxThreadsPerBlock;
     max_blocks_ = devProp.maxGridSize[0];
+    warp_size_ = devProp.warpSize;
 
     std::size_t free_bytes;
     std::size_t total_bytes;
     CUDA_CHECK_STATUS(cudaMemGetInfo(&free_bytes, &total_bytes));
     available_gpu_memory_ = std::size_t(double(free_bytes) * 0.1);
     
-    if (available_gpu_memory_ > user_info_size_)
-    {
-        available_gpu_memory_ -= user_info_size_;
-    }
-    else
+    if (double(user_info_size_) > double(free_bytes) * 0.9)
     {
         throw std::runtime_error("maximum user info size exceeded");
     }

@@ -9,19 +9,19 @@ int gpufit
 (
     size_t n_fits,
     size_t n_points,
-    float * data,
-    float * weights,
+    REAL * data,
+    REAL * weights,
     int model_id,
-    float * initial_parameters,
-    float tolerance,
+    REAL * initial_parameters,
+    REAL tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
     size_t user_info_size,
     char * user_info,
-    float * output_parameters,
+    REAL * output_parameters,
     int * output_states,
-    float * output_chi_squares,
+    REAL * output_chi_squares,
     int * output_n_iterations,
     int * output_info
 )
@@ -43,6 +43,7 @@ try
         output_states,
         output_chi_squares,
         output_n_iterations,
+        HOST,
         output_info);
 
     fi.fit(static_cast<ModelID>(model_id));
@@ -58,6 +59,61 @@ catch( std::exception & exception )
 catch( ... )
 {
     last_error = "unknown error" ;
+
+    return ReturnState::ERROR;
+}
+
+int gpufit_cuda_interface
+(
+    size_t n_fits,
+    size_t n_points,
+    REAL * gpu_data,
+    REAL * gpu_weights,
+    int model_id,
+    REAL tolerance,
+    int max_n_iterations,
+    int * parameters_to_fit,
+    int estimator_id,
+    size_t user_info_size,
+    char * gpu_user_info,
+    REAL * gpu_fit_parameters,
+    int * gpu_output_states,
+    REAL * gpu_output_chi_squares,
+    int * gpu_output_n_iterations
+)
+try
+{
+    FitInterface fi(
+        gpu_data,
+        gpu_weights,
+        n_fits,
+        static_cast<int>(n_points),
+        tolerance,
+        max_n_iterations,
+        static_cast<EstimatorID>(estimator_id),
+        gpu_fit_parameters,
+        parameters_to_fit,
+        gpu_user_info,
+        user_info_size,
+        gpu_fit_parameters,
+        gpu_output_states,
+        gpu_output_chi_squares,
+        gpu_output_n_iterations,
+        DEVICE);
+
+    fi.fit(static_cast<ModelID>(model_id));
+
+    return ReturnState::OK;
+}
+catch (std::exception & exception)
+{
+    last_error = exception.what();
+
+    return ReturnState::ERROR;
+}
+catch (...)
+{
+    last_error = "unknown error";
 
     return ReturnState::ERROR;
 }
@@ -105,19 +161,19 @@ int gpufit_portable_interface(int argc, void *argv[])
     return gpufit(
         *((size_t *) argv[0]),
         *((size_t *) argv[1]),
-        (float *) argv[2],
-        (float *) argv[3],
+        (REAL *) argv[2],
+        (REAL *) argv[3],
         *((int *) argv[4]),
-        (float *) argv[5],
-        *((float *) argv[6]),
+        (REAL *) argv[5],
+        *((REAL *) argv[6]),
         *((int *) argv[7]),
         (int *) argv[8],
         *((int *) argv[9]),
         *((size_t *) argv[10]),
         (char *) argv[11],
-        (float *) argv[12],
+        (REAL *) argv[12],
         (int *) argv[13],
-        (float *) argv[14],
+        (REAL *) argv[14],
         (int *) argv[15],
         (int *)argv[16]);
 

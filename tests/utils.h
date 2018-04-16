@@ -3,6 +3,7 @@
 
 #include<vector>
 #include<random>
+#include "Gpufit/gpufit.h"
 
 #define CHK(x) if (!x) return false
 
@@ -104,11 +105,11 @@ template<typename T> double calculate_mean(std::vector<T> const & a, std::vector
     return s / n;
 }
 
-void generate_gauss_1d(std::vector< float > & v, std::vector< float > const & p);
+void generate_gauss_1d(std::vector< REAL > & v, std::vector< REAL > const & p);
 
-void generate_gauss_2d(std::vector< float > & v, std::vector< float > const & p);
+void generate_gauss_2d(std::vector< REAL > & v, std::vector< REAL > const & p);
 
-void generate_gauss_2d_elliptic(std::vector< float > & v, std::vector< float > const & p);
+void generate_gauss_2d_elliptic(std::vector< REAL > & v, std::vector< REAL > const & p);
 
 struct FitInput
 {
@@ -116,21 +117,21 @@ struct FitInput
 	std::size_t n_points;
 	std::size_t n_parameters;
 
-	std::vector< float > data;
-	std::vector< float > weights_; // size 0 means no weights
+	std::vector< REAL > data;
+	std::vector< REAL > weights_; // size 0 means no weights
 
 	int model_id;
 	int estimator_id;
 
-	std::vector< float > initial_parameters;
+	std::vector< REAL > initial_parameters;
 	std::vector< int > parameters_to_fit;
 
-	float tolerance;
+	REAL tolerance;
 	int max_n_iterations;
 
-	std::vector< float > user_info_; // user info is float
+	std::vector< REAL > user_info_; // user info is REAL
 
-	float * weights()
+	REAL * weights()
 	{
 		if (!this->weights_.empty())
 		{
@@ -150,7 +151,7 @@ struct FitInput
 
 	std::size_t user_info_size()
 	{
-		return this->user_info_.size() * sizeof(float); // type of user_info is float
+		return this->user_info_.size() * sizeof(REAL); // type of user_info is REAL
 	}
 
 	bool sanity_check()
@@ -167,9 +168,9 @@ struct FitInput
 
 struct FitOutput
 {
-	std::vector< float > parameters;
+	std::vector< REAL > parameters;
 	std::vector< int > states;
-	std::vector< float > chi_squares;
+	std::vector< REAL > chi_squares;
 	std::vector< int > n_iterations;
 };
 

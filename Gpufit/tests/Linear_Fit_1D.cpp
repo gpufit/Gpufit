@@ -20,25 +20,25 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
     std::size_t const n_fits{ 1 } ;
     std::size_t const n_points{ 2 } ;
 
-	std::array< float, 2 > const true_parameters{ { 1, 1 } };
+	std::array< REAL, 2 > const true_parameters{ { 1, 1 } };
 
-    std::array< float, n_points > data{ { 1, 2 } } ;
+    std::array< REAL, n_points > data{ { 1, 2 } } ;
     
-	std::array< float, n_points > weights{ { 1, 1 } } ;
+	std::array< REAL, n_points > weights{ { 1, 1 } } ;
 
-    std::array< float, 2 > initial_parameters{ { 1, 0 } } ;
+    std::array< REAL, 2 > initial_parameters{ { 1, 0 } } ;
 
-    float tolerance{ 0.00001f } ;
+    REAL tolerance{ 0.00001f } ;
     
 	int max_n_iterations{ 10 } ;
     
 	std::array< int, 2 > parameters_to_fit{ { 1, 1 } } ;
     
-	std::array< float, n_points > user_info{ { 0.f, 1.f } } ;
+	std::array< REAL, n_points > user_info{ { 0., 1. } } ;
     
-	std::array< float, 2 > output_parameters ;
+	std::array< REAL, 2 > output_parameters ;
     int output_states ;
-    float output_chi_squares ;
+    REAL output_chi_squares ;
     int output_n_iterations ;
 
 	// test with LSE
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
             max_n_iterations,
             parameters_to_fit.data(),
             LSE,
-            n_points * sizeof( float ),
+            n_points * sizeof( REAL ),
             reinterpret_cast< char * >( user_info.data() ),
             output_parameters.data(),
             & output_states,
@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 	BOOST_CHECK( output_n_iterations <= max_n_iterations );
 	BOOST_CHECK( output_chi_squares < 1e-6f );
 
-	BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
-	BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+	BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6);
+	BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6);
 
 	// test with MLE
 	status = gpufit
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 			max_n_iterations,
 			parameters_to_fit.data(),
 			MLE,
-			n_points * sizeof(float),
+			n_points * sizeof(REAL),
 			reinterpret_cast< char * >(user_info.data()),
 			output_parameters.data(),
 			&output_states,
@@ -96,9 +96,9 @@ BOOST_AUTO_TEST_CASE( Linear_Fit_1D )
 	BOOST_CHECK(status == 0);
 	BOOST_CHECK(output_states == 0);
 	BOOST_CHECK(output_n_iterations <= max_n_iterations);
-	BOOST_CHECK(output_chi_squares < 1e-6f);
+	BOOST_CHECK(output_chi_squares < 1e-6);
 
-	BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
-	BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
+	BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6);
+	BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6);
 
 }

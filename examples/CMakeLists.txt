@@ -1,6 +1,10 @@
 
 # Applications
 
+if( USE_CUBLAS )
+    add_definitions( -DUSE_CUBLAS )
+endif()
+
 function( add_example modules name )
   set( target ${name} )
   add_executable( ${target} ${name}.cpp

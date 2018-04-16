@@ -9,7 +9,7 @@
 *
 * This function makes use of the user information data to pass in the 
 * independent variables (X values) corresponding to the data.  The X values
-* must be of type float.
+* must be of type REAL.
 *
 * Note that if no user information is provided, the (X) coordinate of the 
 * first data value is assumed to be (0.0).  In this case, for a fit size of 
@@ -31,13 +31,13 @@
 *       If the user_info array contains the X values for one fit, then 
 *       the same X values will be used for all fits.  In this case, the 
 *       size of the user_info array (in bytes) must equal 
-*       sizeof(float) * n_points.
+*       sizeof(REAL) * n_points.
 *
 *   Unique X values provided for all fits:
 *
 *       In this case, the user_info array must contain X values for each
 *       fit in the dataset.  In this case, the size of the user_info array 
-*       (in bytes) must equal sizeof(float) * n_points * nfits.
+*       (in bytes) must equal sizeof(REAL) * n_points * nfits.
 *
 * Parameters:
 *
@@ -72,11 +72,11 @@
 */
 
 __device__ void calculate_linear1d(
-    float const * parameters,
+    REAL const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    REAL * value,
+    REAL * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -85,17 +85,17 @@ __device__ void calculate_linear1d(
 {
     // indices
 
-    float * user_info_float = (float*) user_info;
-    float x = 0.0f;
+    REAL * user_info_float = (REAL*) user_info;
+    REAL x = 0;
     if (!user_info_float)
     {
         x = point_index;
     }
-    else if (user_info_size / sizeof(float) == n_points)
+    else if (user_info_size / sizeof(REAL) == n_points)
     {
         x = user_info_float[point_index];
     }
-    else if (user_info_size / sizeof(float) > n_points)
+    else if (user_info_size / sizeof(REAL) > n_points)
     {
         int const chunk_begin = chunk_index * n_fits * n_points;
         int const fit_begin = fit_index * n_points;
@@ -108,8 +108,8 @@ __device__ void calculate_linear1d(
 
     // derivatives
 
-    float * current_derivatives = derivative + point_index;
-    current_derivatives[0 * n_points] = 1.f;
+    REAL * current_derivatives = derivative + point_index;
+    current_derivatives[0 * n_points] = 1;
     current_derivatives[1 * n_points] = x;
 }
 

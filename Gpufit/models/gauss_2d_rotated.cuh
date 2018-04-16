@@ -52,11 +52,11 @@
 */
 
 __device__ void calculate_gauss2drotated(
-    float const * parameters,
+    REAL const * parameters,
     int const n_fits,
     int const n_points,
-    float * value,
-    float * derivative,
+    REAL * value,
+    REAL * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -65,28 +65,28 @@ __device__ void calculate_gauss2drotated(
 {
     // indices
 
-    int const n_points_x = sqrt((float)n_points);
+    int const n_points_x = sqrt((REAL)n_points);
 
     int const point_index_y = point_index / n_points_x;
     int const point_index_x = point_index - point_index_y * n_points_x;
 
     // parameters
 
-    float const * p = parameters;
+    REAL const * p = parameters;
 
     // value
 
-    float const cosp6 = cosf(p[6]);
-    float const sinp6 = sinf(p[6]);
+    REAL const cosp6 = cos(p[6]);
+    REAL const sinp6 = sin(p[6]);
 
-    float const arga = (point_index_x - p[1]) * cosp6 - (point_index_y - p[2]) * sinp6;
-    float const argb = (point_index_x - p[1]) * sinp6 + (point_index_y - p[2]) * cosp6;
-    float const ex = exp(-0.5 * (((arga / p[3]) * (arga / p[3])) + ((argb / p[4]) * (argb / p[4]))));
+    REAL const arga = (point_index_x - p[1]) * cosp6 - (point_index_y - p[2]) * sinp6;
+    REAL const argb = (point_index_x - p[1]) * sinp6 + (point_index_y - p[2]) * cosp6;
+    REAL const ex = exp(-.5f * (((arga / p[3]) * (arga / p[3])) + ((argb / p[4]) * (argb / p[4]))));
     value[point_index] = p[0] * ex + p[5];
 
     // derivative
 
-    float * current_derivative = derivative + point_index;
+    REAL * current_derivative = derivative + point_index;
 
     current_derivative[0 * n_points] = ex;
     current_derivative[1 * n_points] = (((p[0] * cosp6 * arga) / (p[3] * p[3])) + ((p[0] * sinp6 * argb) / (p[4] * p[4]))) * ex;
@@ -94,7 +94,7 @@ __device__ void calculate_gauss2drotated(
     current_derivative[3 * n_points] = p[0] * arga * arga / (p[3] * p[3] * p[3]) * ex;
     current_derivative[4 * n_points] = p[0] * argb * argb / (p[4] * p[4] * p[4]) * ex;
     current_derivative[5 * n_points] = 1;
-    current_derivative[6 * n_points] = p[0] * arga * argb * (1.0 / (p[3] * p[3]) - 1.0 / (p[4] * p[4])) * ex;
+    current_derivative[6 * n_points] = p[0] * arga * argb * (1.f / (p[3] * p[3]) - 1.f / (p[4] * p[4])) * ex;
 }
 
 #endif

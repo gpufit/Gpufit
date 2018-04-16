@@ -32,7 +32,7 @@ void generate_input_linear_fit_1d(FitInput & i)
 	i.max_n_iterations = 10;
 
 	// user info
-	i.user_info_ = { 0.f, 1.f };
+	i.user_info_ = { 0., 1. };
 }
 
 void generate_input_gauss_fit_1d(FitInput & i)
@@ -44,7 +44,7 @@ void generate_input_gauss_fit_1d(FitInput & i)
 
 	// data and weights
 	clean_resize(i.data, i.n_fits * i.n_points);
-	std::vector< float > const true_parameters{ { 4.f, 2.f, 0.5f, 1.f } };
+	std::vector< REAL > const true_parameters{ { 4., 2., 0.5, 1. } };
 	generate_gauss_1d(i.data, true_parameters);
 	i.weights_.clear(); // no weights
 
@@ -53,7 +53,7 @@ void generate_input_gauss_fit_1d(FitInput & i)
 	i.estimator_id = LSE;
 
 	// initial parameters and parameters to fit
-	i.initial_parameters = { 2.f, 1.5f, 0.3f, 0.f };
+	i.initial_parameters = { 2., 1.5, 0.3f, 0. };
 	i.parameters_to_fit = { 1, 1, 1, 1 };
 
 	// tolerance and max_n_iterations
@@ -73,7 +73,7 @@ void generate_input_gauss_fit_2d(FitInput & i)
 
 	// data and weights
 	clean_resize(i.data, i.n_fits * i.n_points);
-	std::vector< float > const true_parameters{ { 4.f, 1.8f, 2.2f, 0.5f, 1.f } };
+	std::vector< REAL > const true_parameters{ { 4., 1.8f, 2.2f, 0.5, 1. } };
 	generate_gauss_2d(i.data, true_parameters);
 	i.weights_.clear(); // no weights
 
@@ -82,7 +82,7 @@ void generate_input_gauss_fit_2d(FitInput & i)
 	i.estimator_id = LSE;
 
 	// initial parameters and parameters to fit
-	i.initial_parameters = { 2.f, 1.8f, 2.2f, 0.4f, 0.f };
+	i.initial_parameters = { 2., 1.8f, 2.2f, 0.4f, 0. };
 	i.parameters_to_fit = { 1, 1, 1, 1, 1 };
 
 	// tolerance and max_n_iterations
@@ -104,8 +104,8 @@ void generate_input_gauss_fit_2d_elliptic(FitInput & i)
     // data and weights
     clean_resize(i.data, i.n_fits * i.n_points);
 
-    float const center_x = (static_cast<float>(size_x) - 1.f) / 2.f;
-    std::vector< float > const true_parameters{ { 4.f, center_x, center_x, 0.4f, 0.6f, 1.f} };
+    REAL const center_x = (static_cast<REAL>(size_x) - 1) / 2;
+    std::vector< REAL > const true_parameters{ { 4, center_x, center_x, 0.4f, 0.6f, 1} };
     generate_gauss_2d_elliptic(i.data, true_parameters);
     i.weights_.clear(); // no weights
 
@@ -114,7 +114,7 @@ void generate_input_gauss_fit_2d_elliptic(FitInput & i)
     i.estimator_id = LSE;
 
     // initial parameters and parameters to fit
-    i.initial_parameters = { 2.f, 1.8f, 2.2f, 0.5f, 0.5f, 0.f };
+    i.initial_parameters = { 2, 1.8f, 2.2f, .5f, .5f, 0 };
     i.parameters_to_fit = { 1, 1, 1, 1, 1 };
 
     // tolerance and max_n_iterations

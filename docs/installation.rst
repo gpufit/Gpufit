@@ -34,6 +34,7 @@ updated Nvidia graphics driver. The binary package contains:
 - Matlab 32 bit and 64 bit bindings, with Matlab examples.
 - Python version 2.x and version 3.x bindings (compiled as wheel files) and
   Python examples.
+- Java 8 32 bit and 64 bit bindings, with Java examples.
 - This manual in PDF format.
 
 To re-build the binary distribution, see the instructions located in 
@@ -71,6 +72,8 @@ The following tools are required in order to build Gpufit from source.
 * Boost_ 1.58 or later (required if you want to build the tests)
 * MATLAB_ if building the MATLAB bindings (minimum version Matlab 2012a)
 * Python_ if building the Python bindings (Python version 2.x or 3.x)
+* Java if building the Java bindings (minimum Java JDK version 8)
+* PDF Latex installation (like Miktex) if converting the documentation from Latex to PDF
 
 Source code availability
 ------------------------
@@ -228,6 +231,27 @@ Gpufit has not yet been officially tested on a computer running MacOS with a
 CUDA capable graphics card. However, satisfying the Prerequisites_ and using
 CMake, we estimate that the library should build in principle and one
 should also be able to run the examples on MacOS.
+
+Using cuBLAS
+++++++++++++
+
+Optionally, Gpufit may be configured to make use of the cuBLAS library.  This
+library is used for solving the equation system during the fit process.  
+
+Several benefits are obtained by using cuBLAS:
+
+- Moderately faster fitting performance.
+- Improved numerical stability.
+- The number of fit model parameters may be as high as the number of threads per
+  GPU thread block (1024).  Without cuBLAS, the maximum number of model parameters
+  is limited to 31.
+  
+To include cuBLAS functionality in Gpufit, the USE_CUBLAS flag may be set during 
+the CMAKE configuration step.  Note that the Gpufit cuBLAS feature is only available 
+for 64-bit architectures, and for code built with CUDA toolkit version >= 7.0.  Finally, 
+it is important to note that cuBLAS is not statically linked in the Gpufit DLL, but rather
+it is dynamically linked.  Hence, when distributing applications, the cuBLAS DLL (e.g. cublas64_80.dll 
+for CUDA toolkit version 8) must be packaged along with Gpufit.dll.
 
 Running the performance test
 ++++++++++++++++++++++++++++

@@ -1,10 +1,8 @@
 
 # MATLAB Cpufit binding
 
-find_package( Matlab COMPONENTS MX_LIBRARY )
-
 if( NOT Matlab_FOUND )
-  message( STATUS "Matlab and/or MX_Library NOT found - skipping Cpufit Matlab binding!" )
+  message( STATUS "No suitable Matlab and/or MX_Library version found - skipping Cpufit Matlab binding!" )
   return()
 endif()
 
