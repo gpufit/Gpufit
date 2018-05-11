@@ -3,12 +3,6 @@
 # Find Java
 find_package( Java 1.8 COMPONENTS Development )
 
-# Set the current process environment variable JAVA_HOME to ensure that only one version 
-# of Java is used
-get_filename_component(JAVA_BIN_DIR ${Java_JAVAC_EXECUTABLE} PATH)
-get_filename_component(JAVA_HOME ${JAVA_BIN_DIR} PATH)
-set( ENV{JAVA_HOME} ${JAVA_HOME} )
-
 if( NOT Java_FOUND )
   message( "JAVA JDK NOT found - skipping Gpufit Java binding!" )
   return()
@@ -21,6 +15,12 @@ if( NOT JNI_FOUND )
   message( "JAVA JNI NOT found - skipping Gpufit Java binding!" )
   return()
 endif()
+
+# Set the current process environment variable JAVA_HOME to ensure that only one version 
+# of Java is used
+get_filename_component(JAVA_BIN_DIR ${Java_JAVAC_EXECUTABLE} PATH)
+get_filename_component(JAVA_HOME ${JAVA_BIN_DIR} PATH)
+set( ENV{JAVA_HOME} ${JAVA_HOME} )
 
 # Try running Java
 exec_program( java ARGS -version RETURN_VALUE java_return_value )
