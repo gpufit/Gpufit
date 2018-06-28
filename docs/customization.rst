@@ -27,7 +27,7 @@ of model parameters and dimensions must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
-1. Define an additional model ID in file constants.h_.
+1. Define an additional model ID in file constants.h_. When using the language bindings, the model ID must also be added for Python (in gpufit.py), Matlab (in ModelID.m), Java (in Model.java). 
 2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template.
 
 .. code-block:: cuda
@@ -114,7 +114,7 @@ To extend the Gpufit library with additional estimators, three CUDA device funct
 the functions which calculate the estimator function values, and its gradient and hessian values. Also, a new estimator ID must be defined.
 Detailed step by step instructions for adding an additional estimator is given below.
 
-1. Define an additional estimator ID in constants.h_
+1. Define an additional estimator ID in constants.h_ When using the language bindings, the estimator ID must be added also for Python (in gpufit.py), Matlab (in EstimatorID.m), Java (in Estimator.java). 
 2. Implement three functions within a newly created .cuh file in the folder Gpufit/Gpufit/estimators calculating :math:`\chi^2` values and
    its gradient and hessian according to the following template.
 
@@ -241,7 +241,7 @@ and the gradient and hessian values of the estimator given. For a concrete examp
             break;
         }
 		
-5.	After adding a new estimator, if CMake is being used to configure the compiler, then CMake must be run again.  If not using CMake, the new estimator file (the .cuh file) must be included in the project.
+5.	After adding a new estimator, if CMake is being used to configure the compiler, then CMake must be run again. If not using CMake, the new estimator file (the .cuh file) must be included in the project.
 6.	Re-build the Gpufit project.
 		
 Future releases
