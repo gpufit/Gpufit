@@ -23,6 +23,10 @@ void LMFitCUDA::run()
     // initialize the chi-square values
 	calc_curve_values();
     calc_chi_squares();
+
+    if (info_.n_parameters_to_fit_ == 0)
+        return;
+
     calc_gradients();
     calc_hessians();
 
