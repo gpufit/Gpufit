@@ -134,7 +134,7 @@ Here, :code:`p` is the vector of parameters (p0..p4) and the model function :cod
 	
     No independent variables are passed to this model function.
     Hence, the *(X,Y)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0`).
-    For a fit size of *M x N* data points, the *(X,Y)* coordinates of the data are simply the corresponding 2D array
+    The fit size is *M x M* data points (M*M=number of data points in the interface), the *(X,Y)* coordinates of the data are simply the corresponding 2D array
     indices of the data array, starting from zero.
 
 :`p_0`: amplitude
@@ -164,8 +164,8 @@ in gauss_2d_elliptic.cuh_. Here, :code:`p` is the vector of parameters (p0..p5) 
 
     No independent variables are passed to this model function.
     Hence, the *(X,Y)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0`).
-    For a fit size of *M x N* data points, the *(X,Y)* coordinates of the data are simply the corresponding
-    2D array indices of the data array, starting from zero.
+    The fit size is *M x M* data points (M*M=number of data points in the interface), the *(X,Y)* coordinates of the data are simply the corresponding 2D array
+    indices of the data array, starting from zero.
 
 :`p_0`: amplitude
 	
@@ -197,8 +197,8 @@ Here, :code:`p` is the vector of parameters (p0..p6) and the model function :cod
 
     No independent variables are passed to this model function.
     Hence, the *(X,Y)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0`).
-    For a fit size of *M x N* data points, the *(X,Y)* coordinates of the data are simply the corresponding
-    2D array indices of the data array, starting from zero.
+    The fit size is *M x M* data points (M*M=number of data points in the interface), the *(X,Y)* coordinates of the data are simply the corresponding 2D array
+    indices of the data array, starting from zero.
 
 :`p_0`: amplitude
 	
@@ -232,8 +232,8 @@ coordinate of the input data.
 
     No independent variables are passed to this model function.
     Hence, the *(X,Y)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0`).
-    For a fit size of *M x N* data points, the *(X,Y)* coordinates of the data are simply the corresponding
-    2D array indices of the data array, starting from zero.
+    The fit size is *M x M* data points (M*M=number of data points in the interface), the *(X,Y)* coordinates of the data are simply the corresponding 2D array
+    indices of the data array, starting from zero.
 
 :`p_0`: amplitude
 	
