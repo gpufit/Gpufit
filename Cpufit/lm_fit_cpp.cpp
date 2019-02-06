@@ -918,6 +918,10 @@ void LMFitCPP::run()
     *state_ = FitState::CONVERGED;
 	calc_model();
     calc_coefficients();
+
+    if (info_.n_parameters_to_fit_ == 0)
+        return;
+
     prev_chi_square_ = (*chi_square_);
         
     for (int iteration = 0; (*state_) == 0; iteration++)
