@@ -35,7 +35,10 @@ GPUData::GPUData(Info const & info) :
 
     subtotals_(
         (info_.n_blocks_per_fit_ > 1)
-        ? info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_ : 0),
+        ? std::max(
+            info_.max_chunk_size_ * info_.n_parameters_to_fit_ * info_.n_blocks_per_fit_,
+            info_.max_chunk_size_ * info_.n_blocks_per_fit_)
+        : 0),
 
     values_( info_.max_chunk_size_ * info_.n_points_ ),
     derivatives_( info_.max_chunk_size_ * info_.n_points_ * info_.n_parameters_ ),
