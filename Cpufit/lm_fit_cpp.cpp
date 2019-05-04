@@ -1,6 +1,7 @@
 #include "cpufit.h"
 #include "../Gpufit/constants.h"
 #include "lm_fit.h"
+#include <math.h>
 
 #include <vector>
 #include <numeric>

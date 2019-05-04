@@ -51,7 +51,7 @@ add_custom_target( PYTHON_WHEEL ALL
   COMMAND ${CMAKE_COMMAND} -E
     chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py clean --all
   COMMAND ${CMAKE_COMMAND} -E
-    chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py bdist_wheel
+    chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py build
   COMMENT "Preparing Python Wheel"
 )
 set_property( TARGET PYTHON_WHEEL PROPERTY FOLDER CMakePredefinedTargets )
