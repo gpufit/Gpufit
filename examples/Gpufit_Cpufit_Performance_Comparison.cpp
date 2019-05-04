@@ -463,8 +463,6 @@ int main(int argc, char * argv[])
         std::cout << std::endl;        
     }
     std::cout << std::endl << "Test completed!" << std::endl;
-    std::cout << "Press ENTER to exit" << std::endl;
-    std::getchar();
 
     return 0;
 }
