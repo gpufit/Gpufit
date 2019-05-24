@@ -6,6 +6,8 @@
 
 #include <array>
 
+// TODO this doesn't fail anymore as expected, we do not really throw an error anymore and therefore cannot reliably check for an error
+
 BOOST_AUTO_TEST_CASE( Error_Handling )
 {
     std::size_t const n_fits{ 1 } ;

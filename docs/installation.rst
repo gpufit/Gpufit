@@ -54,13 +54,13 @@ The following tools are required in order to build Gpufit from source.
 
 *Required*
 
-* CMake_ 3.7 or later
+* CMake_ 3.11 or later
 * A C/C++ Compiler
 
-  * Linux: GCC 4.7
-  * Windows: Visual Studio 2013 or 2015
+  * Linux: GCC 4 (tested with 4-6)
+  * Windows: Visual Studio 2013 (tested with 2013 - 2019)
 
-* CUDA_ Toolkit 6.5 or later [#]_
+* CUDA_ Toolkit 6.5 or later (tested with 6.5-10.1) [#]_
 
 .. [#] Note that it is recommended to use the newest available stable release of the CUDA Toolkit which is compatible
     with the compiler (e.g. Visual Studio 2015 is required in order to use CUDA Toolkit 8.0). Some older graphics cards
@@ -182,9 +182,9 @@ the command line.
 Compiling Gpufit on Linux
 -------------------------
 
-A successful build has been verified on Ubuntu 16.04 LTS with gcc 5.4 and CUDA 9
-following the `instructions <https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1604&target_type=debnetwork>`_
-on the NVidia website. CMake needs to be at least version 3.7. To perform the tests, a development version of Boost should be installed (e.g. *libboost-all-dev*).
+A successful build has been verified on Ubuntu 18.04 LTS with gcc 5.5 and CUDA 9.1
+following the `instructions <https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1804&target_type=debnetwork>`_
+on the NVidia website. CMake needs to be at least version 3.11. To perform the tests, a development version of Boost should be installed (e.g. *libboost-all-dev*).
 
 The following commands were executed.
 
@@ -195,6 +195,9 @@ The following commands were executed.
 	cd Gpufit-build
 	cmake -DCMAKE_BUILD_TYPE=RELEASE ../Gpufit
 	make
+
+In case, during make there is an error "unsupported GNU version! gcc versions later than X are not supported", it means that CUDA needs an older version of gcc. Provided that such
+a version is installed on the system you can choose it with the -DCMAKE_C_COMPILER option to cmake. For example, for CUDA 9 one should add -DCMAKE_C_COMPILER=gcc-5 in the call to cmake.
 
 The tests can be run for example by "make test". Run the performance comparison with
 
