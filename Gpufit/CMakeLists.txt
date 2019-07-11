@@ -172,15 +172,29 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
             add_custom_command( TARGET Gpufit POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E
                     copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
+            target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
         else()
-            set( CUDA_CUBLAS_LIBRARIES 
-                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcublas_static.a
-                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libculibos.a )
-        endif()
-            
+            set( STATIC_CUBLAS ON CACHE BOOL "ON | OFF")
+            if ( STATIC_CUBLAS )
+                find_cuda_helper_libs(cublas_static)
+                find_cuda_helper_libs(cublasLt_static)
+                find_cuda_helper_libs(culibos)
+
+                set( CUDA_CUBLAS_LIBRARIES 
+                    ${CUDA_cublas_static_LIBRARY}
+                    ${CUDA_cublasLt_static_LIBRARY}
+                    ${CUDA_cudart_static_LIBRARY}
+                    ${CUDA_culibos_LIBRARY}
+                    dl
+                    pthread
+                    rt )
+                target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
+            else ()
+                # Dynamic Link can be done with a single function call
+                CUDA_ADD_CUBLAS_TO_TARGET( Gpufit )
+            endif ()
+        endif() 
 		add_definitions( -DUSE_CUBLAS )
-                
-        target_link_libraries( Gpufit ${CUDA_CUBLAS_LIBRARIES} )
 	endif()
 elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
 	message( STATUS "CUBLAS: 32-bit architecture detected; USE_CUBLAS flag ignored." )
