@@ -135,6 +135,7 @@ void GPUData::init
     set(scaling_vectors_, 0., chunk_size_ * info_.n_parameters_to_fit_);
     set(states_, 0, chunk_size_);
     set(lambdas_, 0.001f, chunk_size_);
+    set(n_iterations_, 0, chunk_size_);
 }
 
 void GPUData::init_user_info(char const * const user_info)
