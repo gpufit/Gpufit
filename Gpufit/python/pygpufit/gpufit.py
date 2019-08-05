@@ -52,6 +52,11 @@ class ModelID():
     GAUSS_2D_ROTATED = 3
     CAUCHY_2D_ELLIPTIC = 4
     LINEAR_1D = 5
+    FLETCHER_POWELL_HELIX = 6
+    BROWN_DENNIS = 7
+    EXPONENTIAL = 8
+    EXP_3_PARAM = 9
+    EXP_4_PARAM = 10
 
 
 class EstimatorID():

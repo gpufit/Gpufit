@@ -21,8 +21,8 @@ if __name__ == '__main__':
     number_points = 10
 
     # model ID and number of parameter
-    model_id = gf.ModelID.GAUSS_1D
-    number_parameter = 5
+    model_id = gf.ModelID.LIVER_FAT_THREE
+    number_parameter = 6
 
     # initial parameters
     initial_parameters = np.zeros((number_fits, number_parameter), dtype=np.float32)

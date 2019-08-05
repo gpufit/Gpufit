@@ -4,23 +4,10 @@
 #include <random>
 #include <iostream>
 #include <math.h>
-#include <complex>
-using namespace std;
 
-void exponential()
+
+void exponetial()
 {
-	// variables
-	float const exp = 2.71828;
-	float const pi =  3.14159;
-	std::complex<REAL> expC = 2.71828;
-	std::complex<REAL> piC = 3.14159;
-
-	// estimator ID
-	int const estimator_id = LSE;
-
-	// model ID
-	int const model_id = LIVER_FAT_THREE;
-
     /*
     This example generates test data in form of 10000 one dimensional linear
     curves with the size of 20 data points per curve. It is noised by normal
@@ -39,100 +26,42 @@ void exponential()
     - and the mean number of iterations needed.
     */
 
-	// Signal to Noise Ratio
-	float snr = 500000;
 	// number of fits, fit points and parameters
-	size_t const n_fits = 100; //10000
-	size_t const n_points_per_fit = 6;
+	size_t const n_fits = 10000;
+	size_t const n_points_per_fit = 20;
+	size_t const n_model_parameters = 2;
 
-	size_t const n_model_parameters = 3;
-
-// TODO: set user info to echo times
-	/*
-	std::vector<REAL> TEn(6);
-	float echo_time;
-	std::cout << "Please enter in echo times: ";
-	for (size_t i = 0; i < 6 ; i++)
-	{
-		std::cin >> echo_time;
-		TEn.push_back (echo_time);
-	}
-	*/
-	//TODO: make sure te numbers are passed in WITH the signal intensity numbers, just like in the python code before
-	//te numbers: 1.23, 2.48, 3.65, 4.84, 6.03, 7.22
 	// custom x positions for the data points of every fit, stored in user info
-	REAL TEn[] = {1.23, 2.48, 3.65, 4.84, 6.03, 7.22};
-	std::complex<REAL> TEnC[] = {1.23, 2.48, 3.65, 4.84, 6.03, 7.22};
 	std::vector< REAL > user_info(n_points_per_fit);
-	//std::cout << "Enter in echo times: "
 	for (size_t i = 0; i < n_points_per_fit; i++)
-	{
-		user_info[i] = static_cast<REAL>(TEn[i]);
+	{   //TODO: Change this to what Dr. Barnes believes to be correct
+		user_info[i] = static_cast<REAL>(pow(2, i));
 	}
-
-// TODO: transpose this block of code to c++
-/*
-	 * 	self.frequency = 127.74
-	 * 	self.ppm_list=[-3.73,-3.33,-3.04,-2.60,-2.38,-1.86,0.68]
-	 * 	self.ppm_list=[self.frequency*x/1000 for x in self.ppm_list]
-	 * 	self.i=complex(0,1)
-	 * 	self.weight_list=[0.08,0.63,0.07,0.09,0.07,0.02,0.04]
-	 *
-	 * def calc_weights(self, te_list):
-	 * 	self.te_list_cache = te_list
-	 * 	if len(self.complex_weight_list)!=0:
-	 * 		self.complex_weight_list = []
-	 * 	for te in te_list:
-	 * 		te_complex_coeff=0
-	 * 		for weight,ppm in zip(self.weight_list,self.ppm_list):
-	 * 			te_complex_coeff+=weight*np.exp(self.i*2*cmath.pi*ppm*te)
-	 * 		self.complex_weight_list.append(te_complex_coeff)
-	 */
 
 	// size of user info in bytes
 	size_t const user_info_size = n_points_per_fit * sizeof(REAL);
-
-	// true parameters
-	std::vector< REAL > true_parameters { 210, 175, 4};
-
-	float sigma =  (true_parameters[0] + true_parameters[1]) / snr;
 
 	// initialize random number generator
 	std::mt19937 rng;
 	rng.seed(0);
 	std::uniform_real_distribution< REAL > uniform_dist(0, 1);
-	std::normal_distribution< REAL > normal_dist(0, sigma);
+	std::normal_distribution< REAL > normal_dist(0, 1);
+
+//CAT CHECK: this area might be where I can place the values from the liver fat to read off from
+//TODO: Figure out how to place the SI Values in this
+	// true parameters
+	std::vector< REAL > true_parameters { 5 }; // offset, slope
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		// random 1st parameter
+		// random offset
 		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
-		// random 2nd parameter
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.8f + 0.4f * uniform_dist(rng));
-		// random 3rd parameter
-		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.8f + 0.4f * uniform_dist(rng));
-
-		std::cout << "parameter 0 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 0] << "\n";
-		std::cout << "parameter 1 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 1] << "\n";
-		std::cout << "parameter 2 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 2] << "\n";
+		// random slope
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
 	}
-
-	// Complex Number builder
-	// First calculate C_n
-	//maybe define C_n as a real and imaginary part
-	std::complex<REAL> const ppm_list[] = {-0.4764702, -0.4253742, -0.3883296, -0.332124, -0.3040212, -0.2375964, 0.0868632};
-	std::complex<REAL> const weight_list[] = {0.08, 0.63, 0.07, 0.09, 0.07, 0.02, 0.04};
-	std::complex<REAL> C_n = std::complex<REAL>(0.f, 0.f);
-	std::complex<REAL> j = std::complex<REAL> (0.f, 1);
-
-	for (int i =0; i < 7; i++)
-	{
-		// C_n calculation
-		// weight_list * e ^ (j * 2 * pi * ppm_list * TEn)
-		C_n += weight_list[i] * pow(expC, (j * 2.0f * piC * ppm_list[i] * TEnC[i]));
-	}
+//END CAT CHECK
 
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
@@ -142,28 +71,25 @@ void exponential()
 		size_t k = i % n_points_per_fit; // the position within a fit
 
 		REAL x = user_info[k];
-		// one below is for exponential
-		// REAL y = true_parameters[1] * pow(2.71828,(-1 * true_parameters[0] * x));
-//TODO: explicitly state everything as std::complex<REAL>
-		std::cout << "Complex Number: " << C_n << "\n";
-		REAL y = abs((true_parameters[0] + C_n * true_parameters[1]) * pow(exp, (-1 * true_parameters[2] *x)));
-		float rician_noise = sqrt(pow(normal_dist(rng),2) + pow(normal_dist(rng),2));
-		data[i] = y;// + rician_noise;
-		std::cout << "y             " << (REAL) y << "\n";
-		std::cout << "rician noise  " << (REAL) rician_noise << "\n";
-		std::cout << "y with noise  " << (REAL) data[i] << "\n";
+		REAL y = true_parameters[0] + x * true_parameters[1];
+		data[i] = y + normal_dist(rng);
 	}
-
+//CAT UPDATE: this is the area in which to change
 	// tolerance
-	REAL const tolerance = 10e-15f;
+	REAL const tolerance = 0.001f;
 
 	// maximum number of iterations
-	int const max_number_iterations = 200;
+	int const max_number_iterations = 20;
+
+	// estimator ID
+	int const estimator_id = LSE;
+
+	// model ID
+	int const model_id = EXPONENTIAL;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
-//error occurs if in models.cuh the parameters are wrong
 	// output parameters
 	std::vector< REAL > output_parameters(n_fits * n_model_parameters);
 	std::vector< int > output_states(n_fits);
@@ -209,25 +135,21 @@ void exponential()
 	std::cout << "ratio singular hessian       " << (REAL) output_states_histogram[2] / n_fits << "\n";
 	std::cout << "ratio neg curvature MLE      " << (REAL) output_states_histogram[3] / n_fits << "\n";
 	std::cout << "ratio gpu not read           " << (REAL) output_states_histogram[4] / n_fits << "\n";
-// not sure how much from this area needs to be fixed
+
 	// compute mean fitted parameters for converged fits
 	std::vector< REAL > output_parameters_mean(n_model_parameters, 0);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-// I"m pretty sure this needs to be edited for exponential functions
 		if (output_states[i] == FitState::CONVERGED)
 		{
-			// add 1st parameter
+			// add offset
 			output_parameters_mean[0] += output_parameters[i * n_model_parameters + 0];
-			// add 2nd parameter
+			// add slope
 			output_parameters_mean[1] += output_parameters[i * n_model_parameters + 1];
-			// add 3rd parameter
-			output_parameters_mean[2] += output_parameters[i * n_model_parameters + 2];
 		}
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
 	output_parameters_mean[1] /= output_states_histogram[0];
-	output_parameters_mean[2] /= output_states_histogram[0];
 
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);
@@ -235,23 +157,19 @@ void exponential()
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
-			// add squared deviation for 1st parameter
+			// add squared deviation for offset
 			output_parameters_std[0] += (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]);
-			// add squared deviation for 2nd parameter
+			// add squared deviation for slope
 			output_parameters_std[1] += (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]);
-			// add squared deviation for 3rd parameter
-			output_parameters_std[2] += (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]) * (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]);
 		}
 	}
 	// divide and take square root
 	output_parameters_std[0] = sqrt(output_parameters_std[0] / output_states_histogram[0]);
 	output_parameters_std[1] = sqrt(output_parameters_std[1] / output_states_histogram[0]);
-	output_parameters_std[2] = sqrt(output_parameters_std[2] / output_states_histogram[0]);
 
 	// print mean and std
-	std::cout << "parameter 0   true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
-	std::cout << "parameter 1   true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
-	std::cout << "parameter 2   true " << true_parameters[2] << " mean " << output_parameters_mean[2] << " std " << output_parameters_std[2] << "\n";
+	std::cout << "offset  true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
+	std::cout << "slope   true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
@@ -280,13 +198,14 @@ void exponential()
 	std::cout << "mean number of iterations " << output_number_iterations_mean << "\n";
 }
 
+
 int main(int argc, char *argv[])
 {
-	exponential();
+	linear_regression_example();
 
     std::cout << std::endl << "Example completed!" << std::endl;
     std::cout << "Press ENTER to exit" << std::endl;
     std::getchar();
-	
+
 	return 0;
 }
