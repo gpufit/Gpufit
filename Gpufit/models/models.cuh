@@ -52,6 +52,9 @@ __device__ void calculate_model(
     case BROWN_DENNIS:
         calculate_brown_dennis(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
+    case EXPONENTIAL:
+    	calculate_exponential(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+    	break;
     case LIVER_FAT_THREE:
     	calculate_liver_fat_3(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
@@ -75,6 +78,7 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case LINEAR_1D:             n_parameters = 2; n_dimensions = 1; break;
     case FLETCHER_POWELL_HELIX:       n_parameters = 3; n_dimensions = 1; break;
     case BROWN_DENNIS:          n_parameters = 4; n_dimensions = 1; break;
+    case EXPONENTIAL:			n_parameters = 2; n_dimensions = 1; break;
     case LIVER_FAT_THREE:			n_parameters = 3; n_dimensions = 1; break;
     case EXP_4_PARAM:			n_parameters = 4; n_dimensions = 1; break;
     default:                                                        break;
