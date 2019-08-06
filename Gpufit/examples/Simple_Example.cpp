@@ -7,19 +7,19 @@
 #include <complex>
 using namespace std;
 
-void exponential()
+void liver_fat_three()
 {
 	// variables
 	float const exp = 2.71828;
 	float const pi =  3.14159;
-	// std::complex<REAL> expC = 2.71828;
-	// std::complex<REAL> piC = 3.14159;
+	std::complex<REAL> expC = 2.71828;
+	std::complex<REAL> piC = 3.14159;
 
 	// estimator ID
 	int const estimator_id = LSE;
 
 	// model ID
-	int const model_id = EXPONENTIAL;
+	int const model_id = LIVER_FAT_THREE;
 
     /*
     This example generates test data in form of 10000 one dimensional linear
@@ -40,12 +40,12 @@ void exponential()
     */
 
 	// Signal to Noise Ratio
-	float snr = 500000;
+	float snr = 50000;
 	// number of fits, fit points and parameters
 	size_t const n_fits = 100; //10000
 	size_t const n_points_per_fit = 6;
 
-	size_t const n_model_parameters = 2;
+	size_t const n_model_parameters = 3;
 
 // TODO: set user info to echo times
 	/*
@@ -58,44 +58,25 @@ void exponential()
 		TEn.push_back (echo_time);
 	}
 	*/
-	//TODO: make sure te numbers are passed in WITH the signal intensity numbers, just like in the python code before
-	//te numbers: 1.23, 2.48, 3.65, 4.84, 6.03, 7.22
-	// custom x positions for the data points of every fit, stored in user info
-	// REAL TEn[] = {1.23, 2.48, 3.65, 4.84, 6.03, 7.22};
-	// std::complex<REAL> TEnC[] = {1.23, 2.48, 3.65, 4.84, 6.03, 7.22};
-	std::vector< REAL > user_info(n_points_per_fit);
-	//std::cout << "Enter in echo times: "
-	// for (size_t i = 0; i < n_points_per_fit; i++)
-	// {
-	//	user_info[i] = static_cast<REAL>(TEn[i]);
-	// }
 
-// TODO: transpose this block of code to c++
-/*
-	 * 	self.frequency = 127.74
-	 * 	self.ppm_list=[-3.73,-3.33,-3.04,-2.60,-2.38,-1.86,0.68]
-	 * 	self.ppm_list=[self.frequency*x/1000 for x in self.ppm_list]
-	 * 	self.i=complex(0,1)
-	 * 	self.weight_list=[0.08,0.63,0.07,0.09,0.07,0.02,0.04]
-	 *
-	 * def calc_weights(self, te_list):
-	 * 	self.te_list_cache = te_list
-	 * 	if len(self.complex_weight_list)!=0:
-	 * 		self.complex_weight_list = []
-	 * 	for te in te_list:
-	 * 		te_complex_coeff=0
-	 * 		for weight,ppm in zip(self.weight_list,self.ppm_list):
-	 * 			te_complex_coeff+=weight*np.exp(self.i*2*cmath.pi*ppm*te)
-	 * 		self.complex_weight_list.append(te_complex_coeff)
-	 */
+	// custom x positions for the data points of every fit, stored in user info
+	REAL TEn[] = {1.23, 2.48, 3.65, 4.84, 6.03, 7.22};
+	std::complex<REAL> TEnC[] = {1.23, 2.48, 3.65, 4.84, 6.03, 7.22};
+	std::vector< REAL > user_info(n_points_per_fit);
+	// std::cout << "Enter in echo times: "
+	for (size_t i = 0; i < n_points_per_fit; i++)
+	{
+		user_info[i] = static_cast<REAL>(TEn[i]);
+	}
 
 	// size of user info in bytes
 	size_t const user_info_size = n_points_per_fit * sizeof(REAL);
 
 	// true parameters
-	std::vector< REAL > true_parameters { 210, 175};
+	std::vector< REAL > true_parameters { 210, 175, 4};
 
-	float sigma =  (true_parameters[0] + true_parameters[1]) / snr;
+	//possible place for error
+	float sigma =  (true_parameters[1]) / snr;
 
 	// initialize random number generator
 	std::mt19937 rng;
@@ -112,27 +93,27 @@ void exponential()
 		// random 2nd parameter
 		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.8f + 0.4f * uniform_dist(rng));
 		// random 3rd parameter
-		// initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.8f + 0.4f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.8f + 0.4f * uniform_dist(rng));
 
 		std::cout << "parameter 0 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 0] << "\n";
 		std::cout << "parameter 1 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 1] << "\n";
-		// std::cout << "parameter 2 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 2] << "\n";
+		std::cout << "parameter 2 + noise            " << (REAL) initial_parameters[i * n_model_parameters + 2] << "\n";
 	}
 
 	// Complex Number builder
 	// First calculate C_n
-	//maybe define C_n as a real and imaginary part
-	// std::complex<REAL> const ppm_list[] = {-0.4764702, -0.4253742, -0.3883296, -0.332124, -0.3040212, -0.2375964, 0.0868632};
-	// std::complex<REAL> const weight_list[] = {0.08, 0.63, 0.07, 0.09, 0.07, 0.02, 0.04};
-	// std::complex<REAL> C_n = std::complex<REAL>(0.f, 0.f);
-	// std::complex<REAL> j = std::complex<REAL> (0.f, 1);
+	// maybe define C_n as a real and imaginary part
+	std::complex<REAL> const ppm_list[] = {-0.4764702, -0.4253742, -0.3883296, -0.332124, -0.3040212, -0.2375964, 0.0868632};
+	std::complex<REAL> const weight_list[] = {0.08, 0.63, 0.07, 0.09, 0.07, 0.02, 0.04};
+	std::complex<REAL> C_n = std::complex<REAL>(0.f, 0.f);
+	std::complex<REAL> j = std::complex<REAL> (0.f, 1);
 
-	//for (int i =0; i < 7; i++)
-	//{
+	for (int i =0; i < 7; i++)
+	{
 		// C_n calculation
 		// weight_list * e ^ (j * 2 * pi * ppm_list * TEn)
-	//	C_n += weight_list[i] * pow(expC, (j * 2.0f * piC * ppm_list[i] * TEnC[i]));
-	//}
+		C_n += weight_list[i] * pow(expC, (j * 2.0f * piC * ppm_list[i] * TEnC[i]));
+	}
 
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
@@ -142,10 +123,8 @@ void exponential()
 		size_t k = i % n_points_per_fit; // the position within a fit
 
 		REAL x = user_info[k];
-		// one below is for exponential
-	    REAL y = true_parameters[1] * pow(2.71828,(-1 * true_parameters[0] * x));
-		// std::cout << "Complex Number: " << C_n << "\n";
-		// REAL y = abs((true_parameters[0] + C_n * true_parameters[1]) * pow(exp, (-1 * true_parameters[2] *x)));
+		std::cout << "Complex Number: " << C_n << "\n";
+		REAL y = abs((true_parameters[0] + C_n * true_parameters[1]) * pow(exp, (-1 * true_parameters[2] * x)));
 		float rician_noise = sqrt(pow(normal_dist(rng),2) + pow(normal_dist(rng),2));
 		data[i] = y;// + rician_noise;
 		std::cout << "y             " << (REAL) y << "\n";
@@ -221,7 +200,7 @@ void exponential()
 			// add 2nd parameter
 			output_parameters_mean[1] += output_parameters[i * n_model_parameters + 1];
 			// add 3rd parameter
-			// output_parameters_mean[2] += output_parameters[i * n_model_parameters + 2];
+			output_parameters_mean[2] += output_parameters[i * n_model_parameters + 2];
 		}
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
@@ -239,18 +218,18 @@ void exponential()
 			// add squared deviation for 2nd parameter
 			output_parameters_std[1] += (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]);
 			// add squared deviation for 3rd parameter
-			// output_parameters_std[2] += (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]) * (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]);
+			output_parameters_std[2] += (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]) * (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]);
 		}
 	}
 	// divide and take square root
 	output_parameters_std[0] = sqrt(output_parameters_std[0] / output_states_histogram[0]);
 	output_parameters_std[1] = sqrt(output_parameters_std[1] / output_states_histogram[0]);
-	// output_parameters_std[2] = sqrt(output_parameters_std[2] / output_states_histogram[0]);
+	output_parameters_std[2] = sqrt(output_parameters_std[2] / output_states_histogram[0]);
 
 	// print mean and std
 	std::cout << "parameter 0   true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
 	std::cout << "parameter 1   true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
-	// std::cout << "parameter 2   true " << true_parameters[2] << " mean " << output_parameters_mean[2] << " std " << output_parameters_std[2] << "\n";
+	std::cout << "parameter 2   true " << true_parameters[2] << " mean " << output_parameters_mean[2] << " std " << output_parameters_std[2] << "\n";
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
@@ -281,7 +260,7 @@ void exponential()
 
 int main(int argc, char *argv[])
 {
-	exponential();
+	liver_fat_three();
 
     std::cout << std::endl << "Example completed!" << std::endl;
     std::cout << "Press ENTER to exit" << std::endl;
