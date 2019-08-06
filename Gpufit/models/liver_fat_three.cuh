@@ -87,8 +87,6 @@ __device__ void  calculate_liver_fat_3(
 		C_n += weight_list[i] * thrust::exp(j * 2 * pi * ppm_list[i] * TEn);
 	}
 
-	// thrust::complex<REAL> C_nR = thrust::complex<REAL>::real(C_n);
-	// thrust::complex<REAL> C_nI = thrust::complex<REAL>::imag(C_n);
 	///////////////////////////// value //////////////////////////////
 
     thrust::complex<REAL> S_n = (M_w + C_n * M_f) * thrust::exp(-R2eff * TEn);
@@ -106,7 +104,7 @@ __device__ void  calculate_liver_fat_3(
 
     // If we use the complex ones and ignore the imaginary part:
     // Order needs to be dw df dr
-    current_derivative[0 * n_points] = dM_w.real();
+    current_derivative[0 * n_points] = dM_w.real();cd
     current_derivative[1 * n_points] = dM_f.real();
     current_derivative[2 * n_points] = dR.real();
 

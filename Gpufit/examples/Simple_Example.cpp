@@ -40,7 +40,7 @@ void liver_fat_three()
     */
 
 	// Signal to Noise Ratio
-	float snr = 50000;
+	float snr = 5000;
 	// number of fits, fit points and parameters
 	size_t const n_fits = 100; //10000
 	size_t const n_points_per_fit = 6;
@@ -73,10 +73,10 @@ void liver_fat_three()
 	size_t const user_info_size = n_points_per_fit * sizeof(REAL);
 
 	// true parameters
-	std::vector< REAL > true_parameters { 210, 175, 4};
+	std::vector< REAL > true_parameters { 210, 175, .5};
 
 	//possible place for error
-	float sigma =  (true_parameters[1]) / snr;
+	float sigma =  (true_parameters[0] + true_parameters[1]) / snr;
 
 	// initialize random number generator
 	std::mt19937 rng;
@@ -108,25 +108,30 @@ void liver_fat_three()
 	std::complex<REAL> C_n = std::complex<REAL>(0.f, 0.f);
 	std::complex<REAL> j = std::complex<REAL> (0.f, 1);
 
-	for (int i =0; i < 7; i++)
-	{
-		// C_n calculation
-		// weight_list * e ^ (j * 2 * pi * ppm_list * TEn)
-		C_n += weight_list[i] * pow(expC, (j * 2.0f * piC * ppm_list[i] * TEnC[i]));
-	}
+
 
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
+	// Loop over all TEs
 	for (size_t i = 0; i != data.size(); i++)
 	{
-		size_t j = i / n_points_per_fit; // the fit
+		//size_t j = i / n_points_per_fit; // the fit
 		size_t k = i % n_points_per_fit; // the position within a fit
+
+		// C_n calculation
+		C_n = std::complex<REAL>(0.f, 0.f);
+		//Loop over all ppm/weight factors
+		for (int h =0; h < 7; h++)
+		{
+			// weight_list * e ^ (j * 2 * pi * ppm_list * TEn)
+			C_n += weight_list[h] * pow(expC, (j * 2.0f * piC * ppm_list[h] * TEnC[k]));
+		}
 
 		REAL x = user_info[k];
 		std::cout << "Complex Number: " << C_n << "\n";
 		REAL y = abs((true_parameters[0] + C_n * true_parameters[1]) * pow(exp, (-1 * true_parameters[2] * x)));
 		float rician_noise = sqrt(pow(normal_dist(rng),2) + pow(normal_dist(rng),2));
-		data[i] = y;// + rician_noise;
+		data[i] = y + rician_noise;
 		std::cout << "y             " << (REAL) y << "\n";
 		std::cout << "rician noise  " << (REAL) rician_noise << "\n";
 		std::cout << "y with noise  " << (REAL) data[i] << "\n";
@@ -205,7 +210,7 @@ void liver_fat_three()
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
 	output_parameters_mean[1] /= output_states_histogram[0];
-	// output_parameters_mean[2] /= output_states_histogram[0];
+	output_parameters_mean[2] /= output_states_histogram[0];
 
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);

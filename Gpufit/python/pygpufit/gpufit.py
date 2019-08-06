@@ -55,7 +55,7 @@ class ModelID():
     FLETCHER_POWELL_HELIX = 6
     BROWN_DENNIS = 7
     EXPONENTIAL = 8
-    EXP_3_PARAM = 9
+    LIVER_FAT_THREE = 9
     EXP_4_PARAM = 10
 
 
