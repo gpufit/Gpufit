@@ -47,7 +47,7 @@ void liver_fat_three()
 
 	size_t const n_model_parameters = 3;
 
-// TODO: set user info to echo times
+// just in case it was possible to upload manually the echotimes
 	/*
 	std::vector<REAL> TEn(6);
 	float echo_time;
@@ -75,7 +75,6 @@ void liver_fat_three()
 	// true parameters
 	std::vector< REAL > true_parameters { 210, 175, .5};
 
-	//possible place for error
 	float sigma =  (true_parameters[0] + true_parameters[1]) / snr;
 
 	// initialize random number generator

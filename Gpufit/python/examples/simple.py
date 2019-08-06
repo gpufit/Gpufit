@@ -9,23 +9,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pygpufit.gpufit as gf
+import cmath
 
-def liver_fat_3(x, y, p):
-    """
-    Generates many 2D Gaussians peaks for a given set of parameters
-    """
-
-    n_fits = p.shape[0]
-
-    y = np.zeros((n_fits, x.shape[0], x.shape[1]), dtype=np.float32)
-
-    # loop over each fit
-    for i in range(n_fits):
-        pi = p[i, :]
-        arg = -(np.square(xi - pi[1]) + np.square(yi - pi[2])) / (2 * pi[3] * pi[3])
-        y[i, :, :] = pi[0] * np.exp(arg) + pi[4]
-
-    return y
 
 if __name__ == '__main__':
 
@@ -34,81 +19,104 @@ if __name__ == '__main__':
     if not gf.cuda_available():
         raise RuntimeError(gf.get_last_error())
     print('CUDA versions runtime: {}, driver: {}'.format(*gf.get_cuda_version()))
+    
+    #Signal to Noise Ratio
+    snr = 5000
 
-    # number of fit points
-    size_x = 5
-    number_points = size_x * size_x
+    # number of fits and fit points
+    number_fits = 100
+    number_points = 6
+    number_parameters = 3
+    
+    # Echo Times
+    TEn = np.array((1.23, 2.48, 3.65, 4.84, 6.03, 7.22), dtype=np.float32)
+    
+    # User_info set up   
+    #user_info = TEn
 
     # set input arguments
-
+    
     # true parameters
-    mean_true_parameters = np.array((210, 175, 4), dtype=np.float32)
-
-    # average noise level
-    average_noise_level = 10
+    true_parameters = np.array((210, 100, .06), dtype=np.float32)
+    
+    sigma = (true_parameters[0] + true_parameters[1]) / snr
 
     # initialize random number generator
     np.random.seed(0)
-
+    
+    initial_parameters = []
+    for n in range (0, number_fits):
+        #initial parameters
+        initial_parameters.append(true_parameters[0] * (0.8 + 0.4 * np.random.uniform()))
+        initial_parameters.append(true_parameters[1] * (0.8 + 0.4 * np.random.uniform()))
+        initial_parameters.append(true_parameters[2] * (0.8 + 0.4 * np.random.uniform()))
+        
+        print("parameter 0 + noise ", initial_parameters[n * number_parameters + 0])
+        print("parameter 1 + noise ", initial_parameters[n * number_parameters + 1])
+        print("parameter 2 + noise ", initial_parameters[n * number_parameters + 2], "\n")
+    
+    # Creating complex number
+    ppm_list=[-0.4764702, -0.4253742, -0.3883296, -0.332124, -0.3040212, -0.2375964, 0.0868632]
+    i=complex(0,1)
+    C_n = 0
+    weight_list=[0.08,0.63,0.07,0.09,0.07,0.02,0.04]
+      
+    # generating data
+    data = np.zeros((100,6))  
+    for l in range(0, number_fits):
+        for m in range(0, number_points):
+            #k = l % number_points
+        
+            C_n = 0
+            for n in range(0, 7):
+                C_n += weight_list[n] * np.exp(i * 2 * cmath.pi * ppm_list[n] * TEn[m])
+            y = abs((true_parameters[0] + C_n * true_parameters[1]) * np.exp(-1 * true_parameters[2] * TEn[m]))
+            rician_noise = cmath.sqrt(np.random.normal(0,sigma) ** 2 + np.random.normal(0,sigma) ** 2)
+            data[l,m] = (abs(y + rician_noise))
+            print("y            ", y)
+            print("rician noise ", rician_noise)
+            print("y with noise ", data[l,m])
+            print()  
+    
+    # use this to check how data is being collected
+    print(data)
+     
     # tolerance
-    tolerance = 0.0001
-
+    tolerance = 10e-15
+    
     # maximum number of iterations
-    max_number_iterations = 10
+    max_number_iterations = 200
 
     # model ID
-    model_id = gf.ModelID.GAUSS_2D
+    model_id = gf.ModelID.LIVER_FAT_THREE
 
-    # loop over different number of fits
-    n_fits_all = np.around(np.logspace(2, 6, 20)).astype(np.int)
+    # run Gpufit
+    parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id, initial_parameters, \
+                                                        tolerance, max_number_iterations, None, None, TEn)
 
-    # generate x and y values
-    g = np.arange(size_x)
-    yi, xi = np.meshgrid(g, g, indexing='ij')
-    xi = xi.astype(np.float32)
-    yi = yi.astype(np.float32)
+    # print fit results
+    converged = states == 0
+    print('*Gpufit*')
 
-    # loop
-    speed = np.zeros(n_fits_all.size)
-    for i in range(n_fits_all.size):
-        n_fits = n_fits_all[i]
+    # print summary
+    print('\nmodel ID:        {}'.format(model_id))
+    print('number of fits:  {}'.format(number_fits))
+    print('fit size:        {} x {}'.format(size_x, size_x))
+    print('mean chi_square: {:.2f}'.format(np.mean(chi_squares[converged])))
+    print('iterations:      {:.2f}'.format(np.mean(number_iterations[converged])))
+    print('time:            {:.2f} s'.format(execution_time))
 
-        # vary positions of 2D Gaussian peaks slightly
-        test_parameters = np.tile(mean_true_parameters, (n_fits, 1))
-        test_parameters[:, (1,2)] += mean_true_parameters[3] * (-0.2 + 0.4 * np.random.rand(n_fits, 2))
+    # get fit states
+    number_converged = np.sum(converged)
+    print('\nratio converged         {:6.2f} %'.format(number_converged / number_fits * 100))
+    print('ratio max it. exceeded  {:6.2f} %'.format(np.sum(states == 1) / number_fits * 100))
+    print('ratio singular hessian  {:6.2f} %'.format(np.sum(states == 2) / number_fits * 100))
+    print('ratio neg curvature MLE {:6.2f} %'.format(np.sum(states == 3) / number_fits * 100))
 
-        # generate data
-        data = gaussians_2d(xi, yi, test_parameters)
-        data = np.reshape(data, (n_fits, number_points))
-
-        # add noise
-        data += np.random.normal(scale=average_noise_level, size=data.shape)
-
-        # initial parameters (randomized relative (to width for position))
-        initial_parameters = np.tile(mean_true_parameters, (n_fits, 1))
-        initial_parameters[:, (1,2)] += mean_true_parameters[3] * (-0.2 + 0.4 * np.random.rand(n_fits, 2))
-        initial_parameters[:, (0,3,4)] *= 0.8 + 0.4 * np.random.rand(n_fits, 3)
-
-        # run Gpufit
-        parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id, initial_parameters, tolerance, max_number_iterations)
-
-        # analyze result
-        converged = states == 0
-        speed[i] = n_fits / execution_time
-        precision_x0 = np.std(parameters[converged, 1] - test_parameters[converged, 1], axis=0, dtype=np.float64)
-
-        # display result
-        '{} fits '.format(n_fits)
-        print('{:7} fits     iterations: {:6.2f} | time: {:6.3f} s | speed: {:8.0f} fits/s'\
-              .format(n_fits, np.mean(number_iterations[converged]), execution_time, speed[i]))
-
-# plot
-plt.semilogx(n_fits_all, speed, 'bo-')
-plt.grid(True)
-plt.xlabel('number of fits per function call')
-plt.ylabel('fits per second')
-plt.legend(['Gpufit'], loc='upper left')
-ax = plt.gca()
-ax.set_xlim(n_fits_all[0], n_fits_all[-1])
-
-plt.show()
+    # mean, std of fitted parameters
+    converged_parameters = parameters[converged, :]
+    converged_parameters_mean = np.mean(converged_parameters, axis=0)
+    converged_parameters_std = np.std(converged_parameters, axis=0)
+    print('\nparameters of Liver Fat 3')
+    for i in range(number_parameters):
+        print('p{} true {:6.2f} mean {:6.2f} std {:6.2f}'.format(i, true_parameters[i], converged_parameters_mean[i], converged_parameters_std[i]))

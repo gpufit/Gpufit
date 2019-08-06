@@ -54,9 +54,9 @@ class ModelID():
     LINEAR_1D = 5
     FLETCHER_POWELL_HELIX = 6
     BROWN_DENNIS = 7
-    EXPONENTIAL = 8
-    LIVER_FAT_THREE = 9
-    EXP_4_PARAM = 10
+    LIVER_FAT_THREE = 8
+    EXP_4_PARAM = 9
+    EXPONENTIAL = 10
 
 
 class EstimatorID():
