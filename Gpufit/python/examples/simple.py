@@ -21,7 +21,7 @@ if __name__ == '__main__':
     print('CUDA versions runtime: {}, driver: {}'.format(*gf.get_cuda_version()))
     
     #Signal to Noise Ratio
-    snr = 5000
+    snr = 50
 
     # number of fits and fit points
     number_fits = 100
@@ -37,32 +37,34 @@ if __name__ == '__main__':
     # set input arguments
     
     # true parameters
-    true_parameters = np.array((210, 100, .06), dtype=np.float32)
+    true_parameters = np.array((210, 20, 0.1), dtype=np.float32)
     
     sigma = (true_parameters[0] + true_parameters[1]) / snr
 
     # initialize random number generator
     np.random.seed(0)
     
-    initial_parameters = []
+    initial_parameters = np.zeros((number_fits,number_parameters), dtype=np.float32)#np.tile(true_parameters, (number_fits, 1))
     for n in range (0, number_fits):
         #initial parameters
-        initial_parameters.append(true_parameters[0] * (0.8 + 0.4 * np.random.uniform()))
-        initial_parameters.append(true_parameters[1] * (0.8 + 0.4 * np.random.uniform()))
-        initial_parameters.append(true_parameters[2] * (0.8 + 0.4 * np.random.uniform()))
-        
-        print("parameter 0 + noise ", initial_parameters[n * number_parameters + 0])
-        print("parameter 1 + noise ", initial_parameters[n * number_parameters + 1])
-        print("parameter 2 + noise ", initial_parameters[n * number_parameters + 2], "\n")
+        initial_parameters[n,0] = true_parameters[0] * (0.5 + 1 * np.random.uniform())
+        initial_parameters[n,1] = true_parameters[1] * (0.5 + 1 * np.random.uniform())
+        initial_parameters[n,2] = true_parameters[2] * (0.5 + 1 * np.random.uniform())
+        #print("initial guess 0 ", initial_parameters[n, 0])
+        #print("initial guess  1 ", initial_parameters[n, 1])
+        #print("initial guess  2 ", initial_parameters[n, 2], "\n")    
+    #print(initial_parameters.shape)
+    
     
     # Creating complex number
     ppm_list=[-0.4764702, -0.4253742, -0.3883296, -0.332124, -0.3040212, -0.2375964, 0.0868632]
     i=complex(0,1)
     C_n = 0
     weight_list=[0.08,0.63,0.07,0.09,0.07,0.02,0.04]
+     
       
     # generating data
-    data = np.zeros((100,6))  
+    data = np.zeros((100,6), dtype=np.float32)  
     for l in range(0, number_fits):
         for m in range(0, number_points):
             #k = l % number_points
@@ -73,16 +75,24 @@ if __name__ == '__main__':
             y = abs((true_parameters[0] + C_n * true_parameters[1]) * np.exp(-1 * true_parameters[2] * TEn[m]))
             rician_noise = cmath.sqrt(np.random.normal(0,sigma) ** 2 + np.random.normal(0,sigma) ** 2)
             data[l,m] = (abs(y + rician_noise))
-            print("y            ", y)
-            print("rician noise ", rician_noise)
-            print("y with noise ", data[l,m])
-            print()  
+            
+            if l==number_fits-1:
+                print("y            ", y)
+                print("rician noise ", rician_noise)
+                print("y with noise ", data[l,m])
+                print()  
     
     # use this to check how data is being collected
-    print(data)
+    signal = np.mean(data[:,0])
+    noise = np.std(data[:,0])
+    SNR_actual = signal/noise
+    #print(data)
+    #print(data.shape)
+    print("input SNR ",snr)
+    print("actual SNR ", SNR_actual)
      
     # tolerance
-    tolerance = 10e-15
+    tolerance = 10e-3
     
     # maximum number of iterations
     max_number_iterations = 200
@@ -96,12 +106,12 @@ if __name__ == '__main__':
 
     # print fit results
     converged = states == 0
-    print('*Gpufit*')
+    print('\n\n*Gpufit*')
 
     # print summary
     print('\nmodel ID:        {}'.format(model_id))
     print('number of fits:  {}'.format(number_fits))
-    print('fit size:        {} x {}'.format(size_x, size_x))
+    # print('fit size:        {} x {}'.format(size_x, size_x))
     print('mean chi_square: {:.2f}'.format(np.mean(chi_squares[converged])))
     print('iterations:      {:.2f}'.format(np.mean(number_iterations[converged])))
     print('time:            {:.2f} s'.format(execution_time))
