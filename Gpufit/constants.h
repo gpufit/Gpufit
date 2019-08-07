@@ -13,7 +13,7 @@ enum ModelID {
     FLETCHER_POWELL_HELIX = 6,
     BROWN_DENNIS = 7,
     LIVER_FAT_THREE = 8,
-    EXP_4_PARAM = 9,
+    LIVER_FAT_FOUR = 9,
     EXPONENTIAL = 10
 };
 

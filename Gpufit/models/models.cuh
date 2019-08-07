@@ -11,7 +11,7 @@
 #include "brown_dennis.cuh"
 #include "exponential.cuh"
 #include "liver_fat_three.cuh"
-#include "exp_4_param.cuh"
+#include "liver_fat_four.cuh"
 
 __device__ void calculate_model(
     ModelID const model_id,
@@ -58,7 +58,7 @@ __device__ void calculate_model(
     case LIVER_FAT_THREE:
     	calculate_liver_fat_3(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
-    case EXP_4_PARAM:
+    case LIVER_FAT_FOUR:
     	calculate_4paramexp(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
     default:
@@ -80,7 +80,7 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case BROWN_DENNIS:          n_parameters = 4; n_dimensions = 1; break;
     case EXPONENTIAL:			n_parameters = 2; n_dimensions = 1; break;
     case LIVER_FAT_THREE:			n_parameters = 3; n_dimensions = 1; break;
-    case EXP_4_PARAM:			n_parameters = 4; n_dimensions = 1; break;
+    case LIVER_FAT_FOUR:			n_parameters = 4; n_dimensions = 1; break;
     default:                                                        break;
     }
 }

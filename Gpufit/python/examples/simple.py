@@ -51,8 +51,8 @@ if __name__ == '__main__':
         initial_parameters[n,1] = true_parameters[1] * (0.5 + 1 * np.random.uniform())
         initial_parameters[n,2] = true_parameters[2] * (0.5 + 1 * np.random.uniform())
         #print("initial guess 0 ", initial_parameters[n, 0])
-        #print("initial guess  1 ", initial_parameters[n, 1])
-        #print("initial guess  2 ", initial_parameters[n, 2], "\n")    
+        #print("initial guess 1 ", initial_parameters[n, 1])
+        #print("initial guess 2 ", initial_parameters[n, 2], "\n")    
     #print(initial_parameters.shape)
     
     
@@ -107,6 +107,9 @@ if __name__ == '__main__':
     # print fit results
     converged = states == 0
     print('\n\n*Gpufit*')
+    
+    # checking how parameters are made
+    print('\n\nParameters\n', parameters)
 
     # print summary
     print('\nmodel ID:        {}'.format(model_id))
