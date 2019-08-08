@@ -59,7 +59,7 @@ __device__ void calculate_model(
     	calculate_liver_fat_3(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
     case LIVER_FAT_FOUR:
-    	calculate_4paramexp(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+    	calculate_liver_fat_4(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
     default:
         break;

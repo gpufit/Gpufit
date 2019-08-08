@@ -30,7 +30,7 @@
  * @param user_info_size
  * @return
  */
-__device__ void  calculate_liver_fat_3(
+__device__ void  calculate_liver_fat_4(
     REAL const * parameters,
     int const n_fits,
     int const n_points,
@@ -96,8 +96,10 @@ __device__ void  calculate_liver_fat_3(
 
     /////////////////////////// derivative ///////////////////////////
     REAL * current_derivative = derivative + point_index;
-    REAL const minusRT = thrust::exp(- R2eff * TEn).real();
-    REAL const minus2RT = thrust::exp(- 2.0f * R2eff * TEn).real();
+    REAL const minusRwT = thrust::exp(- R2w * TEn).real();
+    REAL const minusRfT = thrust::exp(- R2f * TEn).real();
+    REAL const minus2RwT = thrust::exp(- 2.0f * R2w * TEn).real();
+    REAL const minus2RfT = thrust::exp(- 2.0f * R2f * TEn).real();
 
 #if HARD_DERIVATIVES_BUT_TAKE_REAL_PART
     thrust::complex<REAL> dM_w = (M_f * C_n + M_w) * minusRT / thrust::abs(M_w + M_f * C_n);
@@ -126,7 +128,7 @@ __device__ void  calculate_liver_fat_3(
     thrust::complex<REAL> CR = C_n.real();
     thrust::complex<REAL> CI = C_n.imag();
     thrust::complex<REAL> dM_f = (2 * CR * minus2RT * (CR * M_f + M_w) - 2 * M_f* CI * CI * minus2RT) / (2 * pow(minus2RT * (CR * M_f + M_w) * (CR * M_f + M_w) - M_f * M_f * CI * CI * minus2RT, 0.5));
-    thrust::complex<REAL> dM_w = (minus2RT * (CR * M_f + M_w)) / pow(minus2RT * (CR * M_f + M_w) * (CR * M_f + M_w) - M_f * M_f * CI * CI * minus2RT, 0.5);
+    thrust::complex<REAL> dM_w = (minusRwT * (CR * M_f * minusRfT + M_w * minusRwT)) / pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5);
     thrust::complex<REAL> dR_w = (2 * M_f * M_f * CI * CI * TEn * minus2RT - 2 * TEn * minus2RT * (CR * M_f + M_w) * (CR * M_f + M_w)) / (2 * pow(minus2RT * (CR * M_f + M_w) * (CR * M_f + M_w) - M_f * M_f * CI * CI * minus2RT, 0.5));
     thrust::complex<REAL> dR_f = (2 * M_f * M_f * CI * CI * TEn * minus2RT - 2 * TEn * minus2RT * (CR * M_f + M_w) * (CR * M_f + M_w)) / (2 * pow(minus2RT * (CR * M_f + M_w) * (CR * M_f + M_w) - M_f * M_f * CI * CI * minus2RT, 0.5));
 
