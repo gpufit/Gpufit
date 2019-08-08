@@ -4,10 +4,6 @@
 
 // https://thrust.github.io/doc/group__complex__numbers.html
 
-// This constant changes which derivatives are used.
-// Make it 1 or 0 to toggle it
-#define HARD_DERIVATIVES_BUT_TAKE_REAL_PART 0
-
 /**
  * Parameters contents:
  * 0:					M_w
@@ -115,7 +111,5 @@ __device__ void  calculate_liver_fat_4(
     current_derivative[2 * n_points] = dR_w.real();
     current_derivative[3 * n_points] = dR_f.real();
 
-#endif
 }
-
 #endif
