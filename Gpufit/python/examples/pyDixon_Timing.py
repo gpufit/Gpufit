@@ -238,7 +238,6 @@ if __name__ == '__main__':
         # print summary
         print('\nmodel ID:        {}'.format(model_id))
         print('number of fits:  {}'.format(number_fits))
-        # print('fit size:        {} x {}'.format(size_x, size_x))
         print('mean chi_square: {:.2f}'.format(np.mean(chi_squares[converged])))
         print('iterations:      {:.2f}'.format(np.mean(number_iterations[converged])))
         print('time:            {:.2f} s'.format(execution_time))

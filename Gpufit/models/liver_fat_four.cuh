@@ -86,24 +86,23 @@ __device__ void  calculate_liver_fat_4(
 
 	///////////////////////////// value //////////////////////////////
 
-    // thrust::complex<REAL> S_n = (M_w + C_n * M_f) * thrust::exp(-R2eff * TEn);
 	thrust::complex<REAL> S_n = (M_w * thrust::exp(-R2w * TEn) + C_n * M_f * thrust::exp(-R2f * TEn));
     value[point_index] = thrust::abs(S_n);
 
     /////////////////////////// derivative ///////////////////////////
     REAL * current_derivative = derivative + point_index;
-    REAL const minusRwT = thrust::exp(- R2w * TEn).real();
-    REAL const minusRfT = thrust::exp(- R2f * TEn).real();
+    REAL const minusRwT = thrust::exp(-1* R2w * TEn).real();
+    REAL const minusRfT = thrust::exp(-1* R2f * TEn).real();
     // minus2RwT was not needed
-    // REAL const minus2RwT = thrust::exp(- 2.0f * R2w * TEn).real();
-    REAL const minus2RfT = thrust::exp(- 2.0f * R2f * TEn).real();
+    // REAL const minus2RwT = thrust::exp(-2.0f * R2w * TEn).real();
+    REAL const minus2RfT = thrust::exp(-2.0f * R2f * TEn).real();
 
 /////////////////DERIVATIVES////////////////////
     thrust::complex<REAL> CR = C_n.real();
     thrust::complex<REAL> CI = C_n.imag();
-    thrust::complex<REAL> dM_f = (2 * CR * minusRfT * (CR * minusRfT + M_w * minusRwT) - 2 * M_f * CI * CI * minus2RfT)/ (2 * pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5));
+    thrust::complex<REAL> dM_f = (2 * CR * minusRfT * (CR * M_f * minusRfT + M_w * minusRwT) - 2 * M_f * CI * CI * minus2RfT)/ (2 * pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5));
     thrust::complex<REAL> dM_w = (minusRwT * (CR * M_f * minusRfT + M_w * minusRwT)) / pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5);
-    thrust::complex<REAL> dR_w = - (TEn * M_w * minusRwT * (CR * M_f * minusRfT + M_w * minusRwT)) / pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5);
+    thrust::complex<REAL> dR_w = -1*(TEn * M_w * minusRwT * (CR * M_f * minusRfT + M_w * minusRwT)) / pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5);
     thrust::complex<REAL> dR_f = (2 * M_f * M_f * CI * CI * TEn * minus2RfT - 2 * CR * M_f * TEn * minusRfT * (CR * M_f * minusRfT + M_w * minusRwT)) / (2 * pow((CR * M_f * minusRfT + M_w * minusRwT) * (CR * M_f * minusRfT + M_w * minusRwT) - M_f * M_f * CI * CI * minus2RfT, 0.5));
 
     current_derivative[0 * n_points] = dM_w.real();

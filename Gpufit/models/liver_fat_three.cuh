@@ -94,8 +94,8 @@ __device__ void  calculate_liver_fat_3(
 
     /////////////////////////// derivative ///////////////////////////
     REAL * current_derivative = derivative + point_index;
-    REAL const minusRT = thrust::exp(- R2eff * TEn).real();
-    REAL const minus2RT = thrust::exp(- 2.0f * R2eff * TEn).real();
+    REAL const minusRT = thrust::exp(-1 * R2eff * TEn).real();
+    REAL const minus2RT = thrust::exp(-2.0f * R2eff * TEn).real();
 
 #if HARD_DERIVATIVES_BUT_TAKE_REAL_PART
     thrust::complex<REAL> dM_w = (M_f * C_n + M_w) * minusRT / thrust::abs(M_w + M_f * C_n);
