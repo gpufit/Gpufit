@@ -5,7 +5,7 @@
 
 
 """
-
+import calc_dixon
 import numpy as np
 import matplotlib.pyplot as plt
 import pygpufit.gpufit as gf
@@ -14,8 +14,8 @@ import cmath
 
 if __name__ == '__main__':
 
-    Model_id_pick = input("select a method (LIVER_FAT_THREE or LIVER_FAT_FOUR): ")
-    if Model_id_pick == "LIVER_FAT_THREE":
+    Model_id_pick = input("select a method (3 or 4): ")
+    if Model_id_pick == "3":
         # cuda available checks
         print('CUDA available: {}'.format(gf.cuda_available()))
         if not gf.cuda_available():
@@ -135,8 +135,10 @@ if __name__ == '__main__':
         print('\nparameters of Liver Fat 3')
         for i in range(number_parameters):
             print('p{} true {:6.2f} mean {:6.2f} std {:6.2f}'.format(i, true_parameters[i], converged_parameters_mean[i], converged_parameters_std[i]))
+ 
+#########################################################################################################################
     
-    if Model_id_pick == "LIVER_FAT_FOUR":
+    if Model_id_pick == "4":
                 # cuda available checks
         print('CUDA available: {}'.format(gf.cuda_available()))
         if not gf.cuda_available():
@@ -160,7 +162,7 @@ if __name__ == '__main__':
         # set input arguments
         
         # true parameters
-        true_parameters = np.array((210, 20, 0.1, .05), dtype=np.float32)
+        true_parameters = np.array((290.21, 44.11, 0.05, 0.11), dtype=np.float32)
         
         sigma = (true_parameters[0] + true_parameters[1]) / snr
     
@@ -216,7 +218,7 @@ if __name__ == '__main__':
         print("actual SNR ", SNR_actual)
          
         # tolerance
-        tolerance = 10e-3
+        tolerance = 10e-5
         
         # maximum number of iterations
         max_number_iterations = 200
@@ -227,6 +229,7 @@ if __name__ == '__main__':
         # run Gpufit
         parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id, initial_parameters, \
                                                             tolerance, max_number_iterations, None, None, TEn)
+        
     
         # print fit results
         converged = states == 0
