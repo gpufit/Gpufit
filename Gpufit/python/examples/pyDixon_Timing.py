@@ -5,7 +5,7 @@
 
 
 """
-import calc_dixon
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pygpufit.gpufit as gf
