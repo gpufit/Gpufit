@@ -3,6 +3,7 @@
 
 # Python
 __pycache__
+*.pyc
 
 # Gradle/IntelliJ
 Gpufit/java/gpufit/.gradle
