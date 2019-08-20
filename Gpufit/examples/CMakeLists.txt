@@ -17,6 +17,7 @@ endfunction()
 
 # Examples
 
+add_example( Gpufit Simple_Example )
 add_example( Gpufit Dixon_Fitting )
 add_example( Gpufit Linear_Regression_Example )
 add_example( Gpufit Gauss_Fit_2D_Example )
