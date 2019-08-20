@@ -11,7 +11,11 @@ enum ModelID {
     CAUCHY_2D_ELLIPTIC = 4,
     LINEAR_1D = 5,
     FLETCHER_POWELL_HELIX = 6,
-    BROWN_DENNIS = 7
+    BROWN_DENNIS = 7,
+    LIVER_FAT_TWO = 8,
+    LIVER_FAT_THREE = 9,
+    LIVER_FAT_FOUR = 10,
+    EXPONENTIAL = 11
 };
 
 // estimator ID
