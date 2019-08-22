@@ -44,7 +44,7 @@ void patlak_two()
 					5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9, 9.25, 9.5, 9.75, 10,
 					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25, 14.5, 14.75, 15 };
 
-	// Concentration of plasma (independent)
+	// Concentration of plasma (independent), at 1 min based on equation: Cp(t) = 5.5e^(-.6t)
 	REAL Cp[] =   {	0.0f, 0.0f, 0.0f, 3.01846399851715f, 2.59801604007558f, 2.2361331285733f, 1.92465762011135f, 1.65656816551711f, 1.4258214335524f,
 					1.22721588081636f, 1.05627449741415f, 0.909143885218726f, 0.782507393725825f, 0.6735103553914f, 0.579695735090254f,
 					0.498948743091769f, 0.429449163006342f, 0.369630320068624f, 0.318143764811612f, 0.273828876023252f, 0.235686697768721f,
@@ -78,7 +78,7 @@ void patlak_two()
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.05, 0.03 }; // Ktrans, vp -- ?
+	std::vector< REAL > true_parameters{ 0.05, 0.03 };		// Ktrans, vp
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
@@ -90,7 +90,7 @@ void patlak_two()
 		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
 	}
 
-	// generate data -- NEEDS TO BE CHECKED WITH PATLAK MODEL
+	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
 	REAL mean_y = 0;
 	for (size_t i = 0; i != data.size(); i++)
@@ -120,7 +120,7 @@ void patlak_two()
 
 
 	// tolerance
-	REAL const tolerance = 10e-8f;		// calculated by Christian to be 10e-15f
+	REAL const tolerance = 10e-8f;
 
 	// maximum number of iterations
 	int const max_number_iterations = 200;
