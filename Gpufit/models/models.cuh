@@ -10,6 +10,10 @@
 #include "fletcher_powell_helix.cuh"
 #include "brown_dennis.cuh"
 #include "patlak.cuh"
+#include "tofts.cuh"
+#include "tofts_extended.cuh"
+#include "tissue_uptake.cuh"
+#include "two-compartment_exchange.cuh"
 
 __device__ void calculate_model(
     ModelID const model_id,
@@ -53,6 +57,18 @@ __device__ void calculate_model(
 	case PATLAK:
 		calculate_patlak(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
 		break;
+	case TOFTS:
+		calculate_tofts(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
+	case TOFTS_EXTENDED:
+		calculate_tofts_extended(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
+	case TISSUE_UPTAKE:
+		calculate_tissue_uptake(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
+	case TWO_COMPARTMENT_EXCHANGE:
+		calculate_two_compartment_exchange(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
 	default:
         break;
     }
@@ -62,16 +78,20 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
 {
     switch (model_id)
     {
-    case GAUSS_1D:              n_parameters = 4; n_dimensions = 1; break;
-    case GAUSS_2D:              n_parameters = 5; n_dimensions = 2; break;
-    case GAUSS_2D_ELLIPTIC:     n_parameters = 6; n_dimensions = 2; break;
-    case GAUSS_2D_ROTATED:      n_parameters = 7; n_dimensions = 2; break;
-    case CAUCHY_2D_ELLIPTIC:    n_parameters = 6; n_dimensions = 2; break;
-    case LINEAR_1D:             n_parameters = 2; n_dimensions = 1; break;
-    case FLETCHER_POWELL_HELIX:       n_parameters = 3; n_dimensions = 1; break;
-    case BROWN_DENNIS:          n_parameters = 4; n_dimensions = 1; break;
-	case PATLAK:				n_parameters = 2; n_dimensions = 1; break;
-    default:                                                        break;
+    case GAUSS_1D:					n_parameters = 4; n_dimensions = 1; break;
+    case GAUSS_2D:					n_parameters = 5; n_dimensions = 2; break;
+    case GAUSS_2D_ELLIPTIC:			n_parameters = 6; n_dimensions = 2; break;
+    case GAUSS_2D_ROTATED:			n_parameters = 7; n_dimensions = 2; break;
+    case CAUCHY_2D_ELLIPTIC:		n_parameters = 6; n_dimensions = 2; break;
+    case LINEAR_1D:					n_parameters = 2; n_dimensions = 1; break;
+    case FLETCHER_POWELL_HELIX:     n_parameters = 3; n_dimensions = 1; break;
+    case BROWN_DENNIS:				n_parameters = 4; n_dimensions = 1; break;
+	case PATLAK:					n_parameters = 2; n_dimensions = 1; break;
+	case TOFTS:						n_parameters = 2; n_dimensions = 1; break;
+	case TOFTS_EXTENDED:			n_parameters = 3; n_dimensions = 1; break;
+	case TISSUE_UPTAKE:				n_parameters = 3; n_dimensions = 1; break;
+	case TWO_COMPARTMENT_EXCHANGE:	n_parameters = 4; n_dimensions = 1; break;
+    default:															break;
     }
 }
 

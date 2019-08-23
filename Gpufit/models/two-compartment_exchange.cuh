@@ -1,7 +1,7 @@
-#ifndef GPUFIT_PATLAK_CUH_INCLUDED
-#define GPUFIT_PATLAK_CUH_INCLUDED
+#ifndef GPUFIT_TWO_COMPARTMENT_EXCHANGE_CUH_INCLUDED
+#define GPUFIT_TWO_COMPARTMENT_EXCHANGE_CUH_INCLUDED
 
-__device__ void calculate_patlak (               // function name
+__device__ void calculate_two_compartment_exchange (               // function name
 	REAL const * parameters,
 	int const n_fits,
 	int const n_points,
@@ -10,7 +10,7 @@ __device__ void calculate_patlak (               // function name
 	int const point_index,						 
 	int const fit_index,
 	int const chunk_index,
-	char * user_info,							 // contains time and Cp values in a 1 dimensional array
+	char * user_info,							 // contains time and Cp values in 1 dimensional array
 	std::size_t const user_info_size)
 {
 	// indices
@@ -30,11 +30,7 @@ __device__ void calculate_patlak (               // function name
 	}
 
 	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
-<<<<<<< HEAD
-	//	C(t)		   =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
-=======
 	// C(t)		       =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
->>>>>>> 221fb4c80d94d67329e96357f7171552fba930ea
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
