@@ -27,7 +27,7 @@ void linear_regression_example()
 
 	// number of fits, fit points and parameters
 	size_t const n_fits = 10000;
-	size_t const n_points_per_fit = 20;
+	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 2;
 
 	// custom x positions for the data points of every fit, stored in user info
@@ -38,7 +38,7 @@ void linear_regression_example()
 	}
 
 	// size of user info in bytes
-	size_t const user_info_size = n_points_per_fit * sizeof(REAL); 
+	size_t const user_info_size = n_points_per_fit * sizeof(REAL);
 
 	// initialize random number generator
 	std::mt19937 rng;
