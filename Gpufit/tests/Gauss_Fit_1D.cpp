@@ -3,6 +3,7 @@
 #include "Gpufit/gpufit.h"
 
 #include <boost/test/included/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <array>
 #include <cmath>
@@ -84,6 +85,7 @@ void gauss_fit_1d()
     BOOST_CHECK(output_states == 0);
     BOOST_CHECK(output_chi_square < 1e-6f);
     BOOST_CHECK(output_n_iterations <= max_n_iterations);
+    BOOST_TEST_MESSAGE( "iterations: " + boost::lexical_cast<std::string>(output_n_iterations) );
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters[0]) < 1e-6f);
     BOOST_CHECK(std::abs(output_parameters[1] - true_parameters[1]) < 1e-6f);
@@ -178,6 +180,7 @@ void gauss_fit_1d_custom_x()
     BOOST_CHECK(output_states[0] == 0);
     BOOST_CHECK(output_chi_square[0] < 1e-6f);
     BOOST_CHECK(output_n_iterations[0] <= max_n_iterations);
+    BOOST_TEST_MESSAGE( "iterations: " + boost::lexical_cast<std::string>(output_n_iterations[0]) );
 
     BOOST_CHECK(std::abs(output_parameters[0] - true_parameters_1[0]) < 1e-6f);
     BOOST_CHECK(std::abs(output_parameters[1] - true_parameters_1[1]) < 1e-6f);
@@ -188,6 +191,7 @@ void gauss_fit_1d_custom_x()
     BOOST_CHECK(output_states[1] == 0);
     BOOST_CHECK(output_chi_square[1] < 1e-6f);
     BOOST_CHECK(output_n_iterations[1] <= max_n_iterations);
+    BOOST_TEST_MESSAGE( "iterations: " + boost::lexical_cast<std::string>(output_n_iterations[1]) );
 
     BOOST_CHECK(std::abs(output_parameters[4] - true_parameters_2[0]) < 1e-6f);
     BOOST_CHECK(std::abs(output_parameters[5] - true_parameters_2[1]) < 1e-6f);
@@ -198,8 +202,10 @@ void gauss_fit_1d_custom_x()
 BOOST_AUTO_TEST_CASE( Gauss_Fit_1D )
 {
     // single 1d gauss fit
+	BOOST_TEST_MESSAGE( "Gauss 1d");
     gauss_fit_1d();
 
     // two gauss fits with custom x coordinate values
+	BOOST_TEST_MESSAGE( "Gauss 1d custom");
     gauss_fit_1d_custom_x();
 }

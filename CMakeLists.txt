@@ -184,6 +184,13 @@ if( PYTHONINTERP_FOUND )
       "${Python_WORKING_DIRECTORY}"
     )
   endif()
+  if( UNIX )
+    # Copy over install file for python integration
+    configure_file( "${CMAKE_SOURCE_DIR}/package/install_gpufit_python.sh" 
+      "${CMAKE_BINARY_DIR}/install_gpufit_python.sh" 
+      COPYONLY
+    ) 
+  endif()
 endif()
 
 # Tests
