@@ -30,15 +30,7 @@ __device__ void calculate_patlak (               // function name
 	}
 
 	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
-<<<<<<< HEAD
-<<<<<<< HEAD
 	//	C(t)		   =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
-=======
-	// C(t)		       =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
->>>>>>> 221fb4c80d94d67329e96357f7171552fba930ea
-=======
-	// C(t)		       =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
->>>>>>> 221fb4c80d94d67329e96357f7171552fba930ea
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
