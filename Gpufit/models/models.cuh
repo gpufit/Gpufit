@@ -10,6 +10,10 @@
 #include "fletcher_powell_helix.cuh"
 #include "brown_dennis.cuh"
 #include "patlak.cuh"
+#include "tofts.cuh"
+#include "tofts_extended.cuh"
+#include "tissue_uptake.cuh"
+#include "two-compartment_exchange.cuh"
 
 __device__ void calculate_model(
     ModelID const model_id,

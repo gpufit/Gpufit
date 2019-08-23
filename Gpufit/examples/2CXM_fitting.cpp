@@ -6,7 +6,7 @@
 #include <iostream>
 #include <math.h>
 
-void patlak_two()
+void two_compartment_exchange_complicated()
 {
 	
 	/*

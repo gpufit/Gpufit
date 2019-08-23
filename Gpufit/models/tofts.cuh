@@ -23,20 +23,19 @@ __device__ void calculate_tofts (               // function name
 	REAL* Cp = user_info_float + n_points;
 
 	// integral (trapezoidal rule)
-	REAL convCp = 0;
+	REAL convFunc = 0;
 	for (int i = 1; i < point_index; i++) {
-		REAL spacing = T[i] - T[i - 1];
-		convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
+		
 	}
 
-	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
-	// C(t)		       =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
+	value[point_index] = parameters[0] * Cp[point_index] * convFunc;                    // formula calculating fit model values
+	// C(t)		       =   Ktrans	*	Cp	* trapz(e^(-Ktrans*t/ve)
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
 
-	current_derivative[0 * n_points] = convCp;					// formula calculating derivative values with respect to parameters[0] (Ktrans)
-	current_derivative[1 * n_points] = Cp[point_index];			// formula calculating derivative values with respect to parameters[1] (vp)
+	current_derivative[0 * n_points] = Cp[point_index];					// formula calculating derivative values with respect to parameters[0] (Ktrans)
+	current_derivative[1 * n_points] = Cp[point_index];					// formula calculating derivative values with respect to parameters[1] (ve)
 
 	// deallocate pointers
 	delete T;

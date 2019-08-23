@@ -1,7 +1,7 @@
 #ifndef GPUFIT_TWO_COMPARTMENT_EXCHANGE_CUH_INCLUDED
 #define GPUFIT_TWO_COMPARTMENT_EXCHANGE_CUH_INCLUDED
 
-__device__ void calculate_patlak (               // function name
+__device__ void calculate_two_compartment_exchange (               // function name
 	REAL const * parameters,
 	int const n_fits,
 	int const n_points,

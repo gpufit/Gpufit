@@ -1,7 +1,7 @@
 #ifndef GPUFIT_TISSUE_UPTAKE_CUH_INCLUDED
 #define GPUFIT_TISSUE_UPTAKE_CUH_INCLUDED
 
-__device__ void calculate_patlak (               // function name
+__device__ void calculate_tissue_uptake (               // function name
 	REAL const * parameters,
 	int const n_fits,
 	int const n_points,
