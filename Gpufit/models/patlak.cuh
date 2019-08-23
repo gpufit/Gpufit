@@ -15,21 +15,12 @@ __device__ void calculate_patlak (               // function name
 {
 	// indices
 	REAL* user_info_float = (REAL*)user_info;
-	//REAL x = 0;
-	//if (user_info_size / sizeof(REAL) == n_points) {				// unnecessary since this case is always valid for this model? and setting independent variables is below.
-	//	x = user_info_float[point_index];
-	//}
 
 	///////////////////////////// value //////////////////////////////
 
 	// split user_info array into time and Cp
 	REAL* T = user_info_float;
-//	for (int i = 0; i < n_points; i++)
-//		T[i] = user_info_float[i];
-
 	REAL* Cp = user_info_float + n_points;
-//	for (int i = n_points; i < 2 * n_points; i++)
-//		Cp[i-n_points] = user_info_float[i];
 
 	// integral (trapezoidal rule)
 	REAL convCp = 0;
@@ -40,7 +31,7 @@ __device__ void calculate_patlak (               // function name
 
 
 	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
-	//	C(t)		   =   Ktrans	   * trapz(Cp(k))  + vp   *    Cp(k)
+	//	C(t)		   =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
