@@ -10,7 +10,6 @@ void simple_example()
 		can be built and executed within the project environment. Please note that 
 		this code does not actually do anything other than make a single call to 
 		gpufit().
-
 		In the first section of the code, the *model ID* is set, memory space for 
 		initial parameters and data values is allocated, the *fit tolerance* is set, 
 		the *maximum number of iterations* is set, the *estimator ID* is set, and 

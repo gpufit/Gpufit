@@ -16,6 +16,11 @@ enum ModelID {
     LIVER_FAT_THREE = 9,
     LIVER_FAT_FOUR = 10,
     EXPONENTIAL = 11
+	  PATLAK = 12,
+	  TOFTS = 13,
+	  TOFTS_EXTENDED = 14,
+	  TISSUE_UPTAKE = 15,
+	  TWO_COMPARTMENT_EXCHANGE = 16
 };
 
 // estimator ID
