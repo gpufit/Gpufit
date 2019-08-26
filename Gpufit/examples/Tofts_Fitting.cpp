@@ -101,9 +101,9 @@ void tofts_two()
 		for (int n = 1; n < k; n++) {
 		
 			REAL spacing = timeX[n] - timeX[n - 1];
-			x += (Cp[n - 1] + Cp[n]) / 2 * spacing;
+			x += (Cp[n - 1] + Cp[n]) / 2 * spacing * exp((-true_parameters[0] * spacing / true_parameters[1]));
 		}
-		REAL y = true_parameters[0] * x + true_parameters[1] * Cp[k];
+		REAL y = true_parameters[0] * x;
 		//data[i] = y + normal_dist(rng);
 		//data[i] = y * (0.2f + 1.6f * uniform_dist(rng));
 		data[i] = y;
