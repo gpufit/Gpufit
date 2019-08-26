@@ -6,7 +6,7 @@
 #include <iostream>
 #include <math.h>
 
-void patlak_two()
+void tissue_uptake_three()
 {
 	
 	/*
@@ -259,7 +259,7 @@ void patlak_two()
 int main(int argc, char* argv[])
 {
 	std::cout << std::endl << "Beginning Patlak fit..." << std::endl;
-	patlak_two();
+	tissue_uptake_three();
 
 	std::cout << std::endl << "Patlak fit completed!" << std::endl;
 

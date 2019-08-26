@@ -60,6 +60,7 @@ __device__ void calculate_model(
         calculate_brown_dennis(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
 
+	// Added models
     case EXPONENTIAL:
     	calculate_exponential(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
@@ -73,21 +74,20 @@ __device__ void calculate_model(
     	calculate_liver_fat_4(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
     	break;
     case PATLAK:
-      calculate_patlak(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
-      break;
+		calculate_patlak(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
     case TOFTS:
-      calculate_tofts(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
-      break;
+		calculate_tofts(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
     case TOFTS_EXTENDED:
-      calculate_tofts_extended(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
-      break;
+		calculate_tofts_extended(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
     case TISSUE_UPTAKE:
-      calculate_tissue_uptake(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
-      break;
+		calculate_tissue_uptake(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
     case TWO_COMPARTMENT_EXCHANGE:
-      calculate_two_compartment_exchange(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
-      break;
-	default:
+		calculate_two_compartment_exchange(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		break;
     default:
         break;
     }
@@ -105,17 +105,17 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case LINEAR_1D:                 n_parameters = 2; n_dimensions = 1; break;
     case FLETCHER_POWELL_HELIX:     n_parameters = 3; n_dimensions = 1; break;
     case BROWN_DENNIS:              n_parameters = 4; n_dimensions = 1; break;
-    case EXPONENTIAL:			          n_parameters = 2; n_dimensions = 1; break;
+    case EXPONENTIAL:			    n_parameters = 2; n_dimensions = 1; break;
     
-    case LIVER_FAT_TWO:			        n_parameters = 2; n_dimensions = 1; break;
-    case LIVER_FAT_THREE:		        n_parameters = 3; n_dimensions = 1; break;
-    case LIVER_FAT_FOUR:		        n_parameters = 4; n_dimensions = 1; break;
-    case PATLAK:					          n_parameters = 2; n_dimensions = 1; break;
-    case TOFTS:						          n_parameters = 2; n_dimensions = 1; break;
-    case TOFTS_EXTENDED:			      n_parameters = 3; n_dimensions = 1; break;
-    case TISSUE_UPTAKE:				      n_parameters = 3; n_dimensions = 1; break;
+    case LIVER_FAT_TWO:			    n_parameters = 2; n_dimensions = 1; break;
+    case LIVER_FAT_THREE:		    n_parameters = 3; n_dimensions = 1; break;
+    case LIVER_FAT_FOUR:		    n_parameters = 4; n_dimensions = 1; break;
+    case PATLAK:					n_parameters = 2; n_dimensions = 1; break;
+    case TOFTS:						n_parameters = 2; n_dimensions = 1; break;
+    case TOFTS_EXTENDED:			n_parameters = 3; n_dimensions = 1; break;
+    case TISSUE_UPTAKE:				n_parameters = 3; n_dimensions = 1; break;
     case TWO_COMPARTMENT_EXCHANGE:	n_parameters = 4; n_dimensions = 1; break;
-    default:                                                        break;
+    default:															break;
     }
 }
 
