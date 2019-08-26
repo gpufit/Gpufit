@@ -259,7 +259,7 @@ void two_compartment_exchange_complicated()
 int main(int argc, char* argv[])
 {
 	std::cout << std::endl << "Beginning Patlak fit..." << std::endl;
-	patlak_two();
+	two_compartment_exchange_complicated();
 
 	std::cout << std::endl << "Patlak fit completed!" << std::endl;
 

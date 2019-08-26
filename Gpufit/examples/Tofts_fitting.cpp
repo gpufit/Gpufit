@@ -6,7 +6,7 @@
 #include <iostream>
 #include <math.h>
 
-void patlak_two()
+void tofts_two()
 {
 	
 	/*
@@ -33,14 +33,14 @@ void patlak_two()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 10000;
+	size_t const n_fits = 1000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 2;
 	REAL snr = 0.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
-	REAL timeX[] = { 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
+	REAL timeX[] ={ 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
 					5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9, 9.25, 9.5, 9.75, 10,
 					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25, 14.5, 14.75, 15 };
 
@@ -129,7 +129,7 @@ void patlak_two()
 	int const estimator_id = LSE;
 
 	// model ID
-	int const model_id = PATLAK;
+	int const model_id = TOFTS;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
@@ -259,7 +259,7 @@ void patlak_two()
 int main(int argc, char* argv[])
 {
 	std::cout << std::endl << "Beginning Patlak fit..." << std::endl;
-	patlak_two();
+	tofts_two();
 
 	std::cout << std::endl << "Patlak fit completed!" << std::endl;
 

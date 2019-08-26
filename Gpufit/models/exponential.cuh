@@ -36,13 +36,13 @@ __device__ void  calculate_exponential(
 
 	///////////////////////////// value //////////////////////////////
 
-    value[point_index] = parameters[1] * pow(2.71828, (-1 * parameters[0] * x)) ;                      // formula calculating fit model values
+    value[point_index] = parameters[1] * exp(-1 * parameters[0] * x) ;                      // formula calculating fit model values
 
     /////////////////////////// derivative ///////////////////////////
     float * current_derivative = derivative + point_index;
 
-    current_derivative[0 * n_points] = -1 * parameters[0] * parameters[1] * pow(2.71828, (-1 * parameters[0] * x)) ;  // formula calculating derivative values with respect to parameters[0]
-    current_derivative[1 * n_points] = pow(2.71828, (-1 * parameters[0] * x)) ;  // formula calculating derivative values with respect to parameters[1]
+    current_derivative[0 * n_points] = -1 * parameters[0] * parameters[1] * exp(-1 * parameters[0] * x) ;  // formula calculating derivative values with respect to parameters[0]
+    current_derivative[1 * n_points] = exp(-1 * parameters[0] * x) ;  // formula calculating derivative values with respect to parameters[1]
 
 }
 
