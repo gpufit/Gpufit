@@ -2,13 +2,6 @@
 args=("$@")
 
 # be wary of /i /s /q :: -n? (-s is subfolders?) (-q is no confirmation)
-#function goto
-#{
-#label=$1
-#cmd=$(sed-n "/$label:/{:a;n;p;ba};" $0 | grep -v ':$')
-#eval "$cmd"
-#exit
-#}
 
 set +v
 # create package for Gpufit, assumes everything is compiled
@@ -32,11 +25,6 @@ then
     echo specify source base path
     exit 3
 fi
-
-#echo $1
-#echo $2
-#echo $3
-#exit 3
 
 # date and time from https;/-stackoverflow.com/a/30343827/1536976
 
@@ -79,26 +67,19 @@ export OUTPUT_ZIP=$BUILD_BASE/$OUTPUT_NAME.zip
 
 export PERFORMANCE_TEST_INSTALL=$ROOT_INSTALL/gpufit_performance_test
 export PYTHON_INSTALL=$ROOT_INSTALL/PYTHON
-#export x32_MATLAB_INSTALL=$ROOT_INSTALL/matlab32
 export x64_MATLAB_INSTALL=$ROOT_INSTALL/matlab64
-#export x32_JAVA_INSTALL=$ROOT_INSTALL/java32
 export x64_JAVA_INSTALL=$ROOT_INSTALL/java64
 export SDK_INSTALL_ROOT=$ROOT_INSTALL/gpufit_sdk
 
-# This commented stuff is more important than I thought. The VC14x64-8.0 part must be replaced. Or something.
-#export x64_BUILD=$BUILD_BASE/VC14x64-8.0/Release
-#export x64_BUILD_LIB=$BUILD_BASE/VC14x64-8.0/Gpufit/Release
-#export x32_BUILD=$BUILD_BASE/VC14x32-8.0/RelWithDebInfo
-#export x32_BUILD_LIB=$BUILD_BASE/VC14x32-8.0/Gpufit/RelWithDebInfo
+export x64_BUILD=$BUILD_BASE
+#export x64_BUILD_LIB=$BUILD_BASE/Gpufit
+
 
 export x64_PYTHON_BUILD=$x64_BUILD/pyGpufit/dist
-#export x32_PYTHON_BUILD=$x32_BUILD/pyGpufit/dist
 
 export x64_MATLAB_BUILD=$x64_BUILD/matlab
-#export x32_MATLAB_BUILD=$x32_BUILD/matlab
 
 export x64_JAVA_BUILD=$x64_BUILD/java
-#export x32_JAVA_BUILD=$x32_BUILD/java
 
 export EXAMPLES_SOURCE=$SOURCE_BASE/examples
 export PYTHON_SOURCE=$SOURCE_BASE/Gpufit/python
@@ -112,11 +93,11 @@ export MANUAL_INSTALL=$ROOT_INSTALL/Gpufit_VERSION_Manual.pdf
 
 if [[ -e "$ROOT_INSTALL" ]]; 
 then 
-    rmdir "$ROOT_INSTALL" 
+    rm -r "$ROOT_INSTALL" 
 fi
 if [[ -e "$OUTPUT_ZIP" ]]; 
 then 
-    del "$OUTPUT_ZIP" 
+    rm "$OUTPUT_ZIP" 
 fi
 
 # create root folder
@@ -145,31 +126,20 @@ echo collect performance test application
 mkdir $PERFORMANCE_TEST_INSTALL
 cp "$EXAMPLES_SOURCE/Gpufit_Cpufit_Performance_Comparison_readme.txt" "$PERFORMANCE_TEST_INSTALL/README.txt"
 
-mkdir $PERFORMANCE_TEST_INSTALL/ubuntu18
-cp "$x64_BUILD/Gpufit_Cpufit_Performance_Comparison.exe" "$PERFORMANCE_TEST_INSTALL/ubuntu18"
-cp "$x64_BUILD/Gpufit.so" "$PERFORMANCE_TEST_INSTALL/ubuntu18"
-cp "$x64_BUILD/Cpufit.so" "$PERFORMANCE_TEST_INSTALL/ubuntu18"
+mkdir $PERFORMANCE_TEST_INSTALL/linux
+cp "$x64_BUILD/Gpufit_Cpufit_Performance_Comparison" "$PERFORMANCE_TEST_INSTALL/linux"
+cp "$x64_BUILD/Gpufit/libGpufit.so" "$PERFORMANCE_TEST_INSTALL/linux"
+cp "$x64_BUILD/Cpufit/libCpufit.so" "$PERFORMANCE_TEST_INSTALL/linux"
 
-#mkdir "$PERFORMANCE_TEST_INSTALL/win32"
-#cp "$x32_BUILD/Gpufit_Cpufit_Performance_Comparison.exe" "$PERFORMANCE_TEST_INSTALL/win32"
-#cp "$x32_BUILD/Gpufit.so" "$PERFORMANCE_TEST_INSTALL/win32"
-#cp "$x32_BUILD/Cpufit.so" "$PERFORMANCE_TEST_INSTALL/win32"
 
 # copy Python packages
 
 echo collect python
 mkdir $PYTHON_INSTALL
 cp "$x64_PYTHON_BUILD/pyGpufit-$VERSION-py2.py3-none-any.whl" "$PYTHON_INSTALL/pyGpufit-$VERSION-py2.py3-none-ubuntu18.whl"
-#cp "$x32_PYTHON_BUILD$/pyGpufit-VERSION-py2.py3-none-any.whl" "$PYTHON_INSTALL$/pyGpufit-VERSION-py2.py3-none-win32.whl"
 cp "$PYTHON_SOURCE/README.txt" "$PYTHON_INSTALL"
 cp "$PYTHON_SOURCE/examples" "$PYTHON_INSTALL/examples" -n -r
 
-# copy Matlab 32 bit
-
-#echo collect matlab32
-#mkdir "$x32_MATLAB_INSTALL"
-#cp "$x32_MATLAB_BUILD" "$x32_MATLAB_INSTALL" 
-#cp "$MATLAB_SOURCE/examples" "$x32_MATLAB_INSTALL/examples" -n 
 
 # copy Matlab 64 bit
 
@@ -178,17 +148,13 @@ mkdir $x64_MATLAB_INSTALL
 cp "$x64_MATLAB_BUILD" "$x64_MATLAB_INSTALL" -r
 cp "$MATLAB_SOURCE/examples" "$x64_MATLAB_INSTALL/examples" -n -r
 
-# copy Java 32 bit
-
-#echo collect java32
-#mkdir "$x32_JAVA_INSTALL"
-#cp "$x32_JAVA_BUILD" "$x32_JAVA_INSTALL" -r
 
 # copy Java 64 bit
 
 echo collect java64
 mkdir $x64_JAVA_INSTALL
 cp "$x64_JAVA_BUILD" "$x64_JAVA_INSTALL" -r
+
 
 # copy SDK_INSTALL_ROOT
 
@@ -199,13 +165,10 @@ cp "$SDK_README_SOURCE" "$SDK_INSTALL_ROOT/README.txt"
 mkdir $SDK_INSTALL_ROOT/include
 cp "$SOURCE_BASE/Gpufit/gpufit.h" "$SDK_INSTALL_ROOT/include"
 
-#mkdir "$SDK_INSTALL_ROOT/win32"
-#cp "$x32_BUILD/Gpufit.so" "$SDK_INSTALL_ROOT/win32"
-#cp "$x32_BUILD_LIB/Gpufit.a" "$SDK_INSTALL_ROOT/win32"
+mkdir $SDK_INSTALL_ROOT/linux
+cp "$x64_BUILD/Gpufit/libGpufit.so" "$SDK_INSTALL_ROOT/linux"
+#cp "$x64_BUILD_LIB/Gpufit.a" "$SDK_INSTALL_ROOT/linux"
 
-mkdir $SDK_INSTALL_ROOT/ubuntu18
-cp "$x64_BUILD/Gpufit.so" "$SDK_INSTALL_ROOT/ubuntu18"
-cp "$x64_BUILD_LIB/Gpufit.a" "$SDK_INSTALL_ROOT/ubuntu18"
 
 # zip content of temp folder with 7-Zip if available
 if 7z a "${OUTPUT_ZIP}" ./"${ROOT_INSTALL}"/*
@@ -217,8 +180,3 @@ else
 fi
 
 
-
-#goto end
-#end:
-
-#sleep
