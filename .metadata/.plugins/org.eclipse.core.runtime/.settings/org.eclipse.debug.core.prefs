@@ -1,2 +1,0 @@
-//org.eclipse.debug.core.PREFERRED_DELEGATES/org.eclipse.cdt.launch.remoteApplicationLaunchType=com.nvidia.cuda.ide.remote.cudagdbserverrun,debug,;
-eclipse.preferences.version=1
