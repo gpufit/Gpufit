@@ -48,7 +48,7 @@ __device__ void calculate_tofts (               // function name
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
-	bool numericalApproximationDerivative = true;
+	bool numericalApproximationDerivative = false;
 
 	if (numericalApproximationDerivative)
 	{
