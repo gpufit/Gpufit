@@ -1,4 +1,4 @@
-#ifndef GPUFIT_PATLAK_CUH_INCLUDED
+#ifdef USE_PATLAK
 #define GPUFIT_PATLAK_CUH_INCLUDED
 
 __device__ void calculate_patlak (               // function name

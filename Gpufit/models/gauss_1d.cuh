@@ -1,4 +1,4 @@
-#ifndef GPUFIT_GAUSS1D_CUH_INCLUDED
+#ifdef USE_GAUSS1D
 #define GPUFIT_GAUSS1D_CUH_INCLUDED
 
 /* Description of the calculate_gauss1d function

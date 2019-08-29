@@ -1,4 +1,4 @@
-#ifndef GPUFIT_LINEAR1D_CUH_INCLUDED
+#ifdef USE_BASE_MODELS
 #define GPUFIT_LINEAR1D_CUH_INCLUDED
 
 /* Description of the calculate_linear1d function

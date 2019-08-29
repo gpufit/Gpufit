@@ -1,4 +1,4 @@
-#ifndef GPUFIT_TISSUE_UPTAKE_CUH_INCLUDED
+#ifdef USE_TISSUE_UPTAKE
 #define GPUFIT_TISSUE_UPTAKE_CUH_INCLUDED
 
 __device__ void calculate_tissue_uptake (               // function name

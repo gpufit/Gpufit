@@ -1,4 +1,4 @@
-#ifndef GPUFIT_GAUSS2DROTATED_CUH_INCLUDED
+#ifdef USE_BASE_MODELS
 #define GPUFIT_GAUSS2DROTATED_CUH_INCLUDED
 
 /* Description of the calculate_gauss2drotated function

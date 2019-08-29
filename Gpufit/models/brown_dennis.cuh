@@ -1,4 +1,4 @@
-#ifndef GPUFIT_BROWNDENNIS_CUH_INCLUDED
+#ifdef USE_BASE_MODELS
 #define GPUFIT_BROWNDENNIS_CUH_INCLUDED
 
 /* Description of the calculate_brown_dennis function

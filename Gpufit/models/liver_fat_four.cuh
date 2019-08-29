@@ -1,4 +1,4 @@
-#ifndef GPUFIT_LIVER_FAT_FOUR_CUH_INCLUDED
+#ifdef USE_DIXON_4
 #define GPUFIT_LIVER_FAT_FOUR_CUH_INCLUDED
 #include <thrust/complex.h>
 

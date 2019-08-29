@@ -36,7 +36,7 @@ void tofts_two()
 	size_t const n_fits = 1000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 2;
-	REAL snr = 0.8;
+	REAL snr = 10.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -78,7 +78,7 @@ void tofts_two()
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.05, 0.03 };		// Ktrans, vp
+	std::vector< REAL > true_parameters{ 0.005, 0.30 };		// Ktrans, vp
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
@@ -101,7 +101,9 @@ void tofts_two()
 		for (int n = 1; n < k; n++) {
 		
 			REAL spacing = timeX[n] - timeX[n - 1];
-			x += (Cp[n - 1] + Cp[n]) / 2 * spacing * exp((-true_parameters[0] * spacing / true_parameters[1]));
+			REAL Ct = Cp[n] * exp(-true_parameters[0] * (timeX[k]-timeX[n]) / true_parameters[1]);
+			REAL Ctprev = Cp[n - 1] * exp(-true_parameters[0] * (timeX[k]-timeX[n-1]) / true_parameters[1]);
+			x += ((Ct + Ctprev) / 2 * spacing);
 		}
 		REAL y = true_parameters[0] * x;
 		//data[i] = y + normal_dist(rng);
@@ -258,10 +260,10 @@ void tofts_two()
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "Beginning Patlak fit..." << std::endl;
+	std::cout << std::endl << "Beginning Tofts fit..." << std::endl;
 	tofts_two();
 
-	std::cout << std::endl << "Patlak fit completed!" << std::endl;
+	std::cout << std::endl << "Tofts fit completed!" << std::endl;
 
 	return 0;
 }

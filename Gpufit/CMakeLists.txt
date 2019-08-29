@@ -202,6 +202,61 @@ elseif( CUDA_VERSION VERSION_LESS "7.0" )
 	message( STATUS "CUBLAS: CUDA Version < 7.0 detected; USE_CUBLAS flag ignored." )
 endif()
 
+# Select Gpufit models, because the GPU resources can support only a certain few at once.
+# USE_GAUSSIAN_2D
+option(GPUFIT_USE_GAUSSIAN2D "Use the Gaussian 2D model, recommended for GPU vs CPU fitting comparison." ON)
+if( GPUFIT_USE_GAUSSIAN2D )
+	add_definitions( -DUSE_GAUSS2D )
+endif()
+
+# USE_BASE_MODELS
+option( GPUFIT_USE_BASE_MODELS "Use the original Gpufit models: Linear 1D, Gaussian 1D, Gaussian 2D Rotated/Elliptic, Cauchy 2D Elliptic, Fletcher-Powell Helix, Brown-Dennis, and exponential." )
+if ( GPUFIT_USE_BASE_MODELS )
+	add_definitions( -DUSE_BASE_MODELS )
+endif()
+
+# Use added models (improve descriptions and defs)
+option( GPUFIT_USE_DIXON_2 "Use the Dixon Fitting 2 parameter model. (Extremely high resource usage)" )
+option( GPUFIT_USE_DIXON_3 "Use the Dixon Fitting 3 parameter model. (Extremely high resource usage)" )
+option( GPUFIT_USE_DIXON_4 "Use the Dixon Fitting 4 parameter model. (Extremely high resource usage)" )
+option( GPUFIT_USE_PATLAK_MODEL "Use the Patlak model to fit." )
+option( GPUFIT_USE_TOFTS_MODEL "Use the Tofts model to fit." )
+option( GPUFIT_USE_TOFTS_EXTENDED_MODEL "Use the extended Tofts model to fit." )
+option( GPUFIT_USE_TISSUE_UPTAKE_MODEL "Use the tissue uptake model to fit." )
+option( GPUFIT_USE_2CXM "Use the two-compartment exchange model to fit." )
+
+if( GPUFIT_USE_DIXON_2 )
+	add_definitions( -DUSE_DIXON_2 )
+endif()
+
+if( GPUFIT_USE_DIXON_3 )
+	add_definitions( -DUSE_DIXON_3 )
+endif()
+
+if( GPUFIT_USE_DIXON_4 )
+	add_definitions( -DUSE_DIXON_4 )
+endif()
+
+if ( GPUFIT_USE_PATLAK_MODEL )
+	add_definitions( -DUSE_PATLAK )
+endif()
+
+if ( GPUFIT_USE_TOFTS_MODEL )
+	add_definitions( -DUSE_TOFTS )
+endif()
+
+if ( GPUFIT_USE_TOFTS_EXTENDED_MODEL )
+	add_definitions( -DUSE_TOFTS_EXTENDED )
+endif()
+
+if ( GPUFIT_USE_TISSUE_UPTAKE_MODEL )
+	add_definitions( -DUSE_TISSUE_UPTAKE )
+endif()
+
+if ( GPUFIT_USE_TWO_COMPARTMENT_EXCHANGE_MODEL )
+	add_definitions( -DUSE_2CXM )
+endif()
+
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 
 # Examples

@@ -1,4 +1,4 @@
-#ifndef GPUFIT_CAUCHY2DELLIPTIC_CUH_INCLUDED
+#ifdef USE_BASE_MODELS
 #define GPUFIT_CAUCHY2DELLIPTIC_CUH_INCLUDED
 
 /* Description of the calculate_cauchy2delliptic function

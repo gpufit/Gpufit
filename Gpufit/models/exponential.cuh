@@ -1,4 +1,4 @@
-#ifndef GPUFIT_EXPONENTIAL_CUH_INCLUDED
+#ifdef USE_BASE_MODELS
 #define GPUFIT_EXPONENTIAL_CUH_INCLUDED
 
 //TODO: start putting the actual exponential function together

@@ -1,4 +1,4 @@
-#ifndef GPUFIT_TOFTS_EXTENDED_CUH_INCLUDED
+#ifdef USE_TOFTS_EXTENDED
 #define GPUFIT_TOFTS_EXTENDED_CUH_INCLUDED
 
 __device__ void calculate_tofts_extended (               // function name

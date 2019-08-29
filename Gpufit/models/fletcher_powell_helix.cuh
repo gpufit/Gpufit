@@ -1,4 +1,4 @@
-#ifndef GPUFIT_FLETCHERPOWELLHELIX_CUH_INCLUDED
+#ifdef USE_BASE_MODELS
 #define GPUFIT_FLETCHERPOWELLHELIX_CUH_INCLUDED
 
 /* Description of the calculate_fletcher_powell_helix function

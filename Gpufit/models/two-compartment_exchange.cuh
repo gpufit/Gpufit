@@ -1,4 +1,4 @@
-#ifndef GPUFIT_TWO_COMPARTMENT_EXCHANGE_CUH_INCLUDED
+#ifdef USE_2CXM
 #define GPUFIT_TWO_COMPARTMENT_EXCHANGE_CUH_INCLUDED
 
 __device__ void calculate_two_compartment_exchange (               // function name
