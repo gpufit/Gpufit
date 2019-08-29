@@ -1,6 +1,26 @@
 #ifdef USE_TOFTS
 #define GPUFIT_TOFTS_CUH_INCLUDED
 
+__device__ REAL get_value (
+	REAL p0, //Ktrans
+	REAL p1, //Ve
+	int const point_index,
+	REAL const * T,
+	REAL const * Cp)
+{
+	// integral/convolution
+	REAL convFunc = 0;
+	for (int i = 1; i < point_index; i++) {
+		REAL spacing = T[i] - T[i - 1];
+		REAL Ct = Cp[i] * exp(-p0 * (T[point_index]-T[i]) / p1);
+		REAL Ctprev = Cp[i - 1] * exp(-p0 * (T[point_index]-T[i-1]) / p1);
+		convFunc += ((Ct + Ctprev) / 2 * spacing);
+	}
+
+	REAL function_value = p0 * convFunc;
+	return function_value;
+}
+
 __device__ void calculate_tofts (               // function name
 	REAL const * parameters,
 	int const n_fits,
@@ -19,47 +39,60 @@ __device__ void calculate_tofts (               // function name
 	///////////////////////////// value //////////////////////////////
 
 	// split user_info array into time and Cp
-	REAL* T = user_info_float;
-	REAL* Cp = user_info_float + n_points;
+	REAL const * T = user_info_float;
+	REAL const * Cp = user_info_float + n_points;
 
-	// integral/convolution
-	REAL convFunc = 0;
-	for (int i = 1; i < point_index; i++) {
-		REAL spacing = T[i] - T[i - 1];
-		REAL Ct = Cp[i] * exp(-parameters[0] * (T[point_index]-T[i]) / parameters[1]);
-		REAL Ctprev = Cp[i - 1] * exp(-parameters[0] * (T[point_index]-T[i-1]) / parameters[1]);
-		convFunc += ((Ct + Ctprev) / 2 * spacing);
-	}
+	// formula calculating fit model values
+	value[point_index] = get_value(parameters[0],parameters[1],point_index,T,Cp);
 
-	value[point_index] = parameters[0] * convFunc;                    // formula calculating fit model values
-	// C(t)		       =   Ktrans	   * trapz(Cp(k)*e^(-Ktrans*t/ve))
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
+	bool numericalApproximationDerivative = true;
 
-	// formula calculating derivative values with respect to parameters[0] (Ktrans)
-	//current_derivative[0 * n_points] = convFunc;
-	REAL derivativeFunction = 0;
-	for (int i = 1; i < point_index; i++) {
-		REAL spacing = T[i] - T[i - 1];
-		REAL Ct = Cp[i] * (1-parameters[0]/parameters[1]*(T[point_index]-T[i])) * exp(-parameters[0] * (T[point_index]-T[i]) / parameters[1]);
-		REAL Ctprev = Cp[i - 1] * (1-parameters[0]/parameters[1]*(T[point_index]-T[i-1])) * exp(-parameters[0] * (T[point_index]-T[i-1]) / parameters[1]);
-		derivativeFunction += ((Ct + Ctprev) / 2 * spacing);
-	}
-	current_derivative[0 * n_points] = derivativeFunction;
+	if (numericalApproximationDerivative)
+	{
+		REAL h = 10e-5;
+		REAL f_plus_h;
+		REAL f_minus_h;
+		//3 point method
 
-	// formula calculating derivative values with respect to parameters[1] (Ve)
-	derivativeFunction = 0;
-	for (int i = 1; i < point_index; i++) {
-		REAL spacing = T[i] - T[i - 1];
-		REAL Ct = Cp[i] * (T[point_index]-T[i]) * exp(-parameters[0] * (T[point_index]-T[i]) / parameters[1]);
-		REAL Ctprev = Cp[i - 1] * (T[point_index]-T[i-1]) * exp(-parameters[0] * (T[point_index]-T[i-1]) / parameters[1]);
-		derivativeFunction += ((Ct + Ctprev) / 2 * spacing);
+		// parameters[0]' = (Ktrans)'
+		f_plus_h = get_value(parameters[0]+h,parameters[1],point_index,T,Cp);
+		f_minus_h = get_value(parameters[0]-h,parameters[1],point_index,T,Cp);
+		current_derivative[0 * n_points] = 1/(2*h)*(f_plus_h-f_minus_h);
+
+		// parameters[1]' = (Ve)'
+		f_plus_h = get_value(parameters[0],parameters[1]+h,point_index,T,Cp);
+		f_minus_h = get_value(parameters[0],parameters[1]-h,point_index,T,Cp);
+		current_derivative[1 * n_points] = 1/(2*h)*(f_plus_h-f_minus_h);
 	}
-	current_derivative[1 * n_points] = pow(parameters[0],2)/pow(parameters[1],2)*derivativeFunction;
+	else
+	{
+		// formula calculating derivative values with respect to parameters[0] (Ktrans)
+		REAL derivativeFunction = 0;
+		for (int i = 1; i < point_index; i++) {
+			REAL spacing = T[i] - T[i - 1];
+			REAL Ct = Cp[i] * (1-parameters[0]/parameters[1]*(T[point_index]-T[i])) * exp(-parameters[0] * (T[point_index]-T[i]) / parameters[1]);
+			REAL Ctprev = Cp[i - 1] * (1-parameters[0]/parameters[1]*(T[point_index]-T[i-1])) * exp(-parameters[0] * (T[point_index]-T[i-1]) / parameters[1]);
+			derivativeFunction += ((Ct + Ctprev) / 2 * spacing);
+		}
+		current_derivative[0 * n_points] = derivativeFunction;
+
+		// formula calculating derivative values with respect to parameters[1] (Ve)
+		derivativeFunction = 0;
+		for (int i = 1; i < point_index; i++) {
+			REAL spacing = T[i] - T[i - 1];
+			REAL Ct = Cp[i] * (T[point_index]-T[i]) * exp(-parameters[0] * (T[point_index]-T[i]) / parameters[1]);
+			REAL Ctprev = Cp[i - 1] * (T[point_index]-T[i-1]) * exp(-parameters[0] * (T[point_index]-T[i-1]) / parameters[1]);
+			derivativeFunction += ((Ct + Ctprev) / 2 * spacing);
+		}
+		current_derivative[1 * n_points] = pow(parameters[0],2)/pow(parameters[1],2)*derivativeFunction;
+	}
 
 	// deallocate pointers
-	delete T;
-	delete Cp;
+	//delete T;
+	//delete Cp;
 }
+
 #endif

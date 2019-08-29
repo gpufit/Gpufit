@@ -10,17 +10,16 @@ void tofts_two()
 {
 	
 	/*
-	This example generates test data in form of 10000 one dimensional linear
-	curves with the size of 20 data points per curve. It is noised by normal
-	distributed noise. The initial guesses were randomized, within a specified
-	range of the true value. The LINEAR_1D model is fitted to the test data sets
-	using the LSE estimator. The optional parameter user_info is used to pass
-	custom x positions of the data sets. The same x position values are used for
+	This example generates test data in form of 10000 one dimensional Tissue Concentration
+	curves, using a synthetic AIF, hard coded Ktrans and Ve values. Gaussian noise is
+	added to achieve a specific SNR value. The initial guess is varied randomly between
+	10% and 180% of the true value. The same x position values are used for
 	every fit.
 
 	The console output shows
 	- the ratio of converged fits including ratios of not converged fits for
 	  different reasons,
+	- the SNR of the generated data
 	- the values of the true parameters and the mean values of the fitted
 	  parameters including their standard deviation,
 	- the mean chi square value
@@ -33,10 +32,10 @@ void tofts_two()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 1000;
+	size_t const n_fits = 10000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 2;
-	REAL snr = 10.8;
+	REAL snr = 3.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -73,12 +72,13 @@ void tofts_two()
 
 	// initialize random number generator
 	std::mt19937 rng;
-	rng.seed(time(NULL));
+	//rng.seed(time(NULL));
+	rng.seed(0);
 	std::uniform_real_distribution< REAL > uniform_dist(0, 1);
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.005, 0.30 };		// Ktrans, vp
+	std::vector< REAL > true_parameters{ 0.005, 0.30 };		// Ktrans, ve
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
@@ -221,8 +221,9 @@ void tofts_two()
 	output_parameters_std[1] = sqrt(output_parameters_std[1] / output_states_histogram[0]);
 
 	// print mean and std
+	std::cout << "Data SNR:  " << snr << "\n";
 	std::cout << "Ktrans  true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
-	std::cout << "vp	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
+	std::cout << "Ve	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
