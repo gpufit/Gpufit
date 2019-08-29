@@ -1,6 +1,27 @@
 #ifdef USE_TISSUE_UPTAKE
 #define GPUFIT_TISSUE_UPTAKE_CUH_INCLUDED
 
+__device__ REAL get_value (
+	REAL p0, //Ktrans
+	REAL p1, //Ve
+	REAL p2, //Vp
+	int const point_index,
+	REAL const * T,
+	REAL const * Cp)
+{
+	// integral/convolution
+	REAL convFunc = 0;
+	for (int i = 1; i < point_index; i++) {
+		REAL spacing = T[i] - T[i - 1];
+		REAL Ct = Cp[i] * exp(-p0 * (T[point_index]-T[i]) / p1);
+		REAL Ctprev = Cp[i - 1] * exp(-p0 * (T[point_index]-T[i-1]) / p1);
+		convFunc += ((Ct + Ctprev) / 2 * spacing);
+	}
+
+	REAL function_value = ;
+	return function_value;
+}
+
 __device__ void calculate_tissue_uptake (               // function name
 	REAL const * parameters,
 	int const n_fits,
@@ -29,17 +50,14 @@ __device__ void calculate_tissue_uptake (               // function name
 		convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
 	}
 
-	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
-	// C(t)		       =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
+	value[point_index] = ;                      // formula calculating fit model values
+	// C(t)		       =   integral(Cp(k) * Fp*exp(-t/Tp) + Ktrans*(1-exp(-t/Tp)), need some algebra for Tp
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
 
-	current_derivative[0 * n_points] = convCp;					// formula calculating derivative values with respect to parameters[0] (Ktrans)
-	current_derivative[1 * n_points] = Cp[point_index];			// formula calculating derivative values with respect to parameters[1] (vp)
-
-	// deallocate pointers
-	delete T;
-	delete Cp;
+	current_derivative[0 * n_points] = ;					// formula calculating derivative values with respect to parameters[0] (Ktrans)
+	current_derivative[1 * n_points] = ;			// formula calculating derivative values with respect to parameters[1] (vp)
+	current_derivative[2 * n_points] = ;			// formula calculating derivative values with respect to parameters[1] (Fp)
 }
 #endif
