@@ -1,7 +1,7 @@
 #ifdef USE_TISSUE_UPTAKE
 #define GPUFIT_TISSUE_UPTAKE_CUH_INCLUDED
 
-__device__ REAL get_value (
+__device__ REAL get_tuptake_value (
 	REAL p0, //Ktrans
 	REAL p1, //Ve
 	REAL p2, //Vp
@@ -18,7 +18,7 @@ __device__ REAL get_value (
 		convFunc += ((Ct + Ctprev) / 2 * spacing);
 	}
 
-	REAL function_value = ;
+	REAL function_value = 1;
 	return function_value;
 }
 
@@ -44,20 +44,20 @@ __device__ void calculate_tissue_uptake (               // function name
 	REAL* Cp = user_info_float + n_points;
 
 	// integral (trapezoidal rule)
-	REAL convCp = 0;
-	for (int i = 1; i < point_index; i++) {
-		REAL spacing = T[i] - T[i - 1];
-		convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
-	}
+//	REAL convCp = 0;
+//	for (int i = 1; i < point_index; i++) {
+//		REAL spacing = T[i] - T[i - 1];
+//		convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
+//	}
 
-	value[point_index] = ;                      // formula calculating fit model values
+	value[point_index] = get_tuptake_value(parameters[0],parameters[1],parameters[2],point_index,T,Cp);   // formula calculating fit model values
 	// C(t)		       =   integral(Cp(k) * Fp*exp(-t/Tp) + Ktrans*(1-exp(-t/Tp)), need some algebra for Tp
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
 
-	current_derivative[0 * n_points] = ;					// formula calculating derivative values with respect to parameters[0] (Ktrans)
-	current_derivative[1 * n_points] = ;			// formula calculating derivative values with respect to parameters[1] (vp)
-	current_derivative[2 * n_points] = ;			// formula calculating derivative values with respect to parameters[1] (Fp)
+	current_derivative[0 * n_points] = 1;					// formula calculating derivative values with respect to parameters[0] (Ktrans)
+	current_derivative[1 * n_points] = 1;			// formula calculating derivative values with respect to parameters[1] (vp)
+	current_derivative[2 * n_points] = 1;			// formula calculating derivative values with respect to parameters[1] (Fp)
 }
 #endif
