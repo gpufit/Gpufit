@@ -460,6 +460,12 @@ A function that returns a string representation of the last error.
     'CUDA driver version is insufficient for CUDA runtime version'
         The graphics driver version installed on the computer is not supported by the CUDA Toolkit version which was used
         to build Gpufit.dll. Update the graphics driver or re-build Gpufit using a compatible CUDA Toolkit version.
+        
+        
+    'too many resources requested for launch'
+        Exceeded number of available registers per thread block. Adding model functions to models.cuh can increase the
+        number of registers per thread used by the kernel cuda_calc_curve_values(). If this error occurs, comment
+        out unused models in function calculate_model() in file models.cuh.
 
 gpufit_cuda_available()
 +++++++++++++++++++++++
