@@ -1,0 +1,10 @@
+Package: gpufit
+Version: version_string
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: 
+Maintainer: Samuel Barnes <sabarnes@llu.edu>
+Description: GPU-accelerated Levenberg-Marquardt curve fitting toolkit, implemented in CUDA
+ Requires CUDA video card and driver
+ Python, Java, and Matlab bindings
