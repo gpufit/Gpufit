@@ -32,10 +32,13 @@ void tissue_uptake_three()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 100;
+	size_t const n_fits = 200;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 3;
-	REAL snr = 10.8;
+	REAL snr = 100.8;
+
+	// true parameters
+	std::vector< REAL > true_parameters{ 0.0005, 0.05, 0.1 };		// Ktrans, vp, Fp
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -78,19 +81,16 @@ void tissue_uptake_three()
 	std::uniform_real_distribution< REAL > uniform_dist(0, 1);
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
-	// true parameters
-	std::vector< REAL > true_parameters{ 0.5, 0.70, 0.03 };		// Ktrans, Fp, Fp
-
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random Ktrans
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.5f + 1.0f * uniform_dist(rng));
 		// random vp
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.5f + 1.0f * uniform_dist(rng));
 		// random Fp
-		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.5f + 1.0f * uniform_dist(rng));
 	}
 
 	// generate data
@@ -100,17 +100,17 @@ void tissue_uptake_three()
 	{
 		size_t j = i / n_points_per_fit; // the fit
 		size_t k = i % n_points_per_fit; // the position within a fit
-		REAL x = 0;
+
+		REAL Tp = true_parameters[1] / (true_parameters[2] / ((true_parameters[2]/true_parameters[0]) - 1) + true_parameters[2]);
+		REAL conv = 0;
 		for (int n = 1; n < k; n++) {
 		
 			REAL spacing = timeX[n] - timeX[n - 1];
-			REAL Ct = Cp[n] * exp(-true_parameters[0] * (timeX[k]-timeX[n]) / true_parameters[1]);
-			REAL Ctprev = Cp[n - 1] * exp(-true_parameters[0] * (timeX[k]-timeX[n-1]) / true_parameters[1]);
-			x += ((Ct + Ctprev) / 2 * spacing);
+			REAL Ct = Cp[n] * (true_parameters[2] * exp(-(timeX[k] -timeX[n])/Tp) + true_parameters[0] * (1 - exp(-(timeX[k] - timeX[n])/Tp)));
+			REAL Ctprev = Cp[n - 1] * (true_parameters[2] * exp(-(timeX[k] - timeX[n-1])/Tp) + true_parameters[0] * (1 - exp(-(timeX[k] - timeX[n-1])/Tp)));
+			conv += ((Ct + Ctprev) / 2 * spacing);
 		}
-		REAL y = true_parameters[0] * x + true_parameters[2] * Cp[k];
-		//data[i] = y + normal_dist(rng);
-		//data[i] = y * (0.2f + 1.6f * uniform_dist(rng));
+		REAL y = conv;
 		data[i] = y;
 		mean_y += y;
 		//std::cout << data[i] << std::endl;
@@ -209,10 +209,10 @@ void tissue_uptake_three()
 			if (false)
 			{
 				//std::cout << "Ktrans  fit " << output_parameters[i * n_model_parameters + 0]  << " error " << abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]) << "\n";
-				std::cout << "vp	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
+				//std::cout << "vp	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
 				//std::cout << "Fp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
 
-				std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
+				//std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
 				//std::cout << "vp	init " << initial_parameters[i * n_model_parameters + 1] << "\n";
 				//std::cout << "Fp	init " << initial_parameters[i * n_model_parameters + 2] << "\n";
 			}

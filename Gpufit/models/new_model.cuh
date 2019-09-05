@@ -54,13 +54,13 @@ __device__ void calculate_new_model (               // function name
 	REAL f_minus_h;
 
 	// parameters[0]' = (Ktrans)'
-	f_plus_h = get_value(parameters[0]+h,parameters[1],n_points,point_index,T,Cp);
-	f_minus_h = get_value(parameters[0]-h,parameters[1],n_points,point_index,T,Cp);
+	f_plus_h = get_value(parameters[0]+h,parameters[1],point_index,T,Cp);
+	f_minus_h = get_value(parameters[0]-h,parameters[1],point_index,T,Cp);
 	current_derivative[0 * n_points] = 1/(2*h)*(f_plus_h-f_minus_h);
 
 	// parameters[1]' = (Ve)'
-	f_plus_h = get_value(parameters[0],parameters[1]+h,n_points,point_index,T,Cp);
-	f_minus_h = get_value(parameters[0],parameters[1]-h,n_points,point_index,T,Cp);
+	f_plus_h = get_value(parameters[0],parameters[1]+h,point_index,T,Cp);
+	f_minus_h = get_value(parameters[0],parameters[1]-h,point_index,T,Cp);
 	current_derivative[1 * n_points] = 1/(2*h)*(f_plus_h-f_minus_h);
 
 //	//Numerical differentiation, 5 point method, error O(h^4)
@@ -72,17 +72,17 @@ __device__ void calculate_new_model (               // function name
 //	REAL f_minus_2h;
 //
 //	// parameters[0]' = (Ktrans)'
-//	f_plus_h = get_value(parameters[0]+h,parameters[1],n_points,point_index,T,Cp);
-//	f_minus_h = get_value(parameters[0]-h,parameters[1],n_points,point_index,T,Cp);
-//	f_plus_2h = get_value(parameters[0]+2*h,parameters[1],n_points,point_index,T,Cp);
-//	f_minus_2h = get_value(parameters[0]-2*h,parameters[1],n_points,point_index,T,Cp);
+//	f_plus_h = get_value(parameters[0]+h,parameters[1],point_index,T,Cp);
+//	f_minus_h = get_value(parameters[0]-h,parameters[1],point_index,T,Cp);
+//	f_plus_2h = get_value(parameters[0]+2*h,parameters[1],point_index,T,Cp);
+//	f_minus_2h = get_value(parameters[0]-2*h,parameters[1],point_index,T,Cp);
 //	current_derivative[0 * n_points] = 1/(12*h)*(f_minus_2h-8*f_minus_h+8*f_plus_h-f_plus_2h);
 //
 //	// parameters[1]' = (Ve)'
-//	f_plus_h = get_value(parameters[0],parameters[1]+h,n_points,point_index,T,Cp);
-//	f_minus_h = get_value(parameters[0],parameters[1]-h,n_points,point_index,T,Cp);
-//	f_plus_2h = get_value(parameters[0],parameters[1]+2*h,n_points,point_index,T,Cp);
-//	f_minus_2h = get_value(parameters[0],parameters[1]-2*h,n_points,point_index,T,Cp);
+//	f_plus_h = get_value(parameters[0],parameters[1]+h,point_index,T,Cp);
+//	f_minus_h = get_value(parameters[0],parameters[1]-h,point_index,T,Cp);
+//	f_plus_2h = get_value(parameters[0],parameters[1]+2*h,point_index,T,Cp);
+//	f_minus_2h = get_value(parameters[0],parameters[1]-2*h,point_index,T,Cp);
 //	current_derivative[1 * n_points] = 1/(12*h)*(f_minus_2h-8*f_minus_h+8*f_plus_h-f_plus_2h);
 
 }
