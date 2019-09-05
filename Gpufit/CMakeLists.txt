@@ -253,7 +253,7 @@ if ( GPUFIT_USE_TISSUE_UPTAKE_MODEL )
 	add_definitions( -DUSE_TISSUE_UPTAKE )
 endif()
 
-if ( GPUFIT_USE_TWO_COMPARTMENT_EXCHANGE_MODEL )
+if ( GPUFIT_USE_2CXM )
 	add_definitions( -DUSE_2CXM )
 endif()
 

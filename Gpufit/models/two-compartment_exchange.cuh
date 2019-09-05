@@ -14,14 +14,13 @@ __device__ REAL get_2cx_value (
 	REAL PS;
 	if(p0>=p3) {
 		PS = 10e8;
-	}
-	else {
-		PS = (p3 / ((p3 / p0) - 1);
+	} else {
+		PS = p3 / ((p3 / p0) - 1);
 	}
 
 	REAL convFunc = 0;
-	REAL Tp = p2 / PS + p3);
-	REAL Te = p1 / PS);
+	REAL Tp = p2 / (PS + p3);
+	REAL Te = p1 / PS;
 	REAL Tb = p2 / p3;
 	REAL Kpos = 0.5 * (1/Tp + 1/Te + sqrt(pow(1/Tp + 1/Te,2) - 4 * 1/Te * 1/Tb));
 	REAL Kneg = 0.5 * (1/Tp + 1/Te - sqrt(pow(1/Tp + 1/Te,2) - 4 * 1/Te * 1/Tb));
@@ -63,6 +62,14 @@ __device__ void calculate_two_compartment_exchange (               // function n
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
 
+	//Numerical differentiation, 5 point method, error O(h^4)
+	//smaller error than 3 point, but more function evaluations, potentially slower
+	REAL h = 10e-5;
+	REAL f_plus_h;
+	REAL f_minus_h;
+	REAL f_plus_2h;
+	REAL f_minus_2h;
+
 	// parameters[0]' = (Ktrans)'
 	f_plus_h = get_2cx_value(parameters[0]+h,parameters[1],parameters[2],parameters[3],point_index,T,Cp);
 	f_minus_h = get_2cx_value(parameters[0]-h,parameters[1],parameters[2],parameters[3],point_index,T,Cp);
@@ -78,10 +85,10 @@ __device__ void calculate_two_compartment_exchange (               // function n
 	current_derivative[1 * n_points] = 1/(12*h)*(f_minus_2h-8*f_minus_h+8*f_plus_h-f_plus_2h); // formula calculating derivative values with respect to parameters[1] (ve)
 
 	// parameters[2]' = (Vp)'
-	f_plus_h = get_2cx_value(parameters[0],parameters[1],parameters[2]+h,paramters[3],point_index,T,Cp);
+	f_plus_h = get_2cx_value(parameters[0],parameters[1],parameters[2]+h,parameters[3],point_index,T,Cp);
 	f_minus_h = get_2cx_value(parameters[0],parameters[1],parameters[2]-h,parameters[3],point_index,T,Cp);
 	f_plus_2h = get_2cx_value(parameters[0],parameters[1],parameters[2]+2*h,parameters[3],point_index,T,Cp);
-	f_minus_2h = get_2cx_value(parameters[0],parameters[1],parameters[2]-2*h,paramters[3],point_index,T,Cp);
+	f_minus_2h = get_2cx_value(parameters[0],parameters[1],parameters[2]-2*h,parameters[3],point_index,T,Cp);
 	current_derivative[2 * n_points] = 1/(12*h)*(f_minus_2h-8*f_minus_h+8*f_plus_h-f_plus_2h);	// formula calculating derivative values with respect to parameters[1] (vp)
 
 	// parameters[3]' = (Fp)'
