@@ -93,9 +93,9 @@ sed -i "s/version_string/${VERSION}/" $DEB_ROOT/DEBIAN/control
 
 mkdir $DEB_ROOT/usr
 mkdir $DEB_ROOT/usr/local
-mkdir $DEB_ROOT/usr/local/lib
-cp "$x64_BUILD/Gpufit/libGpufit.so" "$DEB_ROOT/usr/local/lib"
-cp "$x64_BUILD/Cpufit/libCpufit.so" "$DEB_ROOT/usr/local/lib"
+mkdir $DEB_ROOT/usr/lib
+cp "$x64_BUILD/Gpufit/libGpufit.so" "$DEB_ROOT/usr/lib"
+cp "$x64_BUILD/Cpufit/libCpufit.so" "$DEB_ROOT/usr/lib"
 
 mkdir $DEB_ROOT/usr/local/include
 cp "$SOURCE_BASE/Gpufit/gpufit.h" "$DEB_ROOT/usr/local/include"
@@ -142,7 +142,7 @@ cp "$x64_BUILD/Cpufit/libCpufit.so" "$PERFORMANCE_TEST_INSTALL/linux"
 
 echo collect python
 mkdir $PYTHON_INSTALL
-cp "$x64_PYTHON_BUILD/pyGpufit-$VERSION-py2.py3-none-any.whl" "$PYTHON_INSTALL/pyGpufit-$VERSION-py2.py3-none-ubuntu18.whl"
+cp "$x64_PYTHON_BUILD/pyGpufit-$VERSION-py2.py3-none-any.whl" "$PYTHON_INSTALL/pyGpufit-$VERSION-py2.py3-none-any.whl"
 cp "$PYTHON_SOURCE/README.txt" "$PYTHON_INSTALL"
 cp "$PYTHON_SOURCE/examples" "$PYTHON_INSTALL/examples" -n -r
 
