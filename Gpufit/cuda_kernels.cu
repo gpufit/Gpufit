@@ -978,6 +978,14 @@ __global__ void cuda_update_parameters(
     REAL const * current_deltas = &deltas[fit_index * n_parameters_to_fit];
 
     current_parameters[parameters_to_fit_indices[parameter_index]] += current_deltas[parameter_index];
+    if (current_parameters[parameters_to_fit_indices[parameter_index]]<=0)
+	{
+		current_parameters[parameters_to_fit_indices[parameter_index]]=0;
+	}
+    if (current_parameters[parameters_to_fit_indices[parameter_index]]>1)
+	{
+		current_parameters[parameters_to_fit_indices[parameter_index]]=1;
+	}
 }
 
 /* Description of the cuda_update_state_after_solving function
