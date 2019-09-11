@@ -32,13 +32,13 @@ void two_compartment_exchange_four()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 1;
+	size_t const n_fits = 100000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 4;
-	REAL snr = 100.8;
+	REAL snr = 4.8;
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.00005, 0.3, 0.05, 5.1 };		// Ktrans, ve, vp, Fp
+	std::vector< REAL > true_parameters{ 0.005, 0.3, 0.05, 0.1 };		// Ktrans, ve, vp, Fp
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -86,13 +86,13 @@ void two_compartment_exchange_four()
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random Ktrans
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.5f + 1.0f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.95f + 0.1f * uniform_dist(rng));
 		// random ve
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.5f + 1.0f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.95f + 0.1f * uniform_dist(rng));
 		// random vp
-		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.5f + 1.0f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.95f + 0.1f * uniform_dist(rng));
 		// random Fp
-		initial_parameters[i * n_model_parameters + 3] = true_parameters[3] * (0.5f + 1.0f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 3] = true_parameters[3] * (0.95f + 0.1f * uniform_dist(rng));
 	}
 
 	// generate data
@@ -120,7 +120,7 @@ void two_compartment_exchange_four()
 		REAL y = true_parameters[3] * conv;
 		data[i] = y;
 		mean_y += y;
-		std::cout << data[i] << std::endl;
+//		std::cout << data[i] << std::endl;
 	}
 	mean_y = mean_y / data.size();
 	std::normal_distribution<REAL> norm_snr(0,mean_y/snr);
@@ -217,15 +217,17 @@ void two_compartment_exchange_four()
 			// add Fp
 			output_parameters_mean_error[3] += abs(output_parameters[i * n_model_parameters + 3]-true_parameters[3]);
 
-			if (true)
+			if (output_parameters[i * n_model_parameters + 1]<0)
 			{
 				//std::cout << "Ktrans  fit " << output_parameters[i * n_model_parameters + 0]  << " error " << abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]) << "\n";
-				//std::cout << "vp	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
+				std::cout << "ve	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
+				//std::cout << "vp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
 				//std::cout << "Fp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
 
-				//std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
-				//std::cout << "vp	init " << initial_parameters[i * n_model_parameters + 1] << "\n";
-				//std::cout << "Fp	init " << initial_parameters[i * n_model_parameters + 2] << "\n";
+				std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
+				std::cout << "ve	init " << initial_parameters[i * n_model_parameters + 1] << "\n";
+				std::cout << "vp	init " << initial_parameters[i * n_model_parameters + 2] << "\n";
+				std::cout << "Fp	init " << initial_parameters[i * n_model_parameters + 3] << "\n";
 			}
 
 		}
@@ -302,10 +304,10 @@ void two_compartment_exchange_four()
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "Beginning TWO_COMPARTMENT_EXCHANGE fit..." << std::endl;
+	std::cout << std::endl << "Beginning two compartment exchange fit..." << std::endl;
 	two_compartment_exchange_four();
 
-	std::cout << std::endl << "TWO_COMPARTMENT_EXCHANGE fit completed!" << std::endl;
+	std::cout << std::endl << "Two compartment exchange fit completed!" << std::endl;
 
 	return 0;
 }

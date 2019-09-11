@@ -32,10 +32,10 @@ void tofts_three()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 100;
+	size_t const n_fits = 1000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 3;
-	REAL snr = 1000000000.8;
+	REAL snr = 10.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -79,18 +79,18 @@ void tofts_three()
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.5, 0.70, 0.03 };		// Ktrans, ve, vp
+	std::vector< REAL > true_parameters{ 0.005, 0.60, 0.03 };		// Ktrans, ve, vp
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random Ktrans
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.6f + 0.8f * uniform_dist(rng));
 		// random ve
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.6f + 0.8f * uniform_dist(rng));
 		// random vp
-		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.6f + 0.8f * uniform_dist(rng));
 	}
 
 	// generate data
@@ -127,7 +127,7 @@ void tofts_three()
 	REAL const tolerance = 10e-8f;
 
 	// maximum number of iterations
-	int const max_number_iterations = 200;
+	int const max_number_iterations = 100;
 
 	// estimator ID
 	int const estimator_id = LSE;
