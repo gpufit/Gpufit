@@ -95,6 +95,24 @@ void two_compartment_exchange_four()
 		initial_parameters[i * n_model_parameters + 3] = true_parameters[3] * (0.95f + 0.1f * uniform_dist(rng));
 	}
 
+	// parameter_constraints
+	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
+	for (size_t i = 0; i != n_fits; i++)
+	{
+		// Ktrans
+		parameter_constraints[i * n_model_parameters * 2 + 0] = 0;
+		parameter_constraints[i * n_model_parameters * 2 + 1] = 2;
+		// ve
+		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
+		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
+		// vp
+		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
+		parameter_constraints[i * n_model_parameters * 2 + 5] = 1;
+		// Fp
+		parameter_constraints[i * n_model_parameters * 2 + 6] = 0.001;
+		parameter_constraints[i * n_model_parameters * 2 + 7] = 100;
+	}
+
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
 	REAL mean_y = 0;
@@ -152,7 +170,7 @@ void two_compartment_exchange_four()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-	int const status = gpufit
+	int const status = gpufit_constraints
 	(
 		n_fits,
 		n_points_per_fit,
@@ -160,6 +178,7 @@ void two_compartment_exchange_four()
 		0,
 		model_id,
 		initial_parameters.data(),
+		parameter_constraints.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),

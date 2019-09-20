@@ -98,14 +98,14 @@ void tofts_three()
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// Ktrans
-		parameter_constraints[i * n_model_parameters + 0] = 0;
-		parameter_constraints[i * n_model_parameters + 1] = 1;
+		parameter_constraints[i * n_model_parameters * 2 + 0] = 0;
+		parameter_constraints[i * n_model_parameters * 2 + 1] = 2;
 		// ve
-		parameter_constraints[i * n_model_parameters + 2] = 0;
-		parameter_constraints[i * n_model_parameters + 3] = 1;
+		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
+		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
 		// vp
-		parameter_constraints[i * n_model_parameters + 4] = 0;
-		parameter_constraints[i * n_model_parameters + 5] = 1;
+		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
+		parameter_constraints[i * n_model_parameters * 2 + 5] = 1;
 	}
 
 	// generate data
