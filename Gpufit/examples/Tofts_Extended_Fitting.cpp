@@ -93,6 +93,21 @@ void tofts_three()
 		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.6f + 0.8f * uniform_dist(rng));
 	}
 
+	// parameter_constraints
+	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
+	for (size_t i = 0; i != n_fits; i++)
+	{
+		// Ktrans
+		parameter_constraints[i * n_model_parameters + 0] = 0;
+		parameter_constraints[i * n_model_parameters + 1] = 1;
+		// ve
+		parameter_constraints[i * n_model_parameters + 2] = 0;
+		parameter_constraints[i * n_model_parameters + 3] = 1;
+		// vp
+		parameter_constraints[i * n_model_parameters + 4] = 0;
+		parameter_constraints[i * n_model_parameters + 5] = 1;
+	}
+
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
 	REAL mean_y = 0;
@@ -146,7 +161,7 @@ void tofts_three()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-	int const status = gpufit
+	int const status = gpufit_constraints
 	(
 		n_fits,
 		n_points_per_fit,
@@ -154,6 +169,7 @@ void tofts_three()
 		0,
 		model_id,
 		initial_parameters.data(),
+		parameter_constraints.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),

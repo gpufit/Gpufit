@@ -12,6 +12,7 @@ FitInterface::FitInterface
     int max_n_iterations,
     EstimatorID estimator_id,
     REAL const * initial_parameters,
+    REAL const * parameter_constraints,
     int * parameters_to_fit,
     char * user_info,
     std::size_t user_info_size,
@@ -24,6 +25,7 @@ FitInterface::FitInterface
     data_( data ),
     weights_( weights ),
     initial_parameters_( initial_parameters ),
+    parameter_constraints_( parameter_constraints ),
     parameters_to_fit_( parameters_to_fit ),
     user_info_( user_info ),
     n_fits_(n_fits),
@@ -68,6 +70,7 @@ void FitInterface::configure_info(Info & info, ModelID const model_id)
     info.user_info_size_ = user_info_size_;
     info.n_parameters_ = n_parameters_;
     info.use_weights_ = weights_ ? true : false;
+    info.use_constraints_ = parameter_constraints_ ? true : false;
     info.data_location_ = data_location_;
 
     info.set_number_of_parameters_to_fit(parameters_to_fit_);
@@ -90,6 +93,7 @@ void FitInterface::fit(ModelID const model_id)
         weights_,
         info,
         initial_parameters_,
+        parameter_constraints_,
         parameters_to_fit_,
         user_info_,
         output_parameters_,
