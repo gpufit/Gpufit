@@ -32,7 +32,7 @@ void tofts_two()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 1000000;
+	size_t const n_fits = 10000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 2;
 	REAL snr = 3.8;
@@ -84,10 +84,22 @@ void tofts_two()
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		// random offset
+		// random Ktrans
 		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
-		// random slope
+		// random Ve
 		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
+	}
+
+	// parameter_constraints
+	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
+	for (size_t i = 0; i != n_fits; i++)
+	{
+		// Ktrans
+		parameter_constraints[i * n_model_parameters * 2 + 0] = 0;
+		parameter_constraints[i * n_model_parameters * 2 + 1] = 2;
+		// ve
+		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
+		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
 	}
 
 	// generate data
@@ -106,8 +118,6 @@ void tofts_two()
 			x += ((Ct + Ctprev) / 2 * spacing);
 		}
 		REAL y = true_parameters[0] * x;
-		//data[i] = y + normal_dist(rng);
-		//data[i] = y * (0.2f + 1.6f * uniform_dist(rng));
 		data[i] = y;
 		mean_y += y;
 		//std::cout << data[i] << std::endl;
@@ -118,8 +128,6 @@ void tofts_two()
 	{
 		data[i] = data[i] + norm_snr(rng);
 	}
-
-
 
 	// tolerance
 	REAL const tolerance = 10e-8f;
@@ -143,7 +151,7 @@ void tofts_two()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-	int const status = gpufit
+	int const status = gpufit_constraints
 	(
 		n_fits,
 		n_points_per_fit,
@@ -151,6 +159,7 @@ void tofts_two()
 		0,
 		model_id,
 		initial_parameters.data(),
+		parameter_constraints.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),
