@@ -40,6 +40,7 @@ public:
     EstimatorID estimator_id_;
 
     bool use_weights_;
+    bool use_constraints_;
 
     int max_threads_;
     int warp_size_;

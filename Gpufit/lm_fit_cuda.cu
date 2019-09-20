@@ -133,6 +133,7 @@ void LMFitCUDA::update_parameters()
     cuda_update_parameters <<< blocks, threads >>>(
         gpu_data_.parameters_,
         gpu_data_.prev_parameters_,
+        gpu_data_.parameter_constraints_,
         gpu_data_.deltas_,
         info_.n_parameters_to_fit_,
         gpu_data_.parameters_to_fit_indices_,

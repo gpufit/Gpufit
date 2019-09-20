@@ -97,6 +97,8 @@ void Info::set_max_chunk_size()
         one_fit_memory += sizeof(int) * 2;                  // state, number of iterations
         if (use_weights_)
             one_fit_memory += sizeof(REAL) * n_points_;    // weights
+        if (use_constraints_)
+			one_fit_memory += sizeof(REAL) * n_parameters_*2;// constraints
     }
 
 #ifdef USE_CUBLAS
