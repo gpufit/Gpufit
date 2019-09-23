@@ -58,10 +58,10 @@ set x32_JAVA_INSTALL=%ROOT_INSTALL%\java32
 set x64_JAVA_INSTALL=%ROOT_INSTALL%\java64
 set SDK_INSTALL_ROOT=%ROOT_INSTALL%\gpufit_sdk
 
-set x64_BUILD=%BUILD_BASE%\VC14x64-8.0\RelWithDebInfo
-set x64_BUILD_LIB=%BUILD_BASE%\VC14x64-8.0\Gpufit\RelWithDebInfo
-set x32_BUILD=%BUILD_BASE%\VC14x32-8.0\RelWithDebInfo
-set x32_BUILD_LIB=%BUILD_BASE%\VC14x32-8.0\Gpufit\RelWithDebInfo
+set x64_BUILD=%BUILD_BASE%\VC16x64-8.0\RelWithDebInfo
+set x64_BUILD_LIB=%BUILD_BASE%\VC16x64-8.0\Gpufit\RelWithDebInfo
+set x32_BUILD=%BUILD_BASE%\VC16x32-8.0\RelWithDebInfo
+set x32_BUILD_LIB=%BUILD_BASE%\VC16x32-8.0\Gpufit\RelWithDebInfo
 
 set x64_PYTHON_BUILD=%x64_BUILD%\pyGpufit\dist
 set x32_PYTHON_BUILD=%x32_BUILD%\pyGpufit\dist
@@ -171,7 +171,7 @@ mkdir "%SDK_INSTALL_ROOT%\win64"
 copy "%x64_BUILD%\Gpufit.dll" "%SDK_INSTALL_ROOT%\win64"
 copy "%x64_BUILD_LIB%\Gpufit.lib" "%SDK_INSTALL_ROOT%\win64"
 
-REM zip content of temp folder with 7-Zip if availabe
+REM zip content of temp folder with 7-Zip if available
 
 set ZIP=C:\Program Files\7-Zip\7z.exe
 
