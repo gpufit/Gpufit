@@ -49,6 +49,37 @@ if( WIN32 )
 endif()
 
 add_matlab_launcher( GpufitMex "${CMAKE_CURRENT_SOURCE_DIR}" )
+			  
+# MATLAB MEX FILE for gpufit_constraints
+
+set( Headers
+  )
+
+set( Sources
+  mex/GpufitConstraintsMex.cpp
+  )
+
+add_library( GpufitConstraintsMex SHARED
+  ${Headers}
+  ${Sources}
+  )
+
+set_target_properties( GpufitConstraintsMex
+  PROPERTIES
+		PREFIX ""
+		SUFFIX .${Matlab_MEX_EXTENSION}
+		RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
+
+target_include_directories( GpufitConstraintsMex PRIVATE ${Matlab_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR} )
+
+target_link_libraries( GpufitConstraintsMex Gpufit ${Matlab_LIBRARIES} )
+
+if( WIN32 )
+  SET(CMAKE_SHARED_LINKER_FLAGS "/export:mexFunction")
+endif()
+
+add_matlab_launcher( GpufitConstraintsMex "${CMAKE_CURRENT_SOURCE_DIR}" )
 
 # MATLAB MEX FILE for cuda_available
 
@@ -87,6 +118,7 @@ set( build_directory "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/matlab" )
 set( package_files
   "${CMAKE_CURRENT_SOURCE_DIR}/EstimatorID.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/gpufit.m"
+  "${CMAKE_CURRENT_SOURCE_DIR}/gpufit_constraints.m"			
   "${CMAKE_CURRENT_SOURCE_DIR}/gpufit_cuda_available.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/gpufit_version.m"
   "${CMAKE_CURRENT_SOURCE_DIR}/ModelID.m"
