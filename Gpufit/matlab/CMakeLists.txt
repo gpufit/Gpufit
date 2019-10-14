@@ -133,6 +133,7 @@ endif()
 
 set( binary_mex $<TARGET_FILE:GpufitMex> )
 set( binary_mex2 $<TARGET_FILE:GpufitCudaAvailableMex> )
+set( binary_mex3 $<TARGET_FILE:GpufitConstraintsMex> )
 
 add_custom_target( MATLAB_GPUFIT_PACKAGE
   COMMAND ${CMAKE_COMMAND} -E
@@ -147,9 +148,11 @@ add_custom_target( MATLAB_GPUFIT_PACKAGE
     copy_if_different ${binary_mex} ${build_directory}	
   COMMAND ${CMAKE_COMMAND} -E
     copy_if_different ${binary_mex2} ${build_directory}	
+  COMMAND ${CMAKE_COMMAND} -E
+    copy_if_different ${binary_mex3} ${build_directory}	
   COMMENT "Creating Gpufit Matlab package"
 )
 set_property( TARGET MATLAB_GPUFIT_PACKAGE PROPERTY FOLDER CMakePredefinedTargets )
-add_dependencies( MATLAB_GPUFIT_PACKAGE Gpufit GpufitMex GpufitCudaAvailableMex)
+add_dependencies( MATLAB_GPUFIT_PACKAGE Gpufit GpufitMex GpufitConstraintsMex GpufitCudaAvailableMex)
 
 # add launcher
