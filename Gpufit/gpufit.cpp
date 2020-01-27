@@ -239,3 +239,28 @@ int gpufit_portable_interface(int argc, void *argv[])
         (int *) argv[15]);
 
 }
+
+int gpufit_constrained_portable_interface(int argc, void *argv[])
+{
+
+    return gpufit_constrained(
+        *((size_t *) argv[0]),
+        *((size_t *) argv[1]),
+        (REAL *) argv[2],
+        (REAL *) argv[3],
+        *((int *) argv[4]),
+        (REAL *) argv[5],
+        (REAL *) argv[6],
+        (int *) argv[7],
+        *((REAL *) argv[8]),
+        *((int *) argv[9]),
+        (int *) argv[10],
+        *((int *) argv[11]),
+        *((size_t *) argv[12]),
+        (char *) argv[13],
+        (REAL *) argv[14],
+        (int *) argv[15],
+        (REAL *) argv[16],
+        (int *) argv[17]);
+
+}

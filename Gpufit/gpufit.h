@@ -88,6 +88,8 @@ VISIBLE int gpufit_get_cuda_version(int * runtime_version, int * driver_version)
 
 VISIBLE int gpufit_portable_interface(int argc, void *argv[]);
 
+VISIBLE int gpufit_constrained_portable_interface(int argc, void *argv[]);
+
 #ifdef __cplusplus
 }
 #endif
