@@ -22,6 +22,8 @@ public:
         Info & info,
         REAL const * initial_parameters,
         int const * parameters_to_fit,
+        REAL const * constraints,
+        int const * constraint_types,
         char * user_info,
         REAL * output_parameters,
         int * output_states,
@@ -41,6 +43,8 @@ private:
     REAL const * const weights_ ;
     REAL const * const initial_parameters_ ;
     int const * const parameters_to_fit_;
+    REAL const * const constraints_;
+    int const * const constraint_types_;
     char const * const user_info_;
 
     REAL * output_parameters_ ;
@@ -81,6 +85,7 @@ private:
     void solve_equation_systems_lup();
     void update_states();
     void update_parameters();
+    void project_parameters_to_box();
 
 public:
 

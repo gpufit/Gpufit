@@ -36,6 +36,8 @@ try
         static_cast<EstimatorID>(estimator_id),
         initial_parameters,
         parameters_to_fit,
+        NULL,
+        NULL,
         user_info,
         user_info_size,
         output_parameters,
@@ -57,6 +59,66 @@ catch( std::exception & exception )
 catch( ... )
 {
     last_error = "unknown error" ;
+
+    return ReturnState::ERROR;
+}
+
+int gpufit_constrained
+(
+    size_t n_fits,
+    size_t n_points,
+    REAL * data,
+    REAL * weights,
+    int model_id,
+    REAL * initial_parameters,
+    REAL * constraints,
+    int * constraint_types,
+    REAL tolerance,
+    int max_n_iterations,
+    int * parameters_to_fit,
+    int estimator_id,
+    size_t user_info_size,
+    char * user_info,
+    REAL * output_parameters,
+    int * output_states,
+    REAL * output_chi_squares,
+    int * output_n_iterations
+)
+try
+{
+    FitInterface fi(
+        data,
+        weights,
+        n_fits,
+        static_cast<int>(n_points),
+        tolerance,
+        max_n_iterations,
+        static_cast<EstimatorID>(estimator_id),
+        initial_parameters,
+        parameters_to_fit,
+        constraints,
+        constraint_types,
+        user_info,
+        user_info_size,
+        output_parameters,
+        output_states,
+        output_chi_squares,
+        output_n_iterations,
+        HOST);
+
+    fi.fit(static_cast<ModelID>(model_id));
+
+    return ReturnState::OK;
+}
+catch (std::exception & exception)
+{
+    last_error = exception.what();
+
+    return ReturnState::ERROR;
+}
+catch (...)
+{
+    last_error = "unknown error";
 
     return ReturnState::ERROR;
 }
@@ -91,6 +153,8 @@ try
         static_cast<EstimatorID>(estimator_id),
         gpu_fit_parameters,
         parameters_to_fit,
+        NULL,
+        NULL,
         gpu_user_info,
         user_info_size,
         gpu_fit_parameters,
