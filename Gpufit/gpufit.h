@@ -38,7 +38,7 @@ VISIBLE int gpufit
     int * output_n_iterations
 ) ;
 
-VISIBLE int gpufit_constraints
+VISIBLE int gpufit_constrained
 (
     size_t n_fits,
     size_t n_points,
@@ -46,7 +46,8 @@ VISIBLE int gpufit_constraints
     REAL * weights,
     int model_id,
     REAL * initial_parameters,
-    REAL * parameter_constraints,
+    REAL * constraints,
+    int * constraint_types,
     REAL tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
@@ -57,7 +58,7 @@ VISIBLE int gpufit_constraints
     int * output_states,
     REAL * output_chi_squares,
     int * output_n_iterations
-) ;
+);
 
 VISIBLE int gpufit_cuda_interface
 (
@@ -86,6 +87,8 @@ VISIBLE int gpufit_cuda_available();
 VISIBLE int gpufit_get_cuda_version(int * runtime_version, int * driver_version);
 
 VISIBLE int gpufit_portable_interface(int argc, void *argv[]);
+
+VISIBLE int gpufit_constrained_portable_interface(int argc, void *argv[]);
 
 #ifdef __cplusplus
 }

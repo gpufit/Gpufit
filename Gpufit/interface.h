@@ -20,6 +20,8 @@ public:
         REAL const * initial_parameters,
         REAL const * parameter_constraints,
         int * parameters_to_fit,
+        REAL const * constraints,
+        int const * constraint_types,
         char * user_info,
         std::size_t user_info_size,
         REAL * output_parameters,
@@ -45,6 +47,8 @@ private:
     REAL const * const parameter_constraints_;
     REAL const * const initial_parameters_;
     int const * const parameters_to_fit_;
+    REAL const * const constraints_;
+    int const * const constraint_types_;
     char * const user_info_;
     int n_parameters_;
 

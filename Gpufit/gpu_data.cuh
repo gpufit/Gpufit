@@ -88,6 +88,8 @@ public:
         REAL const * initial_parameters,
         REAL const * parameter_constraints,
         std::vector<int> const & parameters_to_fit_indices,
+        REAL const * constraints,
+        int const * constraint_types,
         int * states,
         REAL * chi_squares,
         int * n_iterations
@@ -103,6 +105,7 @@ private:
 
     void set(int* arr, int const value, int const count);
     void write(REAL* dst, REAL const * src, int const count);
+    void write(int * dst, int const * src, int const count);
     void write(int* dst, std::vector<int> const & src);
     void write(char* dst, char const * src, std::size_t const count);
     void point_to_data_sets();
@@ -122,6 +125,8 @@ public:
     Device_Array< REAL > parameters_;
     Device_Array< REAL > prev_parameters_;
     Device_Array< int > parameters_to_fit_indices_;
+    Device_Array< REAL > constraints_;
+    Device_Array< int > constraint_types_;
     Device_Array< char > user_info_;
 
     Device_Array< REAL > chi_squares_;

@@ -26,6 +26,13 @@ GPUData::GPUData(Info const & info) :
     prev_parameters_( info_.max_chunk_size_*info_.n_parameters_ ),
     parameters_to_fit_indices_( info_.n_parameters_to_fit_ ),
 
+    constraints_(
+        info_.use_constraints_
+        ? info_.n_parameters_to_fit_ * 2 : 0),
+    constraint_types_(
+        info_.use_constraints_
+        ? info_.n_parameters_to_fit_ : 0),
+
     chi_squares_(
         (info_.data_location_ == HOST)
         ? info_.max_chunk_size_ : 0),
@@ -92,6 +99,8 @@ void GPUData::init
     REAL const * const initial_parameters,
     REAL const * const parameter_constraints,
     std::vector<int> const & parameters_to_fit_indices,
+    REAL const * const constraints,
+    int const * const constraint_types,
     int * states,
     REAL * chi_squares,
     int * n_iterations)
@@ -142,6 +151,12 @@ void GPUData::init
 
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
+    if (info_.use_constraints_)
+    {
+        write(constraints_, constraints, 2 * info_.n_parameters_to_fit_);
+        write(constraint_types_, constraint_types, info_.n_parameters_to_fit_);
+    }
+
     set(prev_chi_squares_, 0., chunk_size_);
     set(finished_, 0, chunk_size_);
     set(scaling_vectors_, 0., chunk_size_ * info_.n_parameters_to_fit_);
@@ -175,6 +190,11 @@ void GPUData::read(bool * dst, int const * src)
 void GPUData::write(REAL* dst, REAL const * src, int const count)
 {
     CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(REAL), cudaMemcpyHostToDevice));
+}
+
+void GPUData::write(int * dst, int const * src, int const count)
+{
+    CUDA_CHECK_STATUS(cudaMemcpy(dst, src, count * sizeof(int), cudaMemcpyHostToDevice));
 }
 
 void GPUData::write(int* dst, std::vector<int> const & src)
