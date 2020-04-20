@@ -21,7 +21,6 @@ public:
         REAL const * weights,
         Info & info,
         REAL const * initial_parameters,
-        REAL const * parameter_constraints,
         int const * parameters_to_fit,
         REAL const * constraints,
         int const * constraint_types,
@@ -43,7 +42,6 @@ private:
     REAL const * const data_ ;
     REAL const * const weights_ ;
     REAL const * const initial_parameters_ ;
-    REAL const * const parameter_constraints_ ;
     int const * const parameters_to_fit_;
     REAL const * const constraints_;
     int const * const constraint_types_;

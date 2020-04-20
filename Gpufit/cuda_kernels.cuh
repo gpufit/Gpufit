@@ -115,7 +115,6 @@ extern __global__ void cuda_project_parameters_to_box(
 extern __global__ void cuda_update_parameters(
     REAL * parameters,
     REAL * prev_parameters,
-    REAL const * parameter_constraints,
     REAL const * deltas,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,

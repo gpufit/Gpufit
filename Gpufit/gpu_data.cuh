@@ -86,7 +86,6 @@ public:
         REAL const * data,
         REAL const * weights,
         REAL const * initial_parameters,
-        REAL const * parameter_constraints,
         std::vector<int> const & parameters_to_fit_indices,
         REAL const * constraints,
         int const * constraint_types,
@@ -121,7 +120,6 @@ public:
 
     Device_Array< REAL > data_;
     Device_Array< REAL > weights_;
-    Device_Array< REAL > parameter_constraints_;
     Device_Array< REAL > parameters_;
     Device_Array< REAL > prev_parameters_;
     Device_Array< int > parameters_to_fit_indices_;

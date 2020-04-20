@@ -18,7 +18,6 @@ public:
         int max_n_iterations,
         EstimatorID estimator_id,
         REAL const * initial_parameters,
-        REAL const * parameter_constraints,
         int * parameters_to_fit,
         REAL const * constraints,
         int const * constraint_types,
@@ -44,7 +43,6 @@ private:
     //input
     REAL const * const data_ ;
     REAL const * const weights_;
-    REAL const * const parameter_constraints_;
     REAL const * const initial_parameters_;
     int const * const parameters_to_fit_;
     REAL const * const constraints_;

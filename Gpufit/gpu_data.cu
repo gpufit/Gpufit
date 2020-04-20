@@ -16,9 +16,6 @@ GPUData::GPUData(Info const & info) :
     parameters_(
         (info_.data_location_ == HOST)
         ? info_.max_chunk_size_*info_.n_parameters_ : 0 ),
-	parameter_constraints_(
-		(info_.use_constraints_ && info_.data_location_ == HOST)
-		? info_.n_parameters_ * 2 * info_.max_chunk_size_ : 0 ),
     user_info_(
         (info_.data_location_ == HOST)
         ? info_.user_info_size_ : 0),
@@ -97,7 +94,6 @@ void GPUData::init
     REAL const * const data,
     REAL const * const weights,
     REAL const * const initial_parameters,
-    REAL const * const parameter_constraints,
     std::vector<int> const & parameters_to_fit_indices,
     REAL const * const constraints,
     int const * const constraint_types,
@@ -123,11 +119,6 @@ void GPUData::init
                 weights_,
                 weights + chunk_index_*info_.max_chunk_size_*info_.n_points_,
                 chunk_size_ * info_.n_points_);
-        if (info_.use_constraints_)
-			write(
-				parameter_constraints_,
-				parameter_constraints + chunk_index_*info_.max_chunk_size_*info_.n_parameters_*2,
-				chunk_size_ * info_.n_parameters_*2);
     }
     else if (info_.data_location_ == DEVICE)
     {
@@ -138,9 +129,6 @@ void GPUData::init
         if (info_.use_weights_)
             weights_.assign(
                 weights + chunk_index_*info_.max_chunk_size_*info_.n_points_);
-        if (info_.use_constraints_)
-        	parameter_constraints_.assign(
-        			parameter_constraints + chunk_index_*info_.max_chunk_size_*info_.n_parameters_*2);
         states_.assign(
             states + chunk_index_ * info_.max_chunk_size_);
         chi_squares_.assign(
@@ -153,6 +141,7 @@ void GPUData::init
 
     if (info_.use_constraints_)
     {
+    	//TODO: constraints_ will not be size 2*parameters if it is just "lower" or "upper"
         write(constraints_, constraints, 2 * info_.n_parameters_to_fit_);
         write(constraint_types_, constraint_types, info_.n_parameters_to_fit_);
     }

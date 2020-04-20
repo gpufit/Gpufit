@@ -95,6 +95,7 @@ void tissue_uptake_three()
 	}
 	// parameter_constraints
 	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
+	std::vector< int > constraint_type(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// Ktrans
@@ -106,6 +107,11 @@ void tissue_uptake_three()
 		// fp
 		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
 		parameter_constraints[i * n_model_parameters * 2 + 5] = 100;
+
+		//type 3=upper lower
+		constraint_type[i * n_model_parameters + 0] = 3;
+		constraint_type[i * n_model_parameters + 1] = 3;
+		constraint_type[i * n_model_parameters + 2] = 3;
 	}
 
 	// generate data
@@ -179,7 +185,7 @@ void tissue_uptake_three()
 //		output_chi_square.data(),
 //		output_number_iterations.data()
 //	);
-	int const status = gpufit_constraints
+	int const status = gpufit_constrained
 	(
 		n_fits,
 		n_points_per_fit,
@@ -188,6 +194,7 @@ void tissue_uptake_three()
 		model_id,
 		initial_parameters.data(),
 		parameter_constraints.data(),
+		constraint_type.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),

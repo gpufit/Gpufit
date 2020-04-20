@@ -92,6 +92,7 @@ void tofts_two()
 
 	// parameter_constraints
 	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
+	std::vector< int > constraint_type(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// Ktrans
@@ -100,6 +101,10 @@ void tofts_two()
 		// ve
 		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
 		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
+
+		//type 3=upper lower
+		constraint_type[i * n_model_parameters + 0] = 3;
+		constraint_type[i * n_model_parameters + 1] = 3;
 	}
 
 	// generate data
@@ -151,7 +156,7 @@ void tofts_two()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-	int const status = gpufit_constraints
+	int const status = gpufit_constrained
 	(
 		n_fits,
 		n_points_per_fit,
@@ -160,6 +165,7 @@ void tofts_two()
 		model_id,
 		initial_parameters.data(),
 		parameter_constraints.data(),
+		constraint_type.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),
