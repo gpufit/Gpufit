@@ -50,7 +50,7 @@ void mexFunction(
     bool wrong_nlhs = false;
 
     // expects a certain number of input (nrhs) and output (nlhs) arguments
-    expected_nrhs = 13;
+    expected_nrhs = 14;
     expected_nlhs = 4;
 
     if (nrhs != expected_nrhs)
@@ -70,30 +70,31 @@ void mexFunction(
 	// input parameters
 	REAL * data = (REAL*)mxGetPr(prhs[0]);
 	REAL * parameter_constraints = (REAL*)mxGetPr(prhs[1]);
-    std::size_t n_fits = (std::size_t)*mxGetPr(prhs[2]);
-    std::size_t n_points = (std::size_t)*mxGetPr(prhs[3]);
+	REAL * weights = (REAL*)mxGetPr(prhs[2]);
+    std::size_t n_fits = (std::size_t)*mxGetPr(prhs[3]);
+    std::size_t n_points = (std::size_t)*mxGetPr(prhs[4]);
 
 	// tolerance
 	REAL tolerance = 0;
-	if (!get_scalar(prhs[4], tolerance, MX_REAL))
+	if (!get_scalar(prhs[5], tolerance, MX_REAL))
 	{
         TOLERANCE_PRECISION_MESSAGE();
 	}
 
 	// max_n_iterations
 	int max_n_iterations = 0;
-	if (!get_scalar(prhs[5], max_n_iterations, mxINT32_CLASS))
+	if (!get_scalar(prhs[6], max_n_iterations, mxINT32_CLASS))
 	{
 		mexErrMsgIdAndTxt("Gpufit:Mex", "max_n_iteration is not int32");
 	}
 
-    int estimator_id = (int)*mxGetPr(prhs[6]);
-	REAL * initial_parameters = (REAL*)mxGetPr(prhs[7]);
-	int * parameters_to_fit = (int*)mxGetPr(prhs[8]);
-    int model_id = (int)*mxGetPr(prhs[9]);
-    int n_parameters = (int)*mxGetPr(prhs[10]);
-	int * user_info = (int*)mxGetPr(prhs[11]);
-    std::size_t user_info_size = (std::size_t)*mxGetPr(prhs[12]);
+    int estimator_id = (int)*mxGetPr(prhs[7]);
+	REAL * initial_parameters = (REAL*)mxGetPr(prhs[8]);
+	int * parameters_to_fit = (int*)mxGetPr(prhs[9]);
+    int model_id = (int)*mxGetPr(prhs[10]);
+    int n_parameters = (int)*mxGetPr(prhs[11]);
+	int * user_info = (int*)mxGetPr(prhs[12]);
+    std::size_t user_info_size = (std::size_t)*mxGetPr(prhs[13]);
 
 	// output parameters
     REAL * output_parameters;

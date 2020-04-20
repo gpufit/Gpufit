@@ -1,5 +1,5 @@
 function [parameters, states, chi_squares, n_iterations, time]...
-    = gpufit_constraints(data, constraints, model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
+    = gpufit_constraints(data, constraints, weights, model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
 % Wrapper around the Gpufit mex file.
 %
 % Optional arguments can be given as empty matrix [].
@@ -35,7 +35,12 @@ n_fits = data_size(2);
 % consistency with constraints
 % first dimension has to be 2*n_parameters
 % second dimension has to be the number of fist
-assert(n_fits == size(weights,2)), 'Dimension mismatch between data and constraints')
+assert(n_fits == size(constraints,2), 'Dimension mismatch between data and constraints')
+
+% consistency with weights (if given)
+if ~isempty(weights)
+    assert(isequal(data_size, size(weights)), 'Dimension mismatch between data and weights')
+end
 
 % initial parameters is 2D and read number of parameters
 initial_parameters_size = size(initial_parameters);
@@ -74,12 +79,13 @@ end
 
 %% type checks
 
-% data, weights (if given), initial_parameters are all single
+% data, constraints, weights (if given), initial_parameters are all single
 assert(isa(data, 'single'), 'Type of data is not single');
 if ~isempty(weights)
     assert(isa(weights, 'single'), 'Type of weights is not single');
 end
 assert(isa(initial_parameters, 'single'), 'Type of initial_parameters is not single');
+assert(isa(constraints, 'single'), 'Type of constraints is not single');
 
 % parameters_to_fit is int32 (cast to int32 if incorrect type)
 if ~isa(parameters_to_fit, 'int32')
@@ -108,7 +114,7 @@ end
 %% run Gpufit taking the time
 tic;
 [parameters, states, chi_squares, n_iterations] ...
-    = GpufitConstraintsMex(data, constraints, n_fits, n_points, tolerance, max_n_iterations, estimator_id, initial_parameters, parameters_to_fit, model_id, n_parameters, user_info, user_info_size);
+    = GpufitConstraintsMex(data, constraints, weights, n_fits, n_points, tolerance, max_n_iterations, estimator_id, initial_parameters, parameters_to_fit, model_id, n_parameters, user_info, user_info_size);
 
 time = toc;
 

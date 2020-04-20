@@ -35,7 +35,7 @@ void tofts_three()
 	size_t const n_fits = 1000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 3;
-	REAL snr = 10.8;
+	REAL snr = 1.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -79,7 +79,7 @@ void tofts_three()
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.005, 0.60, 0.03 };		// Ktrans, ve, vp
+	std::vector< REAL > true_parameters{ 0.0005, 0.60, 0.03 };		// Ktrans, ve, vp
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
@@ -124,8 +124,6 @@ void tofts_three()
 			x += ((Ct + Ctprev) / 2 * spacing);
 		}
 		REAL y = true_parameters[0] * x + true_parameters[2] * Cp[k];
-		//data[i] = y + normal_dist(rng);
-		//data[i] = y * (0.2f + 1.6f * uniform_dist(rng));
 		data[i] = y;
 		mean_y += y;
 		//std::cout << data[i] << std::endl;
@@ -160,33 +158,62 @@ void tofts_three()
 	std::vector< REAL > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
 
-	// call to gpufit (C interface)
-	int const status = gpufit_constraints
-	(
-		n_fits,
-		n_points_per_fit,
-		data.data(),
-		0,
-		model_id,
-		initial_parameters.data(),
-		parameter_constraints.data(),
-		tolerance,
-		max_number_iterations,
-		parameters_to_fit.data(),
-		estimator_id,
-		user_info_size,
-		reinterpret_cast< char* >( user_info.data() ),
-		output_parameters.data(),
-		output_states.data(),
-		output_chi_square.data(),
-		output_number_iterations.data()
-	);
-
-
-	// check status
-	if (status != ReturnState::OK)
+	bool run_constrained = 0;
+	if(!run_constrained)
 	{
-		throw std::runtime_error(gpufit_get_last_error());
+		// call to gpufit (C interface)
+		int const status = gpufit
+		(
+			n_fits,
+			n_points_per_fit,
+			data.data(),
+			0,
+			model_id,
+			initial_parameters.data(),
+			tolerance,
+			max_number_iterations,
+			parameters_to_fit.data(),
+			estimator_id,
+			user_info_size,
+			reinterpret_cast< char* >( user_info.data() ),
+			output_parameters.data(),
+			output_states.data(),
+			output_chi_square.data(),
+			output_number_iterations.data()
+		);
+		// check status
+		if (status != ReturnState::OK)
+		{
+			throw std::runtime_error(gpufit_get_last_error());
+		}
+	}
+	else
+	{
+		int const status = gpufit_constraints
+		(
+			n_fits,
+			n_points_per_fit,
+			data.data(),
+			0,
+			model_id,
+			initial_parameters.data(),
+			parameter_constraints.data(),
+			tolerance,
+			max_number_iterations,
+			parameters_to_fit.data(),
+			estimator_id,
+			user_info_size,
+			reinterpret_cast< char* >( user_info.data() ),
+			output_parameters.data(),
+			output_states.data(),
+			output_chi_square.data(),
+			output_number_iterations.data()
+		);
+		// check status
+		if (status != ReturnState::OK)
+		{
+			throw std::runtime_error(gpufit_get_last_error());
+		}
 	}
 
 
