@@ -9,21 +9,21 @@ function [parameters, states, chi_squares, n_iterations, time]...
 %% size checks
 
 % number of input parameter (variable)
-if nargin < 12
+if nargin < 11
     user_info = [];
-    if nargin < 11
+    if nargin < 10
         estimator_id = [];
-        if nargin < 10
+        if nargin < 9
             parameters_to_fit = [];
-            if nargin < 9
+            if nargin < 8
                 max_n_iterations = [];
-                if nargin < 8
+                if nargin < 7
                     tolerance = [];
-                    if nargin < 7
+                    if nargin < 6
                         constraint_types = [];
-                        if nargin < 6
+                        if nargin < 5
                             constraints = [];
-                            if nargin < 5
+                            if nargin < 4
                                 assert('Not enough parameters');
                             end
                         end
@@ -54,6 +54,13 @@ assert(n_fits == initial_parameters_size(2), 'Dimension mismatch in number of fi
 % consistency with parameters_to_fit (if given)
 if ~isempty(parameters_to_fit)
     assert(size(parameters_to_fit, 1) == n_parameters, 'Dimension mismatch in number of parameters between initial_parameters and parameters_to_fit');
+end
+
+% consistency with constraints (if given)
+% first dimension has to be 2*n_parameters
+% second dimension has to be the number of fist
+if ~isempty(constraints)
+	assert(n_fits == size(constraints,2), 'Dimension mismatch between data and constraints')
 end
 
 %% default values
