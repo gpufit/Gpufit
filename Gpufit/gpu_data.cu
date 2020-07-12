@@ -25,10 +25,10 @@ GPUData::GPUData(Info const & info) :
 
     constraints_(
         info_.use_constraints_
-        ? info_.n_parameters_to_fit_ * 2 : 0),
+        ? info_.n_parameters_ * 2 : 0),
     constraint_types_(
         info_.use_constraints_
-        ? info_.n_parameters_to_fit_ : 0),
+        ? info_.n_parameters_ : 0),
 
     chi_squares_(
         (info_.data_location_ == HOST)
@@ -141,8 +141,8 @@ void GPUData::init
 
     if (info_.use_constraints_)
     {
-        write(constraints_, constraints, 2 * info_.n_parameters_to_fit_);
-        write(constraint_types_, constraint_types, info_.n_parameters_to_fit_);
+        write(constraints_, constraints, 2 * info_.n_parameters_);
+        write(constraint_types_, constraint_types, info_.n_parameters_);
     }
 
     set(prev_chi_squares_, 0., chunk_size_);
