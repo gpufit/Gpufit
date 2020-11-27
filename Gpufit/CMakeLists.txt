@@ -76,7 +76,7 @@ elseif( CUDA_ARCHITECTURES STREQUAL All )
 # All does not include the latest PTX!
   set( CUDA_ARCHITECTURES "3.0" "3.5" "5.0" "5.2" )
   if( CUDA_VERSION VERSION_LESS "9.0" )
-    list( INSERT CUDA_ARCHITECTURES 0 "2.1(2.0)" )
+    list( INSERT CUDA_ARCHITECTURES 0 "2.0" "2.1(2.0)" )
   endif()
   if( CUDA_VERSION VERSION_GREATER "6.5" )
     list( APPEND CUDA_ARCHITECTURES "3.2" "3.7" "5.3" )
