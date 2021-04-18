@@ -8,5 +8,10 @@ classdef ModelID
         LINEAR_1D = 5
         FLETCHER_POWELL = 6
         BROWN_DENNIS = 7
+        SPLINE_1D = 8
+        SPLINE_2D = 9
+        SPLINE_3D = 10
+        SPLINE_3D_MULTICHANNEL = 11
+        SPLINE_3D_PHASE_MULTICHANNEL = 12
     end
 end

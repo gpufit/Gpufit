@@ -26,6 +26,11 @@
 .. _gauss_2d_rotated.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/gauss_2d_rotated.cuh
 .. _cauchy_2d_elliptic.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/cauchy2delliptic.cuh
 .. _linear_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/linear_1d.cuh
+.. _spline_1d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/spline_1d.cuh
+.. _spline_2d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/spline_2d.cuh
+.. _spline_3d.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/spline_3d.cuh
+.. _spline_3d_multichannel.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/spline_3d_multichannel.cuh
+.. _spline_3d_phase_multichannel.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/spline_3d_phase_multichannel.cuh
 .. _models.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/models/models.cuh
 .. _lse.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/estimators/lse.cuh
 .. _mle.cuh: https://github.com/gpufit/Gpufit/blob/master/Gpufit/estimators/mle.cuh

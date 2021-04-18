@@ -247,3 +247,147 @@ coordinate of the input data.
 	
 :`p_5`: offset
 
+
+1D Spline function
+++++++++++++++++++
+
+A 1D cubic spline function defined by 3 parameters and a set of cubic spline coefficients. Its model ID is ``SPLINE_1D``
+and it is implemented in spline_1d.cuh_. Here, :code:`p` is the vector of parameters (p0..p2) and :code:`c` the vector
+of spline coefficients. The model function :code:`g` exists for each x coordinate of the input data.
+
+.. math::
+
+    g_i(x,\vec{p},\vec{c}_i)=p_2 + p_0 \sum_{m=0}^{3} c_{i,m}(x-i-p_1)^m
+
+:`x`: (independent variables) *X* coordinates
+
+    No independent variables are passed to this model function.
+    Hence, the *X* coordinate of the first data value is assumed to be :math:`0.0`.
+    The fit size is *M* data points (M=number of data points in the interface), the *X* coordinates of the data are
+    simply the corresponding array indices of the data array, starting from zero.
+
+:`p_0`: amplitude
+
+:`p_1`: center coordinate
+
+:`p_2`: offset
+
+2D Spline function
+++++++++++++++++++
+
+A 2D cubic spline function defined by 4 parameters and a set of cubic spline coefficients. Its model ID is ``SPLINE_2D``
+and it is implemented in spline_2d.cuh_. Here, :code:`p` is the vector of parameters (p0..p3) and :code:`c` the vector
+of spline coefficients. The model function :code:`g` exists for each x,y coordinate of the input data.
+
+.. math::
+
+    g_{i,j}(x,y,\vec{p},\vec{c}_{i,j})=p_3 + p_0 \sum_{m=0}^{3} \sum_{n=0}^{3} c_{i,j,m,n} (x-i-p_1)^m (y-j-p_2)^n
+
+:`x,y`: (independent variables) *X,Y* coordinates
+
+    No independent variables are passed to this model function.
+    Hence, the *(X,Y)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0`).
+    The fit size is *M x N* data points (M*N=number of data points in the interface), the *(X,Y)* coordinates of the
+    data are simply the corresponding 2D array indices of the data array, starting from zero.
+
+:`p_0`: amplitude
+
+:`p_1`: center coordinate x
+
+:`p_2`: center coordinate y
+
+:`p_3`: offset
+
+3D Spline function
+++++++++++++++++++
+
+A 3D cubic spline function defined by 5 parameters and a set of cubic spline coefficients. Its model ID is ``SPLINE_3D``
+and it is implemented in spline_3d.cuh_. Here, :code:`p` is the vector of parameters (p0..p4) and :code:`c` the vector
+of spline coefficients. The model function :code:`g` exists for each x,y,z coordinate of the input data.
+
+.. math::
+
+    g_{i,j,k}(x,y,z,\vec{p},\vec{c}_{i,j,k})=p_4 + p_0 \sum_{m=0}^{3} \sum_{n=0}^{3} \sum_{o=0}^{3} c_{i,j,k,m,n,o} (x-i-p_1)^m (y-j-p_2)^n (z-k-p_3)^o
+
+:`x,y,z`: (independent variables) *X,Y,Z* coordinates
+
+    No independent variables are passed to this model function.
+    Hence, the *(X,Y,Z)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0, 0.0`).
+    The fit size is *M x N x O* data points (M*N*O=number of data points in the interface), the *(X,Y,Z)* coordinates of
+    the data are simply the corresponding 3D array indices of the data array, starting from zero.
+
+:`p_0`: amplitude
+
+:`p_1`: center coordinate x
+
+:`p_2`: center coordinate y
+
+:`p_3`: center coordinate z
+
+:`p_4`: offset
+
+3D Multichannel Spline function
++++++++++++++++++++++++++++++++
+
+A 3D cubic spline function with multiple channels defined by 5 parameters and a set of cubic spline coefficients. Its
+model ID is ``SPLINE_3D_MULTICHANNEL`` and it is implemented in spline_3d_multichannel.cuh_. Here, :code:`p` is the
+vector of parameters (p0..p4) and :code:`c` the vector of spline coefficients. The model function :code:`g` exists for
+each x,y,z coordinate of the input data.
+
+.. math::
+
+    g_{ch,i,j,k}(x,y,z,\vec{p},\vec{c}_{ch,i,j,k})=p_4 + p_0 \sum_{m=0}^{3} \sum_{n=0}^{3} \sum_{o=0}^{3} c_{ch,i,j,k,m,n,o} (x-i-p_1)^m (y-j-p_2)^n (z-k-p_3)^o
+
+:`x,y,z`: (independent variables) *X,Y,Z* coordinates
+
+    No independent variables are passed to this model function.
+    Hence, the *(X,Y,Z)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0, 0.0`).
+    The fit size is *M x N x O* data points (M*N*O=number of data points in the interface), the *(X,Y,Z)* coordinates of
+    the data are simply the corresponding 3D array indices of the data array, starting from zero.
+
+:`p_0`: amplitude
+
+:`p_1`: center coordinate x
+
+:`p_2`: center coordinate y
+
+:`p_3`: center coordinate z
+
+:`p_4`: offset
+
+3D Multichannel Spline function with variable phase
++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+A 3D cubic spline function with multiple channels and a variable phase defined by 6 parameters and a set of cubic spline
+coefficients. Its model ID is ``SPLINE_3D_PHASE_MULTICHANNEL`` and it is implemented in
+spline_3d_phase_multichannel.cuh_. Here, :code:`p` is the vector of parameters (p0..p5) and :code:`c` the vector of
+spline coefficients. The model function :code:`g` exists for each x,y,z coordinate of the input data.
+
+.. math::
+
+    g_{ch,i,j,k}(x,y,z,\vec{p},\vec{c}_{0,ch,i,j,k},\vec{c}_{1,ch,i,j,k},\vec{c}_{2,ch,i,j,k})= p_4 + p_0 \ (f_0 + cos(p5) \ f_1 + sin(p_5) \ f_2)
+
+    f_0= \sum_{m=0}^{3} \sum_{n=0}^{3} \sum_{o=0}^{3} c_{0,ch,i,j,k,m,n,o} (x-i-p_1)^m (y-j-p_2)^n (z-k-p_3)^o
+
+    f_1= \sum_{m=0}^{3} \sum_{n=0}^{3} \sum_{o=0}^{3} c_{1,ch,i,j,k,m,n,o} (x-i-p_1)^m (y-j-p_2)^n (z-k-p_3)^o
+
+    f_2= \sum_{m=0}^{3} \sum_{n=0}^{3} \sum_{o=0}^{3} c_{2,ch,i,j,k,m,n,o} (x-i-p_1)^m (y-j-p_2)^n (z-k-p_3)^o
+
+:`x,y,z`: (independent variables) *X,Y,Z* coordinates
+
+    No independent variables are passed to this model function.
+    Hence, the *(X,Y,Z)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0, 0.0`).
+    The fit size is *M x N x O* data points (M*N*O=number of data points in the interface), the *(X,Y,Z)* coordinates of
+    the data are simply the corresponding 3D array indices of the data array, starting from zero.
+
+:`p_0`: amplitude
+
+:`p_1`: center coordinate x
+
+:`p_2`: center coordinate y
+
+:`p_3`: center coordinate z
+
+:`p_4`: offset
+
+:`p_5`: phase

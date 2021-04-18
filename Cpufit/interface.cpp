@@ -97,6 +97,20 @@ void FitInterface::set_number_of_parameters(ModelID const model_id)
     case BROWN_DENNIS:
         n_parameters_ = 4;
         break;
+    case SPLINE_1D:
+        n_parameters_ = 3;
+        break;
+    case SPLINE_2D:
+        n_parameters_ = 4;
+        break;
+    case SPLINE_3D:
+        n_parameters_ = 5;
+        break;
+    case SPLINE_3D_MULTICHANNEL:
+        n_parameters_ = 5;
+        break;
+    case SPLINE_3D_PHASE_MULTICHANNEL:
+        n_parameters_ = 6;
     default:
         break;
     }

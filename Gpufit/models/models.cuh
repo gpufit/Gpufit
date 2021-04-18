@@ -9,6 +9,11 @@
 #include "cauchy_2d_elliptic.cuh"
 #include "fletcher_powell_helix.cuh"
 #include "brown_dennis.cuh"
+#include "spline_1d.cuh"
+#include "spline_2d.cuh"
+#include "spline_3d.cuh"
+#include "spline_3d_multichannel.cuh"
+#include "spline_3d_phase_multichannel.cuh"
 
 __device__ void calculate_model(
     ModelID const model_id,
@@ -49,6 +54,21 @@ __device__ void calculate_model(
     case BROWN_DENNIS:
         calculate_brown_dennis(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
+    case SPLINE_1D:
+        calculate_spline1d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case SPLINE_2D:
+        calculate_spline2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case SPLINE_3D:
+        calculate_spline3d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case SPLINE_3D_MULTICHANNEL:
+        calculate_spline3d_multichannel(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case SPLINE_3D_PHASE_MULTICHANNEL:
+        calculate_spline3d_phase_multichannel(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
     default:
         break;
     }
@@ -64,8 +84,13 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case GAUSS_2D_ROTATED:      n_parameters = 7; n_dimensions = 2; break;
     case CAUCHY_2D_ELLIPTIC:    n_parameters = 6; n_dimensions = 2; break;
     case LINEAR_1D:             n_parameters = 2; n_dimensions = 1; break;
-    case FLETCHER_POWELL_HELIX:       n_parameters = 3; n_dimensions = 1; break;
+    case FLETCHER_POWELL_HELIX: n_parameters = 3; n_dimensions = 1; break;
     case BROWN_DENNIS:          n_parameters = 4; n_dimensions = 1; break;
+    case SPLINE_1D:             n_parameters = 3; n_dimensions = 1; break;
+    case SPLINE_2D:             n_parameters = 4; n_dimensions = 2; break;
+    case SPLINE_3D:             n_parameters = 5; n_dimensions = 3; break;
+    case SPLINE_3D_MULTICHANNEL:         n_parameters = 5; n_dimensions = 4; break;
+    case SPLINE_3D_PHASE_MULTICHANNEL:   n_parameters = 6; n_dimensions = 4; break;
     default:                                                        break;
     }
 }

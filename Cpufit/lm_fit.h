@@ -96,6 +96,18 @@ private:
 
     void calc_values_brown_dennis(std::vector<REAL>& values);
     void calc_derivatives_brown_dennis(std::vector<REAL> & derivatives);
+    
+    void calc_values_spline1d(std::vector<REAL>& values);
+    void calc_derivatives_spline1d(std::vector<REAL> & derivatives);
+
+    void calc_values_spline2d(std::vector<REAL>& values);
+    void calc_derivatives_spline2d(std::vector<REAL> & derivatives);
+
+    void calc_values_spline3d(std::vector<REAL>& values);
+    void calc_derivatives_spline3d(std::vector<REAL> & derivatives);
+
+    void calc_values_spline3d_multichannel(std::vector<REAL>& values);
+    void calc_derivatives_spline3d_multichannel(std::vector<REAL> & derivatives);
 
     void calculate_hessian(std::vector<REAL> const & derivatives,
         std::vector<REAL> const & curve);
