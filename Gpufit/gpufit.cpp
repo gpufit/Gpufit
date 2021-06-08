@@ -7,8 +7,8 @@ std::string last_error ;
 
 int gpufit
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
@@ -17,7 +17,7 @@ int gpufit
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
@@ -65,8 +65,8 @@ catch( ... )
 
 int gpufit_constrained
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
@@ -77,7 +77,7 @@ int gpufit_constrained
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
@@ -125,8 +125,8 @@ catch (...)
 
 int gpufit_cuda_interface
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * gpu_data,
     REAL * gpu_weights,
     int model_id,
@@ -134,7 +134,7 @@ int gpufit_cuda_interface
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * gpu_user_info,
     REAL * gpu_fit_parameters,
     int * gpu_output_states,
@@ -221,8 +221,8 @@ int gpufit_portable_interface(int argc, void *argv[])
 {
 
     return gpufit(
-        *((size_t *) argv[0]),
-        *((size_t *) argv[1]),
+        *((std::size_t *) argv[0]),
+        *((std::size_t *) argv[1]),
         (REAL *) argv[2],
         (REAL *) argv[3],
         *((int *) argv[4]),
@@ -231,7 +231,7 @@ int gpufit_portable_interface(int argc, void *argv[])
         *((int *) argv[7]),
         (int *) argv[8],
         *((int *) argv[9]),
-        *((size_t *) argv[10]),
+        *((std::size_t *) argv[10]),
         (char *) argv[11],
         (REAL *) argv[12],
         (int *) argv[13],
@@ -244,8 +244,8 @@ int gpufit_constrained_portable_interface(int argc, void *argv[])
 {
 
     return gpufit_constrained(
-        *((size_t *) argv[0]),
-        *((size_t *) argv[1]),
+        *((std::size_t *) argv[0]),
+        *((std::size_t *) argv[1]),
         (REAL *) argv[2],
         (REAL *) argv[3],
         *((int *) argv[4]),
@@ -256,7 +256,7 @@ int gpufit_constrained_portable_interface(int argc, void *argv[])
         *((int *) argv[9]),
         (int *) argv[10],
         *((int *) argv[11]),
-        *((size_t *) argv[12]),
+        *((std::size_t *) argv[12]),
         (char *) argv[13],
         (REAL *) argv[14],
         (int *) argv[15],

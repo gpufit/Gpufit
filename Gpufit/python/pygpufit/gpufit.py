@@ -172,7 +172,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
         user_info_p = None
 
     # call into the library (measure time)
-    t0 = time.clock()
+    t0 = time.perf_counter()
     status = gpufit_func(
         gpufit_func.argtypes[0](number_fits), \
         gpufit_func.argtypes[1](number_points), \
@@ -190,7 +190,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
         states.ctypes.data_as(gpufit_func.argtypes[13]), \
         chi_squares.ctypes.data_as(gpufit_func.argtypes[14]), \
         number_iterations.ctypes.data_as(gpufit_func.argtypes[15]))
-    t1 = time.clock()
+    t1 = time.perf_counter()
 
 
     # check status

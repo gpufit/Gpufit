@@ -26,19 +26,19 @@ void linear_regression_example()
     */
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 10000;
-	size_t const n_points_per_fit = 20;
-	size_t const n_model_parameters = 2;
+	std::size_t const n_fits = 10000;
+	std::size_t const n_points_per_fit = 20;
+	std::size_t const n_model_parameters = 2;
 
 	// custom x positions for the data points of every fit, stored in user info
 	std::vector< REAL > user_info(n_points_per_fit);
-	for (size_t i = 0; i < n_points_per_fit; i++)
+	for (std::size_t i = 0; i < n_points_per_fit; i++)
 	{
 		user_info[i] = static_cast<REAL>(pow(2, i));
 	}
 
 	// size of user info in bytes
-	size_t const user_info_size = n_points_per_fit * sizeof(REAL); 
+	std::size_t const user_info_size = n_points_per_fit * sizeof(REAL); 
 
 	// initialize random number generator
 	std::mt19937 rng;
@@ -51,7 +51,7 @@ void linear_regression_example()
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		// random offset
 		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
@@ -61,10 +61,10 @@ void linear_regression_example()
 
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
-	for (size_t i = 0; i != data.size(); i++)
+	for (std::size_t i = 0; i != data.size(); i++)
 	{
-		size_t j = i / n_points_per_fit; // the fit
-		size_t k = i % n_points_per_fit; // the position within a fit
+		std::size_t j = i / n_points_per_fit; // the fit
+		std::size_t k = i % n_points_per_fit; // the position within a fit
 
 		REAL x = user_info[k];
 		REAL y = true_parameters[0] + x * true_parameters[1];
@@ -134,7 +134,7 @@ void linear_regression_example()
 
 	// compute mean fitted parameters for converged fits
 	std::vector< REAL > output_parameters_mean(n_model_parameters, 0);
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
@@ -149,7 +149,7 @@ void linear_regression_example()
 
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
@@ -169,7 +169,7 @@ void linear_regression_example()
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
@@ -181,7 +181,7 @@ void linear_regression_example()
 
 	// compute mean number of iterations for those converged
 	REAL  output_number_iterations_mean = 0;
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
