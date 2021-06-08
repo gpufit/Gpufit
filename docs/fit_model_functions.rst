@@ -41,7 +41,7 @@ A 1D linear function defined by two parameters (offset and slope).  The model ID
 it is implemented in linear_1d.cuh_.
 
 **Optional**: The *X* coordinate of each data point may be specified via the user information data parameter of the
-Gpufit interface.
+Gpufit interface. The user information should then contain *X* coordinate values of type float in increasing order.
 
     :`Default X coordinates`:
 
