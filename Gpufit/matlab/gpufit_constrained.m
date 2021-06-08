@@ -1,6 +1,6 @@
 function [parameters, states, chi_squares, n_iterations, time]...
     = gpufit_constrained(data, weights, model_id, initial_parameters, constraints, constraint_types, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
-% Wrapper around the Gpufit mex file.
+% Wrapper around the GpufitConstrainedMex file.
 %
 % Optional arguments can be given as empty matrix [].
 %
@@ -9,21 +9,21 @@ function [parameters, states, chi_squares, n_iterations, time]...
 %% size checks
 
 % number of input parameter (variable)
-if nargin < 12
+if nargin < 11
     user_info = [];
-    if nargin < 11
+    if nargin < 10
         estimator_id = [];
-        if nargin < 10
+        if nargin < 9
             parameters_to_fit = [];
-            if nargin < 9
+            if nargin < 8
                 max_n_iterations = [];
-                if nargin < 8
+                if nargin < 7
                     tolerance = [];
-                    if nargin < 7
+                    if nargin < 6
                         constraint_types = [];
-                        if nargin < 6
+                        if nargin < 5
                             constraints = [];
-                            if nargin < 5
+                            if nargin < 4
                                 assert('Not enough parameters');
                             end
                         end
