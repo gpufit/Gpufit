@@ -128,6 +128,9 @@ the configuration and generation steps. For further details, see
 Common issues encountered during CMake configuration
 ----------------------------------------------------
 
+It's strongly recommended to use the latest available CMake version.
+Especially the find CUDA, Matlab, Python capabilities of CMake get updated often.
+
 **Boost NOT found - skipping tests!**
 
 If you want to build the tests and Boost is not found automatically, set the 
@@ -154,6 +157,11 @@ CUDA version.
 
 When using Microsoft Visual Studio 2015, the minimum required CUDA Toolkit 
 version is 8.0.
+
+**No suitable Matlab and/or MX_Library version found - skipping Gpufit Matlab binding!**
+
+CMake might not be able to locate Matlab, in which case this message will be shown.
+Try to set the Matlab_ROOT_DIR variable manually and run CMake again.
 
 **Python launcher**
 

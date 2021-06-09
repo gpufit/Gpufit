@@ -1,6 +1,7 @@
 #ifndef GPUFIT_MODELS_CUH_INCLUDED
 #define GPUFIT_MODELS_CUH_INCLUDED
 
+#include <assert.h>
 #include "linear_1d.cuh"
 #include "gauss_1d.cuh"
 #include "gauss_2d.cuh"
@@ -70,7 +71,7 @@ __device__ void calculate_model(
         calculate_spline3d_phase_multichannel(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
     default:
-        break;
+        assert(0); // unknown model ID
     }
 }
 
@@ -91,7 +92,7 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case SPLINE_3D:             n_parameters = 5; n_dimensions = 3; break;
     case SPLINE_3D_MULTICHANNEL:         n_parameters = 5; n_dimensions = 4; break;
     case SPLINE_3D_PHASE_MULTICHANNEL:   n_parameters = 6; n_dimensions = 4; break;
-    default:                                                        break;
+    default: throw std::runtime_error("unknown model ID");
     }
 }
 

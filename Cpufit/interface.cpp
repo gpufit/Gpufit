@@ -111,8 +111,9 @@ void FitInterface::set_number_of_parameters(ModelID const model_id)
         break;
     case SPLINE_3D_PHASE_MULTICHANNEL:
         n_parameters_ = 6;
-    default:
         break;
+    default:
+        throw std::runtime_error("unknown model ID");
     }
 }
 

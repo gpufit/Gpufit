@@ -81,6 +81,10 @@ if ~isempty(weights)
 end
 assert(isa(initial_parameters, 'single'), 'Type of initial_parameters is not single');
 
+% valid model and estimator IDs
+assert(ModelID.validID(model_id), 'Invalid model ID');
+assert(EstimatorID.validID(estimator_id), 'Invalid estimator ID');
+
 % parameters_to_fit is int32 (cast to int32 if incorrect type)
 if ~isa(parameters_to_fit, 'int32')
     parameters_to_fit = int32(parameters_to_fit);

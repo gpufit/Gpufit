@@ -14,4 +14,16 @@ classdef ModelID
         SPLINE_3D_MULTICHANNEL = 11
         SPLINE_3D_PHASE_MULTICHANNEL = 12
     end
+    methods (Static)
+        function v = validID(id)
+            meta = ?ModelID;
+            v = false;
+            for i = 1 : numel(meta.PropertyList)
+                property_value = meta.PropertyList(i).DefaultValue;
+                if id == property_value
+                    v = true;
+                end
+            end
+        end
+    end
 end
