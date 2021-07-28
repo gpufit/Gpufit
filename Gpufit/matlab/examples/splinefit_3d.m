@@ -1,4 +1,4 @@
-function single_spline_fit_3d()
+function splinefit_3d()
 % spline fit 3D
 %
 % requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally

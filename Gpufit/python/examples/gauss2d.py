@@ -1,16 +1,17 @@
 """
-    Example of the Python binding of the Gpufit library which implements
-    Levenberg Marquardt curve fitting in CUDA
-    https://github.com/gpufit/Gpufit
+Example of the Python binding of the Gpufit library which implements
+Levenberg Marquardt curve fitting in CUDA
+https://github.com/gpufit/Gpufit
 
-    Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
-    http://gpufit.readthedocs.io/en/latest/bindings.html#python
+Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
+http://gpufit.readthedocs.io/en/latest/bindings.html#python
 
-    This example additionally requires numpy.
+This example additionally requires numpy.
 """
 
 import numpy as np
 import pygpufit.gpufit as gf
+
 
 def generate_gauss_2d(p, xi, yi):
     """
@@ -23,10 +24,11 @@ def generate_gauss_2d(p, xi, yi):
     :return: The Gaussian 2D peak.
     """
 
-    arg = -(np.square(xi - p[1]) + np.square(yi - p[2])) / (2*p[3]*p[3])
+    arg = -(np.square(xi - p[1]) + np.square(yi - p[2])) / (2 * p[3] * p[3])
     y = p[0] * np.exp(arg) + p[4]
 
     return y
+
 
 if __name__ == '__main__':
 
@@ -52,7 +54,7 @@ if __name__ == '__main__':
 
     # initial parameters (relative randomized, positions relative to width)
     initial_parameters = np.tile(true_parameters, (number_fits, 1))
-    initial_parameters[:, (1,2)] += true_parameters[3] * (-0.2 + 0.4 * np.random.rand(number_fits, 2))
+    initial_parameters[:, (1, 2)] += true_parameters[3] * (-0.2 + 0.4 * np.random.rand(number_fits, 2))
     initial_parameters[:, (0, 3, 4)] *= 0.8 + 0.4 * np.random.rand(number_fits, 3)
 
     # generate x and y values
@@ -83,8 +85,10 @@ if __name__ == '__main__':
     model_id = gf.ModelID.GAUSS_2D
 
     # run Gpufit
-    parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id, initial_parameters, \
-                                                        tolerance, max_number_iterations, None, estimator_id, None)
+    parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id,
+                                                                                initial_parameters,
+                                                                                tolerance, max_number_iterations, None,
+                                                                                estimator_id, None)
 
     # print fit results
     converged = states == 0
@@ -111,5 +115,5 @@ if __name__ == '__main__':
     converged_parameters_std = np.std(converged_parameters, axis=0)
     print('\nparameters of 2D Gaussian peak')
     for i in range(number_parameters):
-        print('p{} true {:6.2f} mean {:6.2f} std {:6.2f}'.format(i, true_parameters[i], converged_parameters_mean[i], converged_parameters_std[i]))
-
+        print('p{} true {:6.2f} mean {:6.2f} std {:6.2f}'.format(i, true_parameters[i], converged_parameters_mean[i],
+                                                                 converged_parameters_std[i]))

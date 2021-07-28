@@ -1,4 +1,4 @@
-function single_spline_fit_1d()
+function splinefit_1d()
 % spline fit 1D example
 %
 % requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
@@ -25,7 +25,7 @@ SF = 2; % scaling factor
 x_spline = (0 : SF * (size_x - 1))';
 x2 = single(x_spline / SF); % 0, 0.5, .., size_x -1
 
-%% generate PSF (two gaussians)
+%% generate PSF (two Gaussians)
 psf_parameters = single([100, (size_x-1)/2, 1.5, 10]);
 psf = calculate_non_gaussian_psf(x2, psf_parameters);
 psf_normalized = (psf - psf_parameters(4)) / psf_parameters(1);
@@ -46,9 +46,10 @@ noisy_psf = psf + noise;
 user_info = [n_intervals, reshape(coefficients,1,numel(coefficients))];
 
 %% true fit parameters
-true_fit_parameters(1,:) = psf_parameters(1); % amplitude
-true_fit_parameters(2,:) = 0;                 % center shift
-true_fit_parameters(3,:) = psf_parameters(4); % offset
+true_fit_parameters = zeros(3, 1, 'single');
+true_fit_parameters(1) = psf_parameters(1); % amplitude
+true_fit_parameters(2) = 0;                 % center shift
+true_fit_parameters(3) = psf_parameters(4); % offset
 
 %% set initial fit parameters
 pos_shift = -1.2 * SF;
@@ -120,8 +121,8 @@ function y = calculate_non_gaussian_psf(x, p)
 % TODO define center of PSF (for now we assume that center is at middle)
 
 % p(1) - amplitude first Gaussian
-% p(2) - center (both Gaussian shifted a bit towards left and right
-% p(3) - Standard deviation (second Gauss is a bit wider)
+% p(2) - center (both Gaussians shifted a bit towards left and right
+% p(3) - Standard deviation (second Gaussian is a bit wider)
 % p(4) - constant background
 
 assert(nargin == 2);

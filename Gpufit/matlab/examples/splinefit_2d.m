@@ -1,4 +1,4 @@
-function single_spline_fit_2d()
+function splinefit_2d()
 % spline fit 2D rectangular
 %
 % requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
@@ -16,7 +16,7 @@ estimator_id = EstimatorID.LSE;
 x = single(0 : size_x - 1)';
 y = single(0 : size_y - 1);
 
-SF = 2;
+SF = 2; % scaling factor
 x_spline = single(0 : SF * (size_x - 1))';
 y_spline = single(0 : SF * (size_y - 1));
 
@@ -27,7 +27,7 @@ y2 = y_spline / SF;
 psf_parameters = single([100, (size_x-1)/2, (size_y-1)/2, 1, 10]);
 
 %% calculate PSF template
-% calculate psf on fine grid
+% calculate PSF on fine grid
 psf = calculate_psf(x2, y2, psf_parameters);
 % PSF template (normalized to minimum = 0 and maximum = 1)
 psf_normalized = (psf - psf_parameters(5)) / psf_parameters(1);
@@ -111,11 +111,11 @@ max_temp = max(max([initial_gauss_fit initial_spline_fit psf_normalized final_ga
 min_value = min(min_noisy_psf, min_temp);
 max_value = max(max_noisy_psf, max_temp);
 clims = [min_value max_value];
-subplot(231); imagesc(x, y, noisy_psf, clims);            colorbar; title('noisy psf'); axis square;
-subplot(232); imagesc(x2, y2, initial_gauss_fit, clims);  colorbar; title('initial gauss fit'); axis square;
+subplot(231); imagesc(x, y, noisy_psf, clims);            colorbar; title('noisy PSF'); axis square;
+subplot(232); imagesc(x2, y2, initial_gauss_fit, clims);  colorbar; title('initial Gaussian fit'); axis square;
 subplot(233); imagesc(x2, y2, initial_spline_fit, clims); colorbar; title('initial spline fit'); axis square;
-subplot(234); imagesc(x2, y2, psf_normalized);            colorbar; title('psf template'); axis square;
-subplot(235); imagesc(x2, y2, final_gauss_fit, clims);    colorbar; title('final gauss fit'); axis square;
+subplot(234); imagesc(x2, y2, psf_normalized);            colorbar; title('PSF template'); axis square;
+subplot(235); imagesc(x2, y2, final_gauss_fit, clims);    colorbar; title('final Gaussian fit'); axis square;
 subplot(236); imagesc(x2, y2, final_spline_fit, clims);   colorbar; title('final spline fit'); axis square;
 colormap('hot');
 

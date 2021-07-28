@@ -1,10 +1,10 @@
 """
-    Example of the Python binding of the Gpufit library which implements
-    Levenberg Marquardt curve fitting in CUDA
-    https://github.com/gpufit/Gpufit
+Example of the Python binding of the Gpufit library which implements
+Levenberg Marquardt curve fitting in CUDA
+https://github.com/gpufit/Gpufit
 
-    Simple example demonstrating a minimal call of all needed parameters for the Python interface
-    http://gpufit.readthedocs.io/en/latest/bindings.html#python
+Simple example demonstrating a minimal call of all needed parameters for the Python interface
+http://gpufit.readthedocs.io/en/latest/bindings.html#python
 """
 
 import numpy as np

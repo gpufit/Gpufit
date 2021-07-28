@@ -1,4 +1,4 @@
-function single_spline_fit_3d_multichannel()
+function splinefit_3d_multichannel()
 % Spline fit 3D 4 channel example. Can for example be used in 4Pi-Storm microscopy.
 %
 % requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally

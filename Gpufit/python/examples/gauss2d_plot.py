@@ -1,18 +1,19 @@
 """
-    Example of the Python binding of the Gpufit library which implements
-    Levenberg Marquardt curve fitting in CUDA
-    https://github.com/gpufit/Gpufit
+Example of the Python binding of the Gpufit library which implements
+Levenberg Marquardt curve fitting in CUDA
+https://github.com/gpufit/Gpufit
 
-    Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
-    repeated for a different total number of fits each time and plotting the results
-    http://gpufit.readthedocs.io/en/latest/bindings.html#python
+Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
+repeated for a different total number of fits each time and plotting the results
+http://gpufit.readthedocs.io/en/latest/bindings.html#python
 
-    This example additionally requires numpy (http://www.numpy.org/) and matplotlib (http://matplotlib.org/).
+This example additionally requires numpy (http://www.numpy.org/) and matplotlib (http://matplotlib.org/).
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pygpufit.gpufit as gf
+
 
 def gaussians_2d(x, y, p):
     """
@@ -30,6 +31,7 @@ def gaussians_2d(x, y, p):
         y[i, :, :] = pi[0] * np.exp(arg) + pi[4]
 
     return y
+
 
 if __name__ == '__main__':
 
@@ -79,7 +81,7 @@ if __name__ == '__main__':
 
         # vary positions of 2D Gaussian peaks slightly
         test_parameters = np.tile(mean_true_parameters, (n_fits, 1))
-        test_parameters[:, (1,2)] += mean_true_parameters[3] * (-0.2 + 0.4 * np.random.rand(n_fits, 2))
+        test_parameters[:, (1, 2)] += mean_true_parameters[3] * (-0.2 + 0.4 * np.random.rand(n_fits, 2))
 
         # generate data
         data = gaussians_2d(xi, yi, test_parameters)
@@ -90,11 +92,13 @@ if __name__ == '__main__':
 
         # initial parameters (randomized relative (to width for position))
         initial_parameters = np.tile(mean_true_parameters, (n_fits, 1))
-        initial_parameters[:, (1,2)] += mean_true_parameters[3] * (-0.2 + 0.4 * np.random.rand(n_fits, 2))
-        initial_parameters[:, (0,3,4)] *= 0.8 + 0.4 * np.random.rand(n_fits, 3)
+        initial_parameters[:, (1, 2)] += mean_true_parameters[3] * (-0.2 + 0.4 * np.random.rand(n_fits, 2))
+        initial_parameters[:, (0, 3, 4)] *= 0.8 + 0.4 * np.random.rand(n_fits, 3)
 
         # run Gpufit
-        parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id, initial_parameters, tolerance, max_number_iterations)
+        parameters, states, chi_squares, number_iterations, execution_time = gf.fit(data, None, model_id,
+                                                                                    initial_parameters, tolerance,
+                                                                                    max_number_iterations)
 
         # analyze result
         converged = states == 0
@@ -103,7 +107,7 @@ if __name__ == '__main__':
 
         # display result
         '{} fits '.format(n_fits)
-        print('{:7} fits     iterations: {:6.2f} | time: {:6.3f} s | speed: {:8.0f} fits/s'\
+        print('{:7} fits     iterations: {:6.2f} | time: {:6.3f} s | speed: {:8.0f} fits/s' \
               .format(n_fits, np.mean(number_iterations[converged]), execution_time, speed[i]))
 
 # plot
