@@ -1,9 +1,11 @@
-function gauss2d()
+function gauss2d_fixed_parameters()
 % Example of the Matlab binding of the Gpufit library implementing
 % Levenberg Marquardt curve fitting in CUDA
 % https://github.com/gpufit/Gpufit
 %
-% Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
+% Multiple fits of a 2D Gaussian peak function ones without fixed
+% parameters and once with fixed parameters, measures performance
+% Longest times is spent in preparing the data
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
 if isempty(which('gpufit.m'))
@@ -12,24 +14,25 @@ end
 
 assert(gpufit_cuda_available(), 'CUDA not available');
 
-% perform some 2D Gaussian peak fits with a symmetrical Gaussian peak
-fit_gauss2d();
+% perform some 2D Gaussian peak fits with an assymetrical Gaussian peak
+fit_gauss2d_elliptic();
 
-% perform some 2D Gaussian peak fits with an asymmetrical, rotated Gaussian peak
-fit_gauss2d_rotated();
+% perform some 2D Gaussian peak fits with an asymmetrical, rotated Gaussian
+% peak (but with fixed rotation angle)
+fit_gauss2d_rotated_fixed();
 
 end
-function fit_gauss2d()
+function fit_gauss2d_elliptic()
 
 %% number of fits and fit points
 number_fits = 1e4;
 size_x = 20;
-number_parameters = 5;
+number_parameters = 6;
 
 %% set input arguments
 
 % true parameters
-true_parameters = single([20, 9.5, 9.5, 3, 10]);
+true_parameters = single([20, 9.5, 9.5, 3, 4, 10]);
 
 % initialize random number generator
 rng(0);
@@ -37,16 +40,17 @@ rng(0);
 % initial parameters (randomized)
 initial_parameters = repmat(single(true_parameters'), [1, number_fits]);
 % randomize relative to width for positions
-initial_parameters([2,3], :) = initial_parameters([2,3], :) + true_parameters(4) * (-0.2 + 0.4 * rand(2, number_fits));
+initial_parameters(2, :) = initial_parameters(2, :) + true_parameters(4) * (-0.2 + 0.4 * rand(1, number_fits));
+initial_parameters(3, :) = initial_parameters(3, :) + true_parameters(5) * (-0.2 + 0.4 * rand(1, number_fits));
 % randomize relative for other parameters
-initial_parameters([1,4,5], :) = initial_parameters([1,4,5], :) .* (0.8 + 0.4 * rand(3, number_fits));
+initial_parameters([1,4,5,6], :) = initial_parameters([1,4,5,6], :) .* (0.8 + 0.4 * rand(4, number_fits));
 
 % generate x and y values
 g = single(0 : size_x - 1);
 [x, y] = ndgrid(g, g);
 
 % generate data with Poisson noise
-data = gaussian_2d(x, y, true_parameters);
+data = gaussian_2d_rotated(x, y, [true_parameters, 0]);
 data = repmat(data(:), [1, number_fits]);
 data = poissrnd(data);
 
@@ -60,18 +64,19 @@ max_n_iterations = 20;
 estimator_id = EstimatorID.MLE;
 
 % model ID
-model_id = ModelID.GAUSS_2D;
+model_id = ModelID.GAUSS_2D_ELLIPTIC;
 
 %% run Gpufit
 [parameters, states, chi_squares, n_iterations, time] = gpufit(data, [], ...
     model_id, initial_parameters, tolerance, max_n_iterations, [], estimator_id, []);
 
 %% displaying results
-display_results('2D Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
+display_results('2D elliptic Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
 
 end
 
-function fit_gauss2d_rotated()
+function fit_gauss2d_rotated_fixed()
+% with the rotation as fixed parameter
 
 %% number of fits and fit points
 number_fits = 1e4;
@@ -81,7 +86,7 @@ number_parameters = 7;
 %% set input arguments
 
 % true parameters
-true_parameters = single([200, 9.5, 9.5, 3, 4, 10, 0.5]);
+true_parameters = single([20, 9.5, 9.5, 3, 4, 10, 0]);
 
 % initialize random number generator
 rng(0);
@@ -92,7 +97,11 @@ initial_parameters = repmat(single(true_parameters'), [1, number_fits]);
 initial_parameters(2, :) = initial_parameters(2, :) + true_parameters(4) * (-0.2 + 0.4 * rand(1, number_fits));
 initial_parameters(3, :) = initial_parameters(3, :) + true_parameters(5) * (-0.2 + 0.4 * rand(1, number_fits));
 % randomize relative for other parameters
-initial_parameters([1,4,5,6,7], :) = initial_parameters([1,4,5,6,7], :) .* (0.8 + 0.4 * rand(5, number_fits));
+initial_parameters([1,4,5,6], :) = initial_parameters([1,4,5,6], :) .* (0.8 + 0.4 * rand(4, number_fits));
+
+% set fixed parameters
+parameters_to_fit = ones([number_parameters, 1], 'int32');
+parameters_to_fit(7) = 0;
 
 % generate x and y values
 g = single(0 : size_x - 1);
@@ -117,10 +126,10 @@ model_id = ModelID.GAUSS_2D_ROTATED;
 
 %% run Gpufit
 [parameters, states, chi_squares, n_iterations, time] = gpufit(data, [], ...
-    model_id, initial_parameters, tolerance, max_n_iterations, [], estimator_id, []);
+    model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, []);
 
 %% displaying results
-display_results('2D rotated Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
+display_results('2D rotated Gaussian peak (fixed parameter)', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
 
 
 end

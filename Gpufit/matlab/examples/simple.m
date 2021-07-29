@@ -6,6 +6,10 @@ function simple()
 % Simple example demonstrating a minimal call of all needed parameters for the Matlab interface
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+
 assert(gpufit_cuda_available(), 'CUDA not available');
 
 % number of fits, number of points per fit

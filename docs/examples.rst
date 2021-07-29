@@ -342,9 +342,9 @@ This example features:
 - Noisy data and random initial guesses for the parameters
 - Unequally spaced *X* position values, passed to :code:`gpufit()` using the user_info parameter.
 
-
-The following code illustrates how the *X* positions of the data points are stored in the user_info variable, for this model function.  
-Note, however, that the way in which user_info is used by a model function may vary from function to function.  
+The following code illustrates how the *X* positions of the data points are stored in the user_info variable, for this
+model function. The user_info points at a vector of float values. Note, however, that the way in which user_info
+is used by a model function may vary from function to function.
 
 .. code-block:: cpp
 
@@ -358,7 +358,7 @@ Note, however, that the way in which user_info is used by a model function may v
 	// size of user_info in bytes
 	size_t const user_info_size = n_points_per_fit * sizeof(float);
 
-Here, by providing the data coordinates for only one fit in user_info, the model function will use the same coordinates for
+By providing the data coordinates for only one fit in user_info, the model function will use the same coordinates for
 all fits in the dataset, as described in :ref:`fit-model-functions`.  
 
 In the next section, the initial parameters for each fit are set to random values, uniformly distributed around the true parameter value.

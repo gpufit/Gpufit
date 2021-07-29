@@ -1,9 +1,10 @@
-function gauss2d()
+function gauss2d_constrained()
 % Example of the Matlab binding of the Gpufit library implementing
 % Levenberg Marquardt curve fitting in CUDA
 % https://github.com/gpufit/Gpufit
 %
-% Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
+% Multiple fits of a 2D symmetric Gaussian peak function
+% Comparison of unconstrained vs. constrained fit
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
 if isempty(which('gpufit.m'))
@@ -12,24 +13,15 @@ end
 
 assert(gpufit_cuda_available(), 'CUDA not available');
 
-% perform some 2D Gaussian peak fits with a symmetrical Gaussian peak
-fit_gauss2d();
-
-% perform some 2D Gaussian peak fits with an asymmetrical, rotated Gaussian peak
-fit_gauss2d_rotated();
-
-end
-function fit_gauss2d()
-
 %% number of fits and fit points
-number_fits = 1e4;
+number_fits = 2e5;
 size_x = 20;
 number_parameters = 5;
 
 %% set input arguments
 
-% true parameters
-true_parameters = single([20, 9.5, 9.5, 3, 10]);
+% true parameters (amplitude, center, center, sigma, background)
+true_parameters = single([2, 9.5, 9.5, 3, 10]);
 
 % initialize random number generator
 rng(0);
@@ -48,7 +40,7 @@ g = single(0 : size_x - 1);
 % generate data with Poisson noise
 data = gaussian_2d(x, y, true_parameters);
 data = repmat(data(:), [1, number_fits]);
-data = poissrnd(data);
+data = data + randn(size(data)).* sqrt(data);
 
 % tolerance
 tolerance = 1e-3;
@@ -57,71 +49,32 @@ tolerance = 1e-3;
 max_n_iterations = 20;
 
 % estimator id
-estimator_id = EstimatorID.MLE;
+estimator_id = EstimatorID.LSE;
 
 % model ID
 model_id = ModelID.GAUSS_2D;
 
-%% run Gpufit
+%% run unconstrained Gpufit
 [parameters, states, chi_squares, n_iterations, time] = gpufit(data, [], ...
     model_id, initial_parameters, tolerance, max_n_iterations, [], estimator_id, []);
 
 %% displaying results
-display_results('2D Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
+display_results('unconstrained 2D Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
 
-end
+%% set constraints
+constraints = zeros([2*number_parameters, number_fits], 'single');
+constraints(7, :) = 2.9;
+constraints(8, :) = 3.1;
+constraint_types = int32([ConstraintType.LOWER, ConstraintType.FREE, ConstraintType.FREE, ConstraintType.LOWER_UPPER, ConstraintType.LOWER]);
 
-function fit_gauss2d_rotated()
-
-%% number of fits and fit points
-number_fits = 1e4;
-size_x = 20;
-number_parameters = 7;
-
-%% set input arguments
-
-% true parameters
-true_parameters = single([200, 9.5, 9.5, 3, 4, 10, 0.5]);
-
-% initialize random number generator
-rng(0);
-
-% initial parameters (randomized)
-initial_parameters = repmat(single(true_parameters'), [1, number_fits]);
-% randomize relative to width for positions
-initial_parameters(2, :) = initial_parameters(2, :) + true_parameters(4) * (-0.2 + 0.4 * rand(1, number_fits));
-initial_parameters(3, :) = initial_parameters(3, :) + true_parameters(5) * (-0.2 + 0.4 * rand(1, number_fits));
-% randomize relative for other parameters
-initial_parameters([1,4,5,6,7], :) = initial_parameters([1,4,5,6,7], :) .* (0.8 + 0.4 * rand(5, number_fits));
-
-% generate x and y values
-g = single(0 : size_x - 1);
-[x, y] = ndgrid(g, g);
-
-% generate data with Poisson noise
-data = gaussian_2d_rotated(x, y, true_parameters);
-data = repmat(data(:), [1, number_fits]);
-data = poissrnd(data);
-
-% tolerance
-tolerance = 1e-3;
-
-% maximum number of iterations
-max_n_iterations = 20;
-
-% estimator id
-estimator_id = EstimatorID.MLE;
-
-% model ID
-model_id = ModelID.GAUSS_2D_ROTATED;
-
-%% run Gpufit
-[parameters, states, chi_squares, n_iterations, time] = gpufit(data, [], ...
-    model_id, initial_parameters, tolerance, max_n_iterations, [], estimator_id, []);
+%% run constrained Gpufit
+[parameters, states, chi_squares, n_iterations, time] = gpufit_constrained(data, [], ...
+    model_id, initial_parameters, constraints, constraint_types, tolerance, max_n_iterations, [], estimator_id, []);
 
 %% displaying results
-display_results('2D rotated Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
+display_results('constrained 2D Gaussian peak', model_id, number_fits, number_parameters, size_x, time, true_parameters, parameters, states, chi_squares, n_iterations);
 
+% gist: if I know the width of a peak really well before-hand, I can estimate its position better
 
 end
 

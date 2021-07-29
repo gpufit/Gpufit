@@ -20,8 +20,8 @@ extern "C" {
 
 VISIBLE int gpufit
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
@@ -30,7 +30,7 @@ VISIBLE int gpufit
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
@@ -40,8 +40,8 @@ VISIBLE int gpufit
 
 VISIBLE int gpufit_constrained
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
@@ -52,7 +52,7 @@ VISIBLE int gpufit_constrained
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
@@ -62,8 +62,8 @@ VISIBLE int gpufit_constrained
 
 VISIBLE int gpufit_cuda_interface
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * gpu_data,
     REAL * gpu_weights,
     int model_id,
@@ -71,7 +71,7 @@ VISIBLE int gpufit_cuda_interface
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * gpu_user_info,
     REAL * gpu_fit_parameters,
     int * gpu_output_states,

@@ -30,7 +30,7 @@ void generate_gauss_2d(
 	
 	// This code assumes that x_coordinates.size == y_coordinates.size == output_values.size
 	
-	for (size_t i = 0; i < x_coordinates.size(); i++)
+	for (std::size_t i = 0; i < x_coordinates.size(); i++)
 	{
 		
 		REAL arg = -(   (x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
@@ -65,10 +65,10 @@ void gauss_fit_2d_example()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 10000;
-	size_t const size_x = 50;
-	size_t const n_points_per_fit = size_x * size_x;
-	size_t const n_model_parameters = 5;
+	std::size_t const n_fits = 10000;
+	std::size_t const size_x = 50;
+	std::size_t const n_points_per_fit = size_x * size_x;
+	std::size_t const n_model_parameters = 5;
 
 	// true parameters (amplitude, center x position, center y position, width, offset)
 	std::vector< REAL > true_parameters{ 10, 14.5f, 14.5f, 3, 10}; 
@@ -82,9 +82,9 @@ void gauss_fit_2d_example()
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
-	for (size_t i = 0; i < n_fits; i++)
+	for (std::size_t i = 0; i < n_fits; i++)
 	{
-		for (size_t j = 0; j < n_model_parameters; j++)
+		for (std::size_t j = 0; j < n_model_parameters; j++)
 		{
 			if (j == 1 || j == 2)
 			{
@@ -103,9 +103,9 @@ void gauss_fit_2d_example()
 	// generate x and y values
 	std::vector< REAL > x(n_points_per_fit);
 	std::vector< REAL > y(n_points_per_fit);
-	for (size_t i = 0; i < size_x; i++)
+	for (std::size_t i = 0; i < size_x; i++)
 	{
-		for (size_t j = 0; j < size_x; j++) {
+		for (std::size_t j = 0; j < size_x; j++) {
 			x[i * size_x + j] = static_cast<REAL>(j);
 			y[i * size_x + j] = static_cast<REAL>(i);
 		}
@@ -116,9 +116,9 @@ void gauss_fit_2d_example()
 	generate_gauss_2d(x, y, true_parameters, temp);
 
 	std::vector< REAL > data(n_fits * n_points_per_fit);
-	for (size_t i = 0; i < n_fits; i++)
+	for (std::size_t i = 0; i < n_fits; i++)
 	{
-		for (size_t j = 0; j < n_points_per_fit; j++)
+		for (std::size_t j = 0; j < n_points_per_fit; j++)
 		{
 			std::poisson_distribution< int > poisson_dist(temp[j]);
 			data[i * n_points_per_fit + j] = static_cast<REAL>(poisson_dist(rng));
@@ -194,29 +194,29 @@ void gauss_fit_2d_example()
 
 	// compute mean of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_mean(n_model_parameters, 0);
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
-			for (size_t j = 0; j < n_model_parameters; j++)
+			for (std::size_t j = 0; j < n_model_parameters; j++)
 			{
 				output_parameters_mean[j] += output_parameters[i * n_model_parameters + j];
 			}
 		}
 	}
 	// normalize
-	for (size_t j = 0; j < n_model_parameters; j++)
+	for (std::size_t j = 0; j < n_model_parameters; j++)
 	{
 		output_parameters_mean[j] /= output_states_histogram[0];
 	}
 	
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
-			for (size_t j = 0; j < n_model_parameters; j++)
+			for (std::size_t j = 0; j < n_model_parameters; j++)
 			{
 				output_parameters_std[j]
                     += (output_parameters[i * n_model_parameters + j] - output_parameters_mean[j])
@@ -225,13 +225,13 @@ void gauss_fit_2d_example()
 		}
 	}
 	// normalize and take square root
-	for (size_t j = 0; j < n_model_parameters; j++)
+	for (std::size_t j = 0; j < n_model_parameters; j++)
 	{
 		output_parameters_std[j] = sqrt(output_parameters_std[j] / output_states_histogram[0]);
 	}
 
 	// print true value, fitted mean and std for every parameter
-	for (size_t j = 0; j < n_model_parameters; j++)
+	for (std::size_t j = 0; j < n_model_parameters; j++)
 	{
 		std::cout
             << "parameter "     << j
@@ -242,7 +242,7 @@ void gauss_fit_2d_example()
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{
@@ -254,7 +254,7 @@ void gauss_fit_2d_example()
 
 	// compute mean number of iterations for those converged
 	REAL  output_number_iterations_mean = 0;
-	for (size_t i = 0; i != n_fits; i++)
+	for (std::size_t i = 0; i != n_fits; i++)
 	{
 		if (output_states[i] == FitState::CONVERGED)
 		{

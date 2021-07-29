@@ -24,7 +24,7 @@ __device__ void calculate_chi_square(
         calculate_chi_square_mle(chi_square, point_index, data, value, weight, state, user_info, user_info_size);
         break;
     default:
-        break;
+        assert(0); // unknown estimator ID
     }
 }
 
@@ -49,7 +49,7 @@ __device__ void calculate_gradient(
         calculate_gradient_mle(gradient, point_index, parameter_index, data, value, derivative, weight, user_info, user_info_size);
         break;
     default:
-        break;
+        assert(0); // unknown estimator ID
     }
 }
 
@@ -77,7 +77,7 @@ __device__ void calculate_hessian(
         (hessian, point_index, parameter_index_i, parameter_index_j, data, value, derivative, weight, user_info, user_info_size);
         break;
     default:
-        break;
+        assert(0); // unknown estimator ID
     }
 }
 

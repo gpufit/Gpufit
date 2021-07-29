@@ -40,6 +40,17 @@ Instructions for using the binary distribution may be found in the documentation
 - Java binding, with Java examples.
 - The Gpufit manual in PDF format
 
+## Examples
+
+There are various examples that demonstrate the capabilities and usage of Gpufit. They can be found at the following locations:
+
+- /examples - C++ examples that use Cpufit and Gpufit
+- /Cpufit/matlab/examples - Matlab examples that only uses Cpufit
+- /Gpufit/examples - C++ examples for Gpufit
+- /Gpufit/matlab/examples - Matlab examples for Gpufit including spline fit examples (also requires [Gpuspline](https://github.com/gpufit/Gpuspline))
+- /Gpufit/python/examples - Python examples for Gpufit including spline fit examples (also requires [Gpuspline](https://github.com/gpufit/Gpuspline))
+- /Gpufit/java/gpufit/src/test/java/com/github/gpufit/examples - Java examples for Gpufit
+
 ## Authors
 
 Gpufit was created by Mark Bates, Adrian Przybylski, Björn Thiel, and Jan Keller-Findeisen at the Max Planck Institute for Biophysical Chemistry, in Göttingen, Germany.

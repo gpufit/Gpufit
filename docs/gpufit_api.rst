@@ -186,13 +186,15 @@ Description of input parameters
     This parameter is intended to provide flexibility to the Gpufit interface. The user information data is a generic
     block of memory which is passed in to the :code:`gpufit()` function, and which is accessible in shared GPU memory by the
     fit model functions and the estimator functions. Possible uses for the user information data are to pass in values 
-    for independent variables (e.g. X values) or to supply additional data to the fit model function or estimator. For 
-    a coded example which makes use of the user information data, see :ref:`linear-regression-example`. The user 
+    for independent variables (e.g. X values) or to supply additional data to the fit model function or estimator.
+    The documentation of the used fit model function or estimator must specify the composition of the user info data.
+    For a coded example which makes use of the user information data, see :ref:`linear-regression-example`. The user
     information data is an optional parameter - if no user information is required this parameter may be set to NULL.
 
     :type: char *
     :length: user_info_size
-    :special: Use a NULL pointer to indicate that no user information is available.
+    :special: Use a NULL pointer to indicate that no user information is available. The interpretation of the user info
+        depends completely on the used fit model function or estimator.
 
 .. _api-output-parameters:
 

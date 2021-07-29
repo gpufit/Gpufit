@@ -8,8 +8,8 @@ std::string last_error ;
 
 int cpufit
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
@@ -18,7 +18,7 @@ int cpufit
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
