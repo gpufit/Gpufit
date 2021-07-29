@@ -6,6 +6,10 @@ function gauss1d()
 % 1D fitting performance estimation
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+
 assert(gpufit_cuda_available(), 'CUDA not available');
 rng(0);
 

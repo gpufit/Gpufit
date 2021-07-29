@@ -7,6 +7,10 @@ function gauss2d_constrained()
 % Comparison of unconstrained vs. constrained fit
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+
 assert(gpufit_cuda_available(), 'CUDA not available');
 
 %% number of fits and fit points

@@ -1,7 +1,17 @@
 function splinefit_3d_multichannel()
 % Spline fit 3D 4 channel example. Can for example be used in 4Pi-Storm microscopy.
 %
-% requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+% Requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+if isempty(which('spline_coefficients.m'))
+    error('Gpuspline library not found in Matlab path.');
+end
+
+% initialize random number generator
+rng(0);
 
 % data size
 size_x = 19;
@@ -117,6 +127,7 @@ sx = [sx ,s_min - 1*delta_s, s_min - 2*delta_s, s_min - 3*delta_s];
 sy = [sy ,s_max + 1*delta_s, s_max + 2*delta_s, s_max + 3*delta_s];
 
 x = linspace(0,pi,size_z);
+a = zeros(numel(x), 4);
 a(:,1) = sin(x + pi * 0/4) * 0.5 + 0.5;
 a(:,2) = sin(x + pi * 1/4) * 0.5 + 0.5;
 a(:,3) = sin(x + pi * 2/4) * 0.5 + 0.5;

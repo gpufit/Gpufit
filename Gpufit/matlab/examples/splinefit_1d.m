@@ -1,13 +1,23 @@
 function splinefit_1d()
-% spline fit 1D example
+% Spline fit 1D example
 %
-% requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+% 
+%
+% Requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
 
 % there are two coordinate systems
 % the spline coordinate system: 0:1:size-1
 % the user coordinate system: whatever
 % be careful to not mix them up (fit coordinates must be in the spline coordinate system!)
 
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+if isempty(which('spline_coefficients.m'))
+    error('Gpuspline library not found in Matlab path.');
+end
+
+% initialize random number generator
 rng(0);
 
 % data size

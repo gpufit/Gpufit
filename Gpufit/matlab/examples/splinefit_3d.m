@@ -1,7 +1,17 @@
 function splinefit_3d()
 % spline fit 3D
 %
-% requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+% Requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+if isempty(which('spline_coefficients.m'))
+    error('Gpuspline library not found in Matlab path.');
+end
+
+% initialize random number generator
+rng(0);
 
 % data size
 size_x = 18;
@@ -21,7 +31,7 @@ z = single(0 : size_z - 1);
 %% generate PSF
 psf_parameters = single([100, (size_x-1)/2, (size_y-1)/2, (size_z-1)/2+1, 1, 10]);
 psf = calculate_psf(x, y, z, psf_parameters);
-z_slice_index = 60;
+z_slice_index = 61;
 
 %% add noise
 snr = 10;
@@ -92,20 +102,21 @@ y_fit = y-parameters_gpufit_spline(3);
 z_fit = -parameters_gpufit_spline(4);
 b_fit = parameters_gpufit_spline(5);
 final_spline_gpufit = a_fit * spline_values(coefficients, x_fit, y_fit, z_fit) + b_fit;
+
 %% figure
 figure(2);
 current_slice = noisy_psf(:,:,z_slice_index);
-min_noisy_psf = min(min(current_slice));
-max_noisy_psf = max(max(current_slice));
+min_noisy_psf = min(current_slice(:));
+max_noisy_psf = max(current_slice(:));
 min_temp = min(min([initial_spline_fit final_spline_gpufit]));
 max_temp = max(max([initial_spline_fit final_spline_gpufit]));
 min_value = min(min_noisy_psf, min_temp);
 max_value = max(max_noisy_psf, max_temp);
 clims = [min_value max_value];
-subplot(2,2,1); imagesc(x, y', true_spline_fit, clims);     title(sprintf('true spline z=%.2f', true_fit_parameters(4))); axis image;
-subplot(2,2,2); imagesc(x, y', current_slice, clims);       title(sprintf('noisy psf z=%.2f', true_fit_parameters(4))); axis image;
-subplot(2,2,3); imagesc(x, y', initial_spline_fit, clims);  title(sprintf('initial spline fit z=%.2f', spline_fit_initial_parameters(4))); axis image;
-subplot(2,2,4); imagesc(x, y', final_spline_gpufit, clims); title(sprintf('final spline gpufit z=%.2f', parameters_gpufit_spline(4))); axis image;
+subplot(2,2,1); imagesc(x, y', true_spline_fit.', clims);     title(sprintf('true spline z=%.2f', true_fit_parameters(4))); axis image;
+subplot(2,2,2); imagesc(x, y', current_slice.', clims);       title(sprintf('noisy psf z=%.2f', true_fit_parameters(4))); axis image;
+subplot(2,2,3); imagesc(x, y', initial_spline_fit.', clims);  title(sprintf('initial spline fit z=%.2f', spline_fit_initial_parameters(4))); axis image;
+subplot(2,2,4); imagesc(x, y', final_spline_gpufit.', clims); title(sprintf('final spline gpufit z=%.2f', parameters_gpufit_spline(4))); axis image;
 colormap('hot');
 
 end

@@ -1,7 +1,17 @@
 function splinefit_2d()
 % spline fit 2D rectangular
 %
-% requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+% Requires Gpuspline (https://github.com/gpufit/Gpuspline) additionally
+
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+if isempty(which('spline_coefficients.m'))
+    error('Gpuspline library not found in Matlab path.');
+end
+
+% initialize random number generator
+rng(0);
 
 % data size
 size_x = 12;

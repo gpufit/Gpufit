@@ -8,6 +8,10 @@ function gauss2d_fixed_parameters()
 % Longest times is spent in preparing the data
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+
 assert(gpufit_cuda_available(), 'CUDA not available');
 
 % perform some 2D Gaussian peak fits with an assymetrical Gaussian peak
