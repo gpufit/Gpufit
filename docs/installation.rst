@@ -136,6 +136,11 @@ Especially the find CUDA, Matlab, Python capabilities of CMake get updated often
 If you want to build the tests and Boost is not found automatically, set the 
 CMake variable BOOST_ROOT to the corresponding directory, and configure again.
 
+**JAVA JNI NOT found - skipping Gpufit Java binding!**
+
+If you want to build the Java binding and CMake cannot find Java, you can set the CMake
+variable JAVA_HOME to specify a Java installation explicitely.
+
 **Specify CUDA_ARCHITECTURES set**
 
 If you need a specific CUDA architecture, set CUDA_ARCHITECTURES according 
