@@ -24,6 +24,7 @@ private:
 public:
     int n_parameters_;
     int n_parameters_to_fit_;
+    bool use_constraints_;
 
 	int n_points_;
     int power_of_two_n_points_;
@@ -40,7 +41,6 @@ public:
     EstimatorID estimator_id_;
 
     bool use_weights_;
-    bool use_constraints_;
 
     int max_threads_;
     int warp_size_;

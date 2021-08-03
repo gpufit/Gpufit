@@ -128,10 +128,18 @@ the configuration and generation steps. For further details, see
 Common issues encountered during CMake configuration
 ----------------------------------------------------
 
+It's strongly recommended to use the latest available CMake version.
+Especially the find CUDA, Matlab, Python capabilities of CMake get updated often.
+
 **Boost NOT found - skipping tests!**
 
 If you want to build the tests and Boost is not found automatically, set the 
 CMake variable BOOST_ROOT to the corresponding directory, and configure again.
+
+**JAVA JNI NOT found - skipping Gpufit Java binding!**
+
+If you want to build the Java binding and CMake cannot find Java, you can set the CMake
+variable JAVA_HOME to specify a Java installation explicitely.
 
 **Specify CUDA_ARCHITECTURES set**
 
@@ -154,6 +162,11 @@ CUDA version.
 
 When using Microsoft Visual Studio 2015, the minimum required CUDA Toolkit 
 version is 8.0.
+
+**No suitable Matlab and/or MX_Library version found - skipping Gpufit Matlab binding!**
+
+CMake might not be able to locate Matlab, in which case this message will be shown.
+Try to set the Matlab_ROOT_DIR variable manually and run CMake again.
 
 **Python launcher**
 

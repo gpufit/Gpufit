@@ -7,8 +7,8 @@ std::string last_error ;
 
 int gpufit
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
@@ -17,7 +17,7 @@ int gpufit
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
@@ -35,8 +35,9 @@ try
         max_n_iterations,
         static_cast<EstimatorID>(estimator_id),
         initial_parameters,
-        0,
         parameters_to_fit,
+        NULL,
+        NULL,
         user_info,
         user_info_size,
         output_parameters,
@@ -61,20 +62,22 @@ catch( ... )
 
     return ReturnState::ERROR;
 }
-int gpufit_constraints
+
+int gpufit_constrained
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * data,
     REAL * weights,
     int model_id,
     REAL * initial_parameters,
-    REAL * parameter_constraints,
+    REAL * constraints,
+    int * constraint_types,
     REAL tolerance,
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * user_info,
     REAL * output_parameters,
     int * output_states,
@@ -92,8 +95,9 @@ try
         max_n_iterations,
         static_cast<EstimatorID>(estimator_id),
         initial_parameters,
-        parameter_constraints,
         parameters_to_fit,
+        constraints,
+        constraint_types,
         user_info,
         user_info_size,
         output_parameters,
@@ -104,25 +108,25 @@ try
 
     fi.fit(static_cast<ModelID>(model_id));
 
-    return ReturnState::OK ;
+    return ReturnState::OK;
 }
-catch( std::exception & exception )
+catch (std::exception & exception)
 {
-    last_error = exception.what() ;
+    last_error = exception.what();
 
-    return ReturnState::ERROR ;
+    return ReturnState::ERROR;
 }
-catch( ... )
+catch (...)
 {
-    last_error = "unknown error" ;
+    last_error = "unknown error";
 
     return ReturnState::ERROR;
 }
 
 int gpufit_cuda_interface
 (
-    size_t n_fits,
-    size_t n_points,
+    std::size_t n_fits,
+    std::size_t n_points,
     REAL * gpu_data,
     REAL * gpu_weights,
     int model_id,
@@ -130,7 +134,7 @@ int gpufit_cuda_interface
     int max_n_iterations,
     int * parameters_to_fit,
     int estimator_id,
-    size_t user_info_size,
+    std::size_t user_info_size,
     char * gpu_user_info,
     REAL * gpu_fit_parameters,
     int * gpu_output_states,
@@ -148,8 +152,9 @@ try
         max_n_iterations,
         static_cast<EstimatorID>(estimator_id),
         gpu_fit_parameters,
-        0,
         parameters_to_fit,
+        NULL,
+        NULL,
         gpu_user_info,
         user_info_size,
         gpu_fit_parameters,
@@ -216,8 +221,8 @@ int gpufit_portable_interface(int argc, void *argv[])
 {
 
     return gpufit(
-        *((size_t *) argv[0]),
-        *((size_t *) argv[1]),
+        *((std::size_t *) argv[0]),
+        *((std::size_t *) argv[1]),
         (REAL *) argv[2],
         (REAL *) argv[3],
         *((int *) argv[4]),
@@ -226,11 +231,36 @@ int gpufit_portable_interface(int argc, void *argv[])
         *((int *) argv[7]),
         (int *) argv[8],
         *((int *) argv[9]),
-        *((size_t *) argv[10]),
+        *((std::size_t *) argv[10]),
         (char *) argv[11],
         (REAL *) argv[12],
         (int *) argv[13],
         (REAL *) argv[14],
         (int *) argv[15]);
+
+}
+
+int gpufit_constrained_portable_interface(int argc, void *argv[])
+{
+
+    return gpufit_constrained(
+        *((std::size_t *) argv[0]),
+        *((std::size_t *) argv[1]),
+        (REAL *) argv[2],
+        (REAL *) argv[3],
+        *((int *) argv[4]),
+        (REAL *) argv[5],
+        (REAL *) argv[6],
+        (int *) argv[7],
+        *((REAL *) argv[8]),
+        *((int *) argv[9]),
+        (int *) argv[10],
+        *((int *) argv[11]),
+        *((std::size_t *) argv[12]),
+        (char *) argv[13],
+        (REAL *) argv[14],
+        (int *) argv[15],
+        (REAL *) argv[16],
+        (int *) argv[17]);
 
 }

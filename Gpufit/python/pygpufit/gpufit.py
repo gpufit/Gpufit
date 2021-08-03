@@ -1,9 +1,9 @@
 """
-    Python binding for Gpufit, a Levenberg Marquardt curve fitting library written in CUDA
-    See https://github.com/gpufit/Gpufit, http://gpufit.readthedocs.io/en/latest/bindings.html#python
+Python binding for Gpufit, a Levenberg Marquardt curve fitting library written in CUDA
+See https://github.com/gpufit/Gpufit, http://gpufit.readthedocs.io/en/latest/bindings.html#python
 
-    The binding is based on ctypes.
-    See https://docs.python.org/3.5/library/ctypes.html, http://www.scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html
+The binding is based on ctypes.
+See https://docs.python.org/3.5/library/ctypes.html, http://www.scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html
 """
 
 import os
@@ -15,18 +15,20 @@ import numpy as np
 package_dir = os.path.dirname(os.path.realpath(__file__))
 
 if os.name == 'nt':
-	lib_path = os.path.join(package_dir, 'Gpufit.dll') # library name on Windows
+    lib_path = os.path.join(package_dir, 'Gpufit.dll')  # library name on Windows
 elif os.name == 'posix':
-	lib_path = os.path.join(package_dir, 'libGpufit.so') # library name on Unix
+    lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
 else:
-	raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
+    raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
 
 lib = cdll.LoadLibrary(lib_path)
 
 # gpufit function in the dll
 gpufit_func = lib.gpufit
 gpufit_func.restype = c_int
-gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float), c_float, c_int, POINTER(c_int), c_int, c_size_t, POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
+gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float), c_float, c_int,
+                        POINTER(c_int), c_int, c_size_t, POINTER(c_char), POINTER(c_float), POINTER(c_int),
+                        POINTER(c_float), POINTER(c_int)]
 
 # gpufit_get_last_error function in the dll
 error_func = lib.gpufit_get_last_error
@@ -44,21 +46,24 @@ get_cuda_version_func.restype = c_int
 get_cuda_version_func.argtypes = [POINTER(c_int), POINTER(c_int)]
 
 
-class ModelID():
-
+class ModelID:
     GAUSS_1D = 0
     GAUSS_2D = 1
     GAUSS_2D_ELLIPTIC = 2
     GAUSS_2D_ROTATED = 3
     CAUCHY_2D_ELLIPTIC = 4
     LINEAR_1D = 5
-    FLETCHER_POWELL_HELIX = 6
+    FLETCHER_POWELL = 6
     BROWN_DENNIS = 7
-    LIVER_FAT_TWO = 8
-    LIVER_FAT_THREE = 9
-    LIVER_FAT_FOUR = 10
-    EXPONENTIAL = 11
-
+    SPLINE_1D = 8
+    SPLINE_2D = 9
+    SPLINE_3D = 10
+    SPLINE_3D_MULTICHANNEL = 11
+    SPLINE_3D_PHASE_MULTICHANNEL = 12
+    LIVER_FAT_TWO = 13
+    LIVER_FAT_THREE = 14
+    LIVER_FAT_FOUR = 15
+    EXPONENTIAL = 16
 
 class EstimatorID():
 
@@ -66,14 +71,19 @@ class EstimatorID():
     MLE = 1
 
 
-class Status():
-
+class Status:
     Ok = 0
     Error = 1
 
 
+def _valid_id(cls, id):
+    properties = [key for key in cls.__dict__.keys() if not key.startswith('__')]
+    values = [cls.__dict__[key] for key in properties]
+    return id in values
+
+
 def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_iterations=None, \
-           parameters_to_fit=None, estimator_id=None, user_info=None):
+        parameters_to_fit=None, estimator_id=None, user_info=None):
     """
     Calls the C interface fit function in the library.
     (see also http://gpufit.readthedocs.io/en/latest/bindings.html#python)
@@ -111,7 +121,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
 
     # size check: consistency with weights (if given)
     if weights is not None and data.shape != weights.shape:
-        raise  RuntimeError('dimension mismatch between data and weights')
+        raise RuntimeError('dimension mismatch between data and weights')
         # the unequal operator checks, type, length and content (https://docs.python.org/3.7/reference/expressions.html#value-comparisons)
 
     # size check: initial parameters is 2D and read number of parameters
@@ -123,7 +133,8 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
 
     # size check: consistency with parameters_to_fit (if given)
     if parameters_to_fit is not None and parameters_to_fit.shape[0] != number_parameters:
-        raise RuntimeError('dimension mismatch in number of parameters between initial_parameters and parameters_to_fit')
+        raise RuntimeError(
+            'dimension mismatch in number of parameters between initial_parameters and parameters_to_fit')
 
     # default value: tolerance
     if not tolerance:
@@ -155,6 +166,12 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
     if parameters_to_fit.dtype != np.int32:
         raise RuntimeError('type of parameters_to_fit is not np.int32')
 
+    # type check: valid model and estimator id
+    if not _valid_id(ModelID, model_id):
+        raise RuntimeError('Invalid model ID, use an attribute of ModelID')
+    if not _valid_id(EstimatorID, estimator_id):
+        raise RuntimeError('Invalid estimator ID, use an attribute of EstimatorID')
+
     # we don't check type of user_info, but we extract the size in bytes of it
     if user_info is not None:
         user_info_size = user_info.nbytes
@@ -178,7 +195,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
         user_info_p = None
 
     # call into the library (measure time)
-    t0 = time.clock()
+    t0 = time.perf_counter()
     status = gpufit_func(
         gpufit_func.argtypes[0](number_fits), \
         gpufit_func.argtypes[1](number_points), \
@@ -196,8 +213,7 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
         states.ctypes.data_as(gpufit_func.argtypes[13]), \
         chi_squares.ctypes.data_as(gpufit_func.argtypes[14]), \
         number_iterations.ctypes.data_as(gpufit_func.argtypes[15]))
-    t1 = time.clock()
-
+    t1 = time.perf_counter()
 
     # check status
     if status != Status.Ok:

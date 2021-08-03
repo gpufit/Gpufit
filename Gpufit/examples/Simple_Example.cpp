@@ -23,12 +23,12 @@ void simple_example()
     /*************** definition of input and output parameters  ***************/
 
 	// number of fits, number of points per fit
-	size_t const n_fits = 10;
-	size_t const n_points_per_fit = 10;
+	std::size_t const n_fits = 10;
+	std::size_t const n_points_per_fit = 10;
 
 	// model ID and number of model parameters
 	int const model_id = GAUSS_1D;
-	size_t const n_model_parameters = 4;
+	std::size_t const n_model_parameters = 4;
 
 	// initial parameters
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);

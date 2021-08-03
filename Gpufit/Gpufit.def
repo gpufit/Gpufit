@@ -6,3 +6,4 @@ EXPORTS
     gpufit_cuda_available @4
     gpufit_portable_interface @5
     gpufit_cuda_interface @6
+    gpufit_constrained @7

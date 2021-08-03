@@ -1,4 +1,5 @@
 #include "../gpufit.h"
+#include "../gpufit.h"
 
 #include <time.h>
 #include <vector>
@@ -32,10 +33,10 @@ void tissue_uptake_three()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 200;
+	size_t const n_fits = 2000;
 	size_t const n_points_per_fit = 60;
 	size_t const n_model_parameters = 3;
-	REAL snr = 100.8;
+	REAL snr = 1.4;
 
 	// true parameters
 	std::vector< REAL > true_parameters{ 0.0005, 0.05, 0.1 };		// Ktrans, vp, Fp
@@ -92,6 +93,26 @@ void tissue_uptake_three()
 		// random Fp
 		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.5f + 1.0f * uniform_dist(rng));
 	}
+	// parameter_constraints
+	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
+	std::vector< int > constraint_type(n_fits * n_model_parameters);
+	for (size_t i = 0; i != n_fits; i++)
+	{
+		// Ktrans
+		parameter_constraints[i * n_model_parameters * 2 + 0] = 0;
+		parameter_constraints[i * n_model_parameters * 2 + 1] = 2;
+		// vp
+		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.055;
+		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
+		// fp
+		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
+		parameter_constraints[i * n_model_parameters * 2 + 5] = 100;
+
+		//type 3=upper lower
+		constraint_type[i * n_model_parameters + 0] = 3;
+		constraint_type[i * n_model_parameters + 1] = 3;
+		constraint_type[i * n_model_parameters + 2] = 3;
+	}
 
 	// generate data
 	std::vector< REAL > data(n_points_per_fit * n_fits);
@@ -145,7 +166,26 @@ void tissue_uptake_three()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-	int const status = gpufit
+//	int const status = gpufit
+//	(
+//		n_fits,
+//		n_points_per_fit,
+//		data.data(),
+//		0,
+//		model_id,
+//		initial_parameters.data(),
+//		tolerance,
+//		max_number_iterations,
+//		parameters_to_fit.data(),
+//		estimator_id,
+//		user_info_size,
+//		reinterpret_cast< char* >( user_info.data() ),
+//		output_parameters.data(),
+//		output_states.data(),
+//		output_chi_square.data(),
+//		output_number_iterations.data()
+//	);
+	int const status = gpufit_constrained
 	(
 		n_fits,
 		n_points_per_fit,
@@ -153,6 +193,8 @@ void tissue_uptake_three()
 		0,
 		model_id,
 		initial_parameters.data(),
+		parameter_constraints.data(),
+		constraint_type.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),

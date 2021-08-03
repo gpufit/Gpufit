@@ -12,15 +12,20 @@ enum ModelID {
     LINEAR_1D = 5,
     FLETCHER_POWELL_HELIX = 6,
     BROWN_DENNIS = 7,
-    LIVER_FAT_TWO = 8, // Added models
-    LIVER_FAT_THREE = 9,
-    LIVER_FAT_FOUR = 10,
-    EXPONENTIAL = 11,
-    PATLAK = 12,
-    TOFTS = 13,
-    TOFTS_EXTENDED = 14,
-    TISSUE_UPTAKE = 15,
-    TWO_COMPARTMENT_EXCHANGE = 16
+    SPLINE_1D = 8,
+    SPLINE_2D = 9,
+    SPLINE_3D = 10,
+    SPLINE_3D_MULTICHANNEL = 11,
+    SPLINE_3D_PHASE_MULTICHANNEL = 12,
+    LIVER_FAT_TWO = 13, // Added models
+    LIVER_FAT_THREE = 14,
+    LIVER_FAT_FOUR = 15,
+    EXPONENTIAL = 16,
+    PATLAK = 17,
+    TOFTS = 18,
+    TOFTS_EXTENDED = 19,
+    TISSUE_UPTAKE = 20,
+    TWO_COMPARTMENT_EXCHANGE = 21
 };
 
 // estimator ID
@@ -32,6 +37,13 @@ enum FitState { CONVERGED = 0, MAX_ITERATION = 1, SINGULAR_HESSIAN = 2, NEG_CURV
 // return state
 enum ReturnState { OK = 0, ERROR = -1 };
 
+// input/output data location
 enum DataLocation { HOST = 0, DEVICE = 1 };
+
+// bounds
+enum Bound { LOWER_BOUND = 0, UPPER_BOUND = 1 };
+
+// constraint type
+enum ConstraintType { NONE = 0, LOWER = 1, UPPER = 2, LOWER_UPPER = 3 };
 
 #endif

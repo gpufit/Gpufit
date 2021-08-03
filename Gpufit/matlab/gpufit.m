@@ -1,6 +1,6 @@
 function [parameters, states, chi_squares, n_iterations, time]...
     = gpufit(data, weights, model_id, initial_parameters, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
-% Wrapper around the Gpufit mex file.
+% Wrapper around the GpufitMex file.
 %
 % Optional arguments can be given as empty matrix [].
 %
@@ -80,6 +80,10 @@ if ~isempty(weights)
     assert(isa(weights, 'single'), 'Type of weights is not single');
 end
 assert(isa(initial_parameters, 'single'), 'Type of initial_parameters is not single');
+
+% valid model and estimator IDs
+assert(ModelID.validID(model_id), 'Invalid model ID');
+assert(EstimatorID.validID(estimator_id), 'Invalid estimator ID');
 
 % parameters_to_fit is int32 (cast to int32 if incorrect type)
 if ~isa(parameters_to_fit, 'int32')

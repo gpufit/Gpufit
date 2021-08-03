@@ -122,6 +122,26 @@ void LMFitCUDA::scale_hessians()
     CUDA_CHECK_STATUS(cudaGetLastError());
 }
 
+void LMFitCUDA::project_parameters_to_box()
+{
+    dim3  threads(1, 1, 1);
+    dim3  blocks(1, 1, 1);
+
+    threads.x = info_.n_parameters_to_fit_*info_.n_fits_per_block_;
+    blocks.x = n_fits_ / info_.n_fits_per_block_;
+
+    cuda_project_parameters_to_box <<< blocks, threads >>>(
+        gpu_data_.parameters_,
+        info_.n_parameters_,
+        info_.n_parameters_to_fit_,
+        gpu_data_.parameters_to_fit_indices_,
+        gpu_data_.constraints_,
+        gpu_data_.constraint_types_,
+        gpu_data_.finished_,
+        info_.n_fits_per_block_);
+    CUDA_CHECK_STATUS(cudaGetLastError());
+}
+
 void LMFitCUDA::update_parameters()
 {
     dim3  threads(1, 1, 1);
@@ -133,7 +153,6 @@ void LMFitCUDA::update_parameters()
     cuda_update_parameters <<< blocks, threads >>>(
         gpu_data_.parameters_,
         gpu_data_.prev_parameters_,
-        gpu_data_.parameter_constraints_,
         gpu_data_.deltas_,
         info_.n_parameters_to_fit_,
         gpu_data_.parameters_to_fit_indices_,

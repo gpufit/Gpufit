@@ -898,6 +898,54 @@ __global__ void cuda_modify_step_widths(
     hessian[diagonal_index] += scaling_vector[parameter_index] * lambda;
 }
 
+__device__ void project_parameter_to_box(REAL & parameter, REAL const lower_bound, REAL const upper_bound, int const constraint_type)
+{
+    switch (constraint_type)
+    {
+    case ConstraintType::LOWER:
+        parameter = max(parameter, lower_bound);
+        break;
+    case ConstraintType::UPPER:
+        parameter = min(parameter, upper_bound);
+        break;
+    case ConstraintType::LOWER_UPPER:
+        parameter = max(parameter, lower_bound);
+        parameter = min(parameter, upper_bound);
+        break;
+    default:
+        break;
+    }
+}
+
+__global__ void cuda_project_parameters_to_box(
+    REAL * parameters,
+    int const n_parameters,
+    int const n_parameters_to_fit,
+    int const * parameters_to_fit_indices,
+    REAL const * constraints,
+    int const * constraint_types,
+    int const * finished,
+    int const n_fits_per_block)
+{
+    int const fit_in_block = threadIdx.x / n_parameters_to_fit;
+    int const fit_index = blockIdx.x * n_fits_per_block + fit_in_block;
+    int const parameter_index = threadIdx.x - fit_in_block * n_parameters_to_fit;
+
+    if (finished[fit_index])
+    {
+        return;
+    }
+
+    REAL & parameter = parameters[fit_index * n_parameters + parameters_to_fit_indices[parameter_index]];
+
+    REAL const  & lower_bound = constraints[parameters_to_fit_indices[parameter_index] * 2 + LOWER_BOUND];
+    REAL const  & upper_bound = constraints[parameters_to_fit_indices[parameter_index] * 2 + UPPER_BOUND];
+    
+    int const & constraint_type = constraint_types[parameters_to_fit_indices[parameter_index]];
+
+    project_parameter_to_box(parameter, lower_bound, upper_bound, constraint_type);
+}
+
 /* Description of the cuda_update_parameters function
 * ===================================================
 *
@@ -949,7 +997,6 @@ __global__ void cuda_modify_step_widths(
 __global__ void cuda_update_parameters(
     REAL * parameters,
     REAL * prev_parameters,
-    REAL const * parameter_constraints,
     REAL const * deltas,
     int const n_parameters_to_fit,
     int const * parameters_to_fit_indices,
@@ -966,8 +1013,6 @@ __global__ void cuda_update_parameters(
 
     current_prev_parameters[parameter_index] = current_parameters[parameter_index];
 
-    REAL const * current_constraint = parameter_constraints ? &parameter_constraints[fit_index * n_parameters*2] : NULL;
-
     if (finished[fit_index])
     {
         return;
@@ -981,17 +1026,6 @@ __global__ void cuda_update_parameters(
     REAL const * current_deltas = &deltas[fit_index * n_parameters_to_fit];
 
     current_parameters[parameters_to_fit_indices[parameter_index]] += current_deltas[parameter_index];
-    if (current_constraint)
-    {
-		if (current_parameters[parameters_to_fit_indices[parameter_index]]<current_constraint[parameters_to_fit_indices[parameter_index]*2+0])
-		{
-			current_parameters[parameters_to_fit_indices[parameter_index]]=current_constraint[parameters_to_fit_indices[parameter_index]*2+0];
-		}
-		if (current_parameters[parameters_to_fit_indices[parameter_index]]>current_constraint[parameters_to_fit_indices[parameter_index]*2+1])
-		{
-			current_parameters[parameters_to_fit_indices[parameter_index]]=current_constraint[parameters_to_fit_indices[parameter_index]*2+1];
-		}
-    }
 }
 
 /* Description of the cuda_update_state_after_solving function

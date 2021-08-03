@@ -368,6 +368,405 @@ void LMFitCPP::calc_derivatives_brown_dennis(
     }
 }
 
+// derivatives are only computed for those points inside the spline area
+void LMFitCPP::calc_derivatives_spline1d(
+    std::vector<REAL> & derivatives)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    int const n_intervals = static_cast<int>(*user_info_REAL);
+    std::size_t const n_coefficients_per_interval = 4;
+
+    REAL const * coefficients = user_info_REAL + 1;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    {
+        REAL const x = static_cast<REAL>(point_index);
+        REAL const position = x - p[1];
+        int i = static_cast<int>(floor(position)); // can be negative
+
+        // adjust i to its bounds
+        i = i >= 0 ? i : 0;
+        i = i < n_intervals ? i : n_intervals - 1;
+
+        // coefficients of the current point
+        REAL const * current_coefficients = coefficients + i * n_coefficients_per_interval;
+
+        REAL const x_diff = position - static_cast<REAL>(i);
+
+        REAL temp_value = 0;
+        REAL temp_derivative_1 = 0;
+
+        REAL power_factor = 1;
+        for (std::size_t order = 0; order < n_coefficients_per_interval; order++)
+        {
+            // intermediate function value without amplitude and offset
+            temp_value += current_coefficients[order] * power_factor;
+
+            // intermediate derivative value with respect to paramater 1 (center position)
+            if (order < n_coefficients_per_interval - 1)
+                temp_derivative_1
+                += (REAL(order) + 1)
+                * current_coefficients[order + 1]
+                * power_factor;
+
+            power_factor *= x_diff;
+        }
+
+        // derivative
+
+        derivatives[0 * info_.n_points_ + point_index] = temp_value;
+        derivatives[1 * info_.n_points_ + point_index] = -p[0] * temp_derivative_1;
+        derivatives[2 * info_.n_points_ + point_index] = 1;
+    }
+}
+
+// derivatives are only computed for those points inside the spline area
+void LMFitCPP::calc_derivatives_spline2d(
+    std::vector<REAL> & derivatives)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 0));
+    std::size_t const n_points_y = static_cast<std::size_t>(*(user_info_REAL + 1));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 2));
+    int const n_intervals_y = static_cast<int>(*(user_info_REAL + 3));
+    std::size_t const n_coefficients_per_interval = 16;
+
+    REAL const * coefficients = user_info_REAL + 4;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t point_index_y = 0; point_index_y < n_points_y; point_index_y++)
+    {
+        for (std::size_t point_index_x = 0; point_index_x < n_points_x; point_index_x++)
+        {
+            std::size_t const point_index = point_index_y * n_points_x + point_index_x;
+
+            REAL const x = static_cast<REAL>(point_index_x);
+            REAL const y = static_cast<REAL>(point_index_y);
+
+            REAL const pos_x = x - p[1];
+            REAL const pos_y = y - p[2];
+
+            int i = static_cast<int>(floor(pos_x));
+            int j = static_cast<int>(floor(pos_y));
+
+            // adjust i and j to their bounds
+            i = i >= 0 ? i : 0;
+            i = i < n_intervals_x ? i : n_intervals_x - 1;
+            j = j >= 0 ? j : 0;
+            j = j < n_intervals_y ? j : n_intervals_y - 1;
+
+            // coefficients of the current point
+            REAL const * current_coefficients
+                = coefficients + (i * n_intervals_y + j) * n_coefficients_per_interval;
+
+            REAL const x_diff = pos_x - static_cast<REAL>(i);
+            REAL const y_diff = pos_y - static_cast<REAL>(j);
+
+            REAL temp_value = 0;
+            REAL temp_derivative_1 = 0;
+            REAL temp_derivative_2 = 0;
+
+            REAL power_factor_i = 1;
+            // TODO replace 4 by constant like n_coefficients_per_interval1D or so (everywhere)
+            for (std::size_t order_i = 0; order_i < 4; order_i++)
+            {
+                REAL power_factor_j = 1;
+                for (std::size_t order_j = 0; order_j < 4; order_j++)
+                {
+                    // intermediate function value without amplitude and offset
+                    temp_value
+                        += current_coefficients[order_i * 4 + order_j]
+                        * power_factor_i
+                        * power_factor_j;
+
+                    // intermediate derivative value with respect to paramater 1 (center position)
+                    if (order_i < 3)
+                    {
+                        temp_derivative_1
+                            += (REAL(order_i) + 1)
+                            * current_coefficients[(order_i + 1) * 4 + order_j]
+                            * power_factor_i
+                            * power_factor_j;
+                    }
+
+                    if (order_j < 3)
+                    {
+                        temp_derivative_2
+                            += (REAL(order_j) + 1)
+                            * current_coefficients[order_i * 4 + (order_j + 1)]
+                            * power_factor_i
+                            * power_factor_j;
+                    }
+
+                    power_factor_j *= y_diff;
+                }
+                power_factor_i *= x_diff;
+            }
+
+            // derivative
+
+            derivatives[0 * info_.n_points_ + point_index] = temp_value;
+            derivatives[1 * info_.n_points_ + point_index] = -p[0] * temp_derivative_1;
+            derivatives[2 * info_.n_points_ + point_index] = -p[0] * temp_derivative_2;
+            derivatives[3 * info_.n_points_ + point_index] = 1;
+        }
+    }
+}
+
+// derivatives are only computed for those points inside the spline area
+void LMFitCPP::calc_derivatives_spline3d(
+    std::vector<REAL> & derivatives)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 0));
+    std::size_t const n_points_y = static_cast<std::size_t>(*(user_info_REAL + 1));
+    std::size_t const n_points_z = static_cast<std::size_t>(*(user_info_REAL + 2));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 3));
+    int const n_intervals_y = static_cast<int>(*(user_info_REAL + 4));
+    int const n_intervals_z = static_cast<int>(*(user_info_REAL + 5));
+    std::size_t const n_coefficients_per_interval = 64;
+    REAL const * coefficients = user_info_REAL + 6;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t point_index_z = 0; point_index_z < n_points_z; point_index_z++)
+    {
+        for (std::size_t point_index_y = 0; point_index_y < n_points_y; point_index_y++)
+        {
+            for (std::size_t point_index_x = 0; point_index_x < n_points_x; point_index_x++)
+            {
+                std::size_t const point_index = point_index_y * n_points_x + point_index_x;
+
+                REAL const position_x = point_index_x - p[1];
+                REAL const position_y = point_index_y - p[2];
+                REAL const position_z = point_index_z - p[3];
+                int i = static_cast<int>(floor(position_x));
+                int j = static_cast<int>(floor(position_y));
+                int k = static_cast<int>(floor(position_z));
+
+                // adjust i, j and k to their bounds
+                i = i >= 0 ? i : 0;
+                i = i < n_intervals_x ? i : n_intervals_x - 1;
+                j = j >= 0 ? j : 0;
+                j = j < n_intervals_y ? j : n_intervals_y - 1;
+                k = k >= 0 ? k : 0;
+                k = k < n_intervals_z ? k : n_intervals_z - 1;
+
+                // coefficients of the current point
+                REAL const * current_coefficients
+                    = coefficients
+                    + (i * n_intervals_y * n_intervals_z + j * n_intervals_z + k)
+                    * n_coefficients_per_interval;
+
+                REAL const x_diff = position_x - i;
+                REAL const y_diff = position_y - j;
+                REAL const z_diff = position_z - k;
+
+                REAL temp_value = 0;
+                REAL temp_derivative_1 = 0;
+                REAL temp_derivative_2 = 0;
+                REAL temp_derivative_3 = 0;
+
+                REAL power_factor_i = 1;
+                for (std::size_t order_i = 0; order_i < 4; order_i++)
+                {
+                    REAL power_factor_j = 1;
+                    for (std::size_t order_j = 0; order_j < 4; order_j++)
+                    {
+                        REAL power_factor_k = 1;
+                        for (std::size_t order_k = 0; order_k < 4; order_k++)
+                        {
+                            // intermediate function value without amplitude and offset
+                            temp_value
+                                += current_coefficients[order_i * 16 + order_j * 4 + order_k]
+                                * power_factor_i
+                                * power_factor_j
+                                * power_factor_k;
+
+                            if (order_i < 3)
+                            {
+                                temp_derivative_1
+                                    += (REAL(order_i) + 1)
+                                    * current_coefficients[(order_i + 1) * 16 + order_j * 4 + order_k]
+                                    * power_factor_i
+                                    * power_factor_j
+                                    * power_factor_k;
+                            }
+
+                            if (order_j < 3)
+                            {
+                                temp_derivative_2
+                                    += (REAL(order_j) + 1)
+                                    * current_coefficients[order_i * 16 + (order_j + 1) * 4 + order_k]
+                                    * power_factor_i
+                                    * power_factor_j
+                                    * power_factor_k;
+                            }
+
+                            if (order_k < 3)
+                            {
+                                temp_derivative_3
+                                    += (REAL(order_k) + 1)
+                                    * current_coefficients[order_i * 16 + order_j * 4 + (order_k + 1)]
+                                    * power_factor_i
+                                    * power_factor_j
+                                    * power_factor_k;
+                            }
+
+                            power_factor_k *= z_diff;
+                        }
+                        power_factor_j *= y_diff;
+                    }
+                    power_factor_i *= x_diff;
+                }
+
+                derivatives[0 * info_.n_points_ + point_index] = temp_value;
+                derivatives[1 * info_.n_points_ + point_index] = -p[0] * temp_derivative_1;
+                derivatives[2 * info_.n_points_ + point_index] = -p[0] * temp_derivative_2;
+                derivatives[3 * info_.n_points_ + point_index] = -p[0] * temp_derivative_3;
+                derivatives[4 * info_.n_points_ + point_index] = 1;
+            }
+        }
+    }
+}
+
+void LMFitCPP::calc_derivatives_spline3d_multichannel(
+    std::vector<REAL> & derivatives)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    std::size_t const n_channels = static_cast<std::size_t>(*(user_info_REAL + 0));
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 1));
+    std::size_t const n_points_y = static_cast<std::size_t>(*(user_info_REAL + 2));
+    std::size_t const n_points_z = static_cast<std::size_t>(*(user_info_REAL + 3));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 4));
+    int const n_intervals_y = static_cast<int>(*(user_info_REAL + 5));
+    int const n_intervals_z = static_cast<int>(*(user_info_REAL + 6));
+
+    std::size_t const n_points_per_channel = info_.n_points_ / n_channels;
+    std::size_t const n_intervals = n_intervals_x * n_intervals_y * n_intervals_z;
+    std::size_t const n_coefficients_per_interval = 64;
+    REAL const * coefficients = user_info_REAL + 7;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t channel = 0; channel < n_channels; channel++)
+    {
+        for (std::size_t point_index_z = 0; point_index_z < n_points_z; point_index_z++)
+        {
+            for (std::size_t point_index_y = 0; point_index_y < n_points_y; point_index_y++)
+            {
+                for (std::size_t point_index_x = 0; point_index_x < n_points_x; point_index_x++)
+                {
+                    std::size_t const point_index
+                        = channel * n_points_per_channel
+                        + point_index_z * n_points_x * n_points_y
+                        + point_index_y * n_points_x
+                        + point_index_x;
+
+                    REAL const position_x = point_index_x - p[1];
+                    REAL const position_y = point_index_y - p[2];
+                    REAL const position_z = point_index_z - p[3];
+                    int i = static_cast<int>(floor(position_x));
+                    int j = static_cast<int>(floor(position_y));
+                    int k = static_cast<int>(floor(position_z));
+
+                    // adjust i, j and k to their bounds
+                    i = i >= 0 ? i : 0;
+                    i = i < n_intervals_x ? i : n_intervals_x - 1;
+                    j = j >= 0 ? j : 0;
+                    j = j < n_intervals_y ? j : n_intervals_y - 1;
+                    k = k >= 0 ? k : 0;
+                    k = k < n_intervals_z ? k : n_intervals_z - 1;
+
+                    // coefficients of the current interval
+                    std::size_t const interval_index
+                        = channel * n_intervals
+                        + i       * n_intervals_y * n_intervals_z
+                        + j       * n_intervals_z
+                        + k;
+
+                    REAL const * current_coefficients
+                        = coefficients + interval_index * n_coefficients_per_interval;
+
+                    REAL const x_diff = position_x - i;
+                    REAL const y_diff = position_y - j;
+                    REAL const z_diff = position_z - k;
+
+                    REAL temp_value = 0;
+                    REAL temp_derivative_1 = 0;
+                    REAL temp_derivative_2 = 0;
+                    REAL temp_derivative_3 = 0;
+
+                    REAL power_factor_i = 1;
+                    for (std::size_t order_i = 0; order_i < 4; order_i++)
+                    {
+                        REAL power_factor_j = 1;
+                        for (std::size_t order_j = 0; order_j < 4; order_j++)
+                        {
+                            REAL power_factor_k = 1;
+                            for (std::size_t order_k = 0; order_k < 4; order_k++)
+                            {
+                                // intermediate function value without amplitude and offset
+                                temp_value
+                                    += current_coefficients[order_i * 16 + order_j * 4 + order_k]
+                                    * power_factor_i
+                                    * power_factor_j
+                                    * power_factor_k;
+
+                                if (order_i < 3)
+                                {
+                                    temp_derivative_1
+                                        += (REAL(order_i) + 1)
+                                        * current_coefficients[(order_i + 1) * 16 + order_j * 4 + order_k]
+                                        * power_factor_i
+                                        * power_factor_j
+                                        * power_factor_k;
+                                }
+
+                                if (order_j < 3)
+                                {
+                                    temp_derivative_2
+                                        += (REAL(order_j) + 1)
+                                        * current_coefficients[order_i * 16 + (order_j + 1) * 4 + order_k]
+                                        * power_factor_i
+                                        * power_factor_j
+                                        * power_factor_k;
+                                }
+
+                                if (order_k < 3)
+                                {
+                                    temp_derivative_3
+                                        += (REAL(order_k) + 1)
+                                        * current_coefficients[order_i * 16 + order_j * 4 + (order_k + 1)]
+                                        * power_factor_i
+                                        * power_factor_j
+                                        * power_factor_k;
+                                }
+                                power_factor_k *= z_diff;
+                            }
+                            power_factor_j *= y_diff;
+                        }
+                        power_factor_i *= x_diff;
+                    }
+
+                    derivatives[0 * info_.n_points_ + point_index] = temp_value;
+                    derivatives[1 * info_.n_points_ + point_index] = -p[0] * temp_derivative_1;
+                    derivatives[2 * info_.n_points_ + point_index] = -p[0] * temp_derivative_2;
+                    derivatives[3 * info_.n_points_ + point_index] = -p[0] * temp_derivative_3;
+                    derivatives[4 * info_.n_points_ + point_index] = 1;
+                }
+            }
+        }
+    }
+}
+
 void LMFitCPP::calc_values_cauchy2delliptic(std::vector<REAL>& cauchy)
 {
     int const size_x = int(std::sqrt(REAL(info_.n_points_)));
@@ -546,6 +945,294 @@ void LMFitCPP::calc_values_brown_dennis(std::vector<REAL>& values)
     }
 }
 
+void LMFitCPP::calc_values_spline1d(std::vector<REAL>& values)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    int const n_intervals = static_cast<int>(*user_info_REAL);
+    std::size_t const n_coefficients_per_interval = 4;
+    std::size_t const n_coefficients_per_fit = n_intervals * n_coefficients_per_interval;
+
+    REAL const * coefficients = user_info_REAL + 1;
+    REAL const * p = parameters_;
+
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    {
+        REAL const x = static_cast<REAL>(point_index);
+        REAL const position = x - p[1];
+        int i = static_cast<int>(floor(position)); // can be negative
+
+        // adjust i to its bounds
+        i = i >= 0 ? i : 0;
+        i = i < n_intervals ? i : n_intervals - 1;
+
+        // coefficients of the current point
+        REAL const * current_coefficients
+            = coefficients
+            + fit_index_ * n_coefficients_per_fit
+            + i * n_coefficients_per_interval;
+
+        REAL const x_diff = position - static_cast<REAL>(i);
+
+        REAL temp_value = 0;
+
+        REAL power_factor = 1;
+        for (std::size_t order = 0; order < n_coefficients_per_interval; order++)
+        {
+            // intermediate function value without amplitude and offset
+            temp_value += current_coefficients[order] * power_factor;
+            power_factor *= x_diff;
+        }
+        values[point_index] = p[0] * temp_value + p[2];
+    }
+}
+
+void LMFitCPP::calc_values_spline2d(std::vector<REAL>& values)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 0));
+    std::size_t const n_points_y = static_cast<std::size_t>(*(user_info_REAL + 1));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 2));
+    int const n_intervals_y = static_cast<int>(*(user_info_REAL + 3));
+
+    std::size_t const n_coefficients_per_interval = 16;
+
+    REAL const * coefficients = user_info_REAL + 4;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t point_index_y = 0; point_index_y < n_points_y; point_index_y++)
+    {
+        for (std::size_t point_index_x = 0; point_index_x < n_points_x; point_index_x++)
+        {
+            std::size_t const point_index = point_index_y * n_points_x + point_index_x;
+
+            REAL const x = static_cast<REAL>(point_index_x);
+            REAL const y = static_cast<REAL>(point_index_y);
+
+            REAL const pos_x = x - p[1];
+            REAL const pos_y = y - p[2];
+
+            int i = static_cast<int>(floor(pos_x));
+            int j = static_cast<int>(floor(pos_y));
+
+            // adjust i and j to their bounds
+            i = i >= 0 ? i : 0;
+            i = i < n_intervals_x ? i : n_intervals_x - 1;
+            j = j >= 0 ? j : 0;
+            j = j < n_intervals_y ? j : n_intervals_y - 1;
+
+            // coefficients of the current point
+            REAL const * current_coefficients
+                = coefficients
+                + (i * n_intervals_y + j) * n_coefficients_per_interval;
+
+            REAL const x_diff = pos_x - static_cast<REAL>(i);
+            REAL const y_diff = pos_y - static_cast<REAL>(j);
+
+            REAL temp_value = 0;
+
+            REAL power_factor_i = 1;
+            for (std::size_t order_i = 0; order_i < 4; order_i++)
+            {
+                REAL power_factor_j = 1;
+                for (std::size_t order_j = 0; order_j < 4; order_j++)
+                {
+                    // intermediate function value without amplitude and offset
+                    temp_value
+                        += current_coefficients[order_i * 4 + order_j]
+                        * power_factor_i
+                        * power_factor_j;
+
+                    power_factor_j *= y_diff;
+                }
+                power_factor_i *= x_diff;
+            }
+            // scale and add offset
+            values[point_index] = p[0] * temp_value + p[3];
+        }
+    }
+}
+
+void LMFitCPP::calc_values_spline3d(std::vector<REAL>& values)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 0));
+    std::size_t const n_points_y = static_cast<std::size_t>(*(user_info_REAL + 1));
+    std::size_t const n_points_z = static_cast<std::size_t>(*(user_info_REAL + 2));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 3));
+    int const n_intervals_y = static_cast<int>(*(user_info_REAL + 4));
+    int const n_intervals_z = static_cast<int>(*(user_info_REAL + 5));
+    std::size_t const n_coefficients_per_interval = 64;
+    REAL const * coefficients = user_info_REAL + 6;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t point_index_z = 0; point_index_z < n_points_z; point_index_z++)
+    {
+        for (std::size_t point_index_y = 0; point_index_y < n_points_y; point_index_y++)
+        {
+            for (std::size_t point_index_x = 0; point_index_x < n_points_x; point_index_x++)
+            {
+                std::size_t const point_index
+                    = point_index_z * n_points_x * n_points_y 
+                    + point_index_y * n_points_x
+                    + point_index_x;
+
+                REAL const position_x = point_index_x - p[1];
+                REAL const position_y = point_index_y - p[2];
+                REAL const position_z = point_index_z - p[3];
+                int i = static_cast<int>(floor(position_x));
+                int j = static_cast<int>(floor(position_y));
+                int k = static_cast<int>(floor(position_z));
+
+                // adjust i, j and k to their bounds
+                i = i >= 0 ? i : 0;
+                i = i < n_intervals_x ? i : n_intervals_x - 1;
+                j = j >= 0 ? j : 0;
+                j = j < n_intervals_y ? j : n_intervals_y - 1;
+                k = k >= 0 ? k : 0;
+                k = k < n_intervals_z ? k : n_intervals_z - 1;
+
+                // coefficients of the current point
+                REAL const * current_coefficients
+                    = coefficients
+                    + (i * n_intervals_y * n_intervals_z + j * n_intervals_z + k)
+                    * n_coefficients_per_interval;
+
+                REAL const x_diff = position_x - i;
+                REAL const y_diff = position_y - j;
+                REAL const z_diff = position_z - k;
+
+                REAL temp_value = 0;
+
+                REAL power_factor_i = 1;
+                for (std::size_t order_i = 0; order_i < 4; order_i++)
+                {
+                    REAL power_factor_j = 1;
+                    for (std::size_t order_j = 0; order_j < 4; order_j++)
+                    {
+                        REAL power_factor_k = 1;
+                        for (std::size_t order_k = 0; order_k < 4; order_k++)
+                        {
+                            // intermediate function value without amplitude and offset
+                            temp_value
+                                += current_coefficients[order_i * 16 + order_j * 4 + order_k]
+                                * power_factor_i
+                                * power_factor_j
+                                * power_factor_k;
+
+                            power_factor_k *= z_diff;
+                        }
+                        power_factor_j *= y_diff;
+                    }
+                    power_factor_i *= x_diff;
+                }
+
+                // scale and add offset
+                values[point_index] = p[0] * temp_value + p[4];
+            }
+        }
+    }
+}
+
+void LMFitCPP::calc_values_spline3d_multichannel(std::vector<REAL>& values)
+{
+    REAL const * user_info_REAL = (REAL *)user_info_;
+
+    std::size_t const n_channels = static_cast<std::size_t>(*(user_info_REAL + 0));
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 1));
+    std::size_t const n_points_y = static_cast<std::size_t>(*(user_info_REAL + 2));
+    std::size_t const n_points_z = static_cast<std::size_t>(*(user_info_REAL + 3));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 4));
+    int const n_intervals_y = static_cast<int>(*(user_info_REAL + 5));
+    int const n_intervals_z = static_cast<int>(*(user_info_REAL + 6));
+
+    std::size_t const n_points_per_channel = info_.n_points_ / n_channels;
+    std::size_t const n_intervals = n_intervals_x * n_intervals_y * n_intervals_z;
+    std::size_t const n_coefficients_per_point = 64;
+    REAL const * coefficients = user_info_REAL + 7;
+
+    REAL const * p = parameters_;
+
+    for (std::size_t channel = 0; channel < n_channels; channel++)
+    {
+        for (std::size_t point_index_z = 0; point_index_z < n_points_z; point_index_z++)
+        {
+            for (std::size_t point_index_y = 0; point_index_y < n_points_y; point_index_y++)
+            {
+                for (std::size_t point_index_x = 0; point_index_x < n_points_x; point_index_x++)
+                {
+                    std::size_t const point_index
+                        = channel * n_points_per_channel
+                        + point_index_z * n_points_x * n_points_y
+                        + point_index_y * n_points_x
+                        + point_index_x;
+
+                    REAL const position_x = point_index_x - p[1];
+                    REAL const position_y = point_index_y - p[2];
+                    REAL const position_z = point_index_z - p[3];
+                    int i = static_cast<int>(floor(position_x));
+                    int j = static_cast<int>(floor(position_y));
+                    int k = static_cast<int>(floor(position_z));
+
+                    // adjust i, j and k to their bounds
+                    i = i >= 0 ? i : 0;
+                    i = i < n_intervals_x ? i : n_intervals_x - 1;
+                    j = j >= 0 ? j : 0;
+                    j = j < n_intervals_y ? j : n_intervals_y - 1;
+                    k = k >= 0 ? k : 0;
+                    k = k < n_intervals_z ? k : n_intervals_z - 1;
+
+                    std::size_t const interval_index
+                        = channel * n_intervals
+                        + i       * n_intervals_y * n_intervals_z
+                        + j       * n_intervals_z
+                        + k;
+
+                    REAL const x_diff = position_x - i;
+                    REAL const y_diff = position_y - j;
+                    REAL const z_diff = position_z - k;
+
+                    // coefficients of the current point
+                    REAL const * current_coefficients
+                        = coefficients + interval_index * n_coefficients_per_point;
+
+                    REAL temp_value = 0;
+
+                    REAL power_factor_i = 1;
+                    for (std::size_t order_i = 0; order_i < 4; order_i++)
+                    {
+                        REAL power_factor_j = 1;
+                        for (std::size_t order_j = 0; order_j < 4; order_j++)
+                        {
+                            REAL power_factor_k = 1;
+                            for (std::size_t order_k = 0; order_k < 4; order_k++)
+                            {
+                                // intermediate function value without amplitude and offset
+                                temp_value
+                                    += current_coefficients[order_i * 16 + order_j * 4 + order_k]
+                                    * power_factor_i
+                                    * power_factor_j
+                                    * power_factor_k;
+
+                                power_factor_k *= z_diff;
+                            }
+                            power_factor_j *= y_diff;
+                        }
+                        power_factor_i *= x_diff;
+                    }
+                    // scale and add offset
+                    values[point_index] = p[0] * temp_value + p[4];
+                }
+            }
+        }
+    }
+}
+
+// depending on the model Id, calls functions to calculate model function values and derivatives
 void LMFitCPP::calc_curve_values(std::vector<REAL>& curve, std::vector<REAL>& derivatives)
 {           
     if (info_.model_id_ == GAUSS_1D)
@@ -587,6 +1274,26 @@ void LMFitCPP::calc_curve_values(std::vector<REAL>& curve, std::vector<REAL>& de
     {
         calc_values_brown_dennis(curve);
         calc_derivatives_brown_dennis(derivatives);
+    }
+    else if (info_.model_id_ == SPLINE_1D)
+    {
+        calc_values_spline1d(curve);
+        calc_derivatives_spline1d(derivatives);
+    }
+    else if (info_.model_id_ == SPLINE_2D)
+    {
+        calc_values_spline2d(curve);
+        calc_derivatives_spline2d(derivatives);
+    }
+    else if (info_.model_id_ == SPLINE_3D)
+    {
+        calc_values_spline3d(curve);
+        calc_derivatives_spline3d(derivatives);
+    }
+    else if (info_.model_id_ == SPLINE_3D_MULTICHANNEL)
+    {
+        calc_values_spline3d_multichannel(curve);
+        calc_derivatives_spline3d_multichannel(derivatives);
     }
 }
 

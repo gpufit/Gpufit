@@ -1,6 +1,7 @@
 #define GPUFIT_NEW_MODEL_CUH_INCLUDED
 
 __device__ REAL get_value (
+	///////////// value calculated here to be used for value and derivative below /////////////
 	REAL p0, //Ktrans
 	REAL p1, //Ve
 	int const point_index,
@@ -28,7 +29,7 @@ __device__ void calculate_new_model (               // function name
 	int const point_index,
 	int const fit_index,
 	int const chunk_index,
-	char * user_info,							 // contains time and Cp values in a 1 dimensional array
+	char * user_info,				// contains time and Cp values in a 1 dimensional array
 	std::size_t const user_info_size)
 {
 	///////////////////////////// value //////////////////////////////

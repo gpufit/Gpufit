@@ -6,6 +6,10 @@ function gauss2d()
 % Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
 % http://gpufit.readthedocs.io/en/latest/bindings.html#matlab
 
+if isempty(which('gpufit.m'))
+    error('Gpufit library not found in Matlab path.');
+end
+
 assert(gpufit_cuda_available(), 'CUDA not available');
 
 % perform some 2D Gaussian peak fits with a symmetrical Gaussian peak

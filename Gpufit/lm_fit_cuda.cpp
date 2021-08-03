@@ -20,6 +20,9 @@ LMFitCUDA::~LMFitCUDA()
 
 void LMFitCUDA::run()
 {
+    if (info_.use_constraints_)
+        project_parameters_to_box();
+
     // initialize the chi-square values
 	calc_curve_values();
     calc_chi_squares();
@@ -45,6 +48,9 @@ void LMFitCUDA::run()
         SOLVE_EQUATION_SYSTEMS();
         update_states();
         update_parameters();
+
+        if (info_.use_constraints_)
+            project_parameters_to_box();
 
         // calculate fitting curve values and its derivatives
         // calculate chi-squares, gradients and hessians

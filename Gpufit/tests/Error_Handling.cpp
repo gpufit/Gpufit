@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE( Error_Handling )
     std::size_t const n_points{ 2 } ;
     std::array< REAL, n_points > data{ { 0, 1 } } ;
     std::array< REAL, n_points > weights{ { 1, 1 } } ;
-    std::array< REAL, 2 > initial_parameters{ { 0, 0 } } ;
+    REAL * initial_parameters = NULL;
     REAL tolerance{ 0.001f } ;
     int max_n_iterations{ 10 } ;
     std::array< int, 2 > parameters_to_fit{ { 0, 0 } } ;
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( Error_Handling )
                 data.data(),
                 weights.data(),
                 LINEAR_1D,
-                initial_parameters.data(),
+                initial_parameters,
                 tolerance,
                 max_n_iterations,
                 parameters_to_fit.data(),
@@ -49,5 +49,5 @@ BOOST_AUTO_TEST_CASE( Error_Handling )
 
     std::string const error = gpufit_get_last_error() ;
 
-    BOOST_CHECK( error == "invalid configuration argument" ) ;
+    BOOST_CHECK( error == "invalid argument" ) ;
 }
