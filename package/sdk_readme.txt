@@ -3,10 +3,8 @@ which implements Levenberg Marquardt curve fitting in CUDA.
 
 Gpufit 1.1.0
 
-Compiled with the Microsoft Visual Studio 2015 C++ compiler and CUDA toolkit 8.0.
+Compiled with the Microsoft Visual Studio 2019 C++ compiler and CUDA toolkit 11.3.
 
 Folder include contains the gpufit.h header file representing the C API.
-
-Folder win32 contains the 32 bit compiled dynamic link library and import library.
 
 Folder win64 contains the 64 bit compiled dynamic link library and import library.
