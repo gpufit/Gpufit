@@ -177,7 +177,7 @@ cp "$x64_BUILD/Gpufit/libGpufit.so" "$SDK_INSTALL_ROOT/linux"
 
 
 # zip content of temp folder with 7-Zip if available
-if 7z a "${OUTPUT_ZIP}" ./"${PACKAGE_INSTALL}"/*
+if 7z a -bso0 "${OUTPUT_ZIP}" "${PACKAGE_INSTALL}"
 then
     #it worked
     echo Created ${OUTPUT_ZIP}
