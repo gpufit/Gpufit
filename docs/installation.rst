@@ -60,7 +60,7 @@ The following tools are required in order to build Gpufit from source.
   * Linux: GCC 4 (tested with 4-6)
   * Windows: Visual Studio 2013 (tested with 2013 - 2019)
 
-* CUDA_ Toolkit 6.5 or later (tested with 6.5-10.1) [#]_
+* CUDA_ Toolkit 6.5 or later (tested with 6.5-11.4) [#]_
 
 .. [#] Note that it is recommended to use the newest available stable release of the CUDA Toolkit which is compatible
     with the compiler (e.g. Visual Studio 2015 is required in order to use CUDA Toolkit 8.0). Some older graphics cards
@@ -71,9 +71,10 @@ The following tools are required in order to build Gpufit from source.
 
 * Boost_ 1.58 or later (required if you want to build the tests)
 * MATLAB_ if building the MATLAB bindings (minimum version Matlab 2012a)
-* Python_ if building the Python bindings (Python version 2.x or 3.x)
+* Python_ if building the Python bindings (Python version 2.x or 3.x).  Note that the "wheel" package is required 
+when building the Python binding.
 * Java if building the Java bindings (minimum Java JDK version 8)
-* PDF Latex installation (like Miktex) if converting the documentation from Latex to PDF
+* PDF Latex installation (like Miktex) if converting the documentation from Latex to PDF.  
 
 Source code availability
 ------------------------
@@ -177,6 +178,10 @@ Python path.
 
 Set Matlab_WORKING_DIRECTORY to a valid directory, it will be added to 
 the Matlab path.
+
+** PDFLATEX not found ** 
+
+When using Miktex, if the PDFLATEX package is not automatically found, the path to pdflatex.exe can be specified to CMake with the MIKTEX_BINARY_PATH variable.
 
 Compiling Gpufit on Windows
 ---------------------------
