@@ -3,7 +3,7 @@ which implements Levenberg Marquardt curve fitting in CUDA.
 
 Gpufit 1.2.0
 
-Compiled with the Microsoft Visual Studio 2019 C++ compiler and CUDA toolkit 11.3.
+Compiled with the Microsoft Visual Studio 2019 C++ compiler and CUDA toolkit 11.4.
 
 Folder include contains the gpufit.h header file representing the C API.
 
