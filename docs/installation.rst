@@ -179,9 +179,15 @@ Python path.
 Set Matlab_WORKING_DIRECTORY to a valid directory, it will be added to 
 the Matlab path.
 
-** PDFLATEX not found ** 
+**Documentation build issues**
 
-When using Miktex, if the PDFLATEX package is not automatically found, the path to pdflatex.exe can be specified to CMake with the MIKTEX_BINARY_PATH variable.
+Note that the several Python packages are required to run the "documentation_create_latex.bat" script
+on Windows systems.  Please ensure that the "sphinx" and "sphinx_rtd_style" packages are installed in your
+Python distribution.
+
+**PDFLATEX not found** 
+
+When using Miktex, if the PDFLATEX package is not automatically found, the path to pdflatex.exe can be specified to CMake with the MIKTEX_BINARY_PATH variable (available under Advanced options).
 
 Compiling Gpufit on Windows
 ---------------------------
