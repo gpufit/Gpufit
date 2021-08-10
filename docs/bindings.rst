@@ -349,7 +349,7 @@ The signature of the gpufit function is
 
     :special: If empty ([]), the default value is used.
 :user_info: user info
-    vector of suitable type (correct type is not checked and depends on the used fit model function or estimator). The length of the user_info in bytes is deduced automatically.
+    vector of suitable type (correct type is not checked and depends on the chosen fit model function or estimator). The length of user_info in bytes is determined automatically.
 
 *Output parameters*
 

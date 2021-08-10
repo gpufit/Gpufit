@@ -56,8 +56,8 @@ set x64_MATLAB_INSTALL=%ROOT_INSTALL%\matlab64
 set x64_JAVA_INSTALL=%ROOT_INSTALL%\java64
 set SDK_INSTALL_ROOT=%ROOT_INSTALL%\gpufit_sdk
 
-set x64_BUILD=%BUILD_BASE%\VC16x64-11.3_cublas\RelWithDebInfo
-set x64_BUILD_LIB=%BUILD_BASE%\VC16x64-11.3_cublas\Gpufit\RelWithDebInfo
+set x64_BUILD=%BUILD_BASE%\VC16x64-11.4_cublas\RelWithDebInfo
+set x64_BUILD_LIB=%BUILD_BASE%\VC16x64-11.4_cublas\Gpufit\RelWithDebInfo
 set x64_PYTHON_BUILD=%x64_BUILD%\pyGpufit\dist
 set x64_MATLAB_BUILD=%x64_BUILD%\matlab
 set x64_JAVA_BUILD=%x64_BUILD%\java

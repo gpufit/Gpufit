@@ -187,7 +187,7 @@ Description of input parameters
     block of memory which is passed in to the :code:`gpufit()` function, and which is accessible in shared GPU memory by the
     fit model functions and the estimator functions. Possible uses for the user information data are to pass in values 
     for independent variables (e.g. X values) or to supply additional data to the fit model function or estimator.
-    The documentation of the used fit model function or estimator must specify the composition of the user info data.
+    The documentation of the fit model function or estimator must specify the composition of the user info data.
     For a coded example which makes use of the user information data, see :ref:`linear-regression-example`. The user
     information data is an optional parameter - if no user information is required this parameter may be set to NULL.
 
