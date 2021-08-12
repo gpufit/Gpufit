@@ -8,7 +8,7 @@ cmake_minimum_required( VERSION 3.11 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 if( NOT PROJECT_NAME )
-  project( Gpufit VERSION 1.2.0 )
+  project( Gpufit VERSION 1.2.0 LANGUAGES CUDA CXX)
   include( CTest )
 endif()
 
