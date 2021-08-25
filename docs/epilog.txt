@@ -16,6 +16,8 @@
 .. _`Gpufit release location`: https://github.com/gpufit/Gpufit/releases
 .. _Gpufit-master.zip: https://github.com/gpufit/Gpufit/archive/master.zip
 
+.. _`Gpuspline on Github`: https://github.com/gpufit/Gpuspline
+
 .. _gpufit.h: https://github.com/gpufit/Gpufit/blob/master/Gpufit/gpufit.h
 .. _constants.h: https://github.com/gpufit/Gpufit/blob/master/Gpufit/constants.h
 .. _interface.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/interface.cpp
@@ -43,15 +45,16 @@
 .. _Gauss_Fit_2D_Example.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/examples/Gauss_Fit_2D_Example.cpp
 .. _Linear_Regression_Example.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/examples/Linear_Regression_Example.cpp
 
-.. _GpufitMex.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/GpufitMex.cpp
-.. _gpufit.m: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/gpufit.m
+.. _GpufitMex.cpp: https://github.com/gpufit/Gpufit/blob/master/Gpufit/matlab/GpufitMex.cpp
+.. _gpufit.m: https://github.com/gpufit/Gpufit/blob/master/Gpufit/matlab/gpufit.m
 
-.. _`Matlab simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/examples/simple.m
-.. _`Matlab Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/examples/gauss2d.m
-.. _`Matlab Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/matlab/examples/gauss2d_plot.m
+.. _`Matlab simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/matlab/examples/simple.m
+.. _`Matlab Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/matlab/examples/gauss2d.m
+.. _`Matlab Gauss2D constrained fit example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/matlab/examples/gauss2d_constrained.m
+.. _`Matlab Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/matlab/examples/gauss2d_plot.m
 
-.. _`Python simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/simple.py
-.. _`Python Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d.py
-.. _`Python Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/python/examples/gauss2d_plot.py
+.. _`Python simple example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/python/examples/simple.py
+.. _`Python Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/python/examples/gauss2d.py
+.. _`Python Gauss2D plot example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/python/examples/gauss2d_plot.py
 
-.. _`Java Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/bindings/java/gpufit/src/test/java/com/github/gpufit/examples/Gauss2DExample.java
+.. _`Java Gauss2D example`: https://github.com/gpufit/Gpufit/blob/master/Gpufit/java/gpufit/src/test/java/com/github/gpufit/examples/Gauss2DExample.java

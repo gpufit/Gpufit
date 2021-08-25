@@ -30,6 +30,13 @@ gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), 
                         POINTER(c_int), c_int, c_size_t, POINTER(c_char), POINTER(c_float), POINTER(c_int),
                         POINTER(c_float), POINTER(c_int)]
 
+# gpufit_constrained function in the dll
+gpufit_constrained_func = lib.gpufit_constrained
+gpufit_constrained_func.restype = c_int
+gpufit_constrained_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float), c_float, c_int,
+                        POINTER(c_int), c_int, c_size_t, POINTER(c_char), POINTER(c_float), POINTER(c_int),
+                        POINTER(c_float), POINTER(c_int)]
+
 # gpufit_get_last_error function in the dll
 error_func = lib.gpufit_get_last_error
 error_func.restype = c_char_p

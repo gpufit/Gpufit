@@ -13,7 +13,8 @@ Optimization algorithms are ubiquitous tools employed in many field of science
 and technology. One such algorithm for numerical, non-linear optimization is the 
 Levenberg-Marquardt algorithm (LMA). The LMA combines elements of the method of 
 steepest descent and Newton's method, and has become a standard algorithm for 
-least-squares fitting.
+least-squares fitting. Box constraints on parameter values can be added as suitable
+projections during the optimization steps.
 
 Although the LMA is, in itself, an efficient optimization algorithm, 
 applications requiring many iterations of this procedure may encounter 
@@ -32,6 +33,10 @@ far exceeding that of a CPU. Languages such as CUDA C and OpenCL allow GPU-
 based programs to be developed in a manner similar to conventional software, but 
 with an inherently parallelized structure. These developments have led to the 
 creation of new GPU-accelerated tools, such as the Gpufit.
+
+Gpufit supports cubic spline functions that can be used to approximate arbitrary (smooth) fit model functions.
+In order to use them a spline representation of the model function must be provided (as an array of suitable spline
+coefficients). See `Gpuspline on Github`_ for details on how to compute these spline representations.
 
 This manual describes how to install and build the Gpufit library and its 
 external bindings. Furthermore it details how to extend Gpufit by adding 

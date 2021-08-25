@@ -72,7 +72,7 @@ The following tools are required in order to build Gpufit from source.
 * Boost_ 1.58 or later (required if you want to build the tests)
 * MATLAB_ if building the MATLAB bindings (minimum version Matlab 2012a)
 * Python_ if building the Python bindings (Python version 2.x or 3.x).  Note that the "wheel" package is required 
-when building the Python binding.
+  when building the Python binding.
 * Java if building the Java bindings (minimum Java JDK version 8)
 * PDF Latex installation (like Miktex) if converting the documentation from Latex to PDF.  
 
@@ -167,7 +167,7 @@ version is 8.0.
 **No suitable Matlab and/or MX_Library version found - skipping Gpufit Matlab binding!**
 
 CMake might not be able to locate Matlab, in which case this message will be shown.
-Try to set the Matlab_ROOT_DIR variable manually and run CMake again.
+Try to set the Matlab_ROOT_DIR variable manually (for example "C:/Program Files/MATLAB/R2020b" or "/usr/local/Matlab/2020b" on Linux) and run CMake again.
 
 **Python launcher**
 

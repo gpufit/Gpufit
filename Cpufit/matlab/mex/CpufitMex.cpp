@@ -8,7 +8,7 @@
 #if (defined _MSC_VER && _MSC_VER <= 1800)
 #define PRINT_MSG _snprintf_s
 #else
-#define PRINT_MSG std::snprintf
+#define PRINT_MSG snprintf
 #endif
 
 #ifdef GPUFIT_DOUBLE

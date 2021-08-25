@@ -37,7 +37,7 @@ for all bindings.
     by default all parameters are fit
 
 For instructions on how to specify these parameters explicitly, see the sections below.
-	
+
 Python
 ------
 
@@ -287,7 +287,7 @@ fitted parameters are limited to those fits that converged.
     print('iterations: {:.2f}'.format(np.mean(number_iterations[converged])))
     print('time: {:.2f} s'.format(execution_time))
 
-	
+
 Matlab
 ------
 
@@ -310,7 +310,7 @@ gpufit
 Optional parameters are passed in as empty matrices (``[]``). The numbers of points, fits and parameters is deduced from the dimensions of
 the input data and initial parameters matrices.
 
-The signature of the gpufit function is
+The signature of the :code:`gpufit` function is
 
 .. code-block:: matlab
 
@@ -366,6 +366,24 @@ The signature of the gpufit function is
     In seconds.
 
 Errors are raised if checks on parameters fail or if the execution of gpufit fails.
+
+gpufit_constrained
+..................
+
+The :code:`gpufit_constrained` function is very similar to the :code:`gpufit` function with the additional possibility to specify
+parameter constraints.
+
+The signature of the :code:`gpufit_constrained` function is
+
+.. code-block:: matlab
+
+    function [parameters, states, chi_squares, n_iterations, time] = gpufit_constrained(data, weights, model_id, initial_parameters, constraints, constraint_types, tolerance, max_n_iterations, parameters_to_fit, estimator_id, user_info)
+
+*Constraint input parameters*
+
+:constraints:
+
+:contraint_types:
 
 gpufit_cuda_available
 .....................
@@ -480,6 +498,27 @@ fitted parameters are limited to those fits that converged.
     fprintf('iterations: %6.2f\n', mean(n_iterations(converged)));
     fprintf('time: %6.2f s\n', time);
 
+2D Gaussian peak constrained fit example
+........................................
+
+An example for a constrained fit can be found at `Matlab Gauss2D constrained fit example`_. It differs from the previous
+example only in that constraints are specified additionally (as 2D array of lower and upper bounds on parameters for every
+fit) as well as constraint types (for all parameters including fixed parameters) that can take a value of ConstraintType (FREE, LOWER, UPPER or LOWER_UPPER)
+in order to either do not enforce the constraints for a parameter or enforce them only at the lower or upper or both bounds.
+
+The following code block demonstrates how the sigma of a 2D Gaussian peak can be constrained to the interval [2.9, 3.1] and the background to non-negative values.
+
+.. code-block:: matlab
+
+    %% set constraints
+    constraints = zeros([2*number_parameters, number_fits], 'single');
+    constraints(7, :) = 2.9;
+    constraints(8, :) = 3.1;
+    constraint_types = int32([ConstraintType.LOWER, ConstraintType.FREE, ConstraintType.FREE, ConstraintType.LOWER_UPPER, ConstraintType.LOWER]);
+
+    %% run constrained Gpufit
+    [parameters, states, chi_squares, n_iterations, time] = gpufit_constrained(data, [], ...
+        model_id, initial_parameters, constraints, constraint_types, tolerance, max_n_iterations, [], estimator_id, []);
 
 Java
 ----

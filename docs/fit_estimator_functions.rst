@@ -28,7 +28,7 @@ use of minimal least squares. The estimator is described as follows.
 
 :`w_n`: Weight values for data at position :math:`n`
 
-	
+
 .. _estimator-mle:
 
 Maximum likelihood estimator for data subject to Poisson statistics
@@ -50,5 +50,5 @@ The estimator is described as follows.
 :`z_n`: Data values at data position :math:`n`
 
 :`\vec{p}`: Actual model function parameters
-	
+
 Note that this estimator does not provide any means to weight the data values. Rather, noise in the data is assumed to be purely Poissonian.
