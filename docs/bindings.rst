@@ -126,6 +126,26 @@ the input data and initial parameters arrays.
 
 Errors are raised if checks on parameters fail or if the execution of fit failed.
 
+fit_constrained
+...............
+
+The :code:`fit_constrained` method is very similar to the :code:`fit` method with the additional possibility to
+specify parameter constraints.
+
+The signature of the :code:`fit_constrained` method (equivalent to calling the C interface function :code:`gpufit_constrained()`) is
+
+.. code-block:: python
+
+    def fit_constrained(data, weights, model_id:ModelID, initial_parameters, constraints=None, constraint_types=None, tolerance:float=None, max_number_iterations:int=None, parameters_to_fit=None, estimator_id:EstimatorID=None, user_info=None):
+
+*Constraint input parameters*
+
+:constraints: Constraint bound intervals for every parameter and every fit.
+    2D NumPy array of shape (number_fits, 2*number_parameter) and data type np.float32
+:contraint_types: Constraint types for every parameter
+    1D NumPy array of length number_parameter
+    Valid values are defined in gf.ConstraintType
+
 get_last_error
 ..............
 
@@ -288,6 +308,30 @@ fitted parameters are limited to those fits that converged.
     print('time: {:.2f} s'.format(execution_time))
 
 
+2D Gaussian peak constrained fit example
+........................................
+
+An example for a constrained fit can be found at `Python Gauss2D constrained fit example`_. It differs from the previous
+example only in that constraints are specified additionally (as 2D array of lower and upper bounds on parameters for every
+fit) as well as constraint types (for all parameters including fixed parameters) that can take a value of ConstraintType (FREE, LOWER, UPPER or LOWER_UPPER)
+in order to either do not enforce the constraints for a parameter or enforce them only at the lower or upper or both bounds.
+
+The following code block demonstrates how the sigma of a 2D Gaussian peak can be constrained to the interval [2.9, 3.1] and the background and ampltiude to non-negative values.
+
+.. code-block:: python
+
+    # set constraints
+    constraints = np.zeros((number_fits, 2*number_parameters), dtype=np.float32)
+    constraints[:, 6] = 2.9
+    constraints[:, 7] = 3.1
+    constraint_types = np.array([gf.ConstraintType.LOWER, gf.ConstraintType.FREE, gf.ConstraintType.FREE, gf.ConstraintType.LOWER_UPPER, gf.ConstraintType.LOWER], dtype=np.int32)
+
+    # run constrained Gpufit
+    parameters, states, chi_squares, number_iterations, execution_time = gf.fit_constrained(data, None, model_id,
+                                                                                initial_parameters, constraints, constraint_types,
+                                                                                tolerance, max_number_iterations, None,
+                                                                                estimator_id, None)
+
 Matlab
 ------
 
@@ -381,9 +425,12 @@ The signature of the :code:`gpufit_constrained` function is
 
 *Constraint input parameters*
 
-:constraints:
+:constraints: Constraint bound intervals for every parameter and every fit
+    2D matrix of size [2*number_parameter, number_fits] of data type single
+:contraint_types: Constraint types for every parameter
+    Vector of length number_parameter, will be converted to int32 if necessary.
+    Valid values are defined in ConstraintType.m.
 
-:contraint_types:
 
 gpufit_cuda_available
 .....................
@@ -506,7 +553,7 @@ example only in that constraints are specified additionally (as 2D array of lowe
 fit) as well as constraint types (for all parameters including fixed parameters) that can take a value of ConstraintType (FREE, LOWER, UPPER or LOWER_UPPER)
 in order to either do not enforce the constraints for a parameter or enforce them only at the lower or upper or both bounds.
 
-The following code block demonstrates how the sigma of a 2D Gaussian peak can be constrained to the interval [2.9, 3.1] and the background to non-negative values.
+The following code block demonstrates how the sigma of a 2D Gaussian peak can be constrained to the interval [2.9, 3.1] and the background and amplitude to non-negative values.
 
 .. code-block:: matlab
 

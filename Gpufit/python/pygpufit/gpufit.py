@@ -23,19 +23,12 @@ else:
 
 lib = cdll.LoadLibrary(lib_path)
 
-# gpufit function in the dll
-gpufit_func = lib.gpufit
-gpufit_func.restype = c_int
-gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float), c_float, c_int,
-                        POINTER(c_int), c_int, c_size_t, POINTER(c_char), POINTER(c_float), POINTER(c_int),
-                        POINTER(c_float), POINTER(c_int)]
-
 # gpufit_constrained function in the dll
-gpufit_constrained_func = lib.gpufit_constrained
-gpufit_constrained_func.restype = c_int
-gpufit_constrained_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float), c_float, c_int,
-                        POINTER(c_int), c_int, c_size_t, POINTER(c_char), POINTER(c_float), POINTER(c_int),
-                        POINTER(c_float), POINTER(c_int)]
+gpufit_func = lib.gpufit_constrained
+gpufit_func.restype = c_int
+gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float),
+                        POINTER(c_float), POINTER(c_int), c_float, c_int, POINTER(c_int), c_int, c_size_t,
+                        POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
 
 # gpufit_get_last_error function in the dll
 error_func = lib.gpufit_get_last_error
@@ -74,6 +67,13 @@ class EstimatorID:
     MLE = 1
 
 
+class ConstraintType:
+    FREE = 0
+    LOWER = 1
+    UPPER = 2
+    LOWER_UPPER = 3
+
+
 class Status:
     Ok = 0
     Error = 1
@@ -98,6 +98,36 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
     :param weights: The weights - 2D NumPy array of the same dimension and data type as parameter data or None (no weights available)
     :param model_id: The model ID
     :param initial_parameters: Initial values for parameters - NumPy array of dimension [number_fits, number_parameters] and data type np.float32
+    :param tolerance: The fit tolerance or None (will use default value)
+    :param max_number_iterations: The maximal number of iterations or None (will use default value)
+    :param parameters_to_fit: Which parameters to fit - NumPy array of length number_parameters and type np.int32 or None (will fit all parameters)
+    :param estimator_id: The Estimator ID or None (will use default values)
+    :param user_info: User info - NumPy array of type np.char or None (no user info available)
+    :return: parameters, states, chi_squares, number_iterations, execution_time
+    """
+
+    # call fit_constrained without any constraints
+    return fit_constrained(data, weights, model_id, initial_parameters, tolerance=tolerance,
+                           max_number_iterations=max_number_iterations, parameters_to_fit=parameters_to_fit,
+                           estimator_id=estimator_id, user_info=user_info)
+
+
+def fit_constrained(data, weights, model_id, initial_parameters, constraints=None, constraint_types=None,
+                    tolerance=None, max_number_iterations=None, \
+                    parameters_to_fit=None, estimator_id=None, user_info=None):
+    """
+    Calls the C interface fit function in the library.
+    (see also http://gpufit.readthedocs.io/en/latest/bindings.html#python)
+
+    All 2D NumPy arrays must be in row-major order (standard in NumPy), i.e. array.flags.C_CONTIGUOUS must be True
+    (see also https://docs.scipy.org/doc/numpy/reference/arrays.ndarray.html#internal-memory-layout-of-an-ndarray)
+
+    :param data: The data - 2D NumPy array of dimension [number_fits, number_points] and data type np.float32
+    :param weights: The weights - 2D NumPy array of the same dimension and data type as parameter data or None (no weights available)
+    :param model_id: The model ID
+    :param initial_parameters: Initial values for parameters - NumPy array of dimension [number_fits, number_parameters] and data type np.float32
+    :param constraints: Constraint bounds intervals - NumPy array of dimension [number_fits, 2*number_parameters] and data type np.float32
+    :param constraint_types: Types of constraints for all parameters (including fixed parameters) - NumPy array of length number_parameters and type np.int32 or None (means no constraints) with values from class ConstraintType
     :param tolerance: The fit tolerance or None (will use default value)
     :param max_number_iterations: The maximal number of iterations or None (will use default value)
     :param parameters_to_fit: Which parameters to fit - NumPy array of length number_parameters and type np.int32 or None (will fit all parameters)
@@ -134,21 +164,36 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
     if initial_parameters.shape[0] != number_fits:
         raise RuntimeError('dimension mismatch in number of fits between data and initial_parameters')
 
+    # size check: constraints is 2D and number of fits, 2x number of parameters if given
+    if constraints is not None:
+        if constraints.ndim != 2:
+            raise RuntimeError('constraints not two-dimensional')
+        if constraints.shape != (number_fits, 2*number_parameters):
+            raise RuntimeError('constraints array has invalid shape')
+
+    # size check: constraint_types has certain length (if given)
+    if constraint_types is not None and constraint_types.shape[0] != number_parameters:
+        raise RuntimeError('constraint_types should have length of number of parameters')
+
     # size check: consistency with parameters_to_fit (if given)
     if parameters_to_fit is not None and parameters_to_fit.shape[0] != number_parameters:
         raise RuntimeError(
             'dimension mismatch in number of parameters between initial_parameters and parameters_to_fit')
 
+    # default value constraint types
+    if constraint_types is None:
+        constraint_types = np.full(number_parameters, ConstraintType.FREE, dtype=np.int32)
+
     # default value: tolerance
-    if not tolerance:
+    if tolerance is None:
         tolerance = 1e-4
 
     # default value: max_number_iterations
-    if not max_number_iterations:
+    if max_number_iterations is None:
         max_number_iterations = 25
 
     # default value: estimator ID
-    if not estimator_id:
+    if estimator_id is None:
         estimator_id = EstimatorID.LSE
 
     # default value: parameters_to_fit
@@ -157,23 +202,29 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
 
     # now only weights and user_info could be not given
 
-    # type check: data, weights (if given), initial_parameters are all np.float32
+    # type check: data, weights (if given), initial_parameters, constraints (if given) are all np.float32
     if data.dtype != np.float32:
         raise RuntimeError('type of data is not np.float32')
     if weights is not None and weights.dtype != np.float32:
         raise RuntimeError('type of weights is not np.float32')
     if initial_parameters.dtype != np.float32:
         raise RuntimeError('type of initial_parameters is not np.float32')
+    if constraints is not None and constraints.dtype != np.float32:
+        raise RuntimeError('type of constraints is not np.float32')
 
-    # type check: parameters_to_fit is np.int32
+    # type check: parameters_to_fit, constraint_types is np.int32
     if parameters_to_fit.dtype != np.int32:
         raise RuntimeError('type of parameters_to_fit is not np.int32')
+    if constraint_types.dtype != np.int32:
+        raise RuntimeError('type of constraint_types is not np.int32')
 
-    # type check: valid model and estimator id
+    # type check: valid model, estimator id, constraint_types
     if not _valid_id(ModelID, model_id):
         raise RuntimeError('Invalid model ID, use an attribute of ModelID')
     if not _valid_id(EstimatorID, estimator_id):
         raise RuntimeError('Invalid estimator ID, use an attribute of EstimatorID')
+    if any(_valid_id(ConstraintType, constraint_type) for constraint_type in constraint_types):
+        raise RuntimeError('Invalid constraint type, use an attribute of ConstraintType')
 
     # we don't check type of user_info, but we extract the size in bytes of it
     if user_info is not None:
@@ -192,8 +243,12 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
         weights_p = weights.ctypes.data_as(gpufit_func.argtypes[3])
     else:
         weights_p = None
+    if constraints is not None:
+        constraints_p = constraints.ctypes.data_as(gpufit_func.argtypes[6])
+    else:
+        constraints_p = None
     if user_info is not None:
-        user_info_p = user_info.ctypes.data_as(gpufit_func.argtypes[11])
+        user_info_p = user_info.ctypes.data_as(gpufit_func.argtypes[13])
     else:
         user_info_p = None
 
@@ -206,16 +261,18 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
         weights_p, \
         gpufit_func.argtypes[4](model_id), \
         initial_parameters.ctypes.data_as(gpufit_func.argtypes[5]), \
-        gpufit_func.argtypes[6](tolerance), \
-        gpufit_func.argtypes[7](max_number_iterations), \
-        parameters_to_fit.ctypes.data_as(gpufit_func.argtypes[8]), \
-        gpufit_func.argtypes[9](estimator_id), \
-        gpufit_func.argtypes[10](user_info_size), \
+        constraints_p, \
+        constraint_types.ctypes.data_as(gpufit_func.argtypes[7]), \
+        gpufit_func.argtypes[8](tolerance), \
+        gpufit_func.argtypes[9](max_number_iterations), \
+        parameters_to_fit.ctypes.data_as(gpufit_func.argtypes[10]), \
+        gpufit_func.argtypes[11](estimator_id), \
+        gpufit_func.argtypes[12](user_info_size), \
         user_info_p, \
-        parameters.ctypes.data_as(gpufit_func.argtypes[12]), \
-        states.ctypes.data_as(gpufit_func.argtypes[13]), \
-        chi_squares.ctypes.data_as(gpufit_func.argtypes[14]), \
-        number_iterations.ctypes.data_as(gpufit_func.argtypes[15]))
+        parameters.ctypes.data_as(gpufit_func.argtypes[14]), \
+        states.ctypes.data_as(gpufit_func.argtypes[15]), \
+        chi_squares.ctypes.data_as(gpufit_func.argtypes[16]), \
+        number_iterations.ctypes.data_as(gpufit_func.argtypes[17]))
     t1 = time.perf_counter()
 
     # check status
