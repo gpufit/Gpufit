@@ -79,6 +79,27 @@ VISIBLE int gpufit_cuda_interface
     int * gpu_output_n_iterations
 );
 
+VISIBLE int gpufit_constrained_cuda_interface
+(
+    std::size_t n_fits,
+    std::size_t n_points,
+    REAL* gpu_data,
+    REAL* gpu_weights,
+    int model_id,
+    REAL tolerance,
+    int max_n_iterations,
+    int* parameters_to_fit,
+    REAL* gpu_constraints,
+    int* constraint_types,
+    int estimator_id,
+    std::size_t user_info_size,
+    char* gpu_user_info,
+    REAL* gpu_fit_parameters,
+    int* gpu_output_states,
+    REAL* gpu_output_chi_squares,
+    int* gpu_output_n_iterations
+);
+
 VISIBLE char const * gpufit_get_last_error() ;
 
 // returns 1 if cuda is available and 0 otherwise

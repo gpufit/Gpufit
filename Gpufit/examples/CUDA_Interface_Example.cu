@@ -118,12 +118,12 @@ void cuda_interface_example()
 
     // number of fits, fit points and parameters
     size_t const n_fits = 10000;
-    size_t const size_x = 50;
+    size_t const size_x = 20;
     size_t const n_points_per_fit = size_x * size_x;
     size_t const n_parameters = 5;
 
     // true parameters (amplitude, center x position, center y position, width, offset)
-    std::vector< REAL > true_parameters{ 10, 14.5f, 14.5f, 3, 10}; 
+    std::vector< REAL > true_parameters{ 5, 14.5f, 14.5f, 3, 10}; 
     
     std::cout << "generate example data" << std::endl;
 
@@ -212,7 +212,7 @@ void cuda_interface_example()
 
     // call to gpufit_cuda_interface
     std::chrono::high_resolution_clock::time_point time_0 = std::chrono::high_resolution_clock::now();
-    int const status = gpufit_cuda_interface
+    int status = gpufit_cuda_interface
         (
             n_fits,
             n_points_per_fit,
@@ -243,6 +243,8 @@ void cuda_interface_example()
     gpu_states.read(output_states);
     gpu_chi_squares.read(output_chi_squares);
     gpu_n_iterations.read(output_n_iterations);
+
+    std::cout << std::endl << "unconstrained fit" << std::endl;
     
     // print execution time
     std::cout << "execution time "
@@ -323,6 +325,147 @@ void cuda_interface_example()
 
     // compute mean number of iterations for those converged
     REAL  output_number_iterations_mean = 0;
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        if (output_states[i] == FitState::CONVERGED)
+        {
+            output_number_iterations_mean += static_cast<REAL>(output_n_iterations[i]);
+        }
+    }
+    // normalize
+    output_number_iterations_mean /= static_cast<REAL>(output_states_histogram[0]);
+    std::cout << "mean number of iterations " << output_number_iterations_mean << std::endl;
+
+    // define constraints
+    std::vector< REAL > constraints(n_fits * 2 * n_parameters, 0);
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        constraints[i * n_parameters * 2 + 6] = 2.9f;
+        constraints[i * n_parameters * 2 + 7] = 3.1f;
+    }
+    GPU_array<REAL> gpu_constraints(constraints);
+    std::vector< int > constraint_types(n_parameters, 0);
+    constraint_types[0] = 1; // lower
+    constraint_types[3] = 3; // lower and upper
+    constraint_types[4] = 1; // lower
+    
+    // call to gpufit_constrained_cuda_interface
+    time_0 = std::chrono::high_resolution_clock::now();
+    status = gpufit_constrained_cuda_interface
+    (
+        n_fits,
+        n_points_per_fit,
+        gpu_data,
+        gpu_weights,
+        model_id,
+        tolerance,
+        max_n_iterations,
+        parameters_to_fit.data(),
+        gpu_constraints,
+        constraint_types.data(),
+        estimator_id,
+        0,
+        0,
+        gpu_initial_parameters,
+        gpu_states,
+        gpu_chi_squares,
+        gpu_n_iterations
+    );
+    time_1 = std::chrono::high_resolution_clock::now();
+
+    // check status
+    if (status != ReturnState::OK)
+    {
+        throw std::runtime_error(gpufit_get_last_error());
+    }
+
+    // copy output data to CPU memory
+    gpu_initial_parameters.read(output_parameters);
+    gpu_states.read(output_states);
+    gpu_chi_squares.read(output_chi_squares);
+    gpu_n_iterations.read(output_n_iterations);
+
+    std::cout << std::endl << "constrained fit" << std::endl;
+
+    // print execution time
+    std::cout << "execution time "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(time_1 - time_0).count() << " ms" << std::endl;
+
+    // get fit states
+    std::fill(output_states_histogram.begin(), output_states_histogram.end(), 0);
+    for (std::vector< int >::iterator it = output_states.begin(); it != output_states.end(); ++it)
+    {
+        output_states_histogram[*it]++;
+    }
+
+    std::cout << "ratio converged              " << (REAL)output_states_histogram[0] / n_fits << "\n";
+    std::cout << "ratio max iteration exceeded " << (REAL)output_states_histogram[1] / n_fits << "\n";
+    std::cout << "ratio singular hessian       " << (REAL)output_states_histogram[2] / n_fits << "\n";
+    std::cout << "ratio neg curvature MLE      " << (REAL)output_states_histogram[3] / n_fits << "\n";
+    std::cout << "ratio gpu not read           " << (REAL)output_states_histogram[4] / n_fits << "\n";
+
+    // compute mean of fitted parameters for converged fits
+    std::fill(output_parameters_mean.begin(), output_parameters_mean.end(), 0.f);
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        if (output_states[i] == FitState::CONVERGED)
+        {
+            for (size_t j = 0; j < n_parameters; j++)
+            {
+                output_parameters_mean[j] += output_parameters[i * n_parameters + j];
+            }
+        }
+    }
+    // normalize
+    for (size_t j = 0; j < n_parameters; j++)
+    {
+        output_parameters_mean[j] /= output_states_histogram[0];
+    }
+
+    // compute std of fitted parameters for converged fits
+    std::fill(output_parameters_std.begin(), output_parameters_std.end(), 0.f);
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        if (output_states[i] == FitState::CONVERGED)
+        {
+            for (size_t j = 0; j < n_parameters; j++)
+            {
+                output_parameters_std[j]
+                    += (output_parameters[i * n_parameters + j] - output_parameters_mean[j])
+                    * (output_parameters[i * n_parameters + j] - output_parameters_mean[j]);
+            }
+        }
+    }
+    // normalize and take square root
+    for (size_t j = 0; j < n_parameters; j++)
+    {
+        output_parameters_std[j] = sqrt(output_parameters_std[j] / output_states_histogram[0]);
+    }
+
+    // print true value, fitted mean and std for every parameter
+    for (size_t j = 0; j < n_parameters; j++)
+    {
+        std::cout
+            << "parameter " << j
+            << " true " << true_parameters[j]
+            << " fitted mean " << output_parameters_mean[j]
+            << " std " << output_parameters_std[j] << std::endl;
+    }
+
+    // compute mean chi-square for those converged
+    output_chi_square_mean = 0;
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        if (output_states[i] == FitState::CONVERGED)
+        {
+            output_chi_square_mean += output_chi_squares[i];
+        }
+    }
+    output_chi_square_mean /= static_cast<REAL>(output_states_histogram[0]);
+    std::cout << "mean chi square " << output_chi_square_mean << std::endl;
+
+    // compute mean number of iterations for those converged
+    output_number_iterations_mean = 0;
     for (size_t i = 0; i != n_fits; i++)
     {
         if (output_states[i] == FitState::CONVERGED)

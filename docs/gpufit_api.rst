@@ -285,7 +285,7 @@ regarding the constraints are explained.
 Description of constraints input parameters
 ...........................................
 
-:constraints: Pointer to initial parameter values
+:constraints: Pointer to model parameter constraint intervals
 
     A 1D array containing the model parameter constraint lower and upper bounds for all parameters (including fixed parameters)
     and for all fits. Order is lower, upper bound first, then parameters, then number of fits.
@@ -420,6 +420,59 @@ Description of output parameters
 
     :0: No error
     :-1: Error
+
+gpufit_constrained_cuda_interface()
++++++++++++++++++++++++++++++++++++
+
+This function is very similar to the :code:`gpufit_cuda_interface()` function but with the additional possibility to add box constraints on the
+allowed parameter ranges.
+
+.. code-block:: cpp
+
+    int gpufit_constrained_cuda_interface
+    (
+        size_t n_fits,
+        size_t n_points,
+        float * gpu_data,
+        float * gpu_weights,
+        int model_id,
+        float tolerance,
+        int max_n_iterations,
+        int * parameters_to_fit,
+        float * gpu_constraints,
+        int * constraint_types,
+        int estimator_id,
+        size_t user_info_size,
+        char * gpu_user_info,
+        float * gpu_fit_parameters,
+        int * gpu_output_states,
+        float * gpu_output_chi_squares,
+        int * gpu_output_n_iterations
+    ) ;
+
+In order to not repeat the same information all input and output parameters in :code:`gpufit_constrained_cuda_interface()` that also
+exist in :code:`gpufit_cuda_interface()` have exactly the same definition and interpretation. Below only the additional input parameter
+regarding the constraints are explained.
+
+Description of constraint input parameters
+..........................................
+
+:gpu_constraints: Pointer to model parameter constraint intervals stored on the GPU
+
+    A 1D array containing the model parameter constraint lower and upper bounds for all parameters (including fixed parameters)
+    and for all fits. Order is lower, upper bound first, then parameters, then number of fits.
+
+    :type: float *
+    :length: n_fits * n_parameters * 2
+
+:constraint_types: Pointer to constraint types for each parameter
+
+    A 1D array containing the constraint types for each parameter (including fixed parameters). The constraint type
+    is defined by an *int* with 0 - no constraint, 1 - only constrain lower bound, 2 - only constrain upper bound,
+    3 - constrain both lower and upper bounds.
+
+    :type: int *
+    :length: n_parameters
 
 gpufit_portable_interface()
 +++++++++++++++++++++++++++
@@ -578,6 +631,3 @@ installed CUDA driver version in *driver_version*.
 
     :0: No error
     :-1: Error. Use the function *gpufit_get_last_error()* to check the error message.
-
-
-
