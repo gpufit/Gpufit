@@ -197,15 +197,27 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
 	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
         if ( WIN32 )
-            set( CUBLAS_DLL
-                "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+	    if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER_EQUAL "10")
+                set( CUBLAS_DLL "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}.dll" )
+	    else()
+		set( CUBLAS_DLL "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+	    endif()
             add_custom_command( TARGET Gpufit POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E
                     copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
         else()
+            find_cuda_helper_libs(cublas_static)
+            find_cuda_helper_libs(cublasLt_static)
+            find_cuda_helper_libs(culibos)
+
             set( CUDA_CUBLAS_LIBRARIES 
-                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcublas_static.a
-                ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libculibos.a )
+                ${CUDA_cublas_static_LIBRARY}
+                ${CUDA_cublasLt_static_LIBRARY}
+                ${CUDA_cudart_static_LIBRARY}
+                ${CUDA_culibos_LIBRARY}
+                dl
+                pthread
+                rt )
         endif()
             
 		add_definitions( -DUSE_CUBLAS )
