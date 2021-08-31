@@ -8,7 +8,7 @@ function( add_example module name )
 endfunction()
 
 function( add_cuda_example module name )
-	cuda_add_executable( ${name} ${name}.cu )
+	add_executable( ${name} ${name}.cu )
 	target_link_libraries( ${name} ${module} )
 	set_property( TARGET ${name}
 		PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
