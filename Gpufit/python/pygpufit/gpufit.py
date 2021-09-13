@@ -223,7 +223,7 @@ def fit_constrained(data, weights, model_id, initial_parameters, constraints=Non
         raise RuntimeError('Invalid model ID, use an attribute of ModelID')
     if not _valid_id(EstimatorID, estimator_id):
         raise RuntimeError('Invalid estimator ID, use an attribute of EstimatorID')
-    if any(_valid_id(ConstraintType, constraint_type) for constraint_type in constraint_types):
+    if not all(_valid_id(ConstraintType, constraint_type) for constraint_type in constraint_types):
         raise RuntimeError('Invalid constraint type, use an attribute of ConstraintType')
 
     # we don't check type of user_info, but we extract the size in bytes of it
