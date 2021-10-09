@@ -35,7 +35,7 @@ updated Nvidia graphics driver. The binary package contains:
 - Python version 2.x and version 3.x bindings (compiled as wheel files) and
   Python examples.
 - Java 8 32 bit and 64 bit bindings, with Java examples.
-- This manual in PDF format.
+- This manual in PDF format. 
 
 To re-build the binary distribution, see the instructions located in 
 package/README.md.
