@@ -1,4 +1,4 @@
-#include "../gpufit.h"
+#include "../../gpufit/gpufit.h"
 #include <iostream>
 #include <vector>
 

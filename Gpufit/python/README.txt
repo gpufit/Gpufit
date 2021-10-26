@@ -20,7 +20,7 @@ pip install --no-index --find-links=LocalPathToWheelFile pyGpufit
 
 Examples
 
-See examples folder.
+See project-root/examples/python folder.
 
 Troubleshooting
 

@@ -12,7 +12,7 @@ An installation is not necessary. However, this path must be part of the Matlab 
 
 Examples
 
-See examples folder. The examples are fully functional only from Matlab2014a.
+See project-root/examples/matlab folder. The examples are fully functional only from Matlab2014a.
 
 Troubleshooting
 

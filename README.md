@@ -44,11 +44,11 @@ Instructions for using the binary distribution may be found in the documentation
 
 There are various examples that demonstrate the capabilities and usage of Gpufit. They can be found at the following locations:
 
-- /examples - C++ examples that use Cpufit and Gpufit
+- /examples/c++ - C++ examples for Gpufit
+- /examples/c++/gpufit_cpufit - C++ examples that use Gpufit and Cpufit
+- /examples/matlab - Matlab examples for Gpufit including spline fit examples (also requires [Gpuspline](https://github.com/gpufit/Gpuspline))
+- /examples/python - Python examples for Gpufit including spline fit examples (also requires [Gpuspline](https://github.com/gpufit/Gpuspline))
 - /Cpufit/matlab/examples - Matlab examples that only uses Cpufit
-- /Gpufit/examples - C++ examples for Gpufit
-- /Gpufit/matlab/examples - Matlab examples for Gpufit including spline fit examples (also requires [Gpuspline](https://github.com/gpufit/Gpuspline))
-- /Gpufit/python/examples - Python examples for Gpufit including spline fit examples (also requires [Gpuspline](https://github.com/gpufit/Gpuspline))
 - /Gpufit/java/gpufit/src/test/java/com/github/gpufit/examples - Java examples for Gpufit
 
 ## Authors

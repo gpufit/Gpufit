@@ -232,9 +232,9 @@ endif()
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 
-# Examples
+# Examples using only Gpufit
 
-add_subdirectory( examples )
+add_subdirectory( ../examples/c++ "${CMAKE_CURRENT_BINARY_DIR}/examples" )
 
 # Tests
 
