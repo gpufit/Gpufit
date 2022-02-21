@@ -16,6 +16,8 @@ public:
         EstimatorID estimator_id,
         REAL const * initial_parameters,
         int const * parameters_to_fit,
+        REAL* constraints,
+		int* constraint_types,
         char * user_info,
         std::size_t user_info_size,
         REAL * output_parameters,
@@ -45,6 +47,8 @@ private:
     EstimatorID estimator_id_;
     REAL const * const initial_parameters_;
     int const * const parameters_to_fit_;
+    REAL const* const constraints_;
+    int const * const constraint_types_;
     char * const user_info_;
     std::size_t const user_info_size_;
 

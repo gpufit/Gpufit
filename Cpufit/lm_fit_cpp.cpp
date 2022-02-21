@@ -19,6 +19,8 @@ LMFitCPP::LMFitCPP(
     Info const & info,
     REAL const * initial_parameters,
     int const * parameters_to_fit,
+    REAL const* const constraints,
+    int const* const constraint_types,
     char * user_info,
     REAL * output_parameters,
     int * output_state,
@@ -33,6 +35,8 @@ LMFitCPP::LMFitCPP(
     converged_(false),
     info_(info),
     parameters_to_fit_(parameters_to_fit),
+    constraints_(constraints),
+    constraint_types_(constraint_types),
     curve_(info.n_points_),
     derivatives_(info.n_points_*info.n_parameters_),
     hessian_(info.n_parameters_to_fit_*info.n_parameters_to_fit_),
@@ -1545,6 +1549,32 @@ void LMFitCPP::solve_equation_system_lup()
     solve_LUP(decomposed_hessian_, pivot_array_, gradient_, info_.n_parameters_to_fit_, delta_);
 }
 
+void LMFitCPP::project_parameters_to_box()
+{
+	for( size_t parameter_index = 0; parameter_index < info_.n_parameters_; parameter_index++ )
+	{
+        if( !parameters_to_fit_[parameter_index] )
+            continue;
+		
+		int const constraint_type = constraint_types_[parameter_index];
+        float& parameter = parameters_[parameter_index];
+		
+		if( constraint_type == ConstraintType::LOWER || constraint_type == ConstraintType::LOWER_UPPER )
+		{
+            REAL const lower_bound = constraints_[parameter_index * 2 + LOWER_BOUND];
+			
+	        parameter = std::max( parameter, lower_bound );
+		}
+
+		if( constraint_type == ConstraintType::UPPER || constraint_type == ConstraintType::LOWER_UPPER )
+		{
+            REAL const upper_bound = constraints_[parameter_index * 2 + UPPER_BOUND];
+			
+	        parameter = std::min( parameter, upper_bound );
+		}
+	}
+}
+
 void LMFitCPP::update_parameters()
 {
     for (int parameter_index = 0, delta_index = 0; parameter_index < info_.n_parameters_; parameter_index++)
@@ -1627,6 +1657,9 @@ void LMFitCPP::run()
     for (int i = 0; i < info_.n_parameters_; i++)
         parameters_[i] = initial_parameters_[i];
 
+    if( info_.use_constraints_ )
+        project_parameters_to_box();
+
     *state_ = FitState::CONVERGED;
 	calc_model();
     calc_coefficients();
@@ -1644,7 +1677,10 @@ void LMFitCPP::run()
 
         update_parameters();
 
-		calc_model();
+        if( info_.use_constraints_ )
+            project_parameters_to_box();
+
+        calc_model();
         calc_coefficients();
 
         converged_ = check_for_convergence();
