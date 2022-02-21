@@ -44,7 +44,7 @@ LMFitCPP::LMFitCPP(
     scaling_vector_(info.n_parameters_to_fit_),
     prev_chi_square_(0),
     lambda_(0.001f),
-    prev_parameters_(info.n_parameters_to_fit_),
+    prev_parameters_(info.n_parameters_),
     user_info_(user_info),
     parameters_(output_parameters),
     state_(output_state),
