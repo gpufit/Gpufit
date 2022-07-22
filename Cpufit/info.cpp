@@ -3,6 +3,7 @@
 Info::Info(void) :
     n_parameters_(0),
     n_parameters_to_fit_(0),
+    use_constraints_(false),
     max_n_iterations_(0),
     n_fits_(0),
     n_points_(0),

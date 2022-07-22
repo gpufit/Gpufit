@@ -40,6 +40,7 @@ set( CUDA_ARCHITECTURES ${DEFAULT_CUDA_ARCH} CACHE STRING
   "Auto | Common | All | ... see CUDA_SELECT_NVCC_ARCH_FLAGS(...)" )
 
 if( CUDA_ARCHITECTURES STREQUAL Auto )
+
   set( file ${PROJECT_BINARY_DIR}/detect_cuda_architectures.cpp )
   file( WRITE ${file} ""
     "#include <cuda_runtime.h>\n"
@@ -72,48 +73,55 @@ if( CUDA_ARCHITECTURES STREQUAL Auto )
     endif()
     set( CUDA_ARCHITECTURES "${architectures}" )
   endif()
+  
 elseif( CUDA_ARCHITECTURES STREQUAL All )
+
 # All does not include the latest PTX!
   set( CUDA_ARCHITECTURES "" )
 
   if( CUDA_VERSION VERSION_LESS "12.0" )
-    list( INSERT CUDA_ARCHITECTURES 0 "5.0" "5.2" )
+    list( INSERT CUDA_ARCHITECTURES 0 "3.5" "5.0" "5.2" )
   endif()
   if( CUDA_VERSION VERSION_LESS "11.0" )
-    list( INSERT CUDA_ARCHITECTURES 0 "3.0" "3.5" )
+    list( INSERT CUDA_ARCHITECTURES 0 "3.0" "3.2")
   endif()
   if( CUDA_VERSION VERSION_LESS "9.0" )
     list( INSERT CUDA_ARCHITECTURES 0 "2.0" "2.1(2.0)" )
   endif()
+  
   if( CUDA_VERSION VERSION_GREATER "6.5" )
-    if( CUDA_VERSION VERSION_LESS "11.0" )
-      list( APPEND CUDA_ARCHITECTURES "3.2" "3.7" )
-    endif()
-    if( CUDA_VERSION VERSION_LESS "12.0" )
       list( APPEND CUDA_ARCHITECTURES "5.3" )
-    endif()
   endif()
   
   if( CUDA_VERSION VERSION_GREATER "7.5" )
     list( APPEND CUDA_ARCHITECTURES "6.0" "6.1" )
   endif()
+  
   if( CUDA_VERSION VERSION_GREATER "8.0" )
-    list( APPEND CUDA_ARCHITECTURES "6.2" "7.0" )
+    list( APPEND CUDA_ARCHITECTURES "7.0" "7.2")
   endif()
-  if( CUDA_VERSION VERSION_GREATER "9.0" )
-    list( APPEND CUDA_ARCHITECTURES "6.2" "7.0" )
-  endif()
-  if( CUDA_VERSION VERSION_GREATER "10.0" )
+  
+  if( CUDA_VERSION VERSION_GREATER "9.2" )
     list( APPEND CUDA_ARCHITECTURES "7.5" )
   endif()
-  if( CUDA_VERSION VERSION_GREATER "11.0" )
-    list( APPEND CUDA_ARCHITECTURES "8.0" "8.6" )
+  
+  if( CUDA_VERSION VERSION_GREATER "10.2" )
+    list( APPEND CUDA_ARCHITECTURES "8.0" )
   endif()
+  
+  if( CUDA_VERSION VERSION_GREATER "11.0" )
+    list( APPEND CUDA_ARCHITECTURES "8.6" )
+  endif()
+  
   string( APPEND CUDA_ARCHITECTURES "+PTX" )
+  
 endif()
+
 message( STATUS "CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES}" )
+
 CUDA_SELECT_NVCC_ARCH_FLAGS( code_generation_flags "${CUDA_ARCHITECTURES}" )
 list( APPEND CUDA_NVCC_FLAGS ${code_generation_flags} )
+
 message( STATUS "CUDA_NVCC_FLAGS=${code_generation_flags}" )
 
 if( NOT WIN32 )
@@ -189,8 +197,11 @@ if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
 	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
         if ( WIN32 )
-            set( CUBLAS_DLL
-                "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+	    if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER_EQUAL "10")
+                set( CUBLAS_DLL "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}.dll" )
+	    else()
+		set( CUBLAS_DLL "${CUDA_TOOLKIT_ROOT_DIR}/bin/cublas64_${CUDA_VERSION_MAJOR}${CUDA_VERSION_MINOR}.dll" )
+	    endif()
             add_custom_command( TARGET Gpufit POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E
                     copy_if_different ${CUBLAS_DLL} $<TARGET_FILE_DIR:Gpufit> )
@@ -281,9 +292,9 @@ endif()
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
 
-# Examples
+# Examples using only Gpufit
 
-add_subdirectory( examples )
+add_subdirectory( ../examples/c++ "${CMAKE_CURRENT_BINARY_DIR}/examples" )
 
 # Tests
 

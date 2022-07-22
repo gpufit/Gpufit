@@ -20,6 +20,8 @@ public:
         Info const& info,
         REAL const * initial_parameters,
         int const * parameters_to_fit,
+        REAL const* constraints,
+        int const* constraint_types,
         char * user_info,
         REAL * output_parameters,
         int * output_states,
@@ -35,6 +37,8 @@ private:
     REAL const * const weights_;
     REAL const * const initial_parameters_;
     int const * const parameters_to_fit_;
+    REAL const* const constraints_;
+    int const* const constraint_types_;
     char * const user_info_;
 
     REAL * output_parameters_;
@@ -56,6 +60,8 @@ public:
         Info const & info,
         REAL const * initial_parameters,
         int const * parameters_to_fit,
+        REAL const* const constraints,
+        int const* const constraint_types,
         char * user_info,
         REAL * output_parameters,
         int * output_states,
@@ -123,6 +129,7 @@ private:
     void modify_step_width();
     void solve_equation_system_gj();
     void solve_equation_system_lup();
+    void project_parameters_to_box();
     void update_parameters();
 
     bool check_for_convergence();
@@ -138,6 +145,8 @@ private:
     REAL const * const weight_;
     REAL const * const initial_parameters_;
     int const * const parameters_to_fit_;
+    REAL const* const constraints_;
+    int const* const constraint_types_;
 
     bool converged_;
     REAL * parameters_;

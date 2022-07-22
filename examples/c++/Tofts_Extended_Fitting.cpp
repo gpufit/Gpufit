@@ -1,4 +1,4 @@
-#include "../gpufit.h"
+#include "../../Gpufit/gpufit.h"
 
 #include <time.h>
 #include <vector>
@@ -6,7 +6,7 @@
 #include <iostream>
 #include <math.h>
 
-void tofts_two()
+void tofts_three()
 {
 	
 	/*
@@ -32,16 +32,17 @@ void tofts_two()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 10000;
+	size_t const n_fits = 1000;
 	size_t const n_points_per_fit = 60;
-	size_t const n_model_parameters = 2;
-	REAL snr = 3.8;
+	size_t const n_model_parameters = 3;
+	REAL snr = 1.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
 	REAL timeX[] ={ 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
 					5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9, 9.25, 9.5, 9.75, 10,
-					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25, 14.5, 14.75, 15 };
+					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25,
+					14.5, 14.75, 15 };
 
 	// Concentration of plasma (independent), at 1 min based on equation: Cp(t) = 5.5e^(-.6t)
 	REAL Cp[] =   {	0.0f, 0.0f, 0.0f, 3.01846399851715f, 2.59801604007558f, 2.2361331285733f, 1.92465762011135f, 1.65656816551711f, 1.4258214335524f,
@@ -72,22 +73,24 @@ void tofts_two()
 
 	// initialize random number generator
 	std::mt19937 rng;
-	//rng.seed(time(NULL));
-	rng.seed(0);
+	rng.seed(time(NULL));
+	//rng.seed(0);
 	std::uniform_real_distribution< REAL > uniform_dist(0, 1);
 	std::normal_distribution< REAL > normal_dist(0, 1);
 
 	// true parameters
-	std::vector< REAL > true_parameters{ 0.005, 0.30 };		// Ktrans, ve
+	std::vector< REAL > true_parameters{ 0.0005, 0.60, 0.03 };		// Ktrans, ve, vp
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random Ktrans
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
-		// random Ve
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.6f + 0.8f * uniform_dist(rng));
+		// random ve
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.6f + 0.8f * uniform_dist(rng));
+		// random vp
+		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.6f + 0.8f * uniform_dist(rng));
 	}
 
 	// parameter_constraints
@@ -101,10 +104,14 @@ void tofts_two()
 		// ve
 		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
 		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
+		// vp
+		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
+		parameter_constraints[i * n_model_parameters * 2 + 5] = 1;
 
 		//type 3=upper lower
 		constraint_type[i * n_model_parameters + 0] = 3;
 		constraint_type[i * n_model_parameters + 1] = 3;
+		constraint_type[i * n_model_parameters + 2] = 3;
 	}
 
 	// generate data
@@ -122,7 +129,7 @@ void tofts_two()
 			REAL Ctprev = Cp[n - 1] * exp(-true_parameters[0] * (timeX[k]-timeX[n-1]) / true_parameters[1]);
 			x += ((Ct + Ctprev) / 2 * spacing);
 		}
-		REAL y = true_parameters[0] * x;
+		REAL y = true_parameters[0] * x + true_parameters[2] * Cp[k];
 		data[i] = y;
 		mean_y += y;
 		//std::cout << data[i] << std::endl;
@@ -134,17 +141,19 @@ void tofts_two()
 		data[i] = data[i] + norm_snr(rng);
 	}
 
+
 	// tolerance
 	REAL const tolerance = 10e-8f;
 
 	// maximum number of iterations
-	int const max_number_iterations = 200;
+	int const max_number_iterations = 100;
 
 	// estimator ID
 	int const estimator_id = LSE;
 
 	// model ID
-	int const model_id = TOFTS;
+	int const model_id = TOFTS_EXTENDED;
+	//int const model_id = TOFTS;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
@@ -155,34 +164,63 @@ void tofts_two()
 	std::vector< REAL > output_chi_square(n_fits);
 	std::vector< int > output_number_iterations(n_fits);
 
-	// call to gpufit (C interface)
-	int const status = gpufit_constrained
-	(
-		n_fits,
-		n_points_per_fit,
-		data.data(),
-		0,
-		model_id,
-		initial_parameters.data(),
-		parameter_constraints.data(),
-		constraint_type.data(),
-		tolerance,
-		max_number_iterations,
-		parameters_to_fit.data(),
-		estimator_id,
-		user_info_size,
-		reinterpret_cast< char* >( user_info.data() ),
-		output_parameters.data(),
-		output_states.data(),
-		output_chi_square.data(),
-		output_number_iterations.data()
-	);
-
-
-	// check status
-	if (status != ReturnState::OK)
+	bool run_constrained = 0;
+	if(!run_constrained)
 	{
-		throw std::runtime_error(gpufit_get_last_error());
+		// call to gpufit (C interface)
+		int const status = gpufit
+		(
+			n_fits,
+			n_points_per_fit,
+			data.data(),
+			0,
+			model_id,
+			initial_parameters.data(),
+			tolerance,
+			max_number_iterations,
+			parameters_to_fit.data(),
+			estimator_id,
+			user_info_size,
+			reinterpret_cast< char* >( user_info.data() ),
+			output_parameters.data(),
+			output_states.data(),
+			output_chi_square.data(),
+			output_number_iterations.data()
+		);
+		// check status
+		if (status != ReturnState::OK)
+		{
+			throw std::runtime_error(gpufit_get_last_error());
+		}
+	}
+	else
+	{
+		int const status = gpufit_constrained
+		(
+			n_fits,
+			n_points_per_fit,
+			data.data(),
+			0,
+			model_id,
+			initial_parameters.data(),
+			parameter_constraints.data(),
+			constraint_type.data(),
+			tolerance,
+			max_number_iterations,
+			parameters_to_fit.data(),
+			estimator_id,
+			user_info_size,
+			reinterpret_cast< char* >( user_info.data() ),
+			output_parameters.data(),
+			output_states.data(),
+			output_chi_square.data(),
+			output_number_iterations.data()
+		);
+		// check status
+		if (status != ReturnState::OK)
+		{
+			throw std::runtime_error(gpufit_get_last_error());
+		}
 	}
 
 
@@ -208,16 +246,33 @@ void tofts_two()
 		{
 			// add Ktrans
 			output_parameters_mean[0] += output_parameters[i * n_model_parameters + 0];
-			// add vp
+			// add ve
 			output_parameters_mean[1] += output_parameters[i * n_model_parameters + 1];
+			// add vp
+			output_parameters_mean[2] += output_parameters[i * n_model_parameters + 2];
 			// add Ktrans
 			output_parameters_mean_error[0] += abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]);
-			// add vp
+			// add ve
 			output_parameters_mean_error[1] += abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]);
+			// add vp
+			output_parameters_mean_error[2] += abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]);
+
+			if (false)
+			{
+				//std::cout << "Ktrans  fit " << output_parameters[i * n_model_parameters + 0]  << " error " << abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]) << "\n";
+				std::cout << "Ve	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
+				//std::cout << "Vp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
+
+				std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
+				//std::cout << "Ve	init " << initial_parameters[i * n_model_parameters + 1] << "\n";
+				//std::cout << "Vp	init " << initial_parameters[i * n_model_parameters + 2] << "\n";
+			}
+
 		}
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
 	output_parameters_mean[1] /= output_states_histogram[0];
+	output_parameters_mean[2] /= output_states_histogram[0];
 
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);
@@ -227,18 +282,22 @@ void tofts_two()
 		{
 			// add squared deviation for Ktrans
 			output_parameters_std[0] += (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]);
-			// add squared deviation for vp
+			// add squared deviation for ve
 			output_parameters_std[1] += (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]);
+			// add squared deviation for vp
+			output_parameters_std[2] += (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]) * (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]);
 		}
 	}
 	// divide and take square root
 	output_parameters_std[0] = sqrt(output_parameters_std[0] / output_states_histogram[0]);
 	output_parameters_std[1] = sqrt(output_parameters_std[1] / output_states_histogram[0]);
+	output_parameters_std[2] = sqrt(output_parameters_std[2] / output_states_histogram[0]);
 
 	// print mean and std
 	std::cout << "Data SNR:  " << snr << "\n";
 	std::cout << "Ktrans  true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
 	std::cout << "Ve	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
+	std::cout << "Vp	true " << true_parameters[2] << " mean " << output_parameters_mean[2] << " std " << output_parameters_std[2] << "\n";
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
@@ -276,10 +335,10 @@ void tofts_two()
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "Beginning Tofts fit..." << std::endl;
-	tofts_two();
+	std::cout << std::endl << "Beginning Extended Tofts fit..." << std::endl;
+	tofts_three();
 
-	std::cout << std::endl << "Tofts fit completed!" << std::endl;
+	std::cout << std::endl << "Tofts (Extended) fit completed!" << std::endl;
 
 	return 0;
 }

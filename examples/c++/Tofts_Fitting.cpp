@@ -1,5 +1,4 @@
-#include "../gpufit.h"
-#include "../gpufit.h"
+#include "../../Gpufit/gpufit.h"
 
 #include <time.h>
 #include <vector>
@@ -7,12 +6,12 @@
 #include <iostream>
 #include <math.h>
 
-void tissue_uptake_three()
+void tofts_two()
 {
 	
 	/*
 	This example generates test data in form of 10000 one dimensional Tissue Concentration
-	curves, using a synthetic AIF, hard coded Ktrans and vp values. Gaussian noise is
+	curves, using a synthetic AIF, hard coded Ktrans and Ve values. Gaussian noise is
 	added to achieve a specific SNR value. The initial guess is varied randomly between
 	10% and 180% of the true value. The same x position values are used for
 	every fit.
@@ -33,20 +32,16 @@ void tissue_uptake_three()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 2000;
+	size_t const n_fits = 10000;
 	size_t const n_points_per_fit = 60;
-	size_t const n_model_parameters = 3;
-	REAL snr = 1.4;
-
-	// true parameters
-	std::vector< REAL > true_parameters{ 0.0005, 0.05, 0.1 };		// Ktrans, vp, Fp
+	size_t const n_model_parameters = 2;
+	REAL snr = 3.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
 	REAL timeX[] ={ 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
 					5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9, 9.25, 9.5, 9.75, 10,
-					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25,
-					14.5, 14.75, 15 };
+					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25, 14.5, 14.75, 15 };
 
 	// Concentration of plasma (independent), at 1 min based on equation: Cp(t) = 5.5e^(-.6t)
 	REAL Cp[] =   {	0.0f, 0.0f, 0.0f, 3.01846399851715f, 2.59801604007558f, 2.2361331285733f, 1.92465762011135f, 1.65656816551711f, 1.4258214335524f,
@@ -77,22 +72,24 @@ void tissue_uptake_three()
 
 	// initialize random number generator
 	std::mt19937 rng;
-	rng.seed(time(NULL));
-	//rng.seed(0);
+	//rng.seed(time(NULL));
+	rng.seed(0);
 	std::uniform_real_distribution< REAL > uniform_dist(0, 1);
 	std::normal_distribution< REAL > normal_dist(0, 1);
+
+	// true parameters
+	std::vector< REAL > true_parameters{ 0.005, 0.30 };		// Ktrans, ve
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
 		// random Ktrans
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.5f + 1.0f * uniform_dist(rng));
-		// random vp
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.5f + 1.0f * uniform_dist(rng));
-		// random Fp
-		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.5f + 1.0f * uniform_dist(rng));
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
+		// random Ve
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
 	}
+
 	// parameter_constraints
 	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
 	std::vector< int > constraint_type(n_fits * n_model_parameters);
@@ -101,17 +98,13 @@ void tissue_uptake_three()
 		// Ktrans
 		parameter_constraints[i * n_model_parameters * 2 + 0] = 0;
 		parameter_constraints[i * n_model_parameters * 2 + 1] = 2;
-		// vp
-		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.055;
+		// ve
+		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
 		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
-		// fp
-		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
-		parameter_constraints[i * n_model_parameters * 2 + 5] = 100;
 
 		//type 3=upper lower
 		constraint_type[i * n_model_parameters + 0] = 3;
 		constraint_type[i * n_model_parameters + 1] = 3;
-		constraint_type[i * n_model_parameters + 2] = 3;
 	}
 
 	// generate data
@@ -121,17 +114,15 @@ void tissue_uptake_three()
 	{
 		size_t j = i / n_points_per_fit; // the fit
 		size_t k = i % n_points_per_fit; // the position within a fit
-
-		REAL Tp = true_parameters[1] / (true_parameters[2] / ((true_parameters[2]/true_parameters[0]) - 1) + true_parameters[2]);
-		REAL conv = 0;
+		REAL x = 0;
 		for (int n = 1; n < k; n++) {
 		
 			REAL spacing = timeX[n] - timeX[n - 1];
-			REAL Ct = Cp[n] * (true_parameters[2] * exp(-(timeX[k] -timeX[n])/Tp) + true_parameters[0] * (1 - exp(-(timeX[k] - timeX[n])/Tp)));
-			REAL Ctprev = Cp[n - 1] * (true_parameters[2] * exp(-(timeX[k] - timeX[n-1])/Tp) + true_parameters[0] * (1 - exp(-(timeX[k] - timeX[n-1])/Tp)));
-			conv += ((Ct + Ctprev) / 2 * spacing);
+			REAL Ct = Cp[n] * exp(-true_parameters[0] * (timeX[k]-timeX[n]) / true_parameters[1]);
+			REAL Ctprev = Cp[n - 1] * exp(-true_parameters[0] * (timeX[k]-timeX[n-1]) / true_parameters[1]);
+			x += ((Ct + Ctprev) / 2 * spacing);
 		}
-		REAL y = conv;
+		REAL y = true_parameters[0] * x;
 		data[i] = y;
 		mean_y += y;
 		//std::cout << data[i] << std::endl;
@@ -143,7 +134,6 @@ void tissue_uptake_three()
 		data[i] = data[i] + norm_snr(rng);
 	}
 
-
 	// tolerance
 	REAL const tolerance = 10e-8f;
 
@@ -154,7 +144,7 @@ void tissue_uptake_three()
 	int const estimator_id = LSE;
 
 	// model ID
-	int const model_id = TISSUE_UPTAKE;
+	int const model_id = TOFTS;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
@@ -166,25 +156,6 @@ void tissue_uptake_three()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-//	int const status = gpufit
-//	(
-//		n_fits,
-//		n_points_per_fit,
-//		data.data(),
-//		0,
-//		model_id,
-//		initial_parameters.data(),
-//		tolerance,
-//		max_number_iterations,
-//		parameters_to_fit.data(),
-//		estimator_id,
-//		user_info_size,
-//		reinterpret_cast< char* >( user_info.data() ),
-//		output_parameters.data(),
-//		output_states.data(),
-//		output_chi_square.data(),
-//		output_number_iterations.data()
-//	);
 	int const status = gpufit_constrained
 	(
 		n_fits,
@@ -239,31 +210,14 @@ void tissue_uptake_three()
 			output_parameters_mean[0] += output_parameters[i * n_model_parameters + 0];
 			// add vp
 			output_parameters_mean[1] += output_parameters[i * n_model_parameters + 1];
-			// add Fp
-			output_parameters_mean[2] += output_parameters[i * n_model_parameters + 2];
 			// add Ktrans
 			output_parameters_mean_error[0] += abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]);
 			// add vp
 			output_parameters_mean_error[1] += abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]);
-			// add Fp
-			output_parameters_mean_error[2] += abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]);
-
-			if (false)
-			{
-				//std::cout << "Ktrans  fit " << output_parameters[i * n_model_parameters + 0]  << " error " << abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]) << "\n";
-				//std::cout << "vp	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
-				//std::cout << "Fp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
-
-				//std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
-				//std::cout << "vp	init " << initial_parameters[i * n_model_parameters + 1] << "\n";
-				//std::cout << "Fp	init " << initial_parameters[i * n_model_parameters + 2] << "\n";
-			}
-
 		}
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
 	output_parameters_mean[1] /= output_states_histogram[0];
-	output_parameters_mean[2] /= output_states_histogram[0];
 
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);
@@ -275,20 +229,16 @@ void tissue_uptake_three()
 			output_parameters_std[0] += (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]);
 			// add squared deviation for vp
 			output_parameters_std[1] += (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]);
-			// add squared deviation for Fp
-			output_parameters_std[2] += (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]) * (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]);
 		}
 	}
 	// divide and take square root
 	output_parameters_std[0] = sqrt(output_parameters_std[0] / output_states_histogram[0]);
 	output_parameters_std[1] = sqrt(output_parameters_std[1] / output_states_histogram[0]);
-	output_parameters_std[2] = sqrt(output_parameters_std[2] / output_states_histogram[0]);
 
 	// print mean and std
 	std::cout << "Data SNR:  " << snr << "\n";
 	std::cout << "Ktrans  true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
-	std::cout << "vp	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
-	std::cout << "Fp	true " << true_parameters[2] << " mean " << output_parameters_mean[2] << " std " << output_parameters_std[2] << "\n";
+	std::cout << "Ve	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
@@ -326,10 +276,10 @@ void tissue_uptake_three()
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "Beginning tissue uptake fit..." << std::endl;
-	tissue_uptake_three();
+	std::cout << std::endl << "Beginning Tofts fit..." << std::endl;
+	tofts_two();
 
-	std::cout << std::endl << "Tissue uptake fit completed!" << std::endl;
+	std::cout << std::endl << "Tofts fit completed!" << std::endl;
 
 	return 0;
 }

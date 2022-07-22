@@ -53,7 +53,7 @@ Gpufit interface. The user information should then contain *X* coordinate values
 
         If the number of values in the user information array is equal to the number of data points per fit, the same *X*
         coordinate values are used for all fits.
-		
+
     :`Unique X coordinate values for each fit`:
 
         If the number of values in the user information array is equal to the total number of data points, unique *X*
@@ -94,7 +94,7 @@ Gpufit interface.
 
         If the number of values in the user information array is equal to the number of data points per fit, the same *X*
         coordinate values are used for all fits.
-		
+
     :`Unique X coordinate values for each fit`:
 
         If the number of values in the user information array is equal to the total number of data points, unique *X*
@@ -117,7 +117,7 @@ Gpufit interface.
 
 :`p_3`: offset
 
-	
+
 .. _gauss-2d:
 
 2D Gaussian function (cylindrical symmetry)
@@ -131,20 +131,20 @@ Here, :code:`p` is the vector of parameters (p0..p4) and the model function :cod
     g(x,y,\vec{p})=p_0 e^{-\left(\left(x-p_1\right)^2+\left(y-p_2\right)^2\right)/\left(2p_3^2\right)}+p_4
 
 :`x,y`: (independent variables) *X,Y* coordinates
-	
+
     No independent variables are passed to this model function.
     Hence, the *(X,Y)* coordinates of the first data value are assumed to be (:math:`0.0, 0.0`).
     The fit size is *M x M* data points (M*M=number of data points in the interface), the *(X,Y)* coordinates of the data are simply the corresponding 2D array
     indices of the data array, starting from zero.
 
 :`p_0`: amplitude
-	
+
 :`p_1`: center coordinate x
-	
+
 :`p_2`: center coordinate y
-	
+
 :`p_3`: width (standard deviation; equal width in x and y dimensions)
-	
+
 :`p_4`: offset
 
 
@@ -168,15 +168,15 @@ in gauss_2d_elliptic.cuh_. Here, :code:`p` is the vector of parameters (p0..p5) 
     indices of the data array, starting from zero.
 
 :`p_0`: amplitude
-	
+
 :`p_1`: center coordinate x
-	
+
 :`p_2`: center coordinate y
-	
+
 :`p_3`: width x (standard deviation)
-	
+
 :`p_4`: width y (standard deviation)
-	
+
 :`p_5`: offset
 
 
@@ -201,15 +201,15 @@ Here, :code:`p` is the vector of parameters (p0..p6) and the model function :cod
     indices of the data array, starting from zero.
 
 :`p_0`: amplitude
-	
+
 :`p_1`: center coordinate x
-	
+
 :`p_2`: center coordinate y
-	
+
 :`p_3`: width x (standard deviation)
-	
+
 :`p_4`: width y (standard deviation)
-	
+
 :`p_5`: offset
 
 :`p_6`: rotation angle [radians]
@@ -236,22 +236,23 @@ coordinate of the input data.
     indices of the data array, starting from zero.
 
 :`p_0`: amplitude
-	
+
 :`p_1`: center coordinate x
-	
+
 :`p_2`: center coordinate y
-	
+
 :`p_3`: width x (standard deviation)
-	
+
 :`p_4`: width y (standard deviation)
-	
+
 :`p_5`: offset
 
 
 1D Spline function
 ++++++++++++++++++
 
-A 1D cubic spline function defined by 3 parameters and a set of cubic spline coefficients. Its model ID is ``SPLINE_1D``
+A 1D cubic spline function defined by 3 parameters and a set of cubic spline coefficients. See `Gpuspline on Github`_ for details
+on how to compute the set of cubic spline coefficients from a data set so that it can be used here. The model ID is ``SPLINE_1D``
 and it is implemented in spline_1d.cuh_. Here, :code:`p` is the vector of parameters (p0..p2) and :code:`c` the vector
 of spline coefficients. The model function :code:`g` exists for each x coordinate of the input data.
 
@@ -275,7 +276,8 @@ of spline coefficients. The model function :code:`g` exists for each x coordinat
 2D Spline function
 ++++++++++++++++++
 
-A 2D cubic spline function defined by 4 parameters and a set of cubic spline coefficients. Its model ID is ``SPLINE_2D``
+A 2D cubic spline function defined by 4 parameters and a set of cubic spline coefficients. See `Gpuspline on Github`_ for details
+on how to compute the set of cubic spline coefficients from a data set so that it can be used here. The model ID is ``SPLINE_2D``
 and it is implemented in spline_2d.cuh_. Here, :code:`p` is the vector of parameters (p0..p3) and :code:`c` the vector
 of spline coefficients. The model function :code:`g` exists for each x,y coordinate of the input data.
 
@@ -301,7 +303,8 @@ of spline coefficients. The model function :code:`g` exists for each x,y coordin
 3D Spline function
 ++++++++++++++++++
 
-A 3D cubic spline function defined by 5 parameters and a set of cubic spline coefficients. Its model ID is ``SPLINE_3D``
+A 3D cubic spline function defined by 5 parameters and a set of cubic spline coefficients. See `Gpuspline on Github`_ for details
+on how to compute the set of cubic spline coefficients from a data set so that it can be used here. The model ID is ``SPLINE_3D``
 and it is implemented in spline_3d.cuh_. Here, :code:`p` is the vector of parameters (p0..p4) and :code:`c` the vector
 of spline coefficients. The model function :code:`g` exists for each x,y,z coordinate of the input data.
 
@@ -329,10 +332,11 @@ of spline coefficients. The model function :code:`g` exists for each x,y,z coord
 3D Multichannel Spline function
 +++++++++++++++++++++++++++++++
 
-A 3D cubic spline function with multiple channels defined by 5 parameters and a set of cubic spline coefficients. Its
-model ID is ``SPLINE_3D_MULTICHANNEL`` and it is implemented in spline_3d_multichannel.cuh_. Here, :code:`p` is the
-vector of parameters (p0..p4) and :code:`c` the vector of spline coefficients. The model function :code:`g` exists for
-each x,y,z coordinate of the input data.
+A 3D cubic spline function with multiple channels defined by 5 parameters and a set of cubic spline coefficients.
+See `Gpuspline on Github`_ for details on how to compute the set of cubic spline coefficients from a data set so that
+it can be used here. The model ID is ``SPLINE_3D_MULTICHANNEL`` and it is implemented in spline_3d_multichannel.cuh_.
+Here, :code:`p` is the vector of parameters (p0..p4) and :code:`c` the vector of spline coefficients.
+The model function :code:`g` exists for each x,y,z coordinate of the input data.
 
 .. math::
 
@@ -359,7 +363,8 @@ each x,y,z coordinate of the input data.
 +++++++++++++++++++++++++++++++++++++++++++++++++++
 
 A 3D cubic spline function with multiple channels and a variable phase defined by 6 parameters and a set of cubic spline
-coefficients. Its model ID is ``SPLINE_3D_PHASE_MULTICHANNEL`` and it is implemented in
+coefficients. See `Gpuspline on Github`_ for details on how to compute the set of cubic spline coefficients from a data set so that
+it can be used here. The model ID is ``SPLINE_3D_PHASE_MULTICHANNEL`` and it is implemented in
 spline_3d_phase_multichannel.cuh_. Here, :code:`p` is the vector of parameters (p0..p5) and :code:`c` the vector of
 spline coefficients. The model function :code:`g` exists for each x,y,z coordinate of the input data.
 

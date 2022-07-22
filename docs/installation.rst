@@ -35,7 +35,7 @@ updated Nvidia graphics driver. The binary package contains:
 - Python version 2.x and version 3.x bindings (compiled as wheel files) and
   Python examples.
 - Java 8 32 bit and 64 bit bindings, with Java examples.
-- This manual in PDF format.
+- This manual in PDF format. 
 
 To re-build the binary distribution, see the instructions located in 
 package/README.md.
@@ -60,7 +60,7 @@ The following tools are required in order to build Gpufit from source.
   * Linux: GCC 4 (tested with 4-6)
   * Windows: Visual Studio 2013 (tested with 2013 - 2019)
 
-* CUDA_ Toolkit 6.5 or later (tested with 6.5-10.1) [#]_
+* CUDA_ Toolkit 6.5 or later (tested with 6.5-11.4) [#]_
 
 .. [#] Note that it is recommended to use the newest available stable release of the CUDA Toolkit which is compatible
     with the compiler (e.g. Visual Studio 2015 is required in order to use CUDA Toolkit 8.0). Some older graphics cards
@@ -71,9 +71,10 @@ The following tools are required in order to build Gpufit from source.
 
 * Boost_ 1.58 or later (required if you want to build the tests)
 * MATLAB_ if building the MATLAB bindings (minimum version Matlab 2012a)
-* Python_ if building the Python bindings (Python version 2.x or 3.x)
+* Python_ if building the Python bindings (Python version 2.x or 3.x).  Note that the "wheel" package is required 
+  when building the Python binding.
 * Java if building the Java bindings (minimum Java JDK version 8)
-* PDF Latex installation (like Miktex) if converting the documentation from Latex to PDF
+* PDF Latex installation (like Miktex) if converting the documentation from Latex to PDF.  
 
 Source code availability
 ------------------------
@@ -103,7 +104,37 @@ First, identify the directory which contains the Gpufit source code
 (for example, on a Windows computer the Gpufit source code may be stored in 
 *C:\\Sources\\Gpufit*). Next, create a build directory outside the
 source code source directory (e.g. *C:\\Sources\\Gpufit-build-64*). Finally, 
-run cmake to configure and generate the compiler input files. The following
+run cmake to configure and generate the compiler input files. 
+
+Using the CMake Graphical User Interface
+----------------------------------------
+
+There is a graphical user interface available for CMake, which simplifies
+the configuration and generation steps.  For further details, see
+`Running CMake <https://cmake.org/runningcmake/>`_. The following steps outline 
+how to use the basic features of the CMake GUI.
+
+First, select the source code directory (the top level directory where the Gpufit 
+source code is located), and the build directory (where the binaries will be built).  
+For this example, the source directory might be *C:\\Sources\\Gpufit*, and the 
+build directory might be *C:\\Sources\\Gpufit-build-64*.
+
+Next, click the "Configure" button, and select the desired compiler from the drop 
+down list (e.g. Visual Studio 12 2013).  Under *Optional platform for Generator*, 
+select the desired architecture (e.g. *x64* to compile 64-bit binaries).
+
+Once configuration is complete, CMake will have automatically found the Matlab 
+installation, and the installation directories will be listed in the *NAME* and 
+*VALUE* columns.  If the Matlab installation was not found, the entries in the 
+*VALUE* column can be manually edited.
+
+Next, click on *Generate* to generate the Visual Studio solution files, which
+will be used to build the Gpufit package.
+
+Running CMake from the command line
+-----------------------------------
+
+The following
 commands, executed from the command prompt, assume that the cmake executable
 (e.g. *C:\\Program Files\\CMake\\bin\\cmake.exe*) is automatically found 
 via the PATH environment variable (if not, the full path to cmake.exe must be
@@ -166,7 +197,7 @@ version is 8.0.
 **No suitable Matlab and/or MX_Library version found - skipping Gpufit Matlab binding!**
 
 CMake might not be able to locate Matlab, in which case this message will be shown.
-Try to set the Matlab_ROOT_DIR variable manually and run CMake again.
+Try to set the Matlab_ROOT_DIR variable manually (for example "C:/Program Files/MATLAB/R2020b" or "/usr/local/Matlab/2020b" on Linux) and run CMake again.
 
 **Python launcher**
 
@@ -177,6 +208,16 @@ Python path.
 
 Set Matlab_WORKING_DIRECTORY to a valid directory, it will be added to 
 the Matlab path.
+
+**Documentation build issues**
+
+Note that the several Python packages are required to run the "documentation_create_latex.bat" script
+on Windows systems.  Please ensure that the "sphinx" and "sphinx_rtd_style" packages are installed in your
+Python distribution.
+
+**PDFLATEX not found** 
+
+When using Miktex, if the PDFLATEX package is not automatically found, the path to pdflatex.exe can be specified to CMake with the MIKTEX_BINARY_PATH variable (available under Advanced options).
 
 Compiling Gpufit on Windows
 ---------------------------

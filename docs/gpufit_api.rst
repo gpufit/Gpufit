@@ -122,7 +122,7 @@ Description of input parameters
 
     A 1D array containing the initial model parameter values for each fit. If the number of parameters of the fit model
     is defined by *n_parameters*, then the size of this array is *n_fits * n_parameters*.
-	
+
     The parameter values for each fit are concatenated one after another. If there are *M* parameters per fit,
     the parameters array is organized as follows: [(parameter 1), (parameter 2), ..., (parameter M), (parameter 1),
     (parameter 2), ..., (parameter M), ...].
@@ -137,10 +137,10 @@ Description of input parameters
     in the absolute value of :math:`\chi^2` is less than the tolerance value, the fit has converged.
     Alternatively, if the change in :math:`\chi^2` is less than the product of tolerance and the absolute value of
     :math:`\chi^2` [tolerance * abs(:math:`\chi^2`)], then the fit has converged.
-	
+
     Setting a lower value for the tolerance results in more precise values for the fit parameters, but requires more fit
     iterations to reach convergence.
-	
+
     A typical value for the tolerance settings is between 1.0E-3 and 1.0E-6.
 
     :type: float
@@ -158,7 +158,7 @@ Description of input parameters
     Each entry in the array is a flag which determines whether or not the corresponding model parameter will be held
     constant during the fit. To allow a parameter to vary during the fit, set the entry in *parameters_to_fit* equal
     to one. To hold the value constant, set the entry to zero.
-	
+
     An array of ones, e.g. [1,1,1,1,1,...] will allow all parameters to vary during the fit.
 
     :type: int *
@@ -187,7 +187,7 @@ Description of input parameters
     block of memory which is passed in to the :code:`gpufit()` function, and which is accessible in shared GPU memory by the
     fit model functions and the estimator functions. Possible uses for the user information data are to pass in values 
     for independent variables (e.g. X values) or to supply additional data to the fit model function or estimator.
-    The documentation of the used fit model function or estimator must specify the composition of the user info data.
+    The documentation of the fit model function or estimator must specify the composition of the user info data.
     For a coded example which makes use of the user information data, see :ref:`linear-regression-example`. The user
     information data is an optional parameter - if no user information is required this parameter may be set to NULL.
 
@@ -245,6 +245,62 @@ Description of output parameters
 
     :0: No error
     :-1: Error
+
+gpufit_constrained()
+++++++++++++++++++++
+
+This is very similar to the :code:`gpufit()` function but with the additional possibility to add box constraints on the
+allowed parameter ranges.
+
+The :code:`gpufit_constrained()` function call is defined below.
+
+.. code-block:: cpp
+
+    int gpufit_constrained
+    (
+        size_t n_fits,
+        size_t n_points,
+        float * data,
+        float * weights,
+        int model_id,
+        float * initial_parameters,
+        float * constraints,
+        int * constraint_types,
+        float tolerance,
+        int max_n_iterations,
+        int * parameters_to_fit,
+        int estimator_id,
+        size_t user_info_size,
+        char * user_info,
+        float * output_parameters,
+        int * output_states,
+        float * output_chi_squares,
+        int * output_n_iterations
+    ) ;
+
+In order to not repeat the same information all input and output parameters in :code:`gpufit_constrained()` that also
+exist in :code:`gpufit()` have exactly the same definition and interpretation. Below only the additional input parameter
+regarding the constraints are explained.
+
+Description of constraints input parameters
+...........................................
+
+:constraints: Pointer to model parameter constraint intervals
+
+    A 1D array containing the model parameter constraint lower and upper bounds for all parameters (including fixed parameters)
+    and for all fits. Order is lower, upper bound first, then parameters, then number of fits.
+
+    :type: float *
+    :length: n_fits * n_parameters * 2
+
+:constraint_types: Pointer to constraint types for each parameter
+
+    A 1D array containing the constraint types for each parameter (including fixed parameters). The constraint type
+    is defined by an *int* with 0 - no constraint, 1 - only constrain lower bound, 2 - only constrain upper bound,
+    3 - constrain both lower and upper bounds.
+
+    :type: int *
+    :length: n_parameters
 
 gpufit_cuda_interface()
 +++++++++++++++++++++++
@@ -365,6 +421,59 @@ Description of output parameters
     :0: No error
     :-1: Error
 
+gpufit_constrained_cuda_interface()
++++++++++++++++++++++++++++++++++++
+
+This function is very similar to the :code:`gpufit_cuda_interface()` function but with the additional possibility to add box constraints on the
+allowed parameter ranges.
+
+.. code-block:: cpp
+
+    int gpufit_constrained_cuda_interface
+    (
+        size_t n_fits,
+        size_t n_points,
+        float * gpu_data,
+        float * gpu_weights,
+        int model_id,
+        float tolerance,
+        int max_n_iterations,
+        int * parameters_to_fit,
+        float * gpu_constraints,
+        int * constraint_types,
+        int estimator_id,
+        size_t user_info_size,
+        char * gpu_user_info,
+        float * gpu_fit_parameters,
+        int * gpu_output_states,
+        float * gpu_output_chi_squares,
+        int * gpu_output_n_iterations
+    ) ;
+
+In order to not repeat the same information all input and output parameters in :code:`gpufit_constrained_cuda_interface()` that also
+exist in :code:`gpufit_cuda_interface()` have exactly the same definition and interpretation. Below only the additional input parameter
+regarding the constraints are explained.
+
+Description of constraint input parameters
+..........................................
+
+:gpu_constraints: Pointer to model parameter constraint intervals stored on the GPU
+
+    A 1D array containing the model parameter constraint lower and upper bounds for all parameters (including fixed parameters)
+    and for all fits. Order is lower, upper bound first, then parameters, then number of fits.
+
+    :type: float *
+    :length: n_fits * n_parameters * 2
+
+:constraint_types: Pointer to constraint types for each parameter
+
+    A 1D array containing the constraint types for each parameter (including fixed parameters). The constraint type
+    is defined by an *int* with 0 - no constraint, 1 - only constrain lower bound, 2 - only constrain upper bound,
+    3 - constrain both lower and upper bounds.
+
+    :type: int *
+    :length: n_parameters
+
 gpufit_portable_interface()
 +++++++++++++++++++++++++++
 
@@ -381,70 +490,88 @@ Description of parameters
 
 :argv: Array of pointers to *gpufit* parameters, as defined above. For reference, the type of each element of the *argv* array is listed below.
 
-	:argv[0]: Number of fits
-	
-		:type: size_t *
-		
-	:argv[1]: Number of points per fit
-	
-		:type: size_t *	
-		
-	:argv[2]: Fit data
-	
-		:type: float *	
-		
-	:argv[3]: Fit weights
-	
-		:type: float *	
-		
-	:argv[4]: Fit model ID
-	
-		:type: int *	
-		
-	:argv[5]: Initial parameters
-	
-		:type: float *	
-		
-	:argv[6]: Fit tolerance
-	
-		:type: float *	
-		
-	:argv[7]: Maximum number of iterations
-	
-		:type: int *	
-		
-	:argv[8]: Parameters to fit
-	
-		:type: int *	
-		
-	:argv[9]: Fit estimator ID
-	
-		:type: int *	
-		
-	:argv[10]: User info size
-	
-		:type: size_t *	
-		
-	:argv[11]: User info data
-	
-		:type: char *	
-		
-	:argv[12]: Output parameters
-	
-		:type: float *	
-		
-	:argv[13]: Output states
-	
-		:type: int *	
-		
-	:argv[14]: Output :math:`\chi^2` values
-	
-		:type: float *	
-		
-	:argv[15]: Output number of iterations
-	
-		:type: int *	
-	
+    :argv[0]: Number of fits
+
+        :type: size_t *
+
+    :argv[1]: Number of points per fit
+
+        :type: size_t *
+
+    :argv[2]: Fit data
+
+        :type: float *
+
+    :argv[3]: Fit weights
+
+        :type: float *
+
+    :argv[4]: Fit model ID
+
+        :type: int *
+
+    :argv[5]: Initial parameters
+
+        :type: float *
+
+    :argv[6]: Fit tolerance
+
+        :type: float *
+
+    :argv[7]: Maximum number of iterations
+
+        :type: int *
+
+    :argv[8]: Parameters to fit
+
+        :type: int *
+
+    :argv[9]: Fit estimator ID
+
+        :type: int *
+
+    :argv[10]: User info size
+
+        :type: size_t *
+
+    :argv[11]: User info data
+
+        :type: char *
+
+    :argv[12]: Output parameters
+
+        :type: float *
+
+    :argv[13]: Output states
+
+        :type: int *
+
+    :argv[14]: Output :math:`\chi^2` values
+
+        :type: float *
+
+    :argv[15]: Output number of iterations
+
+        :type: int *
+
+
+:return value: This function simply returns the :code:`gpufit()` return status code.
+
+gpufit_constrained_portable_interface()
++++++++++++++++++++++++++++++++++++++++
+
+This function is a simple wrapper around the :code:`gpufit_constrained()` function, providing an alternative means of passing the function parameters.
+
+.. code-block:: cpp
+
+    int gpufit_constrained_portable_interface(int argc, void *argv[]);
+
+Description of parameters
+.........................
+
+:argc: The length of the argv pointer array
+
+:argv: Array of pointers to *gpufit_constrained* parameters, as defined above.
 
 :return value: This function simply returns the :code:`gpufit()` return status code.
 
@@ -504,6 +631,3 @@ installed CUDA driver version in *driver_version*.
 
     :0: No error
     :-1: Error. Use the function *gpufit_get_last_error()* to check the error message.
-
-
-

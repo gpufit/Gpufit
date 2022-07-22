@@ -1,4 +1,4 @@
-#include "../gpufit.h"
+#include "../../Gpufit/gpufit.h"
 
 #include <time.h>
 #include <vector>
@@ -6,20 +6,21 @@
 #include <iostream>
 #include <math.h>
 
-void two_compartment_exchange_four()
+void patlak_two()
 {
-
+	
 	/*
-	This example generates test data in form of 10000 one dimensional Tissue Concentration
-	curves, using a synthetic AIF, hard coded Ktrans and vp values. Gaussian noise is
-	added to achieve a specific SNR value. The initial guess is varied randomly between
-	10% and 180% of the true value. The same x position values are used for
+	This example generates test data in form of 10000 one dimensional linear
+	curves with the size of 20 data points per curve. It is noised by normal
+	distributed noise. The initial guesses were randomized, within a specified
+	range of the true value. The LINEAR_1D model is fitted to the test data sets
+	using the LSE estimator. The optional parameter user_info is used to pass
+	custom x positions of the data sets. The same x position values are used for
 	every fit.
 
 	The console output shows
 	- the ratio of converged fits including ratios of not converged fits for
 	  different reasons,
-	- the SNR of the generated data
 	- the values of the true parameters and the mean values of the fitted
 	  parameters including their standard deviation,
 	- the mean chi square value
@@ -32,20 +33,16 @@ void two_compartment_exchange_four()
 
 
 	// number of fits, fit points and parameters
-	size_t const n_fits = 100000;
+	size_t const n_fits = 10000;
 	size_t const n_points_per_fit = 60;
-	size_t const n_model_parameters = 4;
-	REAL snr = 4.8;
-
-	// true parameters
-	std::vector< REAL > true_parameters{ 0.005, 0.3, 0.05, 0.1 };		// Ktrans, ve, vp, Fp
+	size_t const n_model_parameters = 2;
+	REAL snr = 0.8;
 
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
-	REAL timeX[] ={ 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
+	REAL timeX[] = { 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5,
 					5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7, 7.25, 7.5, 7.75, 8, 8.25, 8.5, 8.75, 9, 9.25, 9.5, 9.75, 10,
-					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25,
-					14.5, 14.75, 15 };
+					10.25, 10.5, 10.75, 11, 11.25, 11.5, 11.75, 12, 12.25, 12.5, 12.75, 13, 13.25, 13.5, 13.75, 14, 14.25, 14.5, 14.75, 15 };
 
 	// Concentration of plasma (independent), at 1 min based on equation: Cp(t) = 5.5e^(-.6t)
 	REAL Cp[] =   {	0.0f, 0.0f, 0.0f, 3.01846399851715f, 2.59801604007558f, 2.2361331285733f, 1.92465762011135f, 1.65656816551711f, 1.4258214335524f,
@@ -55,7 +52,7 @@ void two_compartment_exchange_four()
 					0.0824756725126274f, 0.0709874691926393f, 0.0610994809603327f, 0.0525888106179893f, 0.0452636087696102f, 0.0389587491097867f,
 					0.033532106110336f, 0.0288613511954976f, 0.0248411951843697f, 0.0213810148391187f, 0.018402810016092f, 0.0158394453694853f,
 					0.013633136971665f, 0.0117341497352074f, 0.010099676273659f, 0.00869287192804919f, 0.00748202420651342f, 0.00643983791435146f,
-					0.00554281985976681f, 0.00477074926518851f, 0.00410622194607174f, 0.00353425798195557f, 0.00304196403581309f, 0.00261824270962248f,
+					0.00554281985976681f, 0.00477074926518851f, 0.00410622194607174f, 0.00353425798195557f, 0.00304196403581309f, 0.00261824270962248f, 
 					0.00225354238438883f, 0.00193964190545541f, 0.00166946525943377f, 0.00143692206515917f, 0.00123677028298367f, 0.00106449804756952f,
 					0.000916221960431984f, 0.000788599549519612f, 0.000678753922476738f };
 
@@ -77,47 +74,20 @@ void two_compartment_exchange_four()
 	// initialize random number generator
 	std::mt19937 rng;
 	rng.seed(time(NULL));
-	//rng.seed(0);
 	std::uniform_real_distribution< REAL > uniform_dist(0, 1);
 	std::normal_distribution< REAL > normal_dist(0, 1);
+
+	// true parameters
+	std::vector< REAL > true_parameters{ 0.05, 0.03 };		// Ktrans, vp
 
 	// initial parameters (randomized)
 	std::vector< REAL > initial_parameters(n_fits * n_model_parameters);
 	for (size_t i = 0; i != n_fits; i++)
 	{
-		// random Ktrans
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.95f + 0.1f * uniform_dist(rng));
-		// random ve
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[1] * (0.95f + 0.1f * uniform_dist(rng));
-		// random vp
-		initial_parameters[i * n_model_parameters + 2] = true_parameters[2] * (0.95f + 0.1f * uniform_dist(rng));
-		// random Fp
-		initial_parameters[i * n_model_parameters + 3] = true_parameters[3] * (0.95f + 0.1f * uniform_dist(rng));
-	}
-
-	// parameter_constraints
-	std::vector< REAL > parameter_constraints(n_fits * n_model_parameters * 2);
-	std::vector< int > constraint_type(n_fits * n_model_parameters);
-	for (size_t i = 0; i != n_fits; i++)
-	{
-		// Ktrans
-		parameter_constraints[i * n_model_parameters * 2 + 0] = 0;
-		parameter_constraints[i * n_model_parameters * 2 + 1] = 2;
-		// ve
-		parameter_constraints[i * n_model_parameters * 2 + 2] = 0.02;
-		parameter_constraints[i * n_model_parameters * 2 + 3] = 1;
-		// vp
-		parameter_constraints[i * n_model_parameters * 2 + 4] = 0.001;
-		parameter_constraints[i * n_model_parameters * 2 + 5] = 1;
-		// Fp
-		parameter_constraints[i * n_model_parameters * 2 + 6] = 0.001;
-		parameter_constraints[i * n_model_parameters * 2 + 7] = 100;
-
-		//type 3=upper lower
-		constraint_type[i * n_model_parameters + 0] = 3;
-		constraint_type[i * n_model_parameters + 1] = 3;
-		constraint_type[i * n_model_parameters + 2] = 3;
-		constraint_type[i * n_model_parameters + 3] = 3;
+		// random offset
+		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
+		// random slope
+		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.1f + 1.8f * uniform_dist(rng));
 	}
 
 	// generate data
@@ -127,25 +97,18 @@ void two_compartment_exchange_four()
 	{
 		size_t j = i / n_points_per_fit; // the fit
 		size_t k = i % n_points_per_fit; // the position within a fit
-
-		REAL conv = 0;
-		REAL Tp = true_parameters[2] / (true_parameters[3] / ((true_parameters[3] / true_parameters[0]) - 1) + true_parameters[3]);
-		REAL Te = true_parameters[1] / (true_parameters[3] / ((true_parameters[3] / true_parameters[0]) - 1));
-		REAL Tb = true_parameters[2] / true_parameters[3];
-		REAL Kpos = 0.5 * (1/Tp + 1/Te + sqrt(pow(1/Tp + 1/Te,2) - 4 * 1/Te * 1/Tb));
-		REAL Kneg = 0.5 * (1/Tp + 1/Te - sqrt(pow(1/Tp + 1/Te,2) - 4 * 1/Te * 1/Tb));
-		REAL Eneg = (Kpos - 1/Tb) / (Kpos - Kneg);
+		REAL x = 0;
 		for (int n = 1; n < k; n++) {
-
+		
 			REAL spacing = timeX[n] - timeX[n - 1];
-			REAL Ct = Cp[n] * (exp(-(timeX[k] - timeX[n]) * Kpos) + Eneg * (exp(-(timeX[k] - timeX[n]) * Kneg) - exp(-Kpos)));
-			REAL Ctprev = Cp[n - 1] * (exp(-(timeX[k] - timeX[n-1]) * Kpos) + Eneg * ( exp(-(timeX[k] - timeX[n-1]) * Kneg) - exp(-Kpos)));
-			conv += ((Ct + Ctprev) / 2 * spacing);
+			x += (Cp[n - 1] + Cp[n]) / 2 * spacing;
 		}
-		REAL y = true_parameters[3] * conv;
+		REAL y = true_parameters[0] * x + true_parameters[1] * Cp[k];
+		//data[i] = y + normal_dist(rng);
+		//data[i] = y * (0.2f + 1.6f * uniform_dist(rng));
 		data[i] = y;
 		mean_y += y;
-//		std::cout << data[i] << std::endl;
+		//std::cout << data[i] << std::endl;
 	}
 	mean_y = mean_y / data.size();
 	std::normal_distribution<REAL> norm_snr(0,mean_y/snr);
@@ -153,6 +116,7 @@ void two_compartment_exchange_four()
 	{
 		data[i] = data[i] + norm_snr(rng);
 	}
+
 
 
 	// tolerance
@@ -165,7 +129,7 @@ void two_compartment_exchange_four()
 	int const estimator_id = LSE;
 
 	// model ID
-	int const model_id = TWO_COMPARTMENT_EXCHANGE;
+	int const model_id = PATLAK;
 
 	// parameters to fit (all of them)
 	std::vector< int > parameters_to_fit(n_model_parameters, 1);
@@ -177,7 +141,7 @@ void two_compartment_exchange_four()
 	std::vector< int > output_number_iterations(n_fits);
 
 	// call to gpufit (C interface)
-	int const status = gpufit_constrained
+	int const status = gpufit
 	(
 		n_fits,
 		n_points_per_fit,
@@ -185,8 +149,6 @@ void two_compartment_exchange_four()
 		0,
 		model_id,
 		initial_parameters.data(),
-		parameter_constraints.data(),
-		constraint_type.data(),
 		tolerance,
 		max_number_iterations,
 		parameters_to_fit.data(),
@@ -231,38 +193,14 @@ void two_compartment_exchange_four()
 			output_parameters_mean[0] += output_parameters[i * n_model_parameters + 0];
 			// add vp
 			output_parameters_mean[1] += output_parameters[i * n_model_parameters + 1];
-			// add Fp
-			output_parameters_mean[2] += output_parameters[i * n_model_parameters + 2];
-			// add Fp
-			output_parameters_mean[3] += output_parameters[i * n_model_parameters + 3];
 			// add Ktrans
 			output_parameters_mean_error[0] += abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]);
 			// add vp
 			output_parameters_mean_error[1] += abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]);
-			// add Fp
-			output_parameters_mean_error[2] += abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]);
-			// add Fp
-			output_parameters_mean_error[3] += abs(output_parameters[i * n_model_parameters + 3]-true_parameters[3]);
-
-			if (output_parameters[i * n_model_parameters + 1]<0)
-			{
-				//std::cout << "Ktrans  fit " << output_parameters[i * n_model_parameters + 0]  << " error " << abs(output_parameters[i * n_model_parameters + 0]-true_parameters[0]) << "\n";
-				std::cout << "ve	fit " << output_parameters[i * n_model_parameters + 1]  << " error " << abs(output_parameters[i * n_model_parameters + 1]-true_parameters[1]) << "\n";
-				//std::cout << "vp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
-				//std::cout << "Fp	fit " << output_parameters[i * n_model_parameters + 2]  << " error " << abs(output_parameters[i * n_model_parameters + 2]-true_parameters[2]) << "\n";
-
-				std::cout << "Ktrans  init " << initial_parameters[i * n_model_parameters + 0] << "\n";
-				std::cout << "ve	init " << initial_parameters[i * n_model_parameters + 1] << "\n";
-				std::cout << "vp	init " << initial_parameters[i * n_model_parameters + 2] << "\n";
-				std::cout << "Fp	init " << initial_parameters[i * n_model_parameters + 3] << "\n";
-			}
-
 		}
 	}
 	output_parameters_mean[0] /= output_states_histogram[0];
 	output_parameters_mean[1] /= output_states_histogram[0];
-	output_parameters_mean[2] /= output_states_histogram[0];
-	output_parameters_mean[3] /= output_states_histogram[0];
 
 	// compute std of fitted parameters for converged fits
 	std::vector< REAL > output_parameters_std(n_model_parameters, 0);
@@ -274,26 +212,15 @@ void two_compartment_exchange_four()
 			output_parameters_std[0] += (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]) * (output_parameters[i * n_model_parameters + 0] - output_parameters_mean[0]);
 			// add squared deviation for vp
 			output_parameters_std[1] += (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]) * (output_parameters[i * n_model_parameters + 1] - output_parameters_mean[1]);
-			// add squared deviation for Fp
-			output_parameters_std[2] += (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]) * (output_parameters[i * n_model_parameters + 2] - output_parameters_mean[2]);
-			// add squared deviation for Fp
-			output_parameters_std[3] += (output_parameters[i * n_model_parameters + 3] - output_parameters_mean[3]) * (output_parameters[i * n_model_parameters + 3] - output_parameters_mean[3]);
 		}
 	}
 	// divide and take square root
 	output_parameters_std[0] = sqrt(output_parameters_std[0] / output_states_histogram[0]);
 	output_parameters_std[1] = sqrt(output_parameters_std[1] / output_states_histogram[0]);
-	output_parameters_std[2] = sqrt(output_parameters_std[2] / output_states_histogram[0]);
-	output_parameters_std[3] = sqrt(output_parameters_std[3] / output_states_histogram[0]);
-
 
 	// print mean and std
-	std::cout << "Data SNR:  " << snr << "\n";
 	std::cout << "Ktrans  true " << true_parameters[0] << " mean " << output_parameters_mean[0] << " std " << output_parameters_std[0] << "\n";
-	std::cout << "ve	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
-	std::cout << "vp	true " << true_parameters[2] << " mean " << output_parameters_mean[2] << " std " << output_parameters_std[2] << "\n";
-	std::cout << "Fp	true " << true_parameters[3] << " mean " << output_parameters_mean[3] << " std " << output_parameters_std[3] << "\n";
-
+	std::cout << "vp	true " << true_parameters[1] << " mean " << output_parameters_mean[1] << " std " << output_parameters_std[1] << "\n";
 
 	// compute mean chi-square for those converged
 	REAL  output_chi_square_mean = 0;
@@ -331,10 +258,10 @@ void two_compartment_exchange_four()
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::endl << "Beginning two compartment exchange fit..." << std::endl;
-	two_compartment_exchange_four();
+	std::cout << std::endl << "Beginning Patlak fit..." << std::endl;
+	patlak_two();
 
-	std::cout << std::endl << "Two compartment exchange fit completed!" << std::endl;
+	std::cout << std::endl << "Patlak fit completed!" << std::endl;
 
 	return 0;
 }

@@ -180,6 +180,65 @@ catch (...)
     return ReturnState::ERROR;
 }
 
+int gpufit_constrained_cuda_interface
+(
+    std::size_t n_fits,
+    std::size_t n_points,
+    REAL* gpu_data,
+    REAL* gpu_weights,
+    int model_id,
+    REAL tolerance,
+    int max_n_iterations,
+    int* parameters_to_fit,
+    REAL* gpu_constraints,
+    int* constraint_types,
+    int estimator_id,
+    std::size_t user_info_size,
+    char* gpu_user_info,
+    REAL* gpu_fit_parameters,
+    int* gpu_output_states,
+    REAL* gpu_output_chi_squares,
+    int* gpu_output_n_iterations
+)
+try
+{
+    FitInterface fi(
+        gpu_data,
+        gpu_weights,
+        n_fits,
+        static_cast<int>(n_points),
+        tolerance,
+        max_n_iterations,
+        static_cast<EstimatorID>(estimator_id),
+        gpu_fit_parameters,
+        parameters_to_fit,
+        gpu_constraints,
+        constraint_types,
+        gpu_user_info,
+        user_info_size,
+        gpu_fit_parameters,
+        gpu_output_states,
+        gpu_output_chi_squares,
+        gpu_output_n_iterations,
+        DEVICE);
+
+    fi.fit(static_cast<ModelID>(model_id));
+
+    return ReturnState::OK;
+}
+catch (std::exception& exception)
+{
+    last_error = exception.what();
+
+    return ReturnState::ERROR;
+}
+catch (...)
+{
+    last_error = "unknown error";
+
+    return ReturnState::ERROR;
+}
+
 char const * gpufit_get_last_error()
 {
     return last_error.c_str() ;

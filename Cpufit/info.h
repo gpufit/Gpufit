@@ -17,6 +17,7 @@ private:
 public:
     int n_parameters_;
     int n_parameters_to_fit_;
+    bool use_constraints_;
     std::size_t n_fits_;
     std::size_t n_points_;
     int max_n_iterations_;
