@@ -52,9 +52,9 @@ set OUTPUT_ZIP=%BUILD_BASE%\%OUTPUT_NAME%.zip
 
 set PERFORMANCE_TEST_INSTALL=%ROOT_INSTALL%\gpufit_performance_test
 set PYTHON_INSTALL=%ROOT_INSTALL%\python
-set x64_MATLAB_INSTALL=%ROOT_INSTALL%\matlab64
-set x64_JAVA_INSTALL=%ROOT_INSTALL%\java64
-set SDK_INSTALL_ROOT=%ROOT_INSTALL%\gpufit_sdk
+set x64_MATLAB_INSTALL=%ROOT_INSTALL%\matlab
+set x64_JAVA_INSTALL=%ROOT_INSTALL%\java
+set SDK_INSTALL_ROOT=%ROOT_INSTALL%\sdk
 
 set x64_BUILD=%BUILD_BASE%\VC16x64-11.4_cublas\RelWithDebInfo
 set x64_BUILD_LIB=%BUILD_BASE%\VC16x64-11.4_cublas\Gpufit\RelWithDebInfo
@@ -62,9 +62,11 @@ set x64_PYTHON_BUILD=%x64_BUILD%\pyGpufit\dist
 set x64_MATLAB_BUILD=%x64_BUILD%\matlab
 set x64_JAVA_BUILD=%x64_BUILD%\java
 
-set EXAMPLES_SOURCE=%SOURCE_BASE%\examples
+set CPP_EXAMPLES_SOURCE=%SOURCE_BASE%\examples\c++\gpufit_cpufit
 set PYTHON_SOURCE=%SOURCE_BASE%\Gpufit\python
+set PYTHON_EXAMPLES_SOURCE=%SOURCE_BASE%\examples\python
 set MATLAB_SOURCE=%SOURCE_BASE%\Gpufit\matlab
+set MATLAB_EXAMPLES_SOURCE=%SOURCE_BASE%\examples\matlab
 set SDK_README_SOURCE=%SOURCE_BASE%\package\sdk_readme.txt
 
 set MANUAL_SOURCE=%SOURCE_BASE%\docs\_build\latex\Gpufit.pdf
@@ -102,7 +104,7 @@ REM copy performance test
 
 echo collect performance test application
 mkdir "%PERFORMANCE_TEST_INSTALL%"
-copy "%EXAMPLES_SOURCE%\Gpufit_Cpufit_Performance_Comparison_readme.txt" "%PERFORMANCE_TEST_INSTALL%\README.txt"
+copy "%CPP_EXAMPLES_SOURCE%\Gpufit_Cpufit_Performance_Comparison_readme.txt" "%PERFORMANCE_TEST_INSTALL%\README.txt"
 
 mkdir "%PERFORMANCE_TEST_INSTALL%\win64"
 copy "%x64_BUILD%\Gpufit_Cpufit_Performance_Comparison.exe" "%PERFORMANCE_TEST_INSTALL%\win64"
@@ -118,14 +120,14 @@ echo collect python
 mkdir "%PYTHON_INSTALL%"
 copy "%x64_PYTHON_BUILD%\pyGpufit-%VERSION%-py2.py3-none-any.whl" "%PYTHON_INSTALL%\pyGpufit-%VERSION%-py2.py3-none-win_amd64.whl"
 copy "%PYTHON_SOURCE%\README.txt" "%PYTHON_INSTALL%"
-xcopy "%PYTHON_SOURCE%\examples" "%PYTHON_INSTALL%\examples" /i /q
+xcopy "%PYTHON_EXAMPLES_SOURCE%" "%PYTHON_INSTALL%\examples" /i /q
 
 REM copy Matlab 64 bit
 
 echo collect matlab64
 mkdir "%x64_MATLAB_INSTALL%"
 xcopy "%x64_MATLAB_BUILD%" "%x64_MATLAB_INSTALL%" /q
-xcopy "%MATLAB_SOURCE%\examples" "%x64_MATLAB_INSTALL%\examples" /i /q
+xcopy "%MATLAB_EXAMPLES_SOURCE%" "%x64_MATLAB_INSTALL%\examples" /i /q
 
 REM copy Java 64 bit
 

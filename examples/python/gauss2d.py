@@ -2,10 +2,9 @@
 Example of the Python binding of the Gpufit library which implements
 Levenberg Marquardt curve fitting in CUDA
 https://github.com/gpufit/Gpufit
-
-Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
 http://gpufit.readthedocs.io/en/latest/bindings.html#python
 
+Multiple fits of a 2D Gaussian peak function with Poisson distributed noise
 This example additionally requires numpy.
 """
 

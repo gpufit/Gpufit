@@ -14,6 +14,8 @@ FitInterface::FitInterface(
     EstimatorID estimator_id,
     REAL const * initial_parameters,
     int const * parameters_to_fit,
+    REAL* constraints,
+    int* constraint_types,
     char * user_info,
     std::size_t user_info_size,
     REAL * output_parameters,
@@ -29,6 +31,8 @@ FitInterface::FitInterface(
     estimator_id_(estimator_id),
     initial_parameters_(initial_parameters),
     parameters_to_fit_(parameters_to_fit),
+    constraints_(constraints),
+    constraint_types_(constraint_types),
     user_info_(user_info),
     user_info_size_(user_info_size),
     output_parameters_(output_parameters),
@@ -65,6 +69,7 @@ void FitInterface::configure_info(Info & info, ModelID const model_id)
     info.estimator_id_ = estimator_id_;
     info.user_info_size_ = user_info_size_;
     info.n_parameters_ = n_parameters_;
+    info.use_constraints_ = constraints_ ? true : false;
 
     info.set_number_of_parameters_to_fit(parameters_to_fit_);
 }
@@ -132,6 +137,8 @@ void FitInterface::fit(ModelID const model_id)
         info,
         initial_parameters_,
         parameters_to_fit_,
+        constraints_,
+        constraint_types_,
         user_info_,
         output_parameters_,
         output_states_,

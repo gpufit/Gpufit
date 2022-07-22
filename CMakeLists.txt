@@ -142,7 +142,7 @@ add_subdirectory( Gpufit )
 
 # Examples using Gpufit and Cpufit
 
-add_subdirectory( examples )
+add_subdirectory( examples/c++/gpu_vs_cpu_profiling )
 
 # Launcher
 #

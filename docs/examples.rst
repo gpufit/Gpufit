@@ -23,50 +23,50 @@ space for data.  In this example, the *parameters to fit* array is initialized t
 
 .. code-block:: cpp
 
-	// number of fits, number of points per fit
-	size_t const n_fits = 10;
-	size_t const n_points_per_fit = 10;
+    // number of fits, number of points per fit
+    size_t const n_fits = 10;
+    size_t const n_points_per_fit = 10;
 
-	// model ID and number of model parameters
-	int const model_id = GAUSS_1D;
-	size_t const n_model_parameters = 5;
+    // model ID and number of model parameters
+    int const model_id = GAUSS_1D;
+    size_t const n_model_parameters = 5;
 
-	// initial parameters
-	std::vector< float > initial_parameters(n_fits * n_model_parameters);
+    // initial parameters
+    std::vector< float > initial_parameters(n_fits * n_model_parameters);
 
-	// data
-	std::vector< float > data(n_points_per_fit * n_fits);
+    // data
+    std::vector< float > data(n_points_per_fit * n_fits);
 
-	// tolerance
-	float const tolerance = 0.001f;
+    // tolerance
+    float const tolerance = 0.001f;
 
-	// maximum number of iterations
-	int const max_number_iterations = 10;
+    // maximum number of iterations
+    int const max_number_iterations = 10;
 
-	// estimator ID
-	int const estimator_id = LSE;
+    // estimator ID
+    int const estimator_id = LSE;
 
-	// parameters to fit (all of them)
-	std::vector< int > parameters_to_fit(n_model_parameters, 1);
+    // parameters to fit (all of them)
+    std::vector< int > parameters_to_fit(n_model_parameters, 1);
 
-	
+
 In the next section of code, sufficient memory is allocated for the *fit results*, *output states*, *chi-square*, and *number of iterations* arrays. 
 
 .. code-block:: cpp
 
-	// output parameters
-	std::vector< float > output_parameters(n_fits * n_model_parameters);
-	std::vector< int > output_states(n_fits);
-	std::vector< float > output_chi_square(n_fits);
-	std::vector< int > output_number_iterations(n_fits);
+    // output parameters
+    std::vector< float > output_parameters(n_fits * n_model_parameters);
+    std::vector< int > output_states(n_fits);
+    std::vector< float > output_chi_square(n_fits);
+    std::vector< int > output_number_iterations(n_fits);
 
 Finally, a call to the C interface of Gpufit is made.  In this example, the optional inputs *weights* and *user_info* are not used.  The program 
 then checks the return status from Gpufit.  If an error occurred, the last error message is obtained and an exception is thrown.
 
 .. code-block:: cpp
 
-	// call to gpufit (C interface)
-	int const status = gpufit
+    // call to gpufit (C interface)
+    int const status = gpufit
         (
             n_fits,
             n_points_per_fit,
@@ -86,11 +86,11 @@ then checks the return status from Gpufit.  If an error occurred, the last error
             output_number_iterations.data()
         );
 
-	// check status
-	if (status != STATUS_OK)
-	{
-		throw std::runtime_error(gpufit_get_last_error());
-	}
+    // check status
+    if (status != STATUS_OK)
+    {
+        throw std::runtime_error(gpufit_get_last_error());
+    }
 
 In summary, the above example illustrates the basic details of the parameters which are passed to the :code:`gpufit()` function, such
 as the size of the input and output variables, etc.  This example could be adapted for real applications by:
@@ -126,7 +126,7 @@ In this example the true parameters used to generate the Gaussian data are defin
 .. code-block:: cpp
 
     // true parameters
-	std::vector< float > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
+    std::vector< float > true_parameters{ 10.f, 14.5f, 14.5f, 3.f, 10.f}; // amplitude, center x/y positions, width, offset
 
 These parameters define a 2D Gaussian peak centered at the middle of the grid (position 14.5, 14.5), with a width (standard deviation) of 3.0, an amplitude of 10
 and a background of 10.  Note that, since we are not providing the independent variables (X values) in the call to Gpufit, the X and Y coordinates of the first 
@@ -137,97 +137,97 @@ of about 20%. The initial guesses for the center coordinates are chosen with a d
 
 .. code-block:: cpp
 
-	// initial parameters (randomized)
-	std::vector< float > initial_parameters(n_fits * n_model_parameters);
-	for (size_t i = 0; i < n_fits; i++)
-	{
-		for (size_t j = 0; j < n_model_parameters; j++)
-		{
-			if (j == 1 || j == 2)
-			{
-				initial_parameters[i * n_model_parameters + j] = true_parameters[j] + true_parameters[3] * (-0.2f + 0.4f * uniform_dist(rng));
-			}
-			else
-			{
-				initial_parameters[i * n_model_parameters + j] = true_parameters[j] * (0.8f + 0.4f*uniform_dist(rng));
-			}
-		}
-	}
+    // initial parameters (randomized)
+    std::vector< float > initial_parameters(n_fits * n_model_parameters);
+    for (size_t i = 0; i < n_fits; i++)
+    {
+        for (size_t j = 0; j < n_model_parameters; j++)
+        {
+            if (j == 1 || j == 2)
+            {
+                initial_parameters[i * n_model_parameters + j] = true_parameters[j] + true_parameters[3] * (-0.2f + 0.4f * uniform_dist(rng));
+            }
+            else
+            {
+                initial_parameters[i * n_model_parameters + j] = true_parameters[j] * (0.8f + 0.4f*uniform_dist(rng));
+            }
+        }
+    }
 
 The 2D grid of *X* and *Y* values (each ranging from 0 to 29 with an increment of 1) is computed using a double for loop.
 
 .. code-block:: cpp
 
-	// generate x and y values
-	std::vector< float > x(n_points_per_fit);
-	std::vector< float > y(n_points_per_fit);
-	for (size_t i = 0; i < size_x; i++)
-	{
-		for (size_t j = 0; j < size_x; j++) {
-			x[i * size_x + j] = static_cast<float>(j);
-			y[i * size_x + j] = static_cast<float>(i);
-		}
-	}
+    // generate x and y values
+    std::vector< float > x(n_points_per_fit);
+    std::vector< float > y(n_points_per_fit);
+    for (size_t i = 0; i < size_x; i++)
+    {
+        for (size_t j = 0; j < size_x; j++) {
+            x[i * size_x + j] = static_cast<float>(j);
+            y[i * size_x + j] = static_cast<float>(i);
+        }
+    }
 
 Next, a 2D Gaussian peak function (without noise) is calculated, once, using the true parameters.
 
 .. code-block:: cpp
 
-	void generate_gauss_2d(
-		std::vector<float> const & x_coordinates,
-		std::vector<float> const & y_coordinates,
-		std::vector<float> const & gauss_params, 
-		std::vector<float> & output_values)
-	{
-		// Generates a Gaussian 2D function at a set of X and Y coordinates.  The Gaussian is defined by
-		// an array of five parameters.
-		
-		// x_coordinates: Vector of X coordinates.
-		// y_coordinates: Vector of Y coordinates.
-		// gauss_params:  Vector of function parameters.
-		// output_values: Output vector containing the values of the Gaussian function at the
-		//                corresponding X, Y coordinates.
-		
-		// gauss_params[0]: Amplitude
-		// gauss_params[1]: Center X position
-		// guass_params[2]: Center Y position
-		// gauss_params[3]: Gaussian width (standard deviation)
-		// gauss_params[4]: Baseline offset
-		
-		// This code assumes that x_coordinates.size == y_coordinates.size == output_values.size
-		
-		for (size_t i = 0; i < x_coordinates.size(); i++)
-		{
-			
-			float arg = -((x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1]) 
-					+ (y_coordinates[i] - gauss_params[2]) * (y_coordinates[i] - gauss_params[2])) 
-					/ (2.f * gauss_params[3] * gauss_params[3]);
-						 
-			output_values[i] = gauss_params[0] * exp(arg) + gauss_params[4];
-			
-		}
-	}
+    void generate_gauss_2d(
+        std::vector<float> const & x_coordinates,
+        std::vector<float> const & y_coordinates,
+        std::vector<float> const & gauss_params,
+        std::vector<float> & output_values)
+    {
+        // Generates a Gaussian 2D function at a set of X and Y coordinates.  The Gaussian is defined by
+        // an array of five parameters.
+
+        // x_coordinates: Vector of X coordinates.
+        // y_coordinates: Vector of Y coordinates.
+        // gauss_params:  Vector of function parameters.
+        // output_values: Output vector containing the values of the Gaussian function at the
+        //                corresponding X, Y coordinates.
+
+        // gauss_params[0]: Amplitude
+        // gauss_params[1]: Center X position
+        // guass_params[2]: Center Y position
+        // gauss_params[3]: Gaussian width (standard deviation)
+        // gauss_params[4]: Baseline offset
+
+        // This code assumes that x_coordinates.size == y_coordinates.size == output_values.size
+
+        for (size_t i = 0; i < x_coordinates.size(); i++)
+        {
+
+            float arg = -((x_coordinates[i] - gauss_params[1]) * (x_coordinates[i] - gauss_params[1])
+                    + (y_coordinates[i] - gauss_params[2]) * (y_coordinates[i] - gauss_params[2]))
+                    / (2.f * gauss_params[3] * gauss_params[3]);
+
+            output_values[i] = gauss_params[0] * exp(arg) + gauss_params[4];
+
+        }
+    }
 
 The variable temp_gauss is used to store the values of the Gaussian peak.  This variable is then used
 as a template to generate a set of Gaussian peaks with random, Poisson-distributed noise.
 
 .. code-block:: cpp
 
-	// generate data with noise
-	std::vector< float > temp_gauss(n_points_per_fit);
-	// compute the model function
-	generate_gauss_2d(x, y, true_parameters.begin(), temp_gauss);
+    // generate data with noise
+    std::vector< float > temp_gauss(n_points_per_fit);
+    // compute the model function
+    generate_gauss_2d(x, y, true_parameters.begin(), temp_gauss);
 
-	std::vector< float > data(n_fits * n_points_per_fit);
-	for (size_t i = 0; i < n_fits; i++)
-	{
-		// generate Poisson random numbers
-		for (size_t j = 0; j < n_points_per_fit; j++)
-		{
-			std::poisson_distribution< int > poisson_dist(temp_gauss[j]);
-			data[i * n_points_per_fit + j] = static_cast<float>(poisson_dist(rng));
-		}
-	}
+    std::vector< float > data(n_fits * n_points_per_fit);
+    for (size_t i = 0; i < n_fits; i++)
+    {
+        // generate Poisson random numbers
+        for (size_t j = 0; j < n_points_per_fit; j++)
+        {
+            std::poisson_distribution< int > poisson_dist(temp_gauss[j]);
+            data[i * n_points_per_fit + j] = static_cast<float>(poisson_dist(rng));
+        }
+    }
 
 Thus, in this example, the data for each fit differs only in the random noise. This, and the
 randomized initial guesses for each fit, result in each fit returning slightly different best-fit parameters.
@@ -236,19 +236,19 @@ Next, the model and estimator IDs are set, corresponding to the 2D Gaussian fit 
 
 .. code-block:: cpp
 
-	// estimator ID
-	int const estimator_id = MLE;
+    // estimator ID
+    int const estimator_id = MLE;
 
-	// model ID
-	int const model_id = GAUSS_2D;
+    // model ID
+    int const model_id = GAUSS_2D;
 
 Next, the gpufit function is called via the :ref:`c-interface`. Parameters weights, user_info and user_info_size are set to 0, 
 indicating that they are not used in this example.
 
 .. code-block:: cpp
 
-	// call to gpufit (C interface)
-	int const status = gpufit
+    // call to gpufit (C interface)
+    int const status = gpufit
         (
             n_fits,
             n_points_per_fit,
@@ -268,11 +268,11 @@ indicating that they are not used in this example.
             output_number_iterations.data()
         );
 
-	// check status
-	if (status != STATUS_OK)
-	{
-		throw std::runtime_error(gpufit_get_last_error());
-	}
+    // check status
+    if (status != STATUS_OK)
+    {
+        throw std::runtime_error(gpufit_get_last_error());
+    }
 
 After the fits are complete, the return value is checked to ensure that no error occurred.  
 
@@ -287,42 +287,42 @@ is obtained by iterating over the state of each fit.
 
 .. code-block:: cpp
 
-	// get fit states
-	std::vector< int > output_states_histogram(5, 0);
-	for (std::vector< int >::iterator it = output_states.begin(); it != output_states.end(); ++it)
-	{
-		output_states_histogram[*it]++;
-	}
+    // get fit states
+    std::vector< int > output_states_histogram(5, 0);
+    for (std::vector< int >::iterator it = output_states.begin(); it != output_states.end(); ++it)
+    {
+        output_states_histogram[*it]++;
+    }
 
 In computing the mean and standard deviation of the results, only the converged fits are taken into account. The following code 
 contains an example of the calculation of the means of the output parameters, iterating over all fits and all model parameters.
 
 .. code-block:: cpp
 
-	// compute mean of fitted parameters for converged fits
-	std::vector< float > output_parameters_mean(n_model_parameters, 0);
-	for (size_t i = 0; i != n_fits; i++)
-	{
-		if (output_states[i] == STATE_CONVERGED)
-		{
-			for (size_t j = 0; j < n_model_parameters; j++)
-			{
-				output_parameters_mean[j] += output_parameters[i * n_model_parameters + j];
-			}
-		}
-	}
-	// normalize
-	for (size_t j = 0; j < n_model_parameters; j++)
-	{
-		output_parameters_mean[j] /= output_states_histogram[0];
-	}
+    // compute mean of fitted parameters for converged fits
+    std::vector< float > output_parameters_mean(n_model_parameters, 0);
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        if (output_states[i] == STATE_CONVERGED)
+        {
+            for (size_t j = 0; j < n_model_parameters; j++)
+            {
+                output_parameters_mean[j] += output_parameters[i * n_model_parameters + j];
+            }
+        }
+    }
+    // normalize
+    for (size_t j = 0; j < n_model_parameters; j++)
+    {
+        output_parameters_mean[j] /= output_states_histogram[0];
+    }
 
 In summary, the above example illustrates a simple call to :code:`gpufit()` using a real dataset.  When the fit is complete, the 
 fit results are obtained and the output states are checked.  Additionally, this example calculates some basic statistics 
 describing the results.  The code also illustrates how the input and output parameters are organized in memory.
-	
+
 .. _linear-regression-example:	
-	
+
 Linear Regression Example
 -------------------------
 
@@ -348,15 +348,15 @@ is used by a model function may vary from function to function.
 
 .. code-block:: cpp
 
-	// custom x positions for the data points of every fit, stored in user_info
-	std::vector< float > user_info(n_points_per_fit);
-	for (size_t i = 0; i < n_points_per_fit; i++)
-	{
-		user_info[i] = static_cast<float>(pow(2, i));
-	}
+    // custom x positions for the data points of every fit, stored in user_info
+    std::vector< float > user_info(n_points_per_fit);
+    for (size_t i = 0; i < n_points_per_fit; i++)
+    {
+        user_info[i] = static_cast<float>(pow(2, i));
+    }
 
-	// size of user_info in bytes
-	size_t const user_info_size = n_points_per_fit * sizeof(float);
+    // size of user_info in bytes
+    size_t const user_info_size = n_points_per_fit * sizeof(float);
 
 By providing the data coordinates for only one fit in user_info, the model function will use the same coordinates for
 all fits in the dataset, as described in :ref:`fit-model-functions`.  
@@ -365,52 +365,52 @@ In the next section, the initial parameters for each fit are set to random value
 
 .. code-block:: cpp
 
-	// true parameters
-	std::vector< float > true_parameters { 5, 2 }; // offset, slope
+    // true parameters
+    std::vector< float > true_parameters { 5, 2 }; // offset, slope
 
-	// initial parameters (randomized)
-	std::vector< float > initial_parameters(n_fits * n_model_parameters);
-	for (size_t i = 0; i != n_fits; i++)
-	{
-		// random offset
-		initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
-		// random slope
-		initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
-	}
+    // initial parameters (randomized)
+    std::vector< float > initial_parameters(n_fits * n_model_parameters);
+    for (size_t i = 0; i != n_fits; i++)
+    {
+        // random offset
+        initial_parameters[i * n_model_parameters + 0] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
+        // random slope
+        initial_parameters[i * n_model_parameters + 1] = true_parameters[0] * (0.8f + 0.4f * uniform_dist(rng));
+    }
 
 The data is then generated as the value of a linear function plus additive, normally distributed, random noise.
 
 .. code-block:: cpp
 
-	// generate data
-	std::vector< float > data(n_points_per_fit * n_fits);
-	for (size_t i = 0; i != data.size(); i++)
-	{
-		size_t j = i / n_points_per_fit; // the fit
-		size_t k = i % n_points_per_fit; // the position within a fit
+    // generate data
+    std::vector< float > data(n_points_per_fit * n_fits);
+    for (size_t i = 0; i != data.size(); i++)
+    {
+        size_t j = i / n_points_per_fit; // the fit
+        size_t k = i % n_points_per_fit; // the position within a fit
 
-		float x = user_info[k];
-		float y = true_parameters[0] + x * true_parameters[1];
-		data[i] = y + normal_dist(rng);
-	}
+        float x = user_info[k];
+        float y = true_parameters[0] + x * true_parameters[1];
+        data[i] = y + normal_dist(rng);
+    }
 
 In the following code, the model and estimator IDs for the fit are initialized.
 
 .. code-block:: cpp
 
-	// estimator ID
-	int const estimator_id = LSE;
+    // estimator ID
+    int const estimator_id = LSE;
 
-	// model ID
-	int const model_id = LINEAR_1D;
+    // model ID
+    int const model_id = LINEAR_1D;
 
 Finally, a call is made to :code:`gpufit()` (:ref:`c-interface`).  The weights parameter is set to 0, indicating that 
 the fits are unweighted.
 
 .. code-block:: cpp
 
-	// call to gpufit (C interface)
-	int const status = gpufit
+    // call to gpufit (C interface)
+    int const status = gpufit
         (
             n_fits,
             n_points_per_fit,
