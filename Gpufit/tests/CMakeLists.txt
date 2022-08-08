@@ -10,6 +10,7 @@ add_boost_test( Gpufit Gauss_Fit_2D_Rotated )
 add_boost_test( Gpufit Cauchy_Fit_2D_Elliptic )
 add_boost_test( Gpufit Fletcher_Powell_Helix_Fit )
 add_boost_test( Gpufit Brown_Dennis_Fit )
+add_boost_test( Gpufit Patlak )
 
 if( UNIX )
   # Copy over run tests script

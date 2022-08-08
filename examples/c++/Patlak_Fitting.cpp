@@ -13,7 +13,7 @@ void patlak_two()
 	This example generates test data in form of 10000 one dimensional linear
 	curves with the size of 20 data points per curve. It is noised by normal
 	distributed noise. The initial guesses were randomized, within a specified
-	range of the true value. The LINEAR_1D model is fitted to the test data sets
+	range of the true value. The PATLAK model is fitted to the test data sets
 	using the LSE estimator. The optional parameter user_info is used to pass
 	custom x positions of the data sets. The same x position values are used for
 	every fit.

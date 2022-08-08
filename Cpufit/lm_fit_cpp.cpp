@@ -771,6 +771,74 @@ void LMFitCPP::calc_derivatives_spline3d_multichannel(
     }
 }
 
+void LMFitCPP::calc_derivatives_patlak(std::vector<REAL> & derivatives)
+{
+    	// indices
+	REAL* user_info_float = (REAL*) user_info_;
+
+	///////////////////////////// value //////////////////////////////
+
+	// split user_info array into time and Cp
+	REAL* T = user_info_float;
+	REAL* Cp = user_info_float + info_.n_points_;
+
+	// integral (trapezoidal rule)
+	REAL convCp = 0.f;
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    {
+        // if (!user_info_float)
+        // {
+        //     convCp = REAL(point_index);
+        // }
+        // else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
+        // {
+        //     convCp = user_info_float[point_index];
+        // }
+        // else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
+        // {
+        //     std::size_t const fit_begin = fit_index_ * info_.n_points_;
+        //     convCp = user_info_float[fit_begin + point_index];
+        // }
+
+        for (int i = 1; i < point_index; i++)
+        {
+            REAL spacing = T[i] - T[i - 1];
+            convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
+        }
+
+        /////////////////////////// derivative ///////////////////////////
+        derivatives[0 * info_.n_points_ + point_index] = convCp;					// formula calculating derivative values with respect to parameters[0] (Ktrans)
+        derivatives[1 * info_.n_points_] = Cp[point_index];			// formula calculating derivative values with respect to parameters[1] (vp)
+    }
+
+	// deallocate pointers
+	// delete T;
+	// delete Cp;
+    //     REAL * user_info_float = (REAL*)user_info_;
+    // REAL x = 0.;
+
+    // for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    // {
+    //     if (!user_info_float)
+    //     {
+    //         x = REAL(point_index);
+    //     }
+    //     else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
+    //     {
+    //         x = user_info_float[point_index];
+    //     }
+    //     else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
+    //     {
+    //         std::size_t const fit_begin = fit_index_ * info_.n_points_;
+    //         x = user_info_float[fit_begin + point_index];
+    //     }
+
+    //     derivatives[0 * info_.n_points_ + point_index] = 1.;
+    //     derivatives[1 * info_.n_points_ + point_index] = x;
+    // }
+
+}
+
 void LMFitCPP::calc_values_cauchy2delliptic(std::vector<REAL>& cauchy)
 {
     int const size_x = int(std::sqrt(REAL(info_.n_points_)));
@@ -1236,6 +1304,52 @@ void LMFitCPP::calc_values_spline3d_multichannel(std::vector<REAL>& values)
     }
 }
 
+void LMFitCPP::calc_values_patlak(std::vector<REAL>& values)
+{
+    	// indices
+	REAL* user_info_float = (REAL*) user_info_;
+
+	///////////////////////////// value //////////////////////////////
+
+	// split user_info array into time and Cp
+	REAL* T = user_info_float;
+	REAL* Cp = user_info_float + info_.n_points_;
+    for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    {
+        // integral (trapezoidal rule)
+        REAL convCp = 0.f;
+        for (int i = 1; i < point_index; i++) {
+            REAL spacing = T[i] - T[i - 1];
+            convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
+        }
+        //	C(t)		   =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
+        values[point_index] = parameters_[0] * convCp + parameters_[1] * Cp[point_index];
+    }
+	// deallocate pointers
+	delete T;
+	delete Cp;
+
+    // REAL * user_info_float = (REAL*)user_info_;
+    // REAL x = 0.f;
+    // for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
+    // {
+    //     if (!user_info_float)
+    //     {
+    //         x = REAL(point_index);
+    //     }
+    //     else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
+    //     {
+    //         x = user_info_float[point_index];
+    //     }
+    //     else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
+    //     {
+    //         std::size_t const fit_begin = fit_index_ * info_.n_points_;
+    //         x = user_info_float[fit_begin + point_index];
+    //     }
+    //     line[point_index] = parameters_[0] + parameters_[1] * x;
+    // }
+}
+
 // depending on the model Id, calls functions to calculate model function values and derivatives
 void LMFitCPP::calc_curve_values(std::vector<REAL>& curve, std::vector<REAL>& derivatives)
 {           
@@ -1298,6 +1412,11 @@ void LMFitCPP::calc_curve_values(std::vector<REAL>& curve, std::vector<REAL>& de
     {
         calc_values_spline3d_multichannel(curve);
         calc_derivatives_spline3d_multichannel(derivatives);
+    }
+    else if (info_.model_id_ == PATLAK)
+    {
+        calc_values_patlak(curve);
+        calc_derivatives_patlak(derivatives);
     }
 }
 

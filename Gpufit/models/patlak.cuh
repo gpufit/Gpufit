@@ -14,7 +14,7 @@ __device__ void calculate_patlak (               // function name
 	std::size_t const user_info_size)
 {
 	// indices
-	REAL* user_info_float = (REAL*)user_info;
+	REAL* user_info_float = (REAL*) user_info;
 
 	///////////////////////////// value //////////////////////////////
 
@@ -28,9 +28,9 @@ __device__ void calculate_patlak (               // function name
 		REAL spacing = T[i] - T[i - 1];
 		convCp += (Cp[i - 1] + Cp[i]) / 2 * spacing;
 	}
-
-	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
+	
 	//	C(t)		   =   Ktrans	   * trapz(Cp(k))  + vp     *    Cp(k)
+	value[point_index] = parameters[0] * convCp + parameters[1] * Cp[point_index];                      // formula calculating fit model values
 
 	/////////////////////////// derivative ///////////////////////////
 	REAL * current_derivative = derivative + point_index;
