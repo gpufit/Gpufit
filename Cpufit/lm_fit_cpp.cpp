@@ -6,6 +6,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 // TODO if std::size_t and int are not the same, we will get lots of C26451 warnings here related to it, they can be ignored or
 // int should be converted to size_t but be careful, there is at least one for loop that checks for >=0 which only works with int that way
@@ -786,20 +787,6 @@ void LMFitCPP::calc_derivatives_patlak(std::vector<REAL> & derivatives)
 	REAL convCp = 0.f;
     for (std::size_t point_index = 0; point_index < info_.n_points_; point_index++)
     {
-        // if (!user_info_float)
-        // {
-        //     convCp = REAL(point_index);
-        // }
-        // else if (info_.user_info_size_ / sizeof(REAL) == info_.n_points_)
-        // {
-        //     convCp = user_info_float[point_index];
-        // }
-        // else if (info_.user_info_size_ / sizeof(REAL) > info_.n_points_)
-        // {
-        //     std::size_t const fit_begin = fit_index_ * info_.n_points_;
-        //     convCp = user_info_float[fit_begin + point_index];
-        // }
-
         for (int i = 1; i < point_index; i++)
         {
             REAL spacing = T[i] - T[i - 1];
@@ -1326,8 +1313,8 @@ void LMFitCPP::calc_values_patlak(std::vector<REAL>& values)
         values[point_index] = parameters_[0] * convCp + parameters_[1] * Cp[point_index];
     }
 	// deallocate pointers
-	delete T;
-	delete Cp;
+	// delete T;
+	// delete Cp;
 
     // REAL * user_info_float = (REAL*)user_info_;
     // REAL x = 0.f;

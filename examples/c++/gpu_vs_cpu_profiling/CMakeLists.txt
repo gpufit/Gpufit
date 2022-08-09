@@ -24,3 +24,5 @@ add_example( "Cpufit;Gpufit" Gpufit_Cpufit_Performance_Comparison )
 add_example( "Cpufit;Gpufit" Gpufit_Cpufit_Nvidia_Profiler_Test )
 
 add_example( "Cpufit;Gpufit" Gpufit_Cpufit_Patlak )
+
+add_example( "Cpufit;Gpufit" Patlak_Fitting_Comparison )
