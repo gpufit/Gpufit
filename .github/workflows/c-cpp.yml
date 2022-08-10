@@ -46,4 +46,4 @@ jobs:
       run:  ./Gpufit-build/Gpufit_Cpufit_Performance_Comparison
       
     - name: Boost tests
-      run:  ./test_all.sh
+      run:  ./Gpufit-build/test_all.sh
