@@ -37,7 +37,7 @@ jobs:
 
     - name: build
       run:  whoami  |
-            cmake -S . -B Gpufit-build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
+            cmake -S . -B Gpufit-build/ -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=/boost/boost-1.73.0-ubuntu-18.04
             
     - name: make
       run:  cmake --build Gpufit-build/ --target all
