@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE( Patlak )
 
     std::size_t const n_fits{ 10000 } ;
     std::size_t const n_points{ 60 } ;
-
+	REAL snr = 0.8f; 
 	std::array< REAL, 2 > const true_parameters{ { .05, .03 } };
 	// custom x positions for the data points of every fit, stored in user info
 	// time independent variable, given in minutes
@@ -63,7 +63,6 @@ BOOST_AUTO_TEST_CASE( Patlak )
 		//std::cout << data[i] << std::endl;
 	}
 	mean_y = mean_y / data.size();
-	REAL snr = 0.8f; 
 	std::normal_distribution<REAL> norm_snr(0,mean_y/snr);
 	for (size_t i = 0; i < data.size(); i++)
 	{
