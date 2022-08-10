@@ -42,5 +42,8 @@ jobs:
     - name: make
       run:  cmake --build Gpufit-build/ --target all
 
-    - name: test
+    - name: Performance test
       run:  ./Gpufit-build/Gpufit_Cpufit_Performance_Comparison
+      
+    - name: Boost tests
+      run:  ./test_all.sh
