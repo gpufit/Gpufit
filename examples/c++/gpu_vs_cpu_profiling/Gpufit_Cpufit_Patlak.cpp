@@ -397,9 +397,8 @@ int main(int argc, char * argv[])
     std::cout << std::setw(10) << "Ktrans" << std::setw(6) << "|";
     std::cout << std::setw(9) << "vp" << std::setw(7) << "|";
     std::cout << std::setw(16) << "|";
-    std::cout << std::setw(12) << "|";    
     std::cout << std::endl;
-    std::cout << "-------------------------------------------------------------------------------------------------------------------------------------------------------------------";
+    std::cout << "---------------------------------------------------------------------------------------------------------------------------------------------------------------";
     std::cout << std::endl;
 
     // loop over number of fits
@@ -517,7 +516,12 @@ int main(int argc, char * argv[])
         else
         {
             std::cout << std::setw(13) << "inf" << std::setw(3) << "|";
-            std::cout << std::setw(12) << "inf";
+            std::cout << std::setw(12) << "inf" << std::setw(3) << "|";
+            std::cout << std::fixed << std::setprecision(9);
+            for (int i = 0; i < n_parameters; i++)
+                std::cout << std::setw(13) << *(gpufit_parameters.data()+fit_index*i)-*(cpufit_parameters.data()+fit_index*i) << std::setw(3) << "|";
+            std::cout << std::setw(13) << *(gpufit_chi_squares.data()+fit_index)-*(cpufit_chi_squares.data()+fit_index) << std::setw(3) << "|";
+            std::cout << std::setw(7) << *(gpufit_n_iterations.data()+fit_index)-*(cpufit_n_iterations.data()+fit_index);
         }
         
         std::cout << std::endl;        
