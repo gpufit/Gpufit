@@ -518,6 +518,9 @@ int main(int argc, char * argv[])
         {
             std::cout << std::setw(13) << "inf" << std::setw(3) << "|";
             std::cout << std::setw(12) << "inf";
+            std::cout << std::setw(12) << "inf";
+            std::cout << std::setw(12) << "inf";
+            std::cout << std::setw(12) << "inf";
         }
         
         std::cout << std::endl;        
