@@ -84,7 +84,6 @@ jobs:
           then
             cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
           else
-            mkdir "${{ env.build_dir }}"
             cmake . -B "${{ env.build_dir }}"
           fi
 
@@ -112,9 +111,7 @@ jobs:
       - name: Build (Linux)
         if: runner.os == 'Linux'
         working-directory: ${{ env.build_dir }}
-        run: |
-          cd "${{ env.build_dir }}"
-          make
+        run: make
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
