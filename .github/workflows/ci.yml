@@ -84,7 +84,7 @@ jobs:
           then
             cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
           else
-            cmake . -B "${{ env.build_dir }}"
+            cmake . -B "${{ env.build_dir }}" -DCMAKE_BUILD_TYPE=RELEASE
           fi
 
       - name: Configure Error Processing
