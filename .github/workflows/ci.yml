@@ -113,8 +113,17 @@ jobs:
         working-directory: ${{ env.build_dir }}
         run: make
 
-      - name: Upload Artifacts
+      - name: Upload Artifacts (Windows)
         uses: actions/upload-artifact@v3
+        if: runner.os == 'Windows'
+        with:
+          name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
+          path: build/Release/**/*
+
+      - name: Upload Artifacts (Linux)
+        uses: actions/upload-artifact@v3
+        if: runner.os == 'Windows'
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
           path: build/**/*
+          
