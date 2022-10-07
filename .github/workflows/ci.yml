@@ -67,7 +67,7 @@ jobs:
       - name: Configure CMake
         id: configure
         shell: bash
-        run: cmake source -B ${{ env.build_dir }} -G "${{ matrix.visual_studio }}" -A x64
+        run: cmake . -B ${{ env.build_dir }} -G "${{ matrix.visual_studio }}" -A x64
 
       - name: Configure Error Processing
         if: ${{ (failure() && steps.configure.outcome == 'failure') || success() }}
