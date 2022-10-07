@@ -1,0 +1,96 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      # explicit include-based build matrix of known valid options
+      matrix:
+        include:
+          # Windows2019 & VS 2019 supports cuda 10.1+
+          - os: windows-2019
+            cuda: "11.4.0"
+            visual_studio: "Visual Studio 16 2019"
+            python: "3.9"
+
+    env:
+      build_dir: "build"
+      config: "Release"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ${{github.workspace}}/build
+          key: ${{ matrix.os }}-build
+          restore-keys: ${{ matrix.os }}-build
+
+      - name: Setup Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python }}"
+          cache: "pip" # caching pip dependencies
+
+      - name: Upgrade Pip and Install wheel
+        run: |
+          python.exe -m pip install --upgrade pip
+          pip install wheel
+
+      - name: Install CUDA
+        uses: Jimver/cuda-toolkit@v0.2.8
+        id: cuda-toolkit
+        with:
+          sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
+          cuda: ${{ matrix.cuda }}
+          method: network
+          use-github-cache: false
+
+      - name: nvcc check
+        shell: powershell
+        run: |
+          nvcc -V
+          ls $env:CUDA_PATH
+          ls $env:CUDA_PATH\bin
+          ls $env:CUDA_PATH\include
+
+      - name: cmake version
+        shell: bash
+        run: cmake --version
+
+      - name: Configure CMake
+        id: configure
+        shell: bash
+        run: cmake source -B ${{ env.build_dir }} -G "${{ matrix.visual_studio }}" -A x64
+
+      - name: Configure Error Processing
+        if: ${{ (failure() && steps.configure.outcome == 'failure') || success() }}
+        working-directory: ${{ env.build_dir }}
+        shell: bash
+        run: |
+          if [[ -f "CMakeFiles/CMakeOutput.log" ]]; then
+            echo "---- CMakeFiles/CMakeOutput.log"
+            cat CMakeFiles/CMakeOutput.log
+            echo "----"
+          fi
+          if [[ -f "CMakeFiles/CMakeError.log" ]]; then
+            echo "---- CMakeFiles/CMakeError.log"
+            cat CMakeFiles/CMakeError.log
+            echo "----"
+          fi
+
+      - name: Build
+        working-directory: ${{ env.build_dir }}
+        run: cmake --build . --config ${{ env.config }} --target ALL_BUILD --verbose
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
+          path: build/Release/**/*
