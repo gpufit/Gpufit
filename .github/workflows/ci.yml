@@ -76,17 +76,16 @@ jobs:
         shell: bash
         run: cmake --version
 
-
-    - name: Configure CMake
-      id: configure
-      shell: bash
-      run: |
-        if [ "${{ runner.os }}" -eq "Windows" ]
-        then
-          cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
-        else
-          cmake . -B "${{ env.build_dir }}"
-        fi
+      - name: Configure CMake
+        id: configure
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" -eq "Windows" ]
+          then
+            cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
+          else
+            cmake . -B "${{ env.build_dir }}"
+          fi
 
       - name: Configure Error Processing
         if: ${{ (failure() && steps.configure.outcome == 'failure') || success() }}
