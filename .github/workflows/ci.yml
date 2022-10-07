@@ -59,18 +59,18 @@ jobs:
         uses: Jimver/cuda-toolkit@v0.2.8
         if: runner.os == 'Linux'
         with:
-          sub-packages: '["nvcc", "curand", "nvrtc", "cudart"]'
+          sub-packages: '["nvcc", "nvrtc", "cudart"]'
           cuda: ${{ matrix.cuda }}
           method: network
           use-github-cache: false
 
       - name: nvcc check
-        shell: powershell
+        shell: bash
         run: |
           nvcc -V
-          ls $env:CUDA_PATH
-          ls $env:CUDA_PATH\bin
-          ls $env:CUDA_PATH\include
+          ls "$CUDA_PATH"
+          ls "$CUDA_PATH/bin"
+          ls "$CUDA_PATH/include"
 
       - name: cmake version
         shell: bash
