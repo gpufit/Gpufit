@@ -84,6 +84,7 @@ jobs:
           then
             cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
           else
+            mkdir "${{ env.build_dir }}"
             cmake . -B "${{ env.build_dir }}"
           fi
 
