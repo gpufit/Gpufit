@@ -43,7 +43,7 @@ jobs:
 
       - name: Upgrade Pip and Install wheel
         run: |
-          python.exe -m pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install wheel
 
       - name: Install CUDA (Windows)
