@@ -104,10 +104,12 @@ jobs:
           fi
 
       - name: Build (Windows)
+        if: runner.os == 'Windows'
         working-directory: ${{ env.build_dir }}
         run: cmake --build . --config ${{ env.config }} --target ALL_BUILD --verbose
 
       - name: Build (Linux)
+        if: runner.os == 'Linux'
         working-directory: ${{ env.build_dir }}
         run: |
           cd "${{ env.build_dir }}"
