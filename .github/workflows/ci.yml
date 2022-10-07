@@ -17,6 +17,9 @@ jobs:
             cuda: "11.4.0"
             visual_studio: "Visual Studio 16 2019"
             python: "3.9"
+          - os: ubuntu-20.04
+            cuda: "11.4.0"
+            python: "3.9"
 
     env:
       build_dir: "build"
@@ -43,11 +46,20 @@ jobs:
           python.exe -m pip install --upgrade pip
           pip install wheel
 
-      - name: Install CUDA
+      - name: Install CUDA (Windows)
         uses: Jimver/cuda-toolkit@v0.2.8
-        id: cuda-toolkit
+        if: runner.os == 'Windows'
         with:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
+          cuda: ${{ matrix.cuda }}
+          method: network
+          use-github-cache: false
+
+      - name: Install CUDA (Linux)
+        uses: Jimver/cuda-toolkit@v0.2.8
+        if: runner.os == 'Linux'
+        with:
+          sub-packages: '["nvcc", "curand", "nvrtc", "cudart"]'
           cuda: ${{ matrix.cuda }}
           method: network
           use-github-cache: false
