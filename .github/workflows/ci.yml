@@ -103,9 +103,15 @@ jobs:
             echo "----"
           fi
 
-      - name: Build
+      - name: Build (Windows)
         working-directory: ${{ env.build_dir }}
         run: cmake --build . --config ${{ env.config }} --target ALL_BUILD --verbose
+
+      - name: Build (Linux)
+        working-directory: ${{ env.build_dir }}
+        run: |
+          cd "${{ env.build_dir }}"
+          make
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
