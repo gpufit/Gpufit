@@ -122,7 +122,7 @@ jobs:
 
       - name: Upload Artifacts (Linux)
         uses: actions/upload-artifact@v3
-        if: runner.os == 'Windows'
+        if: runner.os == 'Linux'
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
           path: build/**/*
