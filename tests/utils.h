@@ -126,10 +126,15 @@ struct FitInput
 	std::vector< REAL > initial_parameters;
 	std::vector< int > parameters_to_fit;
 
+	std::vector< REAL > constraints;
+	std::vector< int > constraint_types;
+
 	REAL tolerance;
 	int max_n_iterations;
 
 	std::vector< REAL > user_info_; // user info is REAL
+
+	std::vector< REAL> expected_parameters; // size zero to not check
 
 	REAL * weights()
 	{

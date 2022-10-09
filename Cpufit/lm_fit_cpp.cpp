@@ -816,11 +816,11 @@ void LMFitCPP::calc_values_gauss2delliptic(std::vector<REAL>& gaussian)
     int const size_y = size_x;
     for (int iy = 0; iy < size_y; iy++)
     {
+        REAL const argy = (iy - parameters_[2]) * (iy - parameters_[2]) / (2 * parameters_[4] * parameters_[4]);
         for (int ix = 0; ix < size_x; ix++)
         {
-            REAL argx = (ix - parameters_[1]) * (ix - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
-            REAL argy = (iy - parameters_[2]) * (iy - parameters_[2]) / (2 * parameters_[4] * parameters_[4]);
-            REAL ex = exp(-(argx + argy));
+            REAL const argx = (ix - parameters_[1]) * (ix - parameters_[1]) / (2 * parameters_[3] * parameters_[3]);
+            REAL const ex = exp(-(argx + argy));
 
             gaussian[iy*size_x + ix]
                 = parameters_[0] * ex + parameters_[5];

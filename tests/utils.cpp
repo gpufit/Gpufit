@@ -36,7 +36,7 @@ void generate_gauss_2d(std::vector< REAL > & v, std::vector< REAL > const & p)
         {
             REAL const argx = ((i - p[1]) * (i - p[1]));
             REAL const ex = exp(-(argx + argy) / (2 * p[3] * p[3]));
-            v[j * n + i] = p[0] * ex + p[3];
+            v[j * n + i] = p[0] * ex + p[4];
         }
     }
 }
@@ -56,7 +56,7 @@ void generate_gauss_2d_elliptic(std::vector< REAL > & v, std::vector< REAL > con
         {
             REAL const argx = ((i - p[1]) * (i - p[1])) / (2 * p[3] * p[3]);
             REAL const ex = exp(-(argx + argy));
-            v[j * n + i] = p[0] * ex + p[3];
+            v[j * n + i] = p[0] * ex + p[5];
         }
     }
 }

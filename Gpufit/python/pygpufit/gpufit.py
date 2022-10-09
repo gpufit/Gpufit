@@ -15,33 +15,43 @@ import numpy as np
 package_dir = os.path.dirname(os.path.realpath(__file__))
 
 if os.name == 'nt':
-    lib_path = os.path.join(package_dir, 'Gpufit.dll')  # library name on Windows
+    gpufit_lib_path = os.path.join(package_dir, 'Gpufit.dll')  # library name on Windows
+    cpufit_lib_path = os.path.join(package_dir, 'Cpufit.dll')  # library name on Windows
 elif os.name == 'posix':
-    lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
+    gpufit_lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
+    cpufit_lib_path = os.path.join(package_dir, 'libCpufit.so')  # library name on Unix
 else:
     raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
 
-lib = cdll.LoadLibrary(lib_path)
+gpufit_lib = cdll.LoadLibrary(gpufit_lib_path)
+cpufit_lib = cdll.LoadLibrary(cpufit_lib_path)
 
 # gpufit_constrained function in the dll
-gpufit_func = lib.gpufit_constrained
+gpufit_func = gpufit_lib.gpufit_constrained
 gpufit_func.restype = c_int
 gpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float),
                         POINTER(c_float), POINTER(c_int), c_float, c_int, POINTER(c_int), c_int, c_size_t,
                         POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
 
+# cpufit_constrained function in the dll
+cpufit_func = cpufit_lib.cpufit_constrained
+cpufit_func.restype = c_int
+cpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float),
+                        POINTER(c_float), POINTER(c_int), c_float, c_int, POINTER(c_int), c_int, c_size_t,
+                        POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
+
 # gpufit_get_last_error function in the dll
-error_func = lib.gpufit_get_last_error
+error_func = gpufit_lib.gpufit_get_last_error
 error_func.restype = c_char_p
 error_func.argtypes = None
 
 # gpufit_cuda_available function in the dll
-cuda_available_func = lib.gpufit_cuda_available
+cuda_available_func = gpufit_lib.gpufit_cuda_available
 cuda_available_func.restype = c_int
 cuda_available_func.argtypes = None
 
 # gpufit_get_cuda_version function in the dll
-get_cuda_version_func = lib.gpufit_get_cuda_version
+get_cuda_version_func = gpufit_lib.gpufit_get_cuda_version
 get_cuda_version_func.restype = c_int
 get_cuda_version_func.argtypes = [POINTER(c_int), POINTER(c_int)]
 
@@ -86,7 +96,7 @@ def _valid_id(cls, id):
 
 
 def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_iterations=None, \
-        parameters_to_fit=None, estimator_id=None, user_info=None):
+        parameters_to_fit=None, estimator_id=None, user_info=None, platform="gpu"):
     """
     Calls the C interface fit function in the library.
     (see also http://gpufit.readthedocs.io/en/latest/bindings.html#python)
@@ -103,18 +113,20 @@ def fit(data, weights, model_id, initial_parameters, tolerance=None, max_number_
     :param parameters_to_fit: Which parameters to fit - NumPy array of length number_parameters and type np.int32 or None (will fit all parameters)
     :param estimator_id: The Estimator ID or None (will use default values)
     :param user_info: User info - NumPy array of type np.char or None (no user info available)
+    :param platform: Fit on 'gpu' or 'cpu'? (defaults to gpu)
     :return: parameters, states, chi_squares, number_iterations, execution_time
     """
 
     # call fit_constrained without any constraints
     return fit_constrained(data, weights, model_id, initial_parameters, tolerance=tolerance,
                            max_number_iterations=max_number_iterations, parameters_to_fit=parameters_to_fit,
-                           estimator_id=estimator_id, user_info=user_info)
+                           estimator_id=estimator_id, user_info=user_info, platform=platform)
 
 
 def fit_constrained(data, weights, model_id, initial_parameters, constraints=None, constraint_types=None,
-                    tolerance=None, max_number_iterations=None, \
-                    parameters_to_fit=None, estimator_id=None, user_info=None):
+                    tolerance=None, max_number_iterations=None,
+                    parameters_to_fit=None, estimator_id=None, user_info=None,
+                    platform="gpu"):
     """
     Calls the C interface fit function in the library.
     (see also http://gpufit.readthedocs.io/en/latest/bindings.html#python)
@@ -133,6 +145,7 @@ def fit_constrained(data, weights, model_id, initial_parameters, constraints=Non
     :param parameters_to_fit: Which parameters to fit - NumPy array of length number_parameters and type np.int32 or None (will fit all parameters)
     :param estimator_id: The Estimator ID or None (will use default values)
     :param user_info: User info - NumPy array of type np.char or None (no user info available)
+    :param platform: Fit on 'gpu' or 'cpu'? (defaults to gpu)
     :return: parameters, states, chi_squares, number_iterations, execution_time
     """
 
@@ -168,7 +181,7 @@ def fit_constrained(data, weights, model_id, initial_parameters, constraints=Non
     if constraints is not None:
         if constraints.ndim != 2:
             raise RuntimeError('constraints not two-dimensional')
-        if constraints.shape != (number_fits, 2*number_parameters):
+        if constraints.shape != (number_fits, 2 * number_parameters):
             raise RuntimeError('constraints array has invalid shape')
 
     # size check: constraint_types has certain length (if given)
@@ -238,41 +251,45 @@ def fit_constrained(data, weights, model_id, initial_parameters, constraints=Non
     chi_squares = np.zeros(number_fits, dtype=np.float32)
     number_iterations = np.zeros(number_fits, dtype=np.int32)
 
+    # argtypes are grabbed from gpufit_func, but are the same for cpufit_func
+    atypes = gpufit_func.argtypes
+
     # conversion to ctypes types for optional C interface parameters using NULL pointer (None) as default argument
     if weights is not None:
-        weights_p = weights.ctypes.data_as(gpufit_func.argtypes[3])
+        weights_p = weights.ctypes.data_as(atypes[3])
     else:
         weights_p = None
     if constraints is not None:
-        constraints_p = constraints.ctypes.data_as(gpufit_func.argtypes[6])
+        constraints_p = constraints.ctypes.data_as(atypes[6])
     else:
         constraints_p = None
     if user_info is not None:
-        user_info_p = user_info.ctypes.data_as(gpufit_func.argtypes[13])
+        user_info_p = user_info.ctypes.data_as(atypes[13])
     else:
         user_info_p = None
 
     # call into the library (measure time)
     t0 = time.perf_counter()
-    status = gpufit_func(
-        gpufit_func.argtypes[0](number_fits), \
-        gpufit_func.argtypes[1](number_points), \
-        data.ctypes.data_as(gpufit_func.argtypes[2]), \
-        weights_p, \
-        gpufit_func.argtypes[4](model_id), \
-        initial_parameters.ctypes.data_as(gpufit_func.argtypes[5]), \
-        constraints_p, \
-        constraint_types.ctypes.data_as(gpufit_func.argtypes[7]), \
-        gpufit_func.argtypes[8](tolerance), \
-        gpufit_func.argtypes[9](max_number_iterations), \
-        parameters_to_fit.ctypes.data_as(gpufit_func.argtypes[10]), \
-        gpufit_func.argtypes[11](estimator_id), \
-        gpufit_func.argtypes[12](user_info_size), \
-        user_info_p, \
-        parameters.ctypes.data_as(gpufit_func.argtypes[14]), \
-        states.ctypes.data_as(gpufit_func.argtypes[15]), \
-        chi_squares.ctypes.data_as(gpufit_func.argtypes[16]), \
-        number_iterations.ctypes.data_as(gpufit_func.argtypes[17]))
+    func = {"gpu": gpufit_func, "cpu": cpufit_func}[platform]
+    status = func(
+        atypes[0](number_fits), 
+        atypes[1](number_points), 
+        data.ctypes.data_as(atypes[2]), 
+        weights_p, 
+        atypes[4](model_id), 
+        initial_parameters.ctypes.data_as(atypes[5]), 
+        constraints_p, 
+        constraint_types.ctypes.data_as(atypes[7]), 
+        atypes[8](tolerance), 
+        atypes[9](max_number_iterations), 
+        parameters_to_fit.ctypes.data_as(atypes[10]), 
+        atypes[11](estimator_id), 
+        atypes[12](user_info_size), 
+        user_info_p, 
+        parameters.ctypes.data_as(atypes[14]), 
+        states.ctypes.data_as(atypes[15]), 
+        chi_squares.ctypes.data_as(atypes[16]), 
+        number_iterations.ctypes.data_as(atypes[17]))
     t1 = time.perf_counter()
 
     # check status

@@ -17,9 +17,9 @@ set( module_files
 )
 
 if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
-	set( binary $<TARGET_FILE:Gpufit> ${CUBLAS_DLL} )
+	set( binary $<TARGET_FILE:Gpufit> ${CUBLAS_DLL} $<TARGET_FILE:Cpufit> )
 else()
-	set( binary $<TARGET_FILE:Gpufit> )
+	set( binary $<TARGET_FILE:Gpufit> $<TARGET_FILE:Cpufit> )
 endif()
 
 add_custom_target( PYTHON_PACKAGE
