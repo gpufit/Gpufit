@@ -6,6 +6,7 @@
 
 cmake_minimum_required( VERSION 3.11 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
+cmake_policy(SET CMP0091 NEW)
 
 if( NOT PROJECT_NAME )
   project( Gpufit VERSION 1.2.0 LANGUAGES CUDA CXX)
@@ -15,17 +16,17 @@ endif()
 if( NOT CMAKE_CXX_STANDARD )
 	set( CMAKE_CXX_STANDARD 14 )
 endif()
-
-if( MSVC ) # link runtime statically with MSVC
-  foreach( type ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} )
-    string( TOUPPER ${type} TYPE )
-    foreach( flags CMAKE_C_FLAGS_${TYPE} CMAKE_CXX_FLAGS_${TYPE} )
-      get_property( help CACHE ${flags} PROPERTY HELPSTRING )
-      string( REPLACE "/MD" "/MT" ${flags} "${${flags}}" )
-      set( ${flags} "${${flags}}" CACHE STRING "${help}" FORCE )
-    endforeach()
-  endforeach()
-endif()
+  
+#if( MSVC ) # link runtime statically with MSVC
+#  foreach( type ${CMAKE_CONFIGURATION_TYPES} ${CMAKE_BUILD_TYPE} )
+#    string( TOUPPER ${type} TYPE )
+#    foreach( flags CMAKE_C_FLAGS_${TYPE} CMAKE_CXX_FLAGS_${TYPE} )
+#      get_property( help CACHE ${flags} PROPERTY HELPSTRING )
+#      string( REPLACE "/MD" "/MT" ${flags} "${${flags}}" )
+#      set( ${flags} "${${flags}}" CACHE STRING "${help}" FORCE )
+#    endforeach()
+#  endforeach()
+#endif()
 
 function( add_launcher target executable arguments working_directory )
   if( MSVC12 OR MSVC14 )
@@ -143,6 +144,14 @@ add_subdirectory( Gpufit )
 # Examples using Gpufit and Cpufit
 
 add_subdirectory( examples/c++/gpu_vs_cpu_profiling )
+
+
+# link runtime statically with MSVC
+set_property(TARGET Gpufit PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set_property(TARGET Cpufit PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 
 # Launcher
 #
