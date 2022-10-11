@@ -8,7 +8,7 @@ cmake_minimum_required( VERSION 3.11 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 if( NOT PROJECT_NAME )
-  project( Gpufit VERSION 1.2.0 )
+  project( Gpufit VERSION 1.2.0 LANGUAGES CUDA CXX)
   include( CTest )
 endif()
 
@@ -183,6 +183,13 @@ if( PYTHONINTERP_FOUND )
       "${CMAKE_SOURCE_DIR}/Gpufit/python"
       "${Python_WORKING_DIRECTORY}"
     )
+  endif()
+  if( UNIX )
+    # Copy over install file for python integration
+    file(COPY "${CMAKE_SOURCE_DIR}/package/install_gpufit_python.sh" 
+      DESTINATION "${CMAKE_BINARY_DIR}" 
+      FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    ) 
   endif()
 endif()
 
