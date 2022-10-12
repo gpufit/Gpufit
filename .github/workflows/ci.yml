@@ -61,7 +61,7 @@ jobs:
       - name: Upgrade Pip and Install wheel
         run: |
           python -m pip install --upgrade pip
-          pip install wheel
+          pip -v -v -v install wheel
 
       - name: Install CUDA (Windows)
         uses: Jimver/cuda-toolkit@v0.2.8
