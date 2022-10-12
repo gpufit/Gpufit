@@ -184,7 +184,7 @@ endif()
 
 if( Python_FOUND )
   set( Python_WORKING_DIRECTORY "${home}" CACHE PATH "Python working directory" )
-  message( STATUS "Python found at: " "${Python_EXECUTABLE}" )
+  message( STATUS "Python found at: " "${PYTHON_EXECUTABLE}" )
   if( Python_WORKING_DIRECTORY )
     add_custom_target( RUN_PYTHON )
     set_property( TARGET RUN_PYTHON PROPERTY FOLDER CMakePredefinedTargets )
