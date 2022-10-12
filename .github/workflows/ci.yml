@@ -26,9 +26,6 @@ jobs:
             visual_studio: "Visual Studio 16 2019"
             python: "3.9"
           - os: ubuntu-20.04
-            cuda: "10.1.243"
-            python: "3.8"
-          - os: ubuntu-20.04
             cuda: "11.4.0"
             python: "3.8"
           - os: ubuntu-20.04

@@ -40,7 +40,7 @@ add_custom_target( PYTHON_PACKAGE
 set_property( TARGET PYTHON_PACKAGE PROPERTY FOLDER CMakePredefinedTargets )
 add_dependencies( PYTHON_PACKAGE Gpufit )
 
-if( NOT PYTHONINTERP_FOUND )
+if( NOT Python_FOUND )
   message( STATUS "Python NOT found - skipping creation of Python wheel!" )
   return()
 endif()
