@@ -56,7 +56,7 @@ jobs:
       - name: Install CUDA (Windows)
         # uses: Jimver/cuda-toolkit@v0.2.8
         # jimkring's branch adds support for more cuda versions
-        uses: jimkring/action-install-cuda-toolkit@master
+        uses: jimkring/action-install-cuda-toolkit@v0
         if: runner.os == 'Windows'
         with:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
@@ -67,7 +67,7 @@ jobs:
       - name: Install CUDA (Linux)
         # uses: Jimver/cuda-toolkit@v0.2.8
         # jimkring's branch adds support for more cuda versions
-        uses: jimkring/action-install-cuda-toolkit@master
+        uses: jimkring/action-install-cuda-toolkit@v0
         if: runner.os == 'Linux'
         with:
           sub-packages: '["nvcc", "nvrtc", "cudart"]'
