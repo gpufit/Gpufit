@@ -10,22 +10,30 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # `include` will only run specific combinations (not permutations of these)
-        include:
-          - os: windows-2019
-            cuda: "11.3.0"
-            visual_studio: "Visual Studio 16 2019"
-            python: "3.9"
-          - os: windows-2019
-            cuda: "11.4.0"
-            visual_studio: "Visual Studio 16 2019"
-            python: "3.9"
+        os: [windows-2019, ubuntu-20.04]
+        cuda: ["11.3.0", "11.4.0"]
+        visual_studio: ["Visual Studio 16 2019"]
+        python: ["3.9"]
+        exclude:
           - os: ubuntu-20.04
-            cuda: "11.3.0"
-            python: "3.9"
-          - os: ubuntu-20.04
-            cuda: "11.4.0"
-            python: "3.9"
+          - visual_studio: ["Visual Studio 16 2019"]
+
+        # # `include` will only run specific combinations (not permutations of these)
+        # include:
+        #   - os: windows-2019
+        #     cuda: "11.3.0"
+        #     visual_studio: "Visual Studio 16 2019"
+        #     python: "3.9"
+        #   - os: windows-2019
+        #     cuda: "11.4.0"
+        #     visual_studio: "Visual Studio 16 2019"
+        #     python: "3.9"
+        #   - os: ubuntu-20.04
+        #     cuda: "11.3.0"
+        #     python: "3.9"
+        #   - os: ubuntu-20.04
+        #     cuda: "11.4.0"
+        #     python: "3.9"
 
     env:
       build_dir: "build"
