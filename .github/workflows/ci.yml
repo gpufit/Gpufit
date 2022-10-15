@@ -14,12 +14,26 @@ jobs:
         include:
           # Windows2019 & VS 2019 supports cuda 10.1+
           - os: windows-2019
+            cuda: "10.1.243"
+            visual_studio: "Visual Studio 16 2019"
+            python: "3.9"
+          - os: windows-2019
             cuda: "11.4.0"
+            visual_studio: "Visual Studio 16 2019"
+            python: "3.9"
+          - os: windows-2019
+            cuda: "11.7.0"
             visual_studio: "Visual Studio 16 2019"
             python: "3.9"
           - os: ubuntu-20.04
             cuda: "11.4.0"
-            python: "3.9"
+            python: "3.8"
+          - os: ubuntu-20.04
+            cuda: "11.7.0"
+            python: "3.8"
+          - os: ubuntu-22.04
+            python: "3.10"
+            cuda: "11.7.0"
 
     env:
       build_dir: "build"

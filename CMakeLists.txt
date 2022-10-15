@@ -104,14 +104,14 @@ endif()
 
 # Python
 
-find_package( PythonInterp )
-if( PYTHONINTERP_FOUND )
+find_package( Python )
+if( Python_FOUND )
   function( add_python_launcher target )
     set( paths "${CMAKE_BINARY_DIR}/$(Configuration)" ${ARGN} )
     list( GET paths -1 working_directory )
     string( REPLACE ";" "')\nsys.path.append('" paths "${paths}" )
     set( arguments "-i -c \"import sys\nsys.path.append('${paths}')\"" )
-    add_launcher( ${target} "${PYTHON_EXECUTABLE}" "${arguments}" "${working_directory}" )
+    add_launcher( ${target} "${Python_EXECUTABLE}" "${arguments}" "${working_directory}" )
   endfunction()
 endif()
 
@@ -182,7 +182,7 @@ if( Matlab_FOUND )
   endif()
 endif()
 
-if( PYTHONINTERP_FOUND )
+if( Python_FOUND )
   set( Python_WORKING_DIRECTORY "${home}" CACHE PATH "Python working directory" )
   if( Python_WORKING_DIRECTORY )
     add_custom_target( RUN_PYTHON )
