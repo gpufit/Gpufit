@@ -20,6 +20,7 @@ jobs:
           - os: windows-2019
             cuda: "11.3.1"
             visual_studio: "Visual Studio 16 2019"
+            python: "3.9"
           - os: windows-2019
             cuda: "11.4.0"
             visual_studio: "Visual Studio 16 2019"
@@ -38,8 +39,8 @@ jobs:
             cuda: "11.7.0"
             python: "3.8"
           - os: ubuntu-22.04
-            python: "3.10"
             cuda: "11.7.0"
+            python: "3.10"
 
     env:
       build_dir: "build"
