@@ -18,7 +18,7 @@ jobs:
             visual_studio: "Visual Studio 16 2019"
             python: "3.9"
           - os: windows-2019
-            cuda: "11.3.0"
+            cuda: "11.3"
             visual_studio: "Visual Studio 16 2019"
           - os: windows-2019
             cuda: "11.4.0"
