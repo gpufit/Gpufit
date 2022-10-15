@@ -77,7 +77,8 @@ jobs:
           use-github-cache: false
 
       - name: Install CUDA (Linux)
-        uses: Jimver/cuda-toolkit@v0.2.8
+#         uses: Jimver/cuda-toolkit@v0.2.8
+        uses: jimkring/action-install-cuda-toolkit@master
         if: runner.os == 'Linux'
         with:
           sub-packages: '["nvcc", "nvrtc", "cudart"]'
