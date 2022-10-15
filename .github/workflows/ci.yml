@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: ${{ matrix.os }}, Cuda ${{ matrix.cuda }}, Python ${{ matrix.python }}, ${{ matrix.visual_studio }}
+    name: ${{ matrix.os }} cuda-${{ matrix.cuda }} python-${{ matrix.python }} ${{ matrix.visual_studio }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
