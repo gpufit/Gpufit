@@ -14,9 +14,9 @@ jobs:
         cuda: ["11.3.0", "11.4.0"]
         visual_studio: ["Visual Studio 16 2019"]
         python: ["3.9"]
-        exclude:
-          - os: ubuntu-20.04
-          - visual_studio: "Visual Studio 16 2019"
+        # exclude:
+        #   - os: ubuntu-20.04
+        #   - visual_studio: "Visual Studio 16 2019"
 
         # # `include` will only run specific combinations (not permutations of these)
         # include:
