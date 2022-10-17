@@ -17,16 +17,20 @@ jobs:
             cuda: "11.3.1"
             visual_studio: "Visual Studio 16 2019"
             python: "3.9"
+            cmake_cxx_standard: "17"
           - os: windows-2019
             cuda: "11.4.0"
             visual_studio: "Visual Studio 16 2019"
             python: "3.9"
+            cmake_cxx_standard: "14"
           - os: ubuntu-20.04
             cuda: "11.3.1"
             python: "3.9"
+            cmake_cxx_standard: "14"
           - os: ubuntu-20.04
             cuda: "11.4.0"
             python: "3.9"
+            cmake_cxx_standard: "14"
 
     env:
       build_dir: "build"
@@ -93,9 +97,9 @@ jobs:
         run: |
           if [ "${{ runner.os }}" -eq "Windows" ]
           then
-            cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
+            cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64 -DCMAKE_CXX_STANDARD=${{ os.cmake_cxx_standard }}
           else
-            cmake . -B "${{ env.build_dir }}" -DCMAKE_BUILD_TYPE=RELEASE
+            cmake . -B "${{ env.build_dir }}" -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_CXX_STANDARD=${{ os.cmake_cxx_standard }}
           fi
 
       - name: Configure Error Processing
