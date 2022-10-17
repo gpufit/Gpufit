@@ -4,7 +4,7 @@
 
 # CMake
 
-cmake_minimum_required( VERSION 3.11 )
+cmake_minimum_required( VERSION 3.12 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 cmake_policy(SET CMP0091 NEW)
 
@@ -15,6 +15,9 @@ endif()
 
 if( NOT CMAKE_CXX_STANDARD )
 	set( CMAKE_CXX_STANDARD 20 )
+endif()
+if( NOT CMAKE_CUDA_STANDARD )
+	set( CMAKE_CUDA_STANDARD 20 )
 endif()
   
 #if( MSVC ) # link runtime statically with MSVC
