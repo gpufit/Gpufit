@@ -140,9 +140,13 @@ void GPUData::init
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
 
     if (info_.use_constraints_)
-    {
-        write(constraints_, constraints, 2 * info_.n_parameters_);
-        write(constraint_types_, constraint_types, info_.n_parameters_);
+    {        
+        write(
+            constraints_,
+            constraints + chunk_index_*info_.max_chunk_size_*info_.n_parameters_,
+            chunk_size_ * info_.n_parameters_ * 2);
+        write(
+            constraint_types_, constraint_types, info_.n_parameters_);
     }
 
     set(prev_chi_squares_, 0., chunk_size_);
