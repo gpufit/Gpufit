@@ -40,7 +40,7 @@ add_custom_target( PYTHON_PACKAGE
 set_property( TARGET PYTHON_PACKAGE PROPERTY FOLDER CMakePredefinedTargets )
 add_dependencies( PYTHON_PACKAGE Gpufit )
 
-if( NOT PYTHONINTERP_FOUND )
+if( NOT Python_FOUND )
   message( STATUS "Python NOT found - skipping creation of Python wheel!" )
   return()
 endif()
@@ -49,9 +49,9 @@ endif()
 
 add_custom_target( PYTHON_WHEEL ALL
   COMMAND ${CMAKE_COMMAND} -E
-    chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py clean --all
+    chdir ${build_directory} "${Python_EXECUTABLE}" setup.py clean --all
   COMMAND ${CMAKE_COMMAND} -E
-    chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py bdist_wheel
+    chdir ${build_directory} "${Python_EXECUTABLE}" setup.py bdist_wheel
   COMMENT "Preparing Python Wheel"
 )
 set_property( TARGET PYTHON_WHEEL PROPERTY FOLDER CMakePredefinedTargets )
