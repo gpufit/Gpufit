@@ -24,8 +24,9 @@ GPUData::GPUData(Info const & info) :
     parameters_to_fit_indices_( info_.n_parameters_to_fit_ ),
 
     constraints_(
-        info_.use_constraints_
-        ? info_.n_parameters_ * 2 : 0),
+        (info_.use_constraints_ && info_.data_location_ == HOST)
+        ? info_.max_chunk_size_*info_.n_parameters_*2 : 0 ),
+
     constraint_types_(
         info_.use_constraints_
         ? info_.n_parameters_ : 0),
@@ -119,6 +120,15 @@ void GPUData::init
                 weights_,
                 weights + chunk_index_*info_.max_chunk_size_*info_.n_points_,
                 chunk_size_ * info_.n_points_);
+        if (info_.use_constraints_)
+            write(
+                constraints_,
+                constraints + chunk_index_*info_.max_chunk_size_*info_.n_parameters_*2,
+                chunk_size_ * info_.n_parameters_ * 2);
+            write(
+                constraint_types_,
+                constraint_types,
+                info_.n_parameters_);
     }
     else if (info_.data_location_ == DEVICE)
     {
@@ -129,6 +139,11 @@ void GPUData::init
         if (info_.use_weights_)
             weights_.assign(
                 weights + chunk_index_*info_.max_chunk_size_*info_.n_points_);
+        if (info_.use_constraints_)
+            constraints_.assign(
+                constraints + chunk_index_*info_.max_chunk_size_*info_.n_parameters_*2);
+            constraint_types_.assign(
+                constraint_types + chunk_index_*info_.max_chunk_size_*info_.n_parameters_);
         states_.assign(
             states + chunk_index_ * info_.max_chunk_size_);
         chi_squares_.assign(
@@ -138,16 +153,6 @@ void GPUData::init
     }
 
     write(parameters_to_fit_indices_, parameters_to_fit_indices);
-
-    if (info_.use_constraints_)
-    {        
-        write(
-            constraints_,
-            constraints + chunk_index_*info_.max_chunk_size_*info_.n_parameters_,
-            chunk_size_ * info_.n_parameters_ * 2);
-        write(
-            constraint_types_, constraint_types, info_.n_parameters_);
-    }
 
     set(prev_chi_squares_, 0., chunk_size_);
     set(finished_, 0, chunk_size_);
