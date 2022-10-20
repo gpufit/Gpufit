@@ -39,8 +39,8 @@ LMFit::~LMFit()
 
 void LMFit::set_parameters_to_fit_indices()
 {
-    int const n_parameters_to_fit = info_.n_parameters_;
-    for (int i = 0; i < n_parameters_to_fit; i++)
+    int const n_parameters = info_.n_parameters_;
+    for (int i = 0; i < n_parameters; i++)
     {
         if (parameters_to_fit_[i])
         {
