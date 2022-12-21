@@ -3,7 +3,7 @@
 # see also CMake configuration in /docs/installation.rst
 
 # CMake
-
+ 
 cmake_minimum_required( VERSION 3.11 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
