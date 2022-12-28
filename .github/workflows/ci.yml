@@ -79,7 +79,8 @@ jobs:
         id: configure
         shell: bash
         run: |
-          if [ "${{ runner.os }}" -eq "Windows" ]
+          rm ${{ env.build_dir }}/CMakeCache.txt
+          if [ "${{ runner.os }}" = "Windows" ]
           then
             cmake . -B "${{ env.build_dir }}" -G "${{ matrix.visual_studio }}" -A x64
           else
