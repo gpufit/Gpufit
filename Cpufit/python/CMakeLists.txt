@@ -3,23 +3,23 @@
 
 # Python package
 
-set( build_directory "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/pyGpufit" )
+set( build_directory "${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/pyCpufit" )
 set( setup_files
   "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
   "${CMAKE_CURRENT_SOURCE_DIR}/setup.py"
   "${CMAKE_CURRENT_SOURCE_DIR}/setup.cfg"
 )
-set( module_directory "${build_directory}/pygpufit" )
+set( module_directory "${build_directory}/pycpufit" )
 set( module_files
-  "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/__init__.py"
-  "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/gpufit.py"
-  "${CMAKE_CURRENT_SOURCE_DIR}/pygpufit/version.py"
+  "${CMAKE_CURRENT_SOURCE_DIR}/pycpufit/__init__.py"
+  "${CMAKE_CURRENT_SOURCE_DIR}/pycpufit/cpufit.py"
+  "${CMAKE_CURRENT_SOURCE_DIR}/pycpufit/version.py"
 )
 
 if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
-	set( binary $<TARGET_FILE:Gpufit> ${CUBLAS_DLL} )
+	set( binary $<TARGET_FILE:Cpufit> ${CUBLAS_DLL} )
 else()
-	set( binary $<TARGET_FILE:Gpufit> )
+	set( binary $<TARGET_FILE:Cpufit> )
 endif()
 
 add_custom_target( PYTHON_PACKAGE
