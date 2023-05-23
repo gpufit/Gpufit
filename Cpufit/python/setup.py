@@ -1,5 +1,5 @@
 """
-    setup script for pyGpufit
+    setup script for pyCpufit
 
     TODO get version, get meaningful email
 """
@@ -38,11 +38,11 @@ if __name__ == "__main__":
         long_description=get_long_description(),
         url='https://github.com/gpufit/Gpufit',
         author='M. Bates, A. Przybylski, B. Thiel, J. Dokulil, and J. Keller-Findeisen',
-        author_email='jakub.dokulil@imp.ac.at',
+        author_email='a@b.c',
         license='MIT license',
         classifiers=[],
         keywords='Levenberg Marquardt, curve fitting, CUDA',
         packages=find_packages(where=HERE),
-        package_data={'pygpufit': ['*{}'.format(lib_ext)]},
-        install_requires=['NumPy>=1.0'],
+        package_data={'pycpufit': ['*{}'.format(lib_ext)]},
+        install_requires=['NumPy>=1.8'],
         zip_safe=False)
