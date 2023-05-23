@@ -12,7 +12,14 @@ from ctypes import cdll, POINTER, byref, c_int, c_float, c_char, c_char_p, c_siz
 import numpy as np
 
 # %%
-lib_path = ".\cpufit.dll"
+package_dir = os.path.dirname(os.path.realpath(__file__))
+
+if os.name == 'nt':
+    lib_path = os.path.join(package_dir, 'cpufit.dll')  # library name on Windows
+elif os.name == 'posix':
+    lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
+else:
+    raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
 
 lib = cdll.LoadLibrary(lib_path)
 
