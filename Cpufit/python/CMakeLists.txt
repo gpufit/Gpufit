@@ -16,13 +16,11 @@ set( module_files
   "${CMAKE_CURRENT_SOURCE_DIR}/pycpufit/version.py"
 )
 
-if ( USE_CUBLAS AND DEFINED CUBLAS_DLL )
-	set( binary $<TARGET_FILE:Cpufit> ${CUBLAS_DLL} )
-else()
-	set( binary $<TARGET_FILE:Cpufit> )
-endif()
 
-add_custom_target( PYTHON_PACKAGE
+set( binary $<TARGET_FILE:Cpufit> )
+
+
+add_custom_target( PYTHON_PACKAGE_CPUFIT
   COMMAND ${CMAKE_COMMAND} -E
     remove_directory ${build_directory}
   COMMAND ${CMAKE_COMMAND} -E
@@ -37,8 +35,8 @@ add_custom_target( PYTHON_PACKAGE
     copy_if_different ${binary} ${module_directory}
 )
 
-set_property( TARGET PYTHON_PACKAGE PROPERTY FOLDER CMakePredefinedTargets )
-add_dependencies( PYTHON_PACKAGE Gpufit )
+set_property( TARGET PYTHON_PACKAGE_CPUFIT PROPERTY FOLDER CMakePredefinedTargets )
+add_dependencies( PYTHON_PACKAGE Cpufit )
 
 if( NOT PYTHONINTERP_FOUND )
   message( STATUS "Python NOT found - skipping creation of Python wheel!" )
@@ -47,14 +45,14 @@ endif()
 
 # Python wheel (output name is incorrect, requires plattform tag, see packaging)
 
-add_custom_target( PYTHON_WHEEL ALL
+add_custom_target( PYTHON_WHEEL_CPUFIT ALL
   COMMAND ${CMAKE_COMMAND} -E
     chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py clean --all
   COMMAND ${CMAKE_COMMAND} -E
     chdir ${build_directory} "${PYTHON_EXECUTABLE}" setup.py bdist_wheel
   COMMENT "Preparing Python Wheel"
 )
-set_property( TARGET PYTHON_WHEEL PROPERTY FOLDER CMakePredefinedTargets )
-add_dependencies( PYTHON_WHEEL PYTHON_PACKAGE )
+set_property( TARGET PYTHON_WHEEL_CPUFIT PROPERTY FOLDER CMakePredefinedTargets )
+add_dependencies( PYTHON_WHEEL_CPUFIT PYTHON_PACKAGE_CPUFIT )
 
 # add launcher to Python package
