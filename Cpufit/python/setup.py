@@ -7,7 +7,7 @@
 from setuptools import setup, find_packages
 import os
 from io import open # to have encoding as parameter of open on Python >=2.6
-import pygpufit.version as vs
+import pycpufit.version as vs
 
 if os.name == 'nt':
 	lib_ext = '.dll' # library name extension on Windows
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         author_email='a@b.c',
         license='MIT license',
         classifiers=[],
-        keywords='Levenberg Marquardt, curve fitting, CUDA',
+        keywords='Levenberg Marquardt, curve fitting',
         packages=find_packages(where=HERE),
         package_data={'pycpufit': ['*{}'.format(lib_ext)]},
         install_requires=['NumPy>=1.8'],
