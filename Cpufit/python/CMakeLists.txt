@@ -36,7 +36,7 @@ add_custom_target( PYTHON_PACKAGE_CPUFIT
 )
 
 set_property( TARGET PYTHON_PACKAGE_CPUFIT PROPERTY FOLDER CMakePredefinedTargets )
-add_dependencies( PYTHON_PACKAGE Cpufit )
+add_dependencies( PYTHON_PACKAGE_CPUFIT Cpufit )
 
 if( NOT PYTHONINTERP_FOUND )
   message( STATUS "Python NOT found - skipping creation of Python wheel!" )
