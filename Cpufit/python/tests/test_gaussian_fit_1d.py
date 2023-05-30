@@ -53,7 +53,7 @@ class Test(unittest.TestCase):
         initial_parameters = np.empty((n_fits, n_parameter), dtype=np.float32)
         initial_parameters[0, :] = (2, 1.5, 0.3, 0)
 
-        # call to gpufit
+        # call to cpufit
         parameters, states, chi_squares, number_iterations, execution_time = cf.fit(data, None, model_id,
                                                                                     initial_parameters, tolerance, \
                                                                                     max_n_iterations, None, None, None)

@@ -37,7 +37,7 @@ class Test(unittest.TestCase):
         # user info
         user_info = np.array((0, 1), dtype=np.float32)
 
-        # call to gpufit
+        # call to cpufit
         parameters, states, chi_squares, number_iterations, execution_time = cf.fit(data, None, model_id,
                                                                                     initial_parameters, tolerance, \
                                                                                     None, None, None, user_info)
