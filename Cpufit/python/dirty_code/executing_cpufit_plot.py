@@ -12,7 +12,7 @@ This example additionally requires numpy (http://www.numpy.org/) and matplotlib 
 
 import numpy as np
 import matplotlib.pyplot as plt
-import cpufit as cf
+import pycpufit as cf
 
 
 def gaussians_2d(x, y, p):
