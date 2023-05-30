@@ -183,6 +183,13 @@ if( PYTHONINTERP_FOUND )
       "${CMAKE_SOURCE_DIR}/Gpufit/python"
       "${Python_WORKING_DIRECTORY}"
     )
+	add_custom_target( RUN_PYTHON_CPUFIT )
+    set_property( TARGET RUN_PYTHON_CPUFIT PROPERTY FOLDER CMakePredefinedTargets )
+    add_dependencies( RUN_PYTHON_CPUFIT Cpufit )
+    add_python_launcher( RUN_PYTHON_CPUFIT
+      "${CMAKE_SOURCE_DIR}/Cpufit/python"
+      "${Python_WORKING_DIRECTORY}"
+    )
   endif()
 endif()
 
