@@ -41,7 +41,7 @@ if __name__ == "__main__":
         author_email='a@b.c',
         license='MIT license',
         classifiers=[],
-        keywords='Levenberg Marquardt, curve fitting, CUDA',
+        keywords='Levenberg Marquardt, curve fitting',
         packages=find_packages(where=HERE),
         package_data={'pycpufit': ['*{}'.format(lib_ext)]},
         install_requires=['NumPy>=1.8'],
