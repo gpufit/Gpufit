@@ -17,7 +17,7 @@ package_dir = os.path.dirname(os.path.realpath(__file__))
 if os.name == 'nt':
     lib_path = os.path.join(package_dir, 'cpufit.dll')  # library name on Windows
 elif os.name == 'posix':
-    lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
+    lib_path = os.path.join(package_dir, 'libCpufit.so')  # library name on Unix
 else:
     raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
 
