@@ -19,4 +19,4 @@ pip install --no-index --find-links=LocalPathToWheelFile pyCpufit
 
 Examples
 
-See project-root/examples/python folder.
+See project-root/examples/python folder. **Cpufit** examples begin with `cpufit_`.
