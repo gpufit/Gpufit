@@ -9,6 +9,10 @@
 #define VISIBLE
 #endif
 
+#ifdef __APPLE__
+#define VISIBLE __attribute__((visibility("default")))
+#endif
+
 #include <cstddef>
 #include "../Gpufit/constants.h"
 #include "../Gpufit/definitions.h"

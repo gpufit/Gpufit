@@ -31,3 +31,4 @@ set_target_properties( Cpufit
 #install( TARGETS Cpufit RUNTIME DESTINATION bin )
 
 add_subdirectory( matlab )
+add_subdirectory( python )

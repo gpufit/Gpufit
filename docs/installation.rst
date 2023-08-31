@@ -233,6 +233,8 @@ The unit tests can be executed by building the target "RUN_TESTS" or by
 starting the created executables in the output directory from
 the command line.
 
+To install the python gpufit package go to "Release" folder and here you find Gpufit resp Cpufit python packages.
+
 Compiling Gpufit on Linux
 -------------------------
 
