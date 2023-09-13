@@ -17,14 +17,26 @@
 #include "spline_3d_phase_multichannel.cuh"
 #include "esr3111.cuh"
 #include "esr2111.cuh"
+#include "dipBiProjY_1_2d.cuh"
+#include "dipBiProjY_2_2d.cuh"
+//#include "dipBiProjY_3_2d.cuh"
+//#include "dipProj111YZ_1_2d.cuh"
+#include "dipProj111u4_Pu4_1_2d.cuh"
+#include "dipProj111u4_Pu4_2_2d.cuh"
+#include "dipProj111u4_Pu4_3_2d.cuh"
+#include "dipProj111u4_Pz_1_2d.cuh"
+#include "dipProj111u4_Pz_2_2d.cuh"
+#include "dipProj111u4_Pz_3_2d.cuh"
+
+
 
 __device__ void calculate_model(
     ModelID const model_id,
-    REAL const * parameters,
+    float const * parameters,
     int const n_fits,
     int const n_points,
-    REAL * value,
-    REAL * derivative,
+    float * value,
+    float * derivative,
     int const point_index,
     int const fit_index,
     int const chunk_index,
@@ -57,7 +69,7 @@ __device__ void calculate_model(
     case BROWN_DENNIS:
         calculate_brown_dennis(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
-    case SPLINE_1D:
+	case SPLINE_1D:
         calculate_spline1d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
     case SPLINE_2D:
@@ -75,9 +87,39 @@ __device__ void calculate_model(
 	case ESR3111:
         calculate_esr3111(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
-	case ESR2111:
+  case ESR2111:
         calculate_esr2111(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
+	case DIPBIPROJY_1_2D:
+        calculate_dipBiProjY_1_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+	case DIPBIPROJY_2_2D:
+        calculate_dipBiProjY_2_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+//	case DIPBIPROJY_3_2D:
+ //       calculate_dipBiProjY_3_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+  //      break;
+ //   case DIPPROJ111YZ_1_2D:
+ //         calculate_dipProj111YZ_1_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+//		  break;
+	case DIPPROJ111U4_PU4_1_2D:
+          calculate_dipProj111u4_Pu4_1_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		  break;
+	case DIPPROJ111U4_PU4_2_2D:
+          calculate_dipProj111u4_Pu4_2_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		  break;
+	case DIPPROJ111U4_PU4_3_2D:
+          calculate_dipProj111u4_Pu4_3_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		  break;
+	case DIPPROJ111U4_PZ_1_2D:
+          calculate_dipProj111u4_Pz_1_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		  break;
+  	case DIPPROJ111U4_PZ_2_2D:
+          calculate_dipProj111u4_Pz_2_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		  break;
+	case DIPPROJ111U4_PZ_3_2D:
+          calculate_dipProj111u4_Pz_3_2d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+		  break;
     default:
         assert(0); // unknown model ID
     }
@@ -93,7 +135,7 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case GAUSS_2D_ROTATED:      n_parameters = 7; n_dimensions = 2; break;
     case CAUCHY_2D_ELLIPTIC:    n_parameters = 6; n_dimensions = 2; break;
     case LINEAR_1D:             n_parameters = 2; n_dimensions = 1; break;
-    case FLETCHER_POWELL_HELIX: n_parameters = 3; n_dimensions = 1; break;
+    case FLETCHER_POWELL_HELIX:       n_parameters = 3; n_dimensions = 1; break;
     case BROWN_DENNIS:          n_parameters = 4; n_dimensions = 1; break;
     case SPLINE_1D:             n_parameters = 3; n_dimensions = 1; break;
     case SPLINE_2D:             n_parameters = 4; n_dimensions = 2; break;
@@ -102,7 +144,17 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case SPLINE_3D_PHASE_MULTICHANNEL:   n_parameters = 6; n_dimensions = 4; break;
 	case ESR3111:				n_parameters = 6; n_dimensions = 1; break;
     case ESR2111:				n_parameters = 5; n_dimensions = 1; break;
-    default: throw std::runtime_error("unknown model ID");
+	case DIPBIPROJY_1_2D:		n_parameters = 6; n_dimensions = 2; break;
+	case DIPBIPROJY_2_2D:		n_parameters = 12; n_dimensions = 2; break;
+//	case DIPBIPROJY_3_2D:		n_parameters = 14; n_dimensions = 2; break;
+//  case DIPPROJ111YZ_1_2D:		n_parameters = 6; n_dimensions = 2; break;
+	case DIPPROJ111U4_PU4_1_2D:	n_parameters = 4; n_dimensions = 2; break;
+	case DIPPROJ111U4_PU4_2_2D:	n_parameters = 8; n_dimensions = 2; break;
+	case DIPPROJ111U4_PU4_3_2D:	n_parameters = 12; n_dimensions = 2; break;
+	case DIPPROJ111U4_PZ_1_2D:	n_parameters = 4; n_dimensions = 2; break;
+    case DIPPROJ111U4_PZ_2_2D:	n_parameters = 8; n_dimensions = 2; break;
+    case DIPPROJ111U4_PZ_3_2D:	n_parameters = 12; n_dimensions = 2; break;
+    default: throw std::runtime_error("unknown model ID"); 
     }
 }
 

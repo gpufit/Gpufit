@@ -1,0 +1,16 @@
+README.txt
+setup.cfg
+setup.py
+pyGpufit.egg-info/PKG-INFO
+pyGpufit.egg-info/SOURCES.txt
+pyGpufit.egg-info/dependency_links.txt
+pyGpufit.egg-info/not-zip-safe
+pyGpufit.egg-info/requires.txt
+pyGpufit.egg-info/top_level.txt
+pygpufit/__init__.py
+pygpufit/gpufit.py
+pygpufit/gpufit_OLD.py
+pygpufit/gpufit_UNMODIFIED.py
+pygpufit/version.py
+tests/test_gaussian_fit_1d.py
+tests/test_linear_regression.py

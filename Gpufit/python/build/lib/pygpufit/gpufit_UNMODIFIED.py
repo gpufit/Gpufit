@@ -14,16 +14,13 @@ import numpy as np
 # define library loader (actual loading is lazy)
 package_dir = os.path.dirname(os.path.realpath(__file__))
 
-#if os.name == 'nt':
-#    lib_path = os.path.join(package_dir, 'Gpufit.dll')  # library name on Windows
-#elif os.name == 'posix':
-#    lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
-#else:
-#    raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
+if os.name == 'nt':
+    lib_path = os.path.join(package_dir, 'Gpufit.dll')  # library name on Windows
+elif os.name == 'posix':
+    lib_path = os.path.join(package_dir, 'libGpufit.so')  # library name on Unix
+else:
+    raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
 
-
-package_dir = os.path.dirname( r'C:\Sources\gpufit-build\Debug\  ')
-lib_path = os.path.join(package_dir, 'Gpufit.dll')
 lib = cdll.LoadLibrary(lib_path)
 
 # gpufit_constrained function in the dll
@@ -63,8 +60,6 @@ class ModelID:
     SPLINE_3D = 10
     SPLINE_3D_MULTICHANNEL = 11
     SPLINE_3D_PHASE_MULTICHANNEL = 12
-    ESR3111 = 13
-    ESR2111 = 14
 
 
 class EstimatorID:
