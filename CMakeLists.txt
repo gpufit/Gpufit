@@ -3,7 +3,7 @@
 # see also CMake configuration in /docs/installation.rst
 
 # CMake
- 
+
 cmake_minimum_required( VERSION 3.11 )
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
@@ -181,13 +181,6 @@ if( PYTHONINTERP_FOUND )
     add_dependencies( RUN_PYTHON Gpufit )
     add_python_launcher( RUN_PYTHON
       "${CMAKE_SOURCE_DIR}/Gpufit/python"
-      "${Python_WORKING_DIRECTORY}"
-    )
-	add_custom_target( RUN_PYTHON_CPUFIT )
-    set_property( TARGET RUN_PYTHON_CPUFIT PROPERTY FOLDER CMakePredefinedTargets )
-    add_dependencies( RUN_PYTHON_CPUFIT Cpufit )
-    add_python_launcher( RUN_PYTHON_CPUFIT
-      "${CMAKE_SOURCE_DIR}/Cpufit/python"
       "${Python_WORKING_DIRECTORY}"
     )
   endif()

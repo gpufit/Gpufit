@@ -1,6 +1,5 @@
 #include "info.h"
 #include <algorithm>
-#include <limits>
 
 Info::Info() :
     n_parameters_(0),
