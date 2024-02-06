@@ -1,1 +1,1 @@
-from cpufit import *
+from pycpufit.cpufit import *
