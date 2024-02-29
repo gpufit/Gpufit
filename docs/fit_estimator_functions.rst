@@ -35,7 +35,7 @@ Maximum likelihood estimator for data subject to Poisson statistics
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The maximum likelihood estimator (MLE) for Poisson distributed noise is relatively simple to implement. In the case of data with Poisson noise
-is provides a more precise estimate when compared to an LSE estimator. The ID for this estimator is ``MLE``. It's implemented in mle.cuh_.
+it provides a more precise estimate when compared to an LSE estimator. The ID for this estimator is ``MLE``. It's implemented in mle.cuh_.
 
 The estimator is described as follows.
 
