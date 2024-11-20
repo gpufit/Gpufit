@@ -106,7 +106,7 @@ try
         output_n_iterations,
         HOST);
 
-    fi.fit(static_cast<ModelID>(model_id));
+     fi.fit(static_cast<ModelID>(model_id));
 
     return ReturnState::OK;
 }
