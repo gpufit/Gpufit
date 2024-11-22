@@ -7,13 +7,13 @@
 * This function calculates the values of reduced triexponential functions
 * and their partial derivatives with respect to the model parameters.
 *
-* The reduced triexponential function is: S/S0 = (1-a-b)*exp(-c*x)+a*exp(-d*x)+b*exp(-e*x)
+* The reduced triexponential function is: S/S0 = a*exp(-b*x)+c*exp(-d*x)+(1-a-c)*exp(-e*x)
 * The derivatives are:
-* dy/da = exp(-d*x) - exp(-c*x)
-* dy/db = exp(-e*x) - exp(-c*x)
-* dy/dc = (1-a-b)*(-x*exp(-c*x))    //a x e^(-c x) + b x e^(-c x) - x e^(-c x)
-* dy/dd = a*(-x*exp(-d*x))
-* dy/de = b*(-x*exp(-e*x))
+* dy/da = exp(-bx) - exp(-ex)
+* dy/db = a*(-x)*exp(-bx)
+* dy/dc = exp(-dx) - exp(-ex)   //a x e^(-c x) + b x e^(-c x) - x e^(-c x)
+* dy/dd = c*(-x)*exp(-d*x)
+* dy/de = (1-a-c)*(-x)*exp(-e*x)
 *
 * This function makes use of the user information data to pass in the
 * independent variables (X values) corresponding to the data.  The X values
@@ -113,31 +113,27 @@ __device__ void calculate_triexp_red(
     // parameters
     REAL const* p = parameters;
 
-    // value
-    // (1-a-b)*exp(-c*x)+a*exp(-d*x)+b*exp(-e*x)
-    // p[0]: a   p[1]: b     p[2]: c    p[3]: d   p[4]: e
-
-    value[point_index] = (1.0 - p[0] - p[1]) * exp(-p[2] * x) +
+    /* value
+    S/S0 = a*exp(-b*x)+c*exp(-d*x)+(1-a-c)*exp(-e*x)
+    p[0]: a   p[1]: b     p[2]: c    p[3]: d   p[4]: e */
+    value[point_index] = 
+        (1.0 - p[0] - p[1]) * exp(-p[2] * x) +
         p[0] * exp(-p[3] * x) +
         p[1] * exp(-p[4] * x);
 
-    // derivatives
-    /* dy/da = exp(-d * x) - exp(-c * x)
-    dy/db = exp(-e*x)-exp(-c*x)
-    dy/dc = (1-a-b)*(-x*exp(-c*x))
-    dy/dd = a*(-x*exp(-d*x))
-    dy/de = b*(-x*exp(-e*x))
-    p[0]: a   p[1]: b     p[2]: c    p[3]: d   p[4]: e    */
+    /* derivatives
+    dy/da = exp(-bx) - exp(-ex)
+    dy/db = a*(-x)*exp(-bx)
+    dy/dc = exp(-dx) - exp(-ex)   //a x e^(-c x) + b x e^(-c x) - x e^(-c x)
+    dy/dd = c*(-x)*exp(-d*x)
+    dy/de = (1-a-c)*(-x)*exp(-e*x)                  */
 
     REAL* current_derivatives = derivative + point_index;
-    current_derivatives[0 * n_points] = exp(-p[3] * x) - exp(-p[2] * x);
-    current_derivatives[1 * n_points] = exp(-p[4] * x) - exp(-p[2] * x);
-    //current_derivatives[2 * n_points] = (1 - p[0] - p[1]) * (-x * exp(-p[2] * x));
-    // a x e^(-c x) + b x e^(-c x) - x e^(-c x)
-    current_derivatives[2 * n_points] = p[0]*exp(-p[2]*x) + p[1]*exp(-p[2]*x) - x*exp(-p[2]*x);
-    //current_derivatives[2 * n_points] = x * (p[0]+p[1]-1) * pow(2.71828, -p[2]*x);
-    current_derivatives[3 * n_points] = p[0] * (-x * exp(-p[3] * x));
-    current_derivatives[4 * n_points] = p[1] * (-x * exp(-p[4] * x));
+    current_derivatives[0 * n_points] = exp(-p[1] * x) - exp(-p[4] * x);
+    current_derivatives[1 * n_points] = p[0] * (-x * exp(-p[1] * x));
+    current_derivatives[2 * n_points] = exp(-p[3] * x) - exp(-p[4] * x);
+    current_derivatives[3 * n_points] = p[2] * (-x * exp(-p[3] * x));
+    current_derivatives[4 * n_points] = (1-p[0]-p[2]) * (-x * exp(-p[4] * x));
 }
 
 #endif

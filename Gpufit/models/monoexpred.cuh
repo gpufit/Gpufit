@@ -1,22 +1,15 @@
-#ifndef GPUFIT_BIEXPRED_CUH_INCLUDED
-#define GPUFIT_BIEXPRED_CUH_INCLUDED
+#ifndef GPUFIT_MONOEXPRED_CUH_INCLUDED
+#define GPUFIT_MONOEXPRED_CUH_INCLUDED
 
-/* Description of the calculate_biexp_red function
+/* Description of the calculate_monoexp_red function
 * ===================================================
 *
-* This function calculates the values of reduced biexponential functions
+* This function calculates the values of reduced monoexponential functions
 * and their partial derivatives with respect to the model parameters.
 *
-* The reduced biexponential function is: S/S0 = (1-a)*exp(-b*x) + a*exp(-c*x)
+* The reduced monoexponential function is: S/S0 = exp(-a*x)
 * The derivatives are:
-* dy/da = exp(-c*x) - exp(-b*x)
-* dy/db = (a-1)*x*exp(-b*x)
-* dy/dc = -a*x*exp(-c*x)
-* The reduced biexponential function is: S/S0 = a*exp(-b*x) + (1-a)*exp(-c*x)
-* The derivatives are:
-* dy/da = exp(-c*x) - exp(-b*x)
-* dy/db = a*(-x)*exp(-b*x)
-* dy/dc = (1-a)*(-x)*exp(-c*x)
+* dy/da = (-x)*exp(-a*x)
 *
 * This function makes use of the user information data to pass in the
 * independent variables (X values) corresponding to the data.  The X values
@@ -53,7 +46,7 @@
 * Parameters:
 *
 * parameters: An input vector of model parameters.
-*             p[0]: a   p[1]: b     p[2]: c
+*             p[0]: a     
 *
 * n_fits: The number of fits.
 *
@@ -73,7 +66,7 @@
 *
 * user_info_size: The size of user_info in bytes.
 *
-* Calling the calculate_biexp_red function
+* Calling the calculate_monoexp_red function
 * =======================================
 *
 * This __device__ function can be only called from a __global__ function or an other
@@ -81,7 +74,7 @@
 *
 */
 
-__device__ void calculate_biexp_red(
+__device__ void calculate_monoexp_red(
     REAL const* parameters,
     int const n_fits,
     int const n_points,
@@ -114,21 +107,16 @@ __device__ void calculate_biexp_red(
 
     // parameters
     REAL const* p = parameters;
+
     /* value
-    S/S0 = a*exp(-b*x) + (1-a)*exp(-c*x)
-    p[0]: a (f2)   p[1]: b  (D1)   p[2]: c   (D2)     */
-    value[point_index] = (1.0 - p[0]) * exp(-p[1]*x) + p[0]*exp(-p[2]*x);
-
+    exp(-a*x)
+    p[0]: a                     */
+    value[point_index] = exp(-p[0] * x);
+    
     /* derivatives
-    dy/da = exp(-c*x) - exp(-b*x)
-    dy/db = a*(-x)*exp(-b*x)
-    dy/dc = (1-a)*(-x)*exp(-c*x)
-    p[0]: a (f2)   p[1]: b  (D1)   p[2]: c   (D2)     */
-
+    dy/da = (-x)*exp(-a*x)      */   
     REAL* current_derivatives = derivative + point_index;
-    current_derivatives[0 * n_points] = exp(-p[2]*x) - exp(-p[1]*x);
-    current_derivatives[1 * n_points] = p[0] * (-x) * exp(-p[1] * x);
-    current_derivatives[2 * n_points] = (1-p[0]) * (-x) * exp(-p[2]*x);
+    current_derivatives[0 * n_points] = (-x) * exp(-p[0] * x);
 }
 
 #endif

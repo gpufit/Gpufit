@@ -114,13 +114,25 @@ __device__ void calculate_triexp(
     // parameters
     REAL const* p = parameters;
 
+    /* value
+    y = a*exp(-bx) + c*exp(-dx) + e*exp(-fx)
+    p[0]: a  (f1)   p[1]: b  (D1)   p[2]: c  (f2)  p[3]: d  (D2)  p[4]: e   (f3)  p[5]: f (D3)    */
+
+
     // value
 
-    value[point_index] = p[0] * exp(-p[1] * x) +
+    value[point_index] = 
+        p[0] * exp(-p[1] * x) +
         p[2] * exp(-p[3] * x) +
         p[4] * exp(-p[5] * x);
 
-    // derivatives
+    /* derivatives
+    dy/da = exp(-bx)
+    dy/db = -a*x*exp(-b*x)         // a*(d/(d*b)exp(-bx))
+    dy/dc = exp(-dx)
+    dy/dd = -c*x*exp(-b*x)         // c*(d/(d*d)exp(-dx))
+    dy/de = exp(-fx)
+    dy/df = -e*x*exp(-f*x)         // e*(d/(d*f)exp(-fx))   */
 
     REAL* current_derivatives = derivative + point_index;
     current_derivatives[0 * n_points] = exp(-p[1] * x);
