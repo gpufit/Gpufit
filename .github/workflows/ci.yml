@@ -120,7 +120,7 @@ jobs:
           path: build/Release/**/*
 
       - name: Upload Artifacts (Linux)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: runner.os == 'Linux'
         with:
           name: ${{ matrix.os }}-x64-cuda-${{ matrix.cuda }}
