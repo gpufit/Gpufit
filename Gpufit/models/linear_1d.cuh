@@ -108,9 +108,9 @@ __device__ void calculate_linear1d(
 
     // derivatives
 
-    REAL * current_derivatives = derivative + point_index;
-    current_derivatives[0 * n_points] = 1;
-    current_derivatives[1 * n_points] = x;
+    REAL * current_derivative = derivative + point_index;
+    current_derivative[0 * n_points] = 1;
+    current_derivative[1 * n_points] = x;
 }
 
 #endif
