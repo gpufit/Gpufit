@@ -9,6 +9,7 @@ Gpufit/java/gpufit/.gradle
 Gpufit/java/gpufit/build
 Gpufit/java/gpufit/out
 
-# docs
+# build folders
+build/
 /docs/_build
 
