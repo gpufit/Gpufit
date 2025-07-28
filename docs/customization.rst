@@ -28,28 +28,28 @@ of model parameters and dimensions must be specified as well.
 Detailed step by step instructions for adding a model function are given below.
 
 1. Define an additional model ID in file constants.h_. When using the language bindings, the model ID must also be added for Python (in gpufit.py), Matlab (in ModelID.m), Java (in Model.java). 
-2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template.
+2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template. (The REAL type is defined in Gpufit/definitions.h to switch between single and double precision.)
 
 .. code-block:: cuda
 
     __device__ void ... (               // ... = function name
-        float const * parameters,
+        REAL const * parameters,
         int const n_fits,
         int const n_points,
-        float * value,
-        float * derivative,
+        REAL * value,
+        REAL * derivative,
         int const point_index,
         int const fit_index,
         int const chunk_index,
         char * user_info,
         std::size_t const user_info_size)
     {
-        ///////////////////////////// value //////////////////////////////
+        // value 
 
         value[point_index] = ... ;                      // formula calculating fit model values
 
-        /////////////////////////// derivative ///////////////////////////
-        float * current_derivative = derivative + point_index;
+        // derivative 
+        REAL * current_derivative = derivative + point_index;
 
         current_derivative[0 * n_points] = ... ;  // formula calculating derivative values with respect to parameters[0]
         current_derivative[1 * n_points] = ... ;  // formula calculating derivative values with respect to parameters[1]
