@@ -396,3 +396,13 @@ spline coefficients. The model function :code:`g` exists for each x,y,z coordina
 :`p_4`: offset
 
 :`p_5`: phase
+
+4D Spline function
+++++++++++++++++++
+
+**Documentation missing**
+
+5D Spline function
+++++++++++++++++++
+
+**Documentation missing**

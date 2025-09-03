@@ -27,7 +27,15 @@ of model parameters and dimensions must be specified as well.
 
 Detailed step by step instructions for adding a model function are given below.
 
-1. Define an additional model ID in file constants.h_. When using the language bindings, the model ID must also be added for Python (in gpufit.py), Matlab (in ModelID.m), Java (in Model.java). 
+1. Define an additional model ID in file `<Gpufit/constants.h>`_. To use wih Cpufit also add the model ID in `<Cpufit/interface.cpp>`_. When using the language bindings, the model ID must also be added 
+
+- for Python 
+    - in `<Gpufit/python/gpufit.py>`_ for pygpufit
+    - in `<Cpufit/python/cpufit.py>`_ for pycpufit
+- for Matlab in `<Gpufitmatlab/ModelID.m>`_
+- for  Java in `<Gpufit/java/gpufit/src/main/java/com/github/gpufit/Model.java>`_. 
+
+
 2. Implement a CUDA device function within a newly created .cuh file in folder Gpufit/Gpufit/models according to the following template. (The REAL type is defined in Gpufit/definitions.h to switch between single and double precision.)
 
 .. code-block:: cuda

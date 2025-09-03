@@ -6,10 +6,8 @@ __pycache__
 
 # Gradle/IntelliJ
 Gpufit/java/gpufit/.gradle
-Gpufit/java/gpufit/build
 Gpufit/java/gpufit/out
 
 # build folders
-build/
-/docs/_build
+**/build/*
 
