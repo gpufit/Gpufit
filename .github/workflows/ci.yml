@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    name: ${{ matrix.os }}, cuda ${{ matrix.cuda }}, python ${{ matrix.python }}, C++${{ matrix.cmake_cxx_standard }}, ${{ matrix.visual_studio }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -13,8 +14,15 @@ jobs:
         # `include` will only run specific combinations (not permutations of these)
         include:
           - os: windows-2019
+            cuda: "11.3.1"
+            visual_studio: "Visual Studio 16 2019"
+            python: "3.9"
+          - os: windows-2019
             cuda: "11.4.0"
             visual_studio: "Visual Studio 16 2019"
+            python: "3.9"
+          - os: ubuntu-20.04
+            cuda: "11.3.1"
             python: "3.9"
           - os: ubuntu-20.04
             cuda: "11.4.0"
@@ -46,7 +54,9 @@ jobs:
           pip install wheel
 
       - name: Install CUDA (Windows)
-        uses: Jimver/cuda-toolkit@v0.2.8
+        # uses: Jimver/cuda-toolkit@v0.2.8
+        # jimkring's branch adds support for more cuda versions
+        uses: jimkring/action-install-cuda-toolkit@v0
         if: runner.os == 'Windows'
         with:
           sub-packages: '["nvcc", "visual_studio_integration", "cublas", "curand", "nvrtc", "cudart"]'
@@ -55,7 +65,9 @@ jobs:
           use-github-cache: false
 
       - name: Install CUDA (Linux)
-        uses: Jimver/cuda-toolkit@v0.2.8
+        # uses: Jimver/cuda-toolkit@v0.2.8
+        # jimkring's branch adds support for more cuda versions
+        uses: jimkring/action-install-cuda-toolkit@v0
         if: runner.os == 'Linux'
         with:
           sub-packages: '["nvcc", "nvrtc", "cudart"]'
