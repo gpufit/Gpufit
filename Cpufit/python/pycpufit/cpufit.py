@@ -29,9 +29,9 @@ cpufit_func = lib.cpufit
 # %%
 
 cpufit_func.restype = c_int
-cpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float),
-                        c_float, c_int, POINTER(c_int), c_int, c_size_t,
-                        POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)]
+cpufit_func.argtypes = [c_size_t, c_size_t, POINTER(c_float), POINTER(c_float), c_int, POINTER(c_float), 
+                         c_float, c_int, POINTER(c_int), c_int, c_size_t, 
+                         POINTER(c_char), POINTER(c_float), POINTER(c_int), POINTER(c_float), POINTER(c_int)] 
 
 # int cpufit
 # (
@@ -254,7 +254,7 @@ def fit_constrained(data, weights, model_id, initial_parameters, constraints=Non
     else:
         constraints_p = None
     if user_info is not None:
-        user_info_p = user_info.ctypes.data_as(cpufit_func.argtypes[13])
+        user_info_p = user_info.ctypes.data_as(cpufit_func.argtypes[11])
     else:
         user_info_p = None
 
