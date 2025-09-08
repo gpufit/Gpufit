@@ -66,7 +66,7 @@ if __name__ == '__main__':
     model_id = gf.ModelID.GAUSS_2D
 
     # loop over different number of fits
-    n_fits_all = np.around(np.logspace(2, 6, 20)).astype(np.int)
+    n_fits_all = np.around(np.logspace(2, 6, 20)).astype(int)
 
     # generate x and y values
     g = np.arange(size_x)
