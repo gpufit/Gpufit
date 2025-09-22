@@ -45,14 +45,13 @@
 *                user_info[3]: the number of spline intervals in Y
 *                user_info[4]: the value of coefficient (0,0) of interval (0,0)
 *                user_info[5]: the value of coefficient (1,0) of interval (0,0)
+*                user_info[6]: the value of coefficient (2,0) of interval (0,0)
+*                user_info[7]: the value of coefficient (3,0) of interval (0,0)
+*                user_info[8]: the value of coefficient (0,1) of interval (0,0)
 *                   .
 *                   .
 *                   .
-*                user_info[8]: the value of coefficient (0,1) of intervall (0,0)
-*                   .
-*                   .
-*                   .
-*                user_info[20]: the value of coefficient (0,0) of intervall (1,0)
+*                user_info[20]: the value of coefficient (0,0) of interval (1,0)
 *                   .
 *                   .
 *                   .
