@@ -6,6 +6,7 @@ The binding is based on ctypes.
 See https://docs.python.org/3.5/library/ctypes.html, http://www.scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html
 """
 
+from genericpath import isdir
 import os
 import time
 from ctypes import cdll, POINTER, byref, c_int, c_float, c_char, c_char_p, c_size_t
@@ -21,7 +22,21 @@ elif os.name == 'posix':
 else:
     raise RuntimeError('OS {} not supported by pyGpufit.'.format(os.name))
 
+cuda_paths = []
+# add CUDA_PATH to the dll search path
+if os.name == 'nt' and hasattr(os, 'add_dll_directory') and 'CUDA_PATH' in os.environ:    
+    cuda_paths.append ( os.add_dll_directory(
+        os.path.join(os.environ['CUDA_PATH'], 'bin'))
+    )
+    cuda_bix_x64 = os.path.join(os.environ['CUDA_PATH'], 'bin/x64')
+    if os.path.isdir(cuda_bix_x64):
+        cuda_paths.append( os.add_dll_directory(cuda_bix_x64) )
+# load the GpuFit library
 lib = cdll.LoadLibrary(lib_path)
+# remove CUDA_PATH from the dll search path
+for cuda_path in cuda_paths:
+    cuda_path.close()
+del cuda_paths
 
 # gpufit_constrained function in the dll
 gpufit_func = lib.gpufit_constrained
