@@ -75,47 +75,50 @@ __device__ void calculate_spline1d(
     // read user_info
     REAL const * user_info_REAL = (REAL *)user_info;
 
-    int const n_intervals = static_cast<int>(*user_info_REAL);
-    std::size_t const n_coefficients_per_interval = 4;
+    std::size_t const n_points_x = static_cast<std::size_t>(*(user_info_REAL + 0));
+    int const n_intervals_x = static_cast<int>(*(user_info_REAL + 1));
 
-    REAL const * coefficients = user_info_REAL + 1;
+    std::size_t const n_coefficients_per_interval = 4;
+    REAL const * coefficients = user_info_REAL + 2;
 
     // parameters
     REAL const * p = parameters;
 
     // estimate index i of the current spline interval
-    REAL const x = static_cast<REAL>(point_index);
-    REAL const position = x - p[1];
-    int i = static_cast<int>(floor(position)); // can be negative
+    REAL const position_x = point_index - p[1];
+    int i = static_cast<int>(floor(position_x));
     
     // adjust i to its bounds
     i = i >= 0 ? i : 0;
-    i = i < n_intervals ? i : n_intervals - 1;
+    i = i < n_intervals_x ? i : n_intervals_x - 1;
 
     // get coefficients of the current interval
     REAL const * current_coefficients = coefficients + i * n_coefficients_per_interval;
 
-    // calculate position relative to the current spline interval
-    REAL const x_diff = position - static_cast<REAL>(i);
+    // estimate position relative to the current spline interval
+    REAL const x_diff = position_x - i;
 
     // intermediate values
     REAL temp_value = 0;
     REAL temp_derivative_1 = 0;
 
-    REAL power_factor = 1;
-    for (std::size_t order = 0; order < n_coefficients_per_interval; order++)
+    REAL power_factor_i = 1;
+    for (int order_i = 0; order_i < 4; order_i++)
     {
-        // intermediate function value without amplitude and offset
-        temp_value += current_coefficients[order] * power_factor;
 
-        // intermediate derivative value with respect to paramater 1 (center position)
-        if (order < n_coefficients_per_interval - 1)
+        // intermediate function value without amplitude and offset
+        temp_value += current_coefficients[order_i] * power_factor_i;
+
+        // intermediate derivative value with respect to paramater 1 (center position x)
+        if (order_i < 3)
+        {
             temp_derivative_1
-                += (REAL(order) + 1)
-                * current_coefficients[order + 1]
-                * power_factor;
+                += (REAL(order_i) + 1)
+                * current_coefficients[(order_i + 1)]
+                * power_factor_i;
+        }
             
-        power_factor *= x_diff;
+        power_factor_i *= x_diff;
     }
 
     // value

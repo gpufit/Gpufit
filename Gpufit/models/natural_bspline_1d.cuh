@@ -36,7 +36,7 @@
 * chunk_index: chunk number
 *
 * user_info:   passed-in buffer with spline meta-data:
-*    user_info[0]                 = num_control_points
+*    user_info[0]                          = num_control_points
 *    user_info[1...num_control_points+4]   = knot vector (float)
 *    user_info[1+num_control_points+4 ...] = coefficients
 *
