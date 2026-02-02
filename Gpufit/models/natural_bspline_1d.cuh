@@ -18,7 +18,7 @@
 *
 * parameters: An input vector of concatenated sets of model parameters.
 *             p[0]: amplitude
-*             p[1]: center coordinate
+*             p[1]: x-shift
 *             p[2]: offset
 *
 * n_fits: The number of fits.
@@ -60,30 +60,40 @@ __device__ void calculate_natural_bspline1d(
     REAL const * ui = (REAL*)user_info;
 
     int const num_coeff = static_cast<int>(ui[0]);
+    int const N_tpl = num_coeff - 2;   // template length
     int const num_knots = num_coeff + 4; // cubic
     REAL const * knots = ui + 1;
     REAL const * coeff = ui + 1 + num_knots;
 
-    // Model parameters: [amp, center, offset]
+    // Model parameters: [amp, shift, offset]
     REAL const * p = parameters;
     REAL amp    = p[0];
-    REAL center = p[1];
+    REAL shift  = p[1];
     REAL offset = p[2];
 
     // Data point coordinate
     REAL x = static_cast<REAL>(point_index);
-    REAL xq = x - center;
+    REAL xq = x - p[1]; 
+
+    bool clamped = false;
+    if (xq < (REAL)0)           { xq = (REAL)0;           clamped = true; }
+    if (xq > (REAL)(N_tpl - 1)) { xq = (REAL)(N_tpl - 1); clamped = true; }
 
     // Find knot span as in host code
     const int k = 3;
-    int N = num_coeff - 2;
     int span;
-    if (xq <= 0.0)
+    if (xq <= (REAL)0) 
+    {               
         span = k;
-    else if (xq >= REAL(N - 1))
+    }
+    else if (xq >= (REAL)(N_tpl - 1))
+    {
         span = num_coeff - 1;
+    }
     else
-        span = int(xq) + k;
+    {
+        span = (int)xq + k;
+    }
 
     // Evaluate basis and derivative (device function!)
     REAL basis[4], dbasis[4];
@@ -102,13 +112,15 @@ __device__ void calculate_natural_bspline1d(
         }
     }
 
+    if (clamped) spline_dx = (REAL)0;
+
     // Write value
     value[point_index] = amp * spline_val + offset;
 
-    // Write derivatives [amp, center, offset]
+    // Write derivatives [amp, shift, offset]
     REAL * der = derivative + point_index;
     der[0 * n_points] = spline_val;         // d/d(amp)
-    der[1 * n_points] = -amp * spline_dx;   // d/d(center)
+    der[1 * n_points] = -amp * spline_dx;   // d/d(shift)
     der[2 * n_points] = 1;                  // d/d(offset)
 }
 

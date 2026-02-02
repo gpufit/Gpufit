@@ -19,6 +19,7 @@
 #include "spline_4d_multichannel.cuh"
 #include "spline_5d.cuh"
 #include "natural_bspline_1d.cuh"
+#include "natural_bspline_nd.cuh"
 
 __device__ void calculate_model(
     ModelID const model_id,
@@ -86,6 +87,21 @@ __device__ void calculate_model(
     case NATURAL_BSPLINE_1D:
         calculate_natural_bspline1d(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
         break;
+    case NATURAL_BSPLINE_2D:
+        calculate_natural_bspline_nd(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case NATURAL_BSPLINE_3D:
+        calculate_natural_bspline_nd(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case NATURAL_BSPLINE_4D:
+        calculate_natural_bspline_nd(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case NATURAL_BSPLINE_5D:
+        calculate_natural_bspline_nd(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
+    case NATURAL_BSPLINE_6D:
+        calculate_natural_bspline_nd(parameters, n_fits, n_points, value, derivative, point_index, fit_index, chunk_index, user_info, user_info_size);
+        break;
     default:
         assert(0); // unknown model ID
     }
@@ -112,6 +128,11 @@ void configure_model(ModelID const model_id, int & n_parameters, int & n_dimensi
     case SPLINE_4D_MULTICHANNEL:         n_parameters = 6; n_dimensions = 5; break;
     case SPLINE_5D:             n_parameters = 7; n_dimensions = 5; break;
     case NATURAL_BSPLINE_1D:    n_parameters = 3; n_dimensions = 1; break;
+    case NATURAL_BSPLINE_2D:    n_parameters = 4; n_dimensions = 2; break;
+    case NATURAL_BSPLINE_3D:    n_parameters = 5; n_dimensions = 3; break;
+    case NATURAL_BSPLINE_4D:    n_parameters = 6; n_dimensions = 4; break;
+    case NATURAL_BSPLINE_5D:    n_parameters = 7; n_dimensions = 5; break;
+    case NATURAL_BSPLINE_6D:    n_parameters = 8; n_dimensions = 6; break;
     default: throw std::runtime_error("unknown model ID");
     }
 }
