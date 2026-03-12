@@ -423,13 +423,13 @@ void natural_bspline_nd_fit_example_2d()
     size_t strides_len = 0;
     size_t coeff_len = 0;
 
-    #ifdef _WIN32
+#ifdef _WIN32
     calculate_sizes_fn calc_sizes = load_calculate_sizes();
     int rc_sizes = calc_sizes(D, spline_dims, &knots_len, &strides_len, &coeff_len);
     if (rc_sizes != 0) throw std::runtime_error("calculate_sizes_natural_bspline_nd failed");
-    #else
+#else
     throw std::runtime_error("Windows-only scaffold (dll).");
-    #endif
+#endif
 
     std::vector<REAL> knots(knots_len);
     std::vector<REAL> coeff_strides(strides_len);
@@ -438,7 +438,7 @@ void natural_bspline_nd_fit_example_2d()
     {
         std::vector<REAL> shape_copy = shape_tpl;
 
-        #ifdef _WIN32
+#ifdef _WIN32
         calculate_coefficients_fn calc_coeff = load_calculate_coefficients();
         int rc = calc_coeff(
             D,
@@ -448,9 +448,9 @@ void natural_bspline_nd_fit_example_2d()
             coeff_strides.data(),
             coeff.data());
         if (rc != 0) throw std::runtime_error("calculate_coefficients_natural_bspline_nd failed");
-        #else
+#else
         throw std::runtime_error("Windows-only scaffold (dll).");
-        #endif
+#endif
     }
 
 
@@ -461,7 +461,7 @@ void natural_bspline_nd_fit_example_2d()
     int const n_coords = spline_dims[0] * spline_dims[1];
     std::vector<REAL> recon((size_t)n_coords);
 
-    #ifdef _WIN32
+#ifdef _WIN32
     calculate_values_fn calc_vals = load_calculate_values();
     int rc_vals = calc_vals(
         D,
@@ -472,9 +472,9 @@ void natural_bspline_nd_fit_example_2d()
         1, // fast
         recon.data());
     if (rc_vals != 0) throw std::runtime_error("calculate_values_natural_bspline_nd failed");
-    #else
+#else
     throw std::runtime_error("Windows-only scaffold (dll).");
-    #endif
+#endif
 
     // error report (max_abs + rms)
     REAL max_abs_err = 0;
