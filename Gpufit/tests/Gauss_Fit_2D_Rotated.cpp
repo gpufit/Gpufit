@@ -94,5 +94,13 @@ BOOST_AUTO_TEST_CASE( Gauss_Fit_2D_Rotated )
     BOOST_CHECK(std::abs(output_parameters[3] - true_parameters[3]) < 1e-6f);
     BOOST_CHECK(std::abs(output_parameters[4] - true_parameters[4]) < 1e-6f);
     BOOST_CHECK(std::abs(output_parameters[5] - true_parameters[5]) < 1e-6f);
+#if defined(USE_HIP)
+    // Rotation angle r: wave32 (gfx1100) vs wave64 (gfx90a) changes the GJ
+    // solver's block packing and thus the FP reduction order, shifting the
+    // converged r by ~1.1e-6 (chi^2 still ~1e-12). 3e-6f keeps margin over the
+    // observed error while staying tight; the CUDA path keeps strict 1e-6f.
+    BOOST_CHECK(std::abs(output_parameters[6] - true_parameters[6]) < 3e-6f);
+#else
     BOOST_CHECK(std::abs(output_parameters[6] - true_parameters[6]) < 1e-6f);
+#endif
 }

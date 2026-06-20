@@ -34,6 +34,11 @@
 #      Set CUDA_BIN_PATH before running CMake or CUDA_TOOLKIT_ROOT_DIR after first configuration
 #      to installation folder of desired CUDA version
 
+# The CUDA (FindCUDA) toolchain detection and NVCC arch-flag logic is for the
+# NVIDIA build only. The HIP build (USE_HIP) drives the device language through
+# enable_language(HIP) further down and does not use FindCUDA.
+if( NOT USE_HIP )
+
 find_package( CUDA 6.5 REQUIRED )
 
 set( CUDA_ARCHITECTURES ${DEFAULT_CUDA_ARCH} CACHE STRING
@@ -128,6 +133,8 @@ if( NOT WIN32 )
 	list( APPEND CUDA_NVCC_FLAGS --std=c++11)
 endif()
 
+endif() # NOT USE_HIP
+
 # Gpufit
 
 set( GpuHeaders
@@ -177,6 +184,42 @@ source_group("CUDA Source Files" FILES ${GpuCudaSources})
 source_group("CUDA Model Files" FILES ${GpuCudaModels})
 source_group("CUDA Estimator Files" FILES ${GpuCudaEstimators})
 
+if( USE_HIP )
+	# Compile the .cu translation units as HIP. The compat header cuda_to_hip.h
+	# (force-included below) aliases the CUDA runtime symbols the project uses to
+	# their HIP equivalents, so the sources keep their plain CUDA spelling.
+	set_source_files_properties( ${GpuCudaSources} PROPERTIES LANGUAGE HIP )
+	add_library( Gpufit SHARED
+		${GpuHeaders}
+		${GpuSources}
+		${GpuCudaHeaders}
+		${GpuCudaSources}
+		${GpuCudaModels}
+		${GpuCudaEstimators}
+	)
+	if(NOT DEFINED CMAKE_HIP_ARCHITECTURES OR CMAKE_HIP_ARCHITECTURES STREQUAL "")
+		set(CMAKE_HIP_ARCHITECTURES "gfx90a")
+	endif()
+	set_target_properties( Gpufit PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}" )
+	# USE_HIP selects the HIP branch of cuda_to_hip.h. __HIP_PLATFORM_AMD__ is
+	# only defined once the HIP runtime header is included, so it cannot gate the
+	# include of that very header; the explicit define breaks the cycle.
+	target_compile_definitions( Gpufit PRIVATE USE_HIP )
+	# Force-include the compat header into every HIP TU so no per-file #include
+	# edits are needed (minimal footprint).
+	# clang-cl (MSVC frontend) ignores GNU-style -include; use /FI instead.
+	target_compile_options( Gpufit PRIVATE
+		$<$<COMPILE_LANGUAGE:HIP>:$<IF:$<STREQUAL:${CMAKE_HIP_COMPILER_FRONTEND_VARIANT},MSVC>,/FI${CMAKE_CURRENT_SOURCE_DIR}/cuda_to_hip.h,-include${CMAKE_CURRENT_SOURCE_DIR}/cuda_to_hip.h>> )
+	# hip_compat/ provides cuda_runtime.h and device_launch_parameters.h shims
+	# for the sources that include them directly; HIP build only.
+	target_include_directories( Gpufit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/hip_compat )
+	# Host-language .cpp TUs (gpufit.cpp, lm_fit.cpp, ...) include gpu_data.cuh,
+	# which pulls in the cuda_to_hip.h shim and thus <hip/hip_runtime.h>. Link
+	# hip::host so those host TUs (compiled as CXX) get the ROCm include dirs and
+	# the __HIP_PLATFORM_AMD__ define.
+	find_package( hip REQUIRED )
+	target_link_libraries( Gpufit hip::host )
+else()
 cuda_add_library( Gpufit SHARED
 	${GpuHeaders}
 	${GpuSources}
@@ -185,6 +228,7 @@ cuda_add_library( Gpufit SHARED
 	${GpuCudaModels}
 	${GpuCudaEstimators}
 )
+endif()
 
 set_target_properties( Gpufit
 	PROPERTIES
@@ -193,7 +237,10 @@ set_target_properties( Gpufit
 )
 
 # USE_CUBLAS
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
+# cuBLAS is a CUDA-only acceleration of the linear solver. The HIP build uses
+# the self-contained Gauss-Jordan solver (the upstream default, USE_CUBLAS OFF);
+# this block also depends on CUDA_VERSION, which is unset on the HIP path.
+if( NOT USE_HIP AND CMAKE_SIZEOF_VOID_P EQUAL 8 AND CUDA_VERSION VERSION_GREATER "6.5")
 	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
 	if( USE_CUBLAS )
         if ( WIN32 )
@@ -228,6 +275,20 @@ elseif( CMAKE_SIZEOF_VOID_P EQUAL 4 )
 	message( STATUS "CUBLAS: 32-bit architecture detected; USE_CUBLAS flag ignored." )
 elseif( CUDA_VERSION VERSION_LESS "7.0" )
 	message( STATUS "CUBLAS: CUDA Version < 7.0 detected; USE_CUBLAS flag ignored." )
+endif()
+
+# USE_CUBLAS on ROCm: the optional batched-LU solver maps onto hipBLAS. Off by
+# default (DEFAULT_USE_CUBLAS). When enabled, cuda_to_hip.h aliases the cublas*
+# batched symbols to hipblas* and the hip_compat/cublas_v2.h shim resolves the
+# project's #include "cublas_v2.h"; here we define USE_CUBLAS and link hipBLAS.
+if( USE_HIP )
+	set( USE_CUBLAS ${DEFAULT_USE_CUBLAS} CACHE BOOL "ON | OFF")
+	if( USE_CUBLAS )
+		find_package( hipblas REQUIRED )
+		target_compile_definitions( Gpufit PRIVATE USE_CUBLAS )
+		target_link_libraries( Gpufit roc::hipblas )
+		message( STATUS "CUBLAS: enabled on ROCm via hipBLAS (roc::hipblas)." )
+	endif()
 endif()
 
 #install( TARGETS Gpufit RUNTIME DESTINATION bin )
