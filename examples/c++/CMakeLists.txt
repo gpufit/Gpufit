@@ -14,9 +14,9 @@ function( add_cuda_example module name )
 		set( gpufit_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../Gpufit )
 		set_source_files_properties( ${name}.cu PROPERTIES LANGUAGE HIP )
 		add_executable( ${name} ${name}.cu )
-		if(NOT DEFINED CMAKE_HIP_ARCHITECTURES OR CMAKE_HIP_ARCHITECTURES STREQUAL "")
-			set(CMAKE_HIP_ARCHITECTURES "gfx90a")
-		endif()
+		# project(... LANGUAGES CXX HIP) in the top-level CMakeLists already honors an
+		# explicit -DCMAKE_HIP_ARCHITECTURES, otherwise auto-detects the host GPU(s)
+		# and errors on a no-GPU host, so no arch default is pinned here.
 		set_target_properties( ${name} PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}" )
 		target_compile_definitions( ${name} PRIVATE USE_HIP )
 		# clang-cl (MSVC frontend) ignores GNU-style -include; use /FI instead.

@@ -197,9 +197,9 @@ if( USE_HIP )
 		${GpuCudaModels}
 		${GpuCudaEstimators}
 	)
-	if(NOT DEFINED CMAKE_HIP_ARCHITECTURES OR CMAKE_HIP_ARCHITECTURES STREQUAL "")
-		set(CMAKE_HIP_ARCHITECTURES "gfx90a")
-	endif()
+	# project(... LANGUAGES CXX HIP) in the top-level CMakeLists already honors an
+	# explicit -DCMAKE_HIP_ARCHITECTURES, otherwise auto-detects the host GPU(s)
+	# and errors on a no-GPU host, so no arch default is pinned here.
 	set_target_properties( Gpufit PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}" )
 	# USE_HIP selects the HIP branch of cuda_to_hip.h. __HIP_PLATFORM_AMD__ is
 	# only defined once the HIP runtime header is included, so it cannot gate the
