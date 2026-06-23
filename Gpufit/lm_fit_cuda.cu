@@ -35,7 +35,13 @@ void LMFitCUDA::solve_equation_systems_lup()
         CUBLAS_OP_N,
         info_.n_parameters_to_fit_,
         1,
+#ifdef USE_HIP
+        // hipBLAS getrsBatched takes float* const A[] (non-const float);
+        // cuBLAS takes const float* const A[]. Drop the leading const on HIP.
+        (REAL **)(gpu_data_.pointer_decomposed_hessians_.data()),
+#else
         (REAL const **)(gpu_data_.pointer_decomposed_hessians_.data()),
+#endif
         info_.n_parameters_to_fit_,
         gpu_data_.pivot_vectors_,
         gpu_data_.pointer_deltas_,

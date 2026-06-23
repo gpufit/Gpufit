@@ -3,17 +3,45 @@
 # see also CMake configuration in /docs/installation.rst
 
 # CMake
- 
-cmake_minimum_required( VERSION 3.11 )
+
+# USE_HIP routes the .cu device sources through the ROCm/HIP toolchain for AMD
+# GPUs instead of CUDA. enable_language(HIP) needs CMake >= 3.21; the CUDA
+# (FindCUDA) path is unaffected by the higher floor. Declared here so every
+# subdirectory sees the option.
+option( USE_HIP "Build the device code with HIP for AMD GPUs" OFF )
+if( USE_HIP )
+  cmake_minimum_required( VERSION 3.21 )
+else()
+  cmake_minimum_required( VERSION 3.11 )
+endif()
 set_property( GLOBAL PROPERTY USE_FOLDERS ON )
 
 if( NOT PROJECT_NAME )
-  project( Gpufit VERSION 1.2.0 )
+  if( USE_HIP )
+    project( Gpufit VERSION 1.2.0 LANGUAGES CXX HIP )
+  else()
+    project( Gpufit VERSION 1.2.0 )
+  endif()
   include( CTest )
 endif()
 
 if( NOT CMAKE_CXX_STANDARD )
 	set( CMAKE_CXX_STANDARD 14 )
+endif()
+
+# On Windows with clang-cl (MSVC frontend), the HIP platform CMake module
+# (Windows-MSVC.cmake / __windows_compiler_msvc) unconditionally sets the HIP
+# compile-object rule to use the MSVC /Fo<out> output flag.  With /Fo, the
+# clang-cl driver routes the host object through the same path it passes to
+# clang-offload-bundler as input, which on Windows causes the device fatbinary
+# to be silently dropped (ERROR_USER_MAPPED_FILE or empty .hip_fatbin section).
+# Fix: override the rule after CMakeHIPInformation.cmake has run, using GNU
+# -o <OBJECT> instead, which keeps the host object in a distinct temp file.
+# Only needed for the MSVC/clang-cl frontend; GCC-frontend clang++ uses the
+# correct default rule (includes -x hip).
+if( USE_HIP AND WIN32 AND CMAKE_HIP_COMPILER MATCHES "clang-cl" )
+  set( CMAKE_HIP_COMPILE_OBJECT
+    "<CMAKE_HIP_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c -- <SOURCE>" )
 endif()
 
 if( MSVC ) # link runtime statically with MSVC
@@ -74,6 +102,11 @@ if( Boost_FOUND )
     )
     target_include_directories( ${target} PRIVATE ${PROJECT_SOURCE_DIR} )
     target_link_libraries( ${target} ${modules} Boost::boost )
+    if( USE_HIP )
+      # Lets tests select wave-size-tolerant bounds where wave32/wave64 change
+      # the FP reduction order of the GJ solver (e.g. Gauss_Fit_2D_Rotated).
+      target_compile_definitions( ${target} PRIVATE USE_HIP )
+    endif()
     set_property( TARGET ${target}
       PROPERTY RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}" )
     set_property( TARGET ${target} PROPERTY FOLDER Tests )
