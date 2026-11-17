@@ -1,0 +1,85 @@
+name: GPU tests (simulated)
+
+# Optional, non-required check. The runners have no GPU, so this runs the
+# tests on a simulated NVIDIA H100 (https://github.com/pantheongpu/pantheonsim).
+# A simulator cannot reproduce hardware-specific behaviour or timing, so it
+# complements real-GPU testing and does not replace it.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "Gpufit/**"
+      - "Cpufit/**"
+      - "tests/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/gpu-sim.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpu-sim-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gpu-tests:
+    name: ctest on a simulated H100
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Boost and Python test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libboost-dev python3-numpy
+
+      - name: Set up the simulated GPU and CUDA toolkit
+        uses: pantheongpu/setup-pantheonsim@dda0c8df8d72627c295edbae525354ba2bcb1687 # v0.1.4
+        with:
+          gpu: nvidia/h100
+          cuda-toolkit: "13.0"
+
+      - name: Patch zero-size allocations
+        # Gpufit keeps unused buffers (e.g. weights) as cudaMalloc(0) and tests
+        # the pointer for NULL, and real CUDA hands back NULL for size 0. The
+        # simulator returns a non-null 1-byte block there, so the kernels would
+        # read the unused weights. Return NULL explicitly for empty arrays.
+        run: |
+          sed -i 's|^\( *\)std::size_t const maximum_size = .*|\1if (size == 0) { data_ = 0; return; }\n&|' Gpufit/gpu_data.cuh
+          git diff Gpufit/gpu_data.cuh
+
+      - name: Configure
+        # The CMake file picks the nvcc arch flags itself, so the default list
+        # is swapped for compute_90 PTX only: the simulator JIT-compiles PTX
+        # and does not run SASS. The CUDA runtime must be shared.
+        run: |
+          sed -i 's|^CUDA_SELECT_NVCC_ARCH_FLAGS( code_generation_flags .*|set( code_generation_flags -gencode arch=compute_90,code=compute_90 )|' Gpufit/CMakeLists.txt
+          git diff --stat
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCUDA_USE_STATIC_CUDA_RUNTIME=OFF
+
+      - name: Build
+        # Only the libraries and the test programs; the wheel and Java targets
+        # are not needed here.
+        run: >
+          cmake --build build -j3 --target
+          Cpufit Gpufit PYTHON_PACKAGE
+          Gpufit_Test_Error_Handling Gpufit_Test_Linear_Fit_1D
+          Gpufit_Test_Gauss_Fit_1D Gpufit_Test_Gauss_Fit_2D
+          Gpufit_Test_Gauss_Fit_2D_Elliptic Gpufit_Test_Gauss_Fit_2D_Rotated
+          Gpufit_Test_Cauchy_Fit_2D_Elliptic Gpufit_Test_Fletcher_Powell_Helix_Fit
+          Gpufit_Test_Brown_Dennis_Fit Cpufit_Gpufit_Test_Consistency
+
+      # The 2D Gauss and Cauchy tests are left out: the fits do not converge on
+      # the simulator (they pass on a real GPU). The Gauss-Jordan solver and the
+      # chi-square sums rely on warps running in lockstep, which the simulator
+      # does not do. Details are in the pull request.
+      - name: Test (ctest)
+        run: vgpu run ctest --test-dir build --output-on-failure --timeout 1800 -E 'Gauss_Fit_2D|Cauchy_Fit_2D'
+
+      - name: Test (Python bindings)
+        working-directory: Gpufit/python/tests
+        run: PYTHONPATH="$GITHUB_WORKSPACE/build/pyGpufit" vgpu run python3 run_tests.py -v
